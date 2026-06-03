@@ -1,0 +1,14 @@
+schema_version: 1
+kind: plan
+id: plan.o5o6.continuation-blueprint
+status: completed_source_static
+approval:
+  required: false
+validation:
+  commands:
+    - id: check.continuation_blueprint_static
+      runner: bash
+      args:
+        - scripts/check-vac-o5o6-continuation-blueprint-static.sh
+      risk: safe_read
+      approval: never

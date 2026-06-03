@@ -1,0 +1,6 @@
+schema_version: 1
+kind: test_assertion
+id: security.shell-injection
+attack: shell_injection
+expected: rejected
+diagnostic_required: true

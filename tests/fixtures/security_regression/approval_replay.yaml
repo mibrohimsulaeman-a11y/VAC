@@ -1,0 +1,6 @@
+schema_version: 1
+kind: test_assertion
+id: security.approval-replay
+attack: approval_replay
+expected: rejected
+diagnostic_required: true

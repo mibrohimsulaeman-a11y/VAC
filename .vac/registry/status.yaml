@@ -1,0 +1,13 @@
+schema_version: 1
+kind: registry_status
+id: vac.migration
+status: ready
+notes:
+- Root workflow-control-plane migration is ready for the default local product path.
+- Root seed coverage is guarded by `vac doctor registry .` and targeted sandbox validations.
+- All root capability and maintenance workflow manifests are ready; full workspace build remains operator-gated release evidence.
+- Surface route readiness means manifest-backed visible route coverage, not that every optional legacy compatibility crate is physically deleted.
+- Donor-backed capabilities remain approval-gated and must pass the donor migration gate before release promotion.
+- docs/DOCS_AUDIT.md is current again and no longer claims donor-inventory.yaml is missing.
+- Documentation state refreshed from 415 docs/**/*.md files into docs/PROJECT_STATE_CURRENT.md and .vac/registry/docs-state.yaml.
+legacy_kind: status

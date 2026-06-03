@@ -1,0 +1,63 @@
+schema_version: 1
+kind: capability
+id: vac.init.dogfood-session
+title: VAC Dogfood Session
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane::vac_init_runtime_enforcement
+ownership:
+  crates:
+  - vac-core
+  modules:
+  - control_plane::vac_init_runtime_enforcement
+  targets:
+  - kind: path
+    include:
+    - docs/dogfood/**
+    - .vac/registry/plans/plan.dogfood.assistant-model.vac-session.yaml
+    - .vac/registry/evidence/evidence.2026-05-30-dogfood-assistant-model.yaml
+    - .vac/registry/trajectory/dogfood-assistant-model.yaml
+    - scripts/check-vac-dogfood-session.sh
+    - scripts/check-no-hardcoded-readiness-scoreboard.sh
+    exclude: []
+description: Dogfood VAC loop using the assistant model as a bounded worker.
+depends_on:
+- vac.init.semantic-plan
+- vac.init.runtime-gate-enforcement
+- vac.init.evidence-why-live
+- vac.init.safe-rationale
+policy:
+  risk: safe_read
+  mutates_files: true
+  network: false
+  redaction: true
+  approval_required_for:
+  - filesystem_write
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - bash scripts/check-vac-dogfood-session.sh
+  palette: true
+  tui:
+    routes:
+    - /workflow
+    - /evidence
+states:
+- empty
+- loading
+- success
+- failure
+validation:
+  gates:
+  - vac_dogfood_session
+  commands:
+  - id: vac.init.dogfood-session.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-dogfood-session.sh
+    risk: execute_process
+    approval: policy
+docs:
+- docs/dogfood/2026-05-30-assistant-model-vac-dogfood.md

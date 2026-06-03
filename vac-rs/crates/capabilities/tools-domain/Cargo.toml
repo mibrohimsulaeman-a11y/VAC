@@ -1,0 +1,12 @@
+[package]
+name = "vac-capability-tools"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "vac_capability_tools"
+path = "src/lib.rs"
+
+[lints]
+workspace = true

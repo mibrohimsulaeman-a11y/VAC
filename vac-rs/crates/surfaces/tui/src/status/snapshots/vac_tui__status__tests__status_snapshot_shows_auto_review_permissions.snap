@@ -1,0 +1,18 @@
+---
+source: tui/src/status/tests.rs
+expression: sanitized
+---
+/status
+
+╭─────────────────────────────────────────────────────────────────────╮
+│  >_ Vastar VAC (v0.0.0)                                             │
+│                                                                     │
+│                                                                     │
+│  Model:            gpt-5.1-vac-max (reasoning none, summaries auto) │
+│  Directory: [[workspace]]                                           │
+│  Permissions:      Workspace (auto-review)                          │
+│  Agents.md:        <none>                                           │
+│                                                                     │
+│  Token usage:      0 total  (0 input + 0 output)                    │
+│  Context window:   100% left (0 used / 272K)                        │
+╰─────────────────────────────────────────────────────────────────────╯

@@ -1,0 +1,71 @@
+schema_version: 1
+kind: capability
+id: vac.init.migration-runtime
+title: VAC-Init Migration Runtime and Compatibility Cleanup
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane::vac_init_migration_runtime
+ownership:
+  crates:
+  - vac-core
+  modules:
+  - control_plane::vac_init_migration_runtime
+  targets:
+  - kind: module
+    crate: vac-core
+    module: control_plane::vac_init_migration_runtime
+  - kind: path
+    include:
+    - vac-rs/control-plane/src/control_plane/vac_init_migration_runtime.rs
+    - scripts/check-vac-init-migration-runtime-contract.sh
+    - .vac/capabilities/migration-runtime.yaml
+    - .vac/workflows/maintenance.migration-runtime.yaml
+    - docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_H_MIGRATION_RUNTIME.md
+    - docs/validation/PRODUCTION_HARDENING_H1_H2_VALIDATION.md
+    exclude: []
+description: Production hardening contract for VAC-Init Migration Runtime and Compatibility Cleanup.
+depends_on:
+- vac.init.registry-strictness
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - bash scripts/check-vac-init-migration-runtime-contract.sh
+    - vac doctor release .
+  palette: true
+  tui:
+    routes:
+    - /capabilities
+    - /runtime
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for: []
+states:
+- empty
+- loading
+- success
+- failure
+validation:
+  gates:
+  - migration_runtime
+  commands:
+  - id: vac.init.migration-runtime.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-migration-runtime-contract.sh
+    risk: execute_process
+    approval: policy
+  - id: vac.init.migration-runtime.validation.cmd002
+    runner: bash
+    args:
+    - scripts/check-vac-registry-migration-runtime.sh
+    risk: execute_process
+    approval: policy
+docs:
+- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_H_MIGRATION_RUNTIME.md
+- docs/validation/PRODUCTION_HARDENING_H1_H2_VALIDATION.md
+- docs/validation/P5_P9_VALIDATION.md

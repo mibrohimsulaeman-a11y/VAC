@@ -1,0 +1,30 @@
+schema_version: 1
+kind: policy_fixture
+id: vac.fixture.policy.multi_policy_merge_six_layer
+title: Six-layer most-restrictive-wins policy merge
+action: filesystem_write
+expected_final_decision: deny
+layers:
+  - id: hardcoded.safety.fixture
+    kind: hardcoded_safety
+    default_decision: allow
+  - id: workspace.fixture
+    kind: workspace
+    default_decision: allow
+  - id: capability.fixture
+    kind: capability
+    default_decision: allow
+    rule_decision: approval_required
+  - id: workflow.fixture
+    kind: workflow
+    default_decision: allow
+  - id: plan.fixture
+    kind: plan
+    default_decision: allow
+  - id: approval_session.fixture
+    kind: approval_session
+    default_decision: deny
+assertions:
+  - deny outranks approval_required and allow
+  - every layer contributes one matched decision
+  - lower layer allow cannot downgrade higher restriction

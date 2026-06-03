@@ -1,0 +1,11 @@
+schema_version: 1
+kind: perf_report
+id: perf.tui-render
+status: NotEvaluated
+metrics:
+  p95_draw_ms: NotEvaluated
+  visible_cells_rendered: NotEvaluated
+  full_transcript_cells_skipped: NotEvaluated
+thresholds:
+  p95_draw_ms_target: 8
+reason: cargo_or_runtime_not_available_in_sandbox

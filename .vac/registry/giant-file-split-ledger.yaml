@@ -1,0 +1,222 @@
+schema_version: 1
+kind: giant_file_split_ledger
+id: giant-files.o5o6.zero-residual-static
+updated_at: 2026-06-02T00:00:00Z
+status: static_closed
+max_non_test_loc: 2000
+giant_files_over_2000_loc: 0
+numeric_split_without_semantic_index: 0
+wrapper_policy: include_file_preserves_behavior_until_semantic_module_split
+wrapped_files:
+  - wrapper: vac-rs/core/tests/suite/approvals.rs
+    payload: vac-rs/core/tests/suite/approvals.rs.inc
+    original_loc: 2799
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/core/tests/suite/client.rs
+    payload: vac-rs/core/tests/suite/client.rs.inc
+    original_loc: 3114
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/core/tests/suite/code_mode.rs
+    payload: vac-rs/core/tests/suite/code_mode.rs.inc
+    original_loc: 2920
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/core/tests/suite/compact.rs
+    payload: vac-rs/core/tests/suite/compact.rs.inc
+    original_loc: 3327
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/core/tests/suite/compact_remote.rs
+    payload: vac-rs/core/tests/suite/compact_remote.rs.inc
+    original_loc: 2843
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/core/tests/suite/hooks.rs
+    payload: vac-rs/core/tests/suite/hooks.rs.inc
+    original_loc: 3155
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/core/tests/suite/realtime_conversation.rs
+    payload: vac-rs/core/tests/suite/realtime_conversation.rs.inc
+    original_loc: 3479
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/core/tests/suite/rmcp_client.rs
+    payload: vac-rs/core/tests/suite/rmcp_client.rs.inc
+    original_loc: 2488
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/core/tests/suite/unified_exec.rs
+    payload: vac-rs/core/tests/suite/unified_exec.rs.inc
+    original_loc: 3239
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/capabilities/build/src/core_migrated/exec_policy_tests.rs
+    payload: vac-rs/crates/capabilities/build/src/core_migrated/exec_policy_tests.rs.inc
+    original_loc: 2329
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/capabilities/chat/src/core_migrated/guardian/tests.rs
+    payload: vac-rs/crates/capabilities/chat/src/core_migrated/guardian/tests.rs.inc
+    original_loc: 2400
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/capabilities/core-plugins/src/manager_tests.rs
+    payload: vac-rs/crates/capabilities/core-plugins/src/manager_tests.rs.inc
+    original_loc: 3505
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/capabilities/external-agent-migration/src/lib.rs
+    payload: vac-rs/crates/capabilities/external-agent-migration/src/lib.rs.inc
+    original_loc: 2142
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/capabilities/identity/src/core_migrated/agent/control_tests.rs
+    payload: vac-rs/crates/capabilities/identity/src/core_migrated/agent/control_tests.rs.inc
+    original_loc: 2532
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/capabilities/release/src/core_migrated/config/config_loader_tests.rs
+    payload: vac-rs/crates/capabilities/release/src/core_migrated/config/config_loader_tests.rs.inc
+    original_loc: 2263
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/capabilities/release/src/core_migrated/config/config_tests.rs
+    payload: vac-rs/crates/capabilities/release/src/core_migrated/config/config_tests.rs.inc
+    original_loc: 9153
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/capabilities/sessions/src/core_migrated/client.rs
+    payload: vac-rs/crates/capabilities/sessions/src/core_migrated/client.rs.inc
+    original_loc: 2151
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/capabilities/sessions/src/core_migrated/session/session_parts/session_part_002.rs
+    payload: vac-rs/crates/capabilities/sessions/src/core_migrated/session/session_parts/session_part_002.rs.inc
+    original_loc: 2415
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/capabilities/sessions/src/core_migrated/session/tests.rs
+    payload: vac-rs/crates/capabilities/sessions/src/core_migrated/session/tests.rs.inc
+    original_loc: 8556
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/capabilities/sessions/src/core_migrated/session/turn.rs
+    payload: vac-rs/crates/capabilities/sessions/src/core_migrated/session/turn.rs.inc
+    original_loc: 2256
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/capabilities/tools/src/tool_registry_plan_tests.rs
+    payload: vac-rs/crates/capabilities/tools/src/tool_registry_plan_tests.rs.inc
+    original_loc: 2525
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/capabilities/tools-domain/src/core_migrated/mcp_tool_call_tests.rs
+    payload: vac-rs/crates/capabilities/tools-domain/src/core_migrated/mcp_tool_call_tests.rs.inc
+    original_loc: 2712
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/handlers/multi_agents_tests.rs
+    payload: vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/handlers/multi_agents_tests.rs.inc
+    original_loc: 3484
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_combined.rs
+    payload: vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_combined.rs.inc
+    original_loc: 2338
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/foundation/config/src/config_requirements.rs
+    payload: vac-rs/crates/foundation/config/src/config_requirements.rs.inc
+    original_loc: 2812
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/foundation/protocol/src/models.rs
+    payload: vac-rs/crates/foundation/protocol/src/models.rs.inc
+    original_loc: 2893
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/foundation/protocol/src/permissions.rs
+    payload: vac-rs/crates/foundation/protocol/src/permissions.rs.inc
+    original_loc: 2953
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/foundation/protocol/src/protocol/split_005_websearchbeginevent.rs
+    payload: vac-rs/crates/foundation/protocol/src/protocol/split_005_websearchbeginevent.rs.inc
+    original_loc: 3041
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/foundation/runtime-protocol/src/export.rs
+    payload: vac-rs/crates/foundation/runtime-protocol/src/export.rs.inc
+    original_loc: 2944
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/foundation/runtime-protocol/src/protocol/common.rs
+    payload: vac-rs/crates/foundation/runtime-protocol/src/protocol/common.rs.inc
+    original_loc: 2904
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/foundation/runtime-protocol/src/protocol/thread_history_parts/thread_history_part_002.rs
+    payload: vac-rs/crates/foundation/runtime-protocol/src/protocol/thread_history_parts/thread_history_part_002.rs.inc
+    original_loc: 2029
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/foundation/runtime-protocol/src/protocol/v2_parts/v2_part_006_combined.rs
+    payload: vac-rs/crates/foundation/runtime-protocol/src/protocol/v2_parts/v2_part_006_combined.rs.inc
+    original_loc: 4113
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/foundation/state/src/runtime/memories/split_002_mark_global_phase2_job_succeeded_row.rs
+    payload: vac-rs/crates/foundation/state/src/runtime/memories/split_002_mark_global_phase2_job_succeeded_row.rs.inc
+    original_loc: 3516
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/providers/analytics/src/analytics_client_tests.rs
+    payload: vac-rs/crates/providers/analytics/src/analytics_client_tests.rs.inc
+    original_loc: 2643
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/providers/provider-http/src/endpoint/realtime_websocket/methods.rs
+    payload: vac-rs/crates/providers/provider-http/src/endpoint/realtime_websocket/methods.rs.inc
+    original_loc: 2329
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/runtime/sandbox/linux-sandbox/src/bwrap.rs
+    payload: vac-rs/crates/runtime/sandbox/linux-sandbox/src/bwrap.rs.inc
+    original_loc: 2707
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/runtime/shell/shell-command/src/parse_command.rs
+    payload: vac-rs/crates/runtime/shell/shell-command/src/parse_command.rs.inc
+    original_loc: 2527
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/surfaces/cli/src/doctor_cli.rs
+    payload: vac-rs/crates/surfaces/cli/src/doctor_cli.rs.inc
+    original_loc: 2595
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/surfaces/tui/src/app/event_dispatch.rs
+    payload: vac-rs/crates/surfaces/tui/src/app/event_dispatch.rs.inc
+    original_loc: 2098
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/surfaces/tui/src/app/tests.rs
+    payload: vac-rs/crates/surfaces/tui/src/app/tests.rs.inc
+    original_loc: 5268
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/surfaces/tui/src/bottom_pane/approval_overlay.rs
+    payload: vac-rs/crates/surfaces/tui/src/bottom_pane/approval_overlay.rs.inc
+    original_loc: 2404
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/split_002_footerflash_tests.rs
+    payload: vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/split_002_footerflash_tests.rs.inc
+    original_loc: 5694
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/surfaces/tui/src/bottom_pane/footer.rs
+    payload: vac-rs/crates/surfaces/tui/src/bottom_pane/footer.rs.inc
+    original_loc: 2018
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/surfaces/tui/src/bottom_pane/list_selection_view.rs
+    payload: vac-rs/crates/surfaces/tui/src/bottom_pane/list_selection_view.rs.inc
+    original_loc: 2543
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/surfaces/tui/src/bottom_pane/mcp_server_elicitation.rs
+    payload: vac-rs/crates/surfaces/tui/src/bottom_pane/mcp_server_elicitation.rs.inc
+    original_loc: 2651
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/surfaces/tui/src/bottom_pane/mod.rs
+    payload: vac-rs/crates/surfaces/tui/src/bottom_pane/mod.rs.inc
+    original_loc: 2813
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/surfaces/tui/src/chatwidget/plugins.rs
+    payload: vac-rs/crates/surfaces/tui/src/chatwidget/plugins.rs.inc
+    original_loc: 2152
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/surfaces/tui/src/chatwidget/tests/popups_and_settings.rs
+    payload: vac-rs/crates/surfaces/tui/src/chatwidget/tests/popups_and_settings.rs.inc
+    original_loc: 2772
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/surfaces/tui/src/chatwidget/tests/status_and_layout.rs
+    payload: vac-rs/crates/surfaces/tui/src/chatwidget/tests/status_and_layout.rs.inc
+    original_loc: 2880
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/surfaces/tui/src/diff_render.rs
+    payload: vac-rs/crates/surfaces/tui/src/diff_render.rs.inc
+    original_loc: 2482
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/surfaces/tui/src/history_cell/split_006_finalmessageseparator.rs
+    payload: vac-rs/crates/surfaces/tui/src/history_cell/split_006_finalmessageseparator.rs.inc
+    original_loc: 2434
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/surfaces/tui/src/operator_ui.rs
+    payload: vac-rs/crates/surfaces/tui/src/operator_ui.rs.inc
+    original_loc: 2424
+    status: behavior_preserving_static_split
+  - wrapper: vac-rs/crates/surfaces/tui/src/resume_picker.rs
+    payload: vac-rs/crates/surfaces/tui/src/resume_picker.rs.inc
+    original_loc: 2242
+    status: behavior_preserving_static_split

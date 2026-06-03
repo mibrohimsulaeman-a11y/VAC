@@ -1,0 +1,13 @@
+schema_version: 1
+kind: registry_status
+id: perf.o5o6.tui
+status: NotEvaluated
+toolchain: cargo/rustc unavailable
+harness: scripts/bench-vac-tui-performance.sh
+expected_outputs:
+  - markdown large transcript
+  - resize reflow width-only
+  - height-only resize no rebuild
+  - draw-cost via TestBackend
+  - TTFF startup span
+  - event-stream load test

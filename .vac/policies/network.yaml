@@ -1,0 +1,38 @@
+schema_version: 1
+kind: policy
+id: vac.policy.network
+title: Network access policy
+default_decision: approval_required
+rules:
+  - id: net.https-default
+    match:
+      action: network_access
+      network:
+        host: "*"
+        protocol: https
+    decision: approval_required
+    reason: Outbound HTTPS requires operator approval before any request is issued.
+  - id: net.http-deny
+    match:
+      action: network_access
+      network:
+        host: "*"
+        protocol: http
+    decision: deny
+    reason: Plain HTTP is not permitted; use HTTPS for outbound network access.
+  - id: net.socks-tcp-deny
+    match:
+      action: network_access
+      network:
+        host: "*"
+        protocol: socks5_tcp
+    decision: deny
+    reason: SOCKS5 TCP tunnels are not permitted under the local policy.
+  - id: net.socks-udp-deny
+    match:
+      action: network_access
+      network:
+        host: "*"
+        protocol: socks5_udp
+    decision: deny
+    reason: SOCKS5 UDP tunnels are not permitted under the local policy.

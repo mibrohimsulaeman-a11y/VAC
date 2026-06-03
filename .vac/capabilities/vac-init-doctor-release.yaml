@@ -1,0 +1,54 @@
+schema_version: 1
+kind: capability
+id: vac.init.doctor-release
+title: VAC-Init Doctor Aggregate Release Gate
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane::vac_init_doctor_release
+ownership:
+  crates:
+  - vac-core
+  modules:
+  - control_plane::vac_init_doctor_release
+  targets:
+  - crate_name: vac-core
+    module: control_plane::vac_init_doctor_release
+description: Doctor release contract aggregates registry, surfaces, policy, ownership, workflow, evidence, build, memory, and init gates using fail-closed release semantics.
+depends_on:
+- vac.init.memory-governance
+- vac.init.evidence-chain
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - bash scripts/check-vac-init-doctor-release-contract.sh
+  palette: true
+  tui:
+    routes:
+    - /capabilities
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for:
+  - execute_process
+states:
+- empty
+- loading
+- success
+- failure
+validation:
+  gates:
+  - vac_init_doctor_release_contract
+  commands:
+  - id: vac.init.doctor-release.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-doctor-release-contract.sh
+    risk: execute_process
+    approval: policy
+docs:
+- docs/vac-init/VAC_INIT_BATCH_13_15_IMPLEMENTATION.md
+- docs/validation/VAC_INIT_DOCTOR_RELEASE_GATE.md

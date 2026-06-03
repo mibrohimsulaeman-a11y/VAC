@@ -1,0 +1,45 @@
+# VAC operator TUI ANSI snapshot
+scenario: capability dashboard
+viewport: 140x40
+style_roles: plain, chrome, muted, accent, success, warning, danger, user, agent, status
+---
+[38;5;245m● ● ●  vac · interactive — agent working                                                                                                    [0m
+[38;5;245m────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;245mchat · runtime · review · [workbench] · mcp                                                                                         tab 4/5 [0m
+[38;5;45mTUI Capability Dashboard                                                                                                                    [0m
+[38;5;45mControl plane registry view for manifest ownership, surfaces, policy, validation, and diagnostics.                                          [0m
+[38;5;45mmetrics  [5 CAPABILITIES]  [42 OWNED DOMAINS]  [3 UNOWNED]  [80% VALID]                                                                     [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;214mlayout  left: command/nav + workspace feed | center: capability table + tabs/filter + registry card | right / Diagnostics                   [0m
+[38;5;117mdiagnostics fallback: YAML/control-plane errors are rendered in-panel                                                                       [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;214m› /capabilities             │ Capability registry                                                       │ right / Diagnostics               [0m
+[38;5;203;1m                            │ filters: [all] ready partial planned broken                               │ Structured errors render her      [0m
+[38;5;117mWORKSPACE FEED              │                                                                           │                                   [0m
+[38;5;214mregistry    .vac/capabiliti │ /capabilities                         control plane registry              │ ┌─ YAML diagnostic ─────────      [0m
+[38;5;45mworkflows   .vac/workflows  │ Control plane registry:                                                   │ │ error                    │      [0m
+[38;5;117msurface     tui + cli + pal │   .vac/capabilities/ manifest scan loaded 18 files · 0 blank screens      │ │ .vac/capabilities/tui.ym │      [0m
+[38;5;42m                            │   .vac/policies/ strict approval gates wired                              │ │ status almost_ready is   │      [0m
+[38;5;42mownership   42 owned        │   vac_tui_runtime surface route summary ready                             │ │ not one of ready,        │      [0m
+[38;5;42munowned     3 domains       │                                                                           │ │ partial, planned,        │      [0m
+[38;5;203;1mpolicy      strict gates    │ ID | STATUS | OWNER | SURFACES | POLICY | VALIDATION / DOCS               │ │ broken, cli-only         │      [0m
+[38;5;42m                            │ vac.approvals | ready | vac-core/policy | tui, cli, runner | requires_con │ │ warning registry:        │      [0m
+[38;5;42m/             ready / vac.t │ vac.tui.capabilities | ready | vac-tui/lib | /capabilities, palette | rea │ │ Registry parse degraded; │      [0m
+[38;5;42m/capabilities ready / regis │ vac.workflow.browser | partial | vac-workflow | /workflow, cli | dry_run_ │ │ policy gates and surface │      [0m
+[38;5;42m/runtime      ready / sched │ vac.root.convert | planned | vac-registry | cli-only | migration_guard |  │ │ routes remain ready      │      [0m
+[38;5;203;1m                            │ vac.yaml.parser | broken | vac-core/config | tui, cli | fail_closed | lin │ └──────────────────────────┘      [0m
+[38;5;117m                            │                                                                           │                                   [0m
+[38;5;117m                            │ ┌─ Ownership scan ─────────────────────────────────────────────────────── │ ┌─ Policy gates ────────────      [0m
+[38;5;42m                            │ │ vac-tui/lib owned                                                     │ │ │ ready                    │      [0m
+[38;5;42m                            │ │ vac-core/policy owned                                                 │ │ │ ████████████████████     │      [0m
+[38;5;117m                            │ └───────────────────────────────────────────────────────────────────────┘ │ └──────────────────────────┘      [0m
+[38;5;117m                            │                                                                           │                                   [0m
+[38;5;117m                            │                                                                           │ ┌─ Surface routes ──────────      [0m
+[38;5;42m                            │                                                                           │ │ ready                    │      [0m
+[38;5;117m                            │                                                                           │ │ ██████████████████░░     │      [0m
+[38;5;117m                            │                                                                           │ └──────────────────────────┘      [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;245m┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐[0m
+[38;5;245m│ ▸  / commands   @ files   shift+tab plan   ctrl+j newline                                                                                │[0m
+[38;5;245m└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘[0m
+[38;5;117mCONVERSATION | model claude-sonnet-4.5 | 68,240 tok | manual | valid 92% | lsp E0 W3 | profile default · rulebook vil.core                  [0m

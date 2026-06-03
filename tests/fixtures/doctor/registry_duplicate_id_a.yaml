@@ -1,0 +1,5 @@
+schema_version: 1
+kind: capability
+id: vac.fixture.duplicate
+title: Duplicate A
+status: planned

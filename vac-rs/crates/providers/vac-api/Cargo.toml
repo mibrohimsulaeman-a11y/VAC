@@ -1,0 +1,16 @@
+[package]
+name = "vac-api"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+vac-provider-http = { workspace = true }
+
+[lints]
+workspace = true
+
+[features]
+default = []
+compat = []
+provider-cloud-tests = []

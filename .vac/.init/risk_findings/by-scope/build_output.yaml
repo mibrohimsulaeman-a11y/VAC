@@ -1,0 +1,10 @@
+schema_version: 1
+kind: risk_finding
+id: finding.live-init.by-scope.build_output
+title: 'VAC init risk findings by scope: build_output'
+status: ready
+summary:
+  scope: build_output
+  total_findings: 0
+findings:
+  []

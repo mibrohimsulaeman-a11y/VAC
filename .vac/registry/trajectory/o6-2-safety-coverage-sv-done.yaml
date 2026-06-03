@@ -1,0 +1,42 @@
+schema_version: 1
+kind: trajectory
+id: trajectory.o6-2-safety-coverage-sv-done
+spans:
+- file: .vac/registry/o6-safety-coverage.yaml
+  start_line: 1
+  end_line: 200
+  symbol: safety_coverage
+  evidence_id: evidence.2026-05-30-o6-2-safety-coverage-sv-done
+- file: .vac/registry/compile-debt-ledger.yaml
+  start_line: 1
+  end_line: 200
+  symbol: compile_debt_ledger
+  evidence_id: evidence.2026-05-30-o6-2-safety-coverage-sv-done
+results_by_evidence:
+  evidence.2026-05-30-o6-2-safety-coverage-sv-done:
+    evidence_id: evidence.2026-05-30-o6-2-safety-coverage-sv-done
+    timestamp: '2026-05-30T00:00:00Z'
+    task: O6.2 SAFETY coverage to SV-Done
+    plan_id: plan.o6-2.safety-coverage.sv-done
+    capability: vac.quality.unsafe-safety-coverage
+    rationale:
+      summary: Added sandbox-verifiable SAFETY coverage and compile-debt ledger while leaving TV verification pending.
+      policy_refs:
+      - vac.no-hardcoded-readiness
+      - vac.sv-tv-done-separation
+      evidence_refs:
+      - evidence.2026-05-30-o6-2-safety-coverage-sv-done
+      memory_refs:
+        team_rules: []
+        semantic_refs: []
+      excluded:
+        raw_chain_of_thought: true
+    changeset:
+      operation: modify
+      diff_excerpt: SAFETY comments added and static no-rustc gate registered.
+      lines_added: 0
+      lines_removed: 0
+    approval:
+      approved_by: operator
+      content_hash: 1b599a31c19bdb9252f9a1f88b8fae632a146e0d1fd6c9b844c6867eba7171dc
+    chain_depth: 1

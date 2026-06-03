@@ -1,0 +1,46 @@
+schema_version: 1
+kind: evidence
+id: evidence.o6_1.runtime_panic_baseline.2026_05_30
+title: O6.1 runtime panic baseline evidence
+status: ready
+updated_at: '2026-05-30T10:00:00Z'
+slice: O6.1-depanic-true-runtime-baseline
+date: 2026-05-30
+implementer: notion-ai-sandbox
+status: Measured_SV-Done
+method: >
+  Counted panic-capable call sites across runtime crates only, then re-counted
+  after removing #[cfg(test)] modules via brace-depth matching. The path filter
+  excludes tests/, benches/, fixtures/, examples/ and *_test.rs / *_tests.rs / tests.rs.
+runtime_files_scanned: 1263
+counts:
+  unwrap:
+    path_filtered: 942
+    minus_cfg_test: 102
+  expect:
+    path_filtered: 4167
+    minus_cfg_test: 73
+  panic_macro:
+    path_filtered: 479
+    minus_cfg_test: 123
+  todo_macro:
+    path_filtered: 0
+    minus_cfg_test: 0
+  unimplemented_macro:
+    path_filtered: 1
+    minus_cfg_test: 1
+  unreachable_macro:
+    path_filtered: 76
+    minus_cfg_test: 61
+finding: >
+  The true runtime de-panic surface is roughly 360 call sites
+  (102 unwrap + 73 expect + 123 panic! + 61 unreachable! + 1 unimplemented!),
+  an order of magnitude smaller than the previously reported path-only figures
+  (unwrap 1881 / expect 8340 / panic 803), which were dominated by test code.
+  O6.1 is therefore far more tractable than the original plan assumed and can be
+  triaged file-by-file in the sandbox.
+script: scripts/measure-vac-o6-1-runtime-panic-surface.py
+caveat: >
+  Upper bound. Brace counting does not exclude braces inside string/char literals
+  or comments, and macro substring counts can include doc/comment text. Definitive
+  per-call-site triage and any unwrap->? conversions remain TV-Pending (need cargo).

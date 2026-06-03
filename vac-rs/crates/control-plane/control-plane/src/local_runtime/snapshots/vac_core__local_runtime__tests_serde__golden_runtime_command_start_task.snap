@@ -1,0 +1,12 @@
+---
+source: core/src/local_runtime/tests_serde.rs
+expression: "RuntimeCommand::start_task(\"Fix the failing tests\", AutonomyMode::Autopilot,\nRuntimeEntrypoint::Exec, PathBuf::from(\"/repo\"),)"
+---
+{
+  "StartTask": {
+    "prompt": "Fix the failing tests",
+    "autonomy_mode": "autopilot",
+    "entrypoint": "exec",
+    "cwd": "/repo"
+  }
+}

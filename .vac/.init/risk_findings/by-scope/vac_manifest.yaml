@@ -1,0 +1,10 @@
+schema_version: 1
+kind: risk_finding
+id: finding.live-init.by-scope.vac_manifest
+title: 'VAC init risk findings by scope: vac_manifest'
+status: ready
+summary:
+  scope: vac_manifest
+  total_findings: 0
+findings:
+  []

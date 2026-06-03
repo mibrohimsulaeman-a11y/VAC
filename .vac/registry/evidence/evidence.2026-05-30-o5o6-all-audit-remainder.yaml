@@ -1,0 +1,85 @@
+schema_version: 1
+kind: evidence
+id: evidence.2026-05-30-o5o6-all-audit-remainder
+timestamp: '2026-05-30T15:15:00Z'
+chain:
+  previous: evidence.2026-05-30-o5o6-epic-a-app-server-retirement
+  previous_hash: null
+  self_hash: '0000000000000000000000000000000000000000000000000000000000000000'
+changeset:
+  plan_id: plan.o5o6.all-audit-remainder
+  capability: vac.o5o6.all-audit-remainder
+  files_modified:
+    - path: vac-rs/**/legacy_include.rs
+      operation: delete
+      diff_hash: source_static_split_manifest_reconstructs_original_hashes
+      lines_added: 0
+      lines_removed: 0
+    - path: vac-rs/**/split_*.rs
+      operation: create
+      diff_hash: source_static_split_manifest_reconstructs_original_hashes
+      lines_added: 0
+      lines_removed: 0
+    - path: scripts/measure-vac-o6-1-runtime-panic-surface.py
+      operation: modify
+      diff_hash: NotEvaluated_source_artifact_hash_only
+      lines_added: 0
+      lines_removed: 0
+    - path: .vac/registry/o6-panic-surface.yaml
+      operation: create
+      diff_hash: NotEvaluated_source_artifact_hash_only
+      lines_added: 0
+      lines_removed: 0
+    - path: .vac/registry/o5-donor-delete-gate.yaml
+      operation: modify
+      diff_hash: NotEvaluated_source_artifact_hash_only
+      lines_added: 0
+      lines_removed: 0
+validation:
+  commands_executed:
+    - id: vac.o5o6.all-audit-remainder.static
+      runner: bash
+      args_hash: scripts/check-vac-o5o6-all-audit-remainder.sh
+      exit_code: 0
+      stdout_hash: docs/monolith-quality/logs/all-audit-remainder-targeted-gates.log
+      stderr_hash: none
+      duration_ms: 19970
+    - id: vac.o5o6.completion-state
+      runner: bash
+      args_hash: scripts/check-vac-o5-o6-completion-state.sh
+      exit_code: 0
+      stdout_hash: docs/monolith-quality/logs/all-audit-remainder-regression-gates.log
+      stderr_hash: none
+      duration_ms: 0
+  gates_passed:
+    - scripts/check-vac-o5-2-godfile-staging-all.sh
+    - scripts/check-vac-o6-1-depanic-surface.sh
+    - scripts/check-vac-f5-protocol-duplication.sh
+    - scripts/check-vac-o5-5-donor-delete-gate.sh
+    - scripts/check-vac-o6-quality-triage.sh
+    - scripts/check-vac-o5-o6-monolith-quality-slice.sh
+    - scripts/check-vac-o5-o6-completion-state.sh
+    - scripts/check-vac-o6-2-safety-coverage.sh
+    - scripts/check-legal-release-blockers.sh
+    - scripts/check-tui-source-artifact-hygiene.sh
+    - scripts/check-vac-o5o6-upload-sha256.sh
+  gates_failed: []
+  gates_not_evaluated:
+    - cargo build --offline --workspace --locked
+    - cargo clippy --offline --workspace -- -D warnings
+    - cargo test --offline --workspace
+approval:
+  approved_by: operator
+  approved_at: '2026-05-30T15:15:00Z'
+  content_hash: NotEvaluated_source_artifact_hash_only
+  signature:
+    algorithm: none
+    value: null
+attribution:
+  agent_id: chatgpt-sandbox
+  model: GPT-5.5 Thinking
+  memory_snapshot:
+    working_facts: 0
+    team_rules_consulted: []
+    semantic_refs: []
+  rationale_ref: docs/monolith-quality/O5O6_ALL_AUDIT_REMAINDER_REPORT.md

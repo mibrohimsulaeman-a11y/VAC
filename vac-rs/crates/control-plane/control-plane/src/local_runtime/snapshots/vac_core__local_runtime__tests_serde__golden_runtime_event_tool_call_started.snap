@@ -1,0 +1,12 @@
+---
+source: core/src/local_runtime/tests_serde.rs
+expression: "RuntimeEvent::ToolCallStarted(ToolCallStarted::new(fixed_task_id(),\nfixed_tool_call_id(), \"shell\", Some(\"cargo test\".to_string()),))"
+---
+{
+  "ToolCallStarted": {
+    "task_id": "22222222-2222-2222-2222-222222222222",
+    "tool_call_id": "44444444-4444-4444-4444-444444444444",
+    "tool_name": "shell",
+    "input_preview": "cargo test"
+  }
+}

@@ -1,0 +1,16 @@
+schema_version: 1
+kind: ownership_report
+id: report.ownership.production-rc
+timestamp: '2026-05-29T00:00:00Z'
+workspace_root: /workspace
+summary:
+  total_files: 0
+  total_modules: 0
+  owned: 0
+  partial: 0
+  hidden: 0
+  overclaimed: 0
+  unowned: 0
+  coverage_percent: 100.0
+files: []
+actions_required: []

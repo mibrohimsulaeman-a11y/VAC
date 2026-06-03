@@ -1,0 +1,72 @@
+schema_version: 1
+kind: workflow
+id: maintenance.vac-init-batch2-5
+title: VAC-Init Batch 2-5 aggregate readiness
+status: ready
+inputs: {}
+steps:
+- id: manifest_contracts
+  uses: capability.vac.init.manifest-contracts.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+- id: registry_validator
+  uses: capability.vac.init.registry-validator.check
+  depends_on:
+  - manifest_contracts
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+- id: lifecycle
+  uses: capability.vac.init.lifecycle.check
+  depends_on:
+  - registry_validator
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+- id: ownership_scanner
+  uses: capability.vac.init.ownership-scanner.check
+  depends_on:
+  - lifecycle
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+ui:
+  surface: /workflow
+  inspect_surface: /capabilities
+  progress_panel: true
+  activity_log: true
+  approval_surface: false
+  evidence_surface: true
+policy:
+  default_risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for: []
+validation:
+  gates:
+  - lifecycle
+  - manifest_contracts
+  - ownership_scanner
+  - registry_validator
+  - vac_init_batch2_5_contract
+  commands:
+  - id: maintenance.vac-init-batch2-5.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-batch2-5-contract.sh
+    risk: execute_process
+    approval: policy

@@ -1,0 +1,50 @@
+schema_version: 1
+kind: capability
+id: vac.tui.pty_gate
+title: TUI PTY Operator Gate
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane
+ownership:
+  crates:
+  - vac-core
+  modules:
+  - control_plane
+description: Validation gate that runs the active product TUI in a real or virtual PTY, verifies slash-command screen updates and Ctrl-C exit, and records unavailable TTYs as BLOCKED-OPERATOR instead of pass.
+depends_on:
+- vac.tui
+policy:
+  risk: execute_process
+  mutates_files: false
+  network: false
+  redaction: true
+  approval_required_for:
+  - execute_process
+surfaces:
+  palette: true
+states:
+- empty
+- loading
+- success
+- failure
+- passed
+- failed
+- blocked_operator
+- skipped_not_applicable
+validation:
+  gates:
+  - validate
+  commands:
+  - id: vac.tui.pty-gate.validation.cmd001
+    runner: cargo
+    args:
+    - +1.93.0
+    - check
+    - -p
+    - vac-core
+    risk: execute_process
+    approval: policy
+docs:
+- docs/validation/TUI_PTY_DOGFOOD_GATE.md
+- docs/workflow-control-plane/plans/23-pty-operator-gate.md

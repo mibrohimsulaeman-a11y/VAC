@@ -1,0 +1,10 @@
+schema_version: 1
+kind: risk_finding
+id: finding.live-init.by-scope.donor_quarantined
+title: 'VAC init risk findings by scope: donor_quarantined'
+status: ready
+summary:
+  scope: donor_quarantined
+  total_findings: 0
+findings:
+  []

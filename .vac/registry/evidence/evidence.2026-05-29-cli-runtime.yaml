@@ -1,0 +1,37 @@
+schema_version: 1
+kind: evidence
+id: evidence.2026-05-29-cli-runtime
+timestamp: 2026-05-29T10:30:00Z
+chain:
+  previous: null
+  previous_hash: null
+  self_hash: sha256-placeholder-cli-runtime
+changeset:
+  plan_id: plan.production-hardening-b
+  capability: vac.init.cli-runtime-foundation
+  files_modified:
+    - path: vac-rs/cli/src/main.rs
+      operation: modify
+      diff_hash: sha256-placeholder-main
+      lines_added: 1
+      lines_removed: 0
+validation:
+  commands_executed: []
+  gates_passed:
+    - vac_init_cli_runtime_foundation_contract
+  gates_failed: []
+approval:
+  approved_by: operator
+  approved_at: 2026-05-29T10:30:00Z
+  content_hash: sha256-placeholder-approval
+  signature:
+    algorithm: none
+    value: null
+attribution:
+  agent_id: chatgpt-sandbox
+  model: GPT-5.5 Thinking
+  memory_snapshot:
+    working_facts: 0
+    team_rules_consulted: []
+    semantic_refs: []
+  rationale_ref: .vac/registry/trajectory/index.yaml

@@ -1,0 +1,12 @@
+schema_version: 1
+kind: evidence
+id: evidence.fixture-broken-chain
+timestamp: '2026-05-29T00:00:00Z'
+chain:
+  previous: evidence.prev
+  previous_hash: bad
+  self_hash: bad
+changeset: {}
+validation: {}
+approval: {}
+attribution: {}

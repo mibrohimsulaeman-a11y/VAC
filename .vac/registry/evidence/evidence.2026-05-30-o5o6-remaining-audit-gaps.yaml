@@ -1,0 +1,71 @@
+schema_version: 1
+kind: evidence
+id: evidence.2026-05-30-o5o6-remaining-audit-gaps
+timestamp: '2026-05-30T12:30:00Z'
+chain:
+  previous: evidence.2026-05-30-o5o6-gap-bc-depth
+  previous_hash: null
+  self_hash: '0000000000000000000000000000000000000000000000000000000000000000'
+changeset:
+  plan_id: plan.o5o6.remaining-audit-gaps
+  capability: vac.o5o6.remaining-audit-gaps
+  files_modified:
+    - path: vac-rs/control-plane/src/control_plane/vac_init_approval_binding.rs
+      operation: modify
+      diff_hash: NotEvaluated_source_artifact_hash_only
+      lines_added: 0
+      lines_removed: 0
+    - path: vac-rs/control-plane/src/control_plane/vac_init_evidence_chain.rs
+      operation: modify
+      diff_hash: NotEvaluated_source_artifact_hash_only
+      lines_added: 0
+      lines_removed: 0
+    - path: vac-rs/control-plane/src/control_plane/vac_init_migration_runtime.rs
+      operation: modify
+      diff_hash: NotEvaluated_source_artifact_hash_only
+      lines_added: 0
+      lines_removed: 0
+    - path: scripts/check-vac-init-remaining-audit-gaps-static.sh
+      operation: create
+      diff_hash: NotEvaluated_source_artifact_hash_only
+      lines_added: 0
+      lines_removed: 0
+validation:
+  commands_executed:
+    - id: vac.remaining.audit.gaps.static
+      runner: bash
+      args_hash: scripts/check-vac-init-remaining-audit-gaps-static.sh
+      exit_code: 0
+      stdout_hash: docs/monolith-quality/logs/remaining-audit-gaps-targeted-gates.log
+      stderr_hash: none
+      duration_ms: 0
+    - id: vac.upload.sha256.external
+      runner: bash
+      args_hash: VAC_UPLOAD_SHA256SUMS=/mnt/data/SHA256SUMS.txt VAC_UPLOAD_DIR=/mnt/data scripts/check-vac-o5o6-upload-sha256.sh
+      exit_code: 0
+      stdout_hash: docs/monolith-quality/logs/remaining-audit-gaps-targeted-gates.log
+      stderr_hash: none
+      duration_ms: 0
+  gates_passed:
+    - scripts/check-vac-init-remaining-audit-gaps-static.sh
+    - scripts/check-vac-init-approval-binding-contract.sh
+    - scripts/check-vac-init-evidence-chain-contract.sh
+    - scripts/check-vac-init-migration-runtime-contract.sh
+    - scripts/check-vac-init-tui-real-data-contract.sh
+    - scripts/check-legal-release-blockers.sh
+  gates_failed: []
+approval:
+  approved_by: operator
+  approved_at: '2026-05-30T12:30:00Z'
+  content_hash: NotEvaluated_source_artifact_hash_only
+  signature:
+    algorithm: none
+    value: null
+attribution:
+  agent_id: chatgpt-sandbox
+  model: GPT-5.5 Thinking
+  memory_snapshot:
+    working_facts: 0
+    team_rules_consulted: []
+    semantic_refs: []
+  rationale_ref: docs/monolith-quality/O5O6_REMAINING_AUDIT_GAPS_IMPLEMENTATION_REPORT.md

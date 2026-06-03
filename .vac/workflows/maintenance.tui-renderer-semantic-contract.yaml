@@ -1,0 +1,74 @@
+schema_version: 1
+kind: workflow
+id: maintenance.tui-renderer-semantic-contract
+title: TUI renderer semantic contract readiness
+status: ready
+owner:
+  crate: vac-surface-tui
+  module: operator_ui
+description: Readiness workflow for semantic operator-console renderer and live adapter hardening.
+triggers:
+- kind: manual
+  id: check_tui_renderer_semantic_contract
+steps:
+- id: renderer_semantic_contract
+  uses: capability.vac.tui.renderer-semantic-contract.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+- id: ansi_contract
+  uses: capability.vac.tui.renderer-semantic-contract.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+- id: live_adapter_contract
+  uses: capability.vac.tui.renderer-semantic-contract.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+policy:
+  mutates_files: false
+  network: false
+  default_risk: safe_read
+  redaction: false
+  approval_required_for: []
+ui:
+  surface: /workflow
+  inspect_surface: /capabilities
+  progress_panel: true
+  activity_log: true
+  approval_surface: false
+  evidence_surface: true
+validation:
+  gates:
+  - ansi_contract
+  - live_adapter_contract
+  - renderer_semantic_contract
+  commands:
+  - id: maintenance.tui-renderer-semantic-contract.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-tui-renderer-semantic-contract.sh
+    risk: execute_process
+    approval: policy
+  - id: maintenance.tui-renderer-semantic-contract.validation.cmd002
+    runner: bash
+    args:
+    - scripts/check-tui-operator-ansi-contract.sh
+    risk: execute_process
+    approval: policy
+  - id: maintenance.tui-renderer-semantic-contract.validation.cmd003
+    runner: bash
+    args:
+    - scripts/check-tui-operator-live-adapter.sh
+    risk: execute_process
+    approval: policy

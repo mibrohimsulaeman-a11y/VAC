@@ -1,0 +1,83 @@
+schema_version: 1
+kind: plan
+id: plan.o5-o6.monolith-quality.slice1
+title: 'O5/O6 monolith quality slice 1: protocol dedup and gate robustness'
+status: completed
+task:
+  description: Register O5/O6 implementation plan, fix scanner gate missing-rustc behavior, and implement O5.1 protocol dedup by making vac-app-server-protocol a compatibility shim over vac-runtime-protocol.
+  requested_by: operator
+  timestamp: '2026-05-30T00:00:00Z'
+  capability: vac.o5-o6.monolith-quality
+memory_context:
+  working:
+  - artifact.vac-source-scanner-hardening-o1-o4-s5-s8
+  team:
+  - vac.no-hardcoded-readiness
+  - vac.not-evaluated-unrun-gates
+  semantic:
+  - o5.monolith-refactor
+  - o6.quality-de-risk
+allowed_files:
+- path: scripts/check-vac-init-scanner-hardening-spec-flow.sh
+  operation: modify
+  ownership: vac.init.scanner-policy-hardening
+  rationale: Missing rustc must be NotEvaluated instead of exit 127.
+- path: vac-rs/app-server-protocol/**
+  operation: modify
+  ownership: vac.o5-o6.monolith-quality
+  rationale: Deduplicate protocol implementation while keeping compatibility crate.
+- path: docs/monolith-quality/**
+  operation: create
+  ownership: vac.o5-o6.monolith-quality
+  rationale: Persist O5/O6 plan and slice report.
+- path: .vac/registry/o5-o6-monolith-quality-state.yaml
+  operation: create
+  ownership: vac.o5-o6.monolith-quality
+  rationale: Machine-readable state with Cargo gates NotEvaluated.
+- path: scripts/check-vac-o5-o6-monolith-quality-slice.sh
+  operation: create
+  ownership: vac.o5-o6.monolith-quality
+  rationale: Gate the O5.1 slice.
+forbidden:
+  files:
+  - target/**
+  - .git/**
+  - node_modules/**
+  - vac-rs/vendor/**
+  actions:
+  - full_workspace_build_claim
+  - e2e_pass_claim_without_execution
+  - big_bang_monolith_merge
+validation:
+  pre_conditions:
+  - Baseline is vac-source-scanner-hardening-o1-o4-s5-s8.zip
+  post_conditions:
+  - O5.1 dedup shim present
+  - Cargo gates remain NotEvaluated
+  - scanner gate no longer crashes on missing rustc
+  commands:
+  - id: o5-o6.slice1.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-o5-o6-monolith-quality-slice.sh
+    risk: execute_process
+    approval: policy
+  - id: o5-o6.slice1.validation.cmd002
+    runner: bash
+    args:
+    - scripts/check-vac-init-scanner-hardening-spec-flow.sh
+    risk: execute_process
+    approval: policy
+approval:
+  required: false
+  approver: operator
+  approved_at: '2026-05-30T00:00:00Z'
+  content_hash: 19effcb226c0a06e75737fac9289903efc992bb231ba853f57a99fe50a0d05ec
+  signature:
+    algorithm: none
+    value: null
+bounds:
+  max_patches: 1
+  max_new_files: 12
+  max_line_delta: 800
+  timeout_seconds: 180

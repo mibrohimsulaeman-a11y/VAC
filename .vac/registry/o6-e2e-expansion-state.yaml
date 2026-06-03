@@ -1,0 +1,17 @@
+schema_version: 1
+kind: registry_status
+id: vac.o6.e2e_expansion_state
+title: O6.4 E2E expansion status
+status: ready
+updated_at: '2026-05-30T00:00:00Z'
+required_flows:
+- vac init lifecycle scan -> discovered
+- vac init --rescan-ast -> policy_inferred
+- scanner doctor exit 0 and exit 1 fixture
+- cargo build/test workspace offline
+- vac why evidence-backed rationale
+implemented_in_this_slice:
+- minimal shell fixture registration
+- cargo gate availability detector
+cargo_e2e_status: NotEvaluated
+reason: No usable cargo/rustc executable; source artifact excludes vac-rs/vendor/.

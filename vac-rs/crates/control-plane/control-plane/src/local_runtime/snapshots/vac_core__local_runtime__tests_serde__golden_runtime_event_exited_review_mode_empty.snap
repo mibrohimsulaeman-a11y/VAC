@@ -1,0 +1,7 @@
+---
+source: core/src/local_runtime/tests_serde.rs
+expression: "RuntimeEvent::ExitedReviewMode(ExitedReviewMode::new(None::<String>),)"
+---
+{
+  "ExitedReviewMode": {}
+}

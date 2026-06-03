@@ -1,0 +1,35 @@
+schema_version: 1
+kind: policy
+id: vac.policy.approval
+title: Approval request policy
+default_decision: approval_required
+rules:
+  - id: approval.session-write
+    match:
+      action: session_write
+    decision: approval_required
+    reason: Session state mutations require operator approval before persisting.
+  - id: approval.checkpoint-write
+    match:
+      action: checkpoint_write
+    decision: approval_required
+    reason: Checkpoint mutations require operator approval before persisting.
+  - id: approval.credential-read
+    match:
+      action: credential_read
+      data_class: credential
+    decision: deny
+    reason: Credentials must never be read by automated steps; deny without exception.
+  - id: approval.credential-secret-like
+    match:
+      action: credential_read
+      data_class: secret_like
+    decision: deny
+    reason: Secret-like values follow the same deny rule as credentials.
+
+evidence:
+  signing:
+    required: false
+    key_env: VAC_EVIDENCE_ED25519_SIGNING_KEY_BASE64
+    required_env: VAC_EVIDENCE_SIGNING_REQUIRED
+    unsigned_behavior: warn_when_optional_fail_closed_when_required

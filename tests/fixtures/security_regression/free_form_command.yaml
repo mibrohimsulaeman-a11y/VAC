@@ -1,0 +1,6 @@
+schema_version: 1
+kind: test_assertion
+id: security.free-form-command
+attack: free_form_command
+expected: rejected
+diagnostic_required: true

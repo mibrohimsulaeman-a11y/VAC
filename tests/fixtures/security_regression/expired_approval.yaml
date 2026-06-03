@@ -1,0 +1,6 @@
+schema_version: 1
+kind: test_assertion
+id: security.expired-approval
+attack: expired_approval
+expected: rejected
+diagnostic_required: true

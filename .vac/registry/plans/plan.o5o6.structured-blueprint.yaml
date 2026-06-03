@@ -1,0 +1,19 @@
+schema_version: 1
+kind: plan
+id: plan.o5o6.structured-blueprint
+status: completed-static
+summary: Execute all batches from the O5/O6 structured implementation blueprint at source/static level.
+capability: vac.o5o6.monolith-quality
+validation:
+  commands:
+    - id: vac.o5o6.blueprint.static
+      runner: bash
+      args:
+        - scripts/check-vac-o5o6-blueprint-all-static.sh
+      risk: low
+      approval: never
+truth_status:
+  static: SV-Done
+  cargo: TV-Pending
+  tests: TV-Pending
+  benchmarks: TV-Pending

@@ -1,0 +1,59 @@
+schema_version: 1
+kind: capability
+id: vac.quality.unsafe-safety-coverage
+title: O6.2 unsafe SAFETY coverage
+status: ready
+owner:
+  crate: vac-core
+  module: quality::safety_coverage
+ownership:
+  crates:
+  - vac-core
+  modules:
+  - quality::safety_coverage
+  targets:
+  - kind: path
+    include:
+    - .vac/registry/o6-safety-coverage.yaml
+    - .vac/registry/compile-debt-ledger.yaml
+    - docs/monolith-quality/O6_2_SAFETY_ANNOTATION_COVERAGE.md
+    - scripts/check-vac-o6-2-safety-coverage.sh
+    exclude: []
+description: Static no-rustc gate ensuring each runtime unsafe occurrence has a nearby SAFETY comment.
+depends_on:
+- vac.quality.depanic-unsafe-triage
+- vac.o5-o6.completion-state
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for: []
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - bash scripts/check-vac-o6-2-safety-coverage.sh
+  palette: true
+  tui:
+    routes:
+    - /doctor
+    - /release
+states:
+- empty
+- loading
+- success
+- failure
+validation:
+  gates:
+  - o6_2_safety_coverage
+  commands:
+  - id: vac.quality.unsafe-safety-coverage.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-o6-2-safety-coverage.sh
+    risk: execute_process
+    approval: policy
+docs:
+- docs/monolith-quality/O6_2_SAFETY_ANNOTATION_COVERAGE.md
+- docs/monolith-quality/O6_2_UNSAFE_TRIAGE.md

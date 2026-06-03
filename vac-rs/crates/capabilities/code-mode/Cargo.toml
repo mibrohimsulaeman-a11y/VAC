@@ -1,0 +1,32 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "vac-code-mode"
+version.workspace = true
+
+[lib]
+doctest = false
+name = "vac_code_mode"
+path = "src/lib.rs"
+
+[lints]
+workspace = true
+
+[features]
+default = []
+code-mode-v8 = ["dep:deno_core_icudata", "dep:v8"]
+
+[dependencies]
+async-channel = { workspace = true }
+async-trait = { workspace = true }
+vac-protocol = { workspace = true }
+deno_core_icudata = { workspace = true, optional = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt", "sync", "time"] }
+tokio-util = { workspace = true, features = ["rt"] }
+tracing = { workspace = true }
+v8 = { workspace = true, optional = true }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }

@@ -1,0 +1,52 @@
+schema_version: 1
+kind: capability
+id: vac.release
+title: Release
+status: ready
+owner:
+  crate: vac-capability-release
+  module: contract
+ownership:
+  crates:
+  - vac-capability-release
+  - vac-cli
+  modules:
+  - doctor_cli
+description: Release-gate maintenance and publish-readiness checks.
+reason: 'Release-gate diagnostics are wired through `vac doctor release`, workflow release gates, and Plan 23 PTY semantics: `BLOCKED-OPERATOR` is not release pass evidence. Real operator evidence remains an input, not an ambiguous implementation gap.
+
+  '
+depends_on:
+- vac.workflow
+- vac.architecture
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - vac doctor release
+  palette: true
+states:
+- empty
+- loading
+- success
+- failure
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for:
+  - execute_process
+validation:
+  commands:
+  - id: vac.release.validation.cmd001
+    runner: cargo
+    args:
+    - +1.93.0
+    - check
+    - -p
+    - vac-cli
+    risk: execute_process
+    approval: policy
+docs:
+- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

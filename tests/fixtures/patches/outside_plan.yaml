@@ -1,0 +1,5 @@
+schema_version: 1
+kind: test_assertion
+id: fixture.patch.outside-plan
+assertion: patch outside plan is rejected
+target: src/outside.rs

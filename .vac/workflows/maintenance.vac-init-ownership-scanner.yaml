@@ -1,0 +1,50 @@
+schema_version: 1
+kind: workflow
+id: maintenance.vac-init-ownership-scanner
+title: VAC-Init source inventory and ownership scanner readiness
+status: ready
+inputs: {}
+steps:
+- id: source_inventory_contract
+  uses: capability.ownership.scan
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+- id: quarantine_contract
+  uses: capability.vac.init.ownership-scanner.check
+  depends_on:
+  - source_inventory_contract
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+ui:
+  surface: /workflow
+  inspect_surface: /capabilities
+  progress_panel: true
+  activity_log: true
+  approval_surface: false
+  evidence_surface: true
+policy:
+  default_risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for: []
+validation:
+  gates:
+  - quarantine_contract
+  - source_inventory_contract
+  - vac_init_ownership_scanner_contract
+  commands:
+  - id: maintenance.vac-init-ownership-scanner.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-ownership-scanner-contract.sh
+    risk: execute_process
+    approval: policy

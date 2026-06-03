@@ -1,0 +1,55 @@
+schema_version: 1
+kind: trajectory
+id: trajectory.o5o6-tui-widget-style-output-path
+spans:
+  - file: vac-rs/tui/src/operator_widget_render.rs
+    start_line: 1099
+    end_line: 1137
+    symbol: buffer_to_lines
+    evidence_id: evidence.2026-05-31-o5o6-tui-widget-style-output-path
+  - file: vac-rs/tui/src/operator_ui.rs
+    start_line: 945
+    end_line: 988
+    symbol: render_*_visual_lines
+    evidence_id: evidence.2026-05-31-o5o6-tui-widget-style-output-path
+  - file: vac-rs/tui/src/capability_dashboard.rs
+    start_line: 36
+    end_line: 41
+    symbol: render_capability_dashboard_visual_lines
+    evidence_id: evidence.2026-05-31-o5o6-tui-widget-style-output-path
+  - file: vac-rs/tui/src/chatwidget/split_015_set_thread_rename_block_message.rs
+    start_line: 111
+    end_line: 114
+    symbol: add_runtime_jobs_output
+    evidence_id: evidence.2026-05-31-o5o6-tui-widget-style-output-path
+  - file: vac-rs/tui/src/history_cell/split_003_approvaldecisionactor.rs
+    start_line: 271
+    end_line: 274
+    symbol: new_session_info_idle_visual_lines
+    evidence_id: evidence.2026-05-31-o5o6-tui-widget-style-output-path
+results_by_evidence:
+  evidence.2026-05-31-o5o6-tui-widget-style-output-path:
+    evidence_id: evidence.2026-05-31-o5o6-tui-widget-style-output-path
+    timestamp: '2026-05-31T00:00:00Z'
+    task: O5/O6 TUI widget styled output path
+    plan_id: plan.o5o6.tui-widget-style-output-path
+    capability: vac.tui.operator-visual-gate
+    rationale:
+      summary: >
+        Preserved ratatui Buffer cell style through the live history-surface path
+        so rounded widgets, pills, and gauges keep foreground/background/modifier
+        metadata instead of degrading to plain text before display.
+      policy_refs:
+        - vac.static-vs-toolchain-truth
+        - vac.no-hardcoded-readiness
+      evidence_refs:
+        - evidence.2026-05-31-o5o6-tui-widget-style-output-path
+      excluded:
+        raw_chain_of_thought: true
+    changeset:
+      operation: modify
+      diff_excerpt: Buffer cells now become styled Span runs and live TUI call sites consume visual Line values directly.
+    approval:
+      approved_by: operator
+      content_hash: source-artifact-final-pending-sha256
+    chain_depth: 1

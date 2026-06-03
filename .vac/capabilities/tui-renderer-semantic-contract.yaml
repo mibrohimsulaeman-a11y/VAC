@@ -1,0 +1,62 @@
+schema_version: 1
+kind: capability
+id: vac.tui.renderer-semantic-contract
+title: TUI renderer semantic contract
+status: ready
+owner:
+  crate: vac-surface-tui
+  module: operator_ui
+ownership:
+  crates:
+  - vac-tui
+  modules:
+  - operator_ui
+  - operator_style
+  - operator_ui_styles
+description: Semantic line/span render contract for operator-console snapshots, ANSI snapshots, and live ratatui adapter wiring.
+depends_on:
+- vac.tui
+- vac.tui.ansi-style
+- vac.tui.operator-live-adapter
+surfaces:
+  tui:
+    routes:
+    - /
+    - /capabilities
+    - /runtime
+  slash:
+    commands:
+    - /capabilities
+    - /runtime
+  palette: true
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+validation:
+  commands:
+  - id: vac.tui.renderer-semantic-contract.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-tui-renderer-semantic-contract.sh
+    risk: execute_process
+    approval: policy
+  - id: vac.tui.renderer-semantic-contract.validation.cmd002
+    runner: bash
+    args:
+    - scripts/check-tui-operator-ansi-contract.sh
+    risk: execute_process
+    approval: policy
+  - id: vac.tui.renderer-semantic-contract.validation.cmd003
+    runner: bash
+    args:
+    - scripts/check-tui-operator-live-adapter.sh
+    risk: execute_process
+    approval: policy
+  gates:
+  - semantic_line_span_specs
+  - ansi_strip_round_trip
+  - live_adapter_uses_specs
+docs:
+- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

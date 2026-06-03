@@ -1,0 +1,4329 @@
+schema_version: 1
+kind: risk_finding
+id: finding.live-init.by-risk.filesystem_delete
+title: 'VAC init risk findings by risk: filesystem_delete'
+status: ready
+summary:
+  risk: filesystem_delete
+  total_findings: 270
+findings:
+  - id: finding.live-init.vac.rs.app.server.protocol.src.export.rs.588
+    file: vac-rs/app-server-protocol/src/export.rs
+    line: 588
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.app.server.protocol.src.export.rs.2387
+    file: vac-rs/app-server-protocol/src/export.rs
+    line: 2387
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.app.server.protocol.src.export.rs.2661
+    file: vac-rs/app-server-protocol/src/export.rs
+    line: 2661
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.app.server.protocol.src.export.rs.2700
+    file: vac-rs/app-server-protocol/src/export.rs
+    line: 2700
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.app.server.protocol.src.export.rs.2743
+    file: vac-rs/app-server-protocol/src/export.rs
+    line: 2743
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.app.server.protocol.src.export.rs.2818
+    file: vac-rs/app-server-protocol/src/export.rs
+    line: 2818
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.app.server.protocol.src.export.rs.2940
+    file: vac-rs/app-server-protocol/src/export.rs
+    line: 2940
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.app.server.protocol.src.schema.fixtures.rs.117
+    file: vac-rs/app-server-protocol/src/schema_fixtures.rs
+    line: 117
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.app.server.transport.src.transport.unix.socket.rs.130
+    file: vac-rs/app-server-transport/src/transport/unix_socket.rs
+    line: 130
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.app.server.transport.src.transport.unix.socket.rs.155
+    file: vac-rs/app-server-transport/src/transport/unix_socket.rs
+    line: 155
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.app.server.tests.suite.v2.fs.rs.850
+    file: vac-rs/app-server/tests/suite/v2/fs.rs
+    line: 850
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.arg0.src.lib.rs.429
+    file: vac-rs/arg0/src/lib.rs
+    line: 429
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.src.doctor.cli.rs.1685
+    file: vac-rs/cli/src/doctor_cli.rs
+    line: 1685
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.src.doctor.cli.rs.1733
+    file: vac-rs/cli/src/doctor_cli.rs
+    line: 1733
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.src.doctor.cli.rs.1835
+    file: vac-rs/cli/src/doctor_cli.rs
+    line: 1835
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.src.doctor.cli.rs.1911
+    file: vac-rs/cli/src/doctor_cli.rs
+    line: 1911
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.src.doctor.cli.rs.1991
+    file: vac-rs/cli/src/doctor_cli.rs
+    line: 1991
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.src.doctor.cli.rs.2042
+    file: vac-rs/cli/src/doctor_cli.rs
+    line: 2042
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.src.doctor.cli.rs.2071
+    file: vac-rs/cli/src/doctor_cli.rs
+    line: 2071
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.src.doctor.cli.rs.2089
+    file: vac-rs/cli/src/doctor_cli.rs
+    line: 2089
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.src.doctor.cli.rs.2422
+    file: vac-rs/cli/src/doctor_cli.rs
+    line: 2422
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.src.main.rs.643
+    file: vac-rs/cli/src/main.rs
+    line: 643
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.tests.runtime.owner.gates.rs.121
+    file: vac-rs/cli/tests/runtime_owner_gates.rs
+    line: 121
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.tests.runtime.owner.gates.rs.147
+    file: vac-rs/cli/tests/runtime_owner_gates.rs
+    line: 147
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.tests.runtime.owner.gates.rs.174
+    file: vac-rs/cli/tests/runtime_owner_gates.rs
+    line: 174
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.tests.runtime.owner.gates.rs.191
+    file: vac-rs/cli/tests/runtime_owner_gates.rs
+    line: 191
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.tests.runtime.owner.gates.rs.245
+    file: vac-rs/cli/tests/runtime_owner_gates.rs
+    line: 245
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.tests.runtime.owner.gates.rs.270
+    file: vac-rs/cli/tests/runtime_owner_gates.rs
+    line: 270
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.tests.runtime.owner.gates.rs.295
+    file: vac-rs/cli/tests/runtime_owner_gates.rs
+    line: 295
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.tests.runtime.owner.gates.rs.324
+    file: vac-rs/cli/tests/runtime_owner_gates.rs
+    line: 324
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.tests.runtime.owner.gates.rs.352
+    file: vac-rs/cli/tests/runtime_owner_gates.rs
+    line: 352
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.tests.runtime.owner.gates.rs.390
+    file: vac-rs/cli/tests/runtime_owner_gates.rs
+    line: 390
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.cli.tests.runtime.owner.gates.rs.413
+    file: vac-rs/cli/tests/runtime_owner_gates.rs
+    line: 413
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.config.src.mcp.edit.tests.rs.81
+    file: vac-rs/config/src/mcp_edit_tests.rs
+    line: 81
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.plugins.src.manager.tests.rs.2760
+    file: vac-rs/core-plugins/src/manager_tests.rs
+    line: 2760
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.plugins.src.marketplace.remove.rs.94
+    file: vac-rs/core-plugins/src/marketplace_remove.rs
+    line: 94
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.plugins.src.marketplace.remove.rs.96
+    file: vac-rs/core-plugins/src/marketplace_remove.rs
+    line: 96
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.plugins.src.marketplace.upgrade.activation.rs.113
+    file: vac-rs/core-plugins/src/marketplace_upgrade/activation.rs
+    line: 113
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.plugins.src.marketplace.upgrade.activation.rs.139
+    file: vac-rs/core-plugins/src/marketplace_upgrade/activation.rs
+    line: 139
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.plugins.src.remote.rs.747
+    file: vac-rs/core-plugins/src/remote.rs
+    line: 747
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.plugins.src.remote.rs.749
+    file: vac-rs/core-plugins/src/remote.rs
+    line: 749
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.plugins.src.remote.remote.installed.plugin.sync.rs.332
+    file: vac-rs/core-plugins/src/remote/remote_installed_plugin_sync.rs
+    line: 332
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.plugins.src.remote.remote.installed.plugin.sync.rs.339
+    file: vac-rs/core-plugins/src/remote/remote_installed_plugin_sync.rs
+    line: 339
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.plugins.src.remote.share.local.paths.rs.92
+    file: vac-rs/core-plugins/src/remote/share/local_paths.rs
+    line: 92
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.plugins.src.startup.sync.rs.333
+    file: vac-rs/core-plugins/src/startup_sync.rs
+    line: 333
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.plugins.src.store.rs.248
+    file: vac-rs/core-plugins/src/store.rs
+    line: 248
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.plugins.src.store.rs.252
+    file: vac-rs/core-plugins/src/store.rs
+    line: 252
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.skills.src.system.rs.7
+    file: vac-rs/core-skills/src/system.rs
+    line: 7
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.agent.control.tests.rs.2499
+    file: vac-rs/core/src/agent/control_tests.rs
+    line: 2499
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.approval.store.rs.117
+    file: vac-rs/control-plane/src/control_plane/approval_store.rs
+    line: 117
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.architecture.invariants.rs.1301
+    file: vac-rs/control-plane/src/control_plane/architecture_invariants.rs
+    line: 1301
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.architecture.invariants.rs.1326
+    file: vac-rs/control-plane/src/control_plane/architecture_invariants.rs
+    line: 1326
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.architecture.invariants.rs.1357
+    file: vac-rs/control-plane/src/control_plane/architecture_invariants.rs
+    line: 1357
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.docs.maintenance.rs.459
+    file: vac-rs/control-plane/src/control_plane/docs_maintenance.rs
+    line: 459
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.docs.maintenance.rs.483
+    file: vac-rs/control-plane/src/control_plane/docs_maintenance.rs
+    line: 483
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.donor.status.rs.259
+    file: vac-rs/control-plane/src/control_plane/donor_status.rs
+    line: 259
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.donor.status.rs.307
+    file: vac-rs/control-plane/src/control_plane/donor_status.rs
+    line: 307
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.donor.status.rs.347
+    file: vac-rs/control-plane/src/control_plane/donor_status.rs
+    line: 347
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.donor.status.rs.394
+    file: vac-rs/control-plane/src/control_plane/donor_status.rs
+    line: 394
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.donor.status.rs.436
+    file: vac-rs/control-plane/src/control_plane/donor_status.rs
+    line: 436
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.donor.status.rs.483
+    file: vac-rs/control-plane/src/control_plane/donor_status.rs
+    line: 483
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.vac.init.evidence.writer.rs.265
+    file: vac-rs/control-plane/src/control_plane/vac_init_evidence_writer.rs
+    line: 265
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.vac.init.live.scanner.policy.rs.951
+    file: vac-rs/control-plane/src/control_plane/vac_init_live_scanner_policy.rs
+    line: 951
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.vac.init.live.scanner.policy.rs.1367
+    file: vac-rs/control-plane/src/control_plane/vac_init_live_scanner_policy.rs
+    line: 1367
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.vac.init.live.scanner.policy.rs.1417
+    file: vac-rs/control-plane/src/control_plane/vac_init_live_scanner_policy.rs
+    line: 1417
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.vac.init.live.stores.rs.120
+    file: vac-rs/control-plane/src/control_plane/vac_init_live_stores.rs
+    line: 120
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.vac.init.live.stores.rs.134
+    file: vac-rs/control-plane/src/control_plane/vac_init_live_stores.rs
+    line: 134
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.vac.init.risk.policy.rs.418
+    file: vac-rs/control-plane/src/control_plane/vac_init_risk_policy.rs
+    line: 418
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.vac.init.scanner.policy.hardening.rs.141
+    file: vac-rs/control-plane/src/control_plane/vac_init_scanner_policy_hardening.rs
+    line: 141
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.vac.init.tui.real.data.rs.384
+    file: vac-rs/control-plane/src/control_plane/vac_init_tui_real_data.rs
+    line: 384
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.control.plane.workflow.runner.rs.5175
+    file: vac-rs/control-plane/src/control_plane/workflow_runner.rs
+    line: 5175
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.file.watcher.tests.rs.429
+    file: vac-rs/core/src/file_watcher_tests.rs
+    line: 429
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.project.workspace.rs.1024
+    file: vac-rs/core/src/project_workspace.rs
+    line: 1024
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.project.workspace.rs.1040
+    file: vac-rs/core/src/project_workspace.rs
+    line: 1040
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.project.workspace.rs.1058
+    file: vac-rs/core/src/project_workspace.rs
+    line: 1058
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.project.workspace.rs.1083
+    file: vac-rs/core/src/project_workspace.rs
+    line: 1083
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.project.workspace.rs.1107
+    file: vac-rs/core/src/project_workspace.rs
+    line: 1107
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.project.workspace.rs.1132
+    file: vac-rs/core/src/project_workspace.rs
+    line: 1132
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.project.workspace.rs.1149
+    file: vac-rs/core/src/project_workspace.rs
+    line: 1149
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.project.workspace.rs.1167
+    file: vac-rs/core/src/project_workspace.rs
+    line: 1167
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.project.workspace.rs.1192
+    file: vac-rs/core/src/project_workspace.rs
+    line: 1192
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.project.workspace.rs.1210
+    file: vac-rs/core/src/project_workspace.rs
+    line: 1210
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.project.workspace.rs.1233
+    file: vac-rs/core/src/project_workspace.rs
+    line: 1233
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.project.workspace.rs.1248
+    file: vac-rs/core/src/project_workspace.rs
+    line: 1248
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.project.workspace.rs.1276
+    file: vac-rs/core/src/project_workspace.rs
+    line: 1276
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.project.workspace.rs.1316
+    file: vac-rs/core/src/project_workspace.rs
+    line: 1316
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.project.workspace.rs.1333
+    file: vac-rs/core/src/project_workspace.rs
+    line: 1333
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.project.workspace.rs.1353
+    file: vac-rs/core/src/project_workspace.rs
+    line: 1353
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.project.workspace.rs.1378
+    file: vac-rs/core/src/project_workspace.rs
+    line: 1378
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.session.tests.rs.5976
+    file: vac-rs/core/src/session/tests.rs
+    line: 5976
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.session.tests.rs.6014
+    file: vac-rs/core/src/session/tests.rs
+    line: 6014
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.session.tests.rs.6028
+    file: vac-rs/core/src/session/tests.rs
+    line: 6028
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.shell.snapshot.rs.175
+    file: vac-rs/core/src/shell_snapshot.rs
+    line: 175
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.shell.snapshot.rs.548
+    file: vac-rs/core/src/shell_snapshot.rs
+    line: 548
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.stream.events.utils.tests.rs.216
+    file: vac-rs/core/src/stream_events_utils_tests.rs
+    line: 216
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.stream.events.utils.tests.rs.224
+    file: vac-rs/core/src/stream_events_utils_tests.rs
+    line: 224
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.stream.events.utils.tests.rs.258
+    file: vac-rs/core/src/stream_events_utils_tests.rs
+    line: 258
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.stream.events.utils.tests.rs.266
+    file: vac-rs/core/src/stream_events_utils_tests.rs
+    line: 266
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.stream.events.utils.tests.rs.274
+    file: vac-rs/core/src/stream_events_utils_tests.rs
+    line: 274
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.thread.manager.rs.103
+    file: vac-rs/core/src/thread_manager.rs
+    line: 103
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.turn.diff.tracker.tests.rs.123
+    file: vac-rs/core/src/turn_diff_tracker_tests.rs
+    line: 123
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.src.turn.diff.tracker.tests.rs.290
+    file: vac-rs/core/src/turn_diff_tracker_tests.rs
+    line: 290
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.approvals.rs.144
+    file: vac-rs/core/tests/suite/approvals.rs
+    line: 144
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.approvals.rs.264
+    file: vac-rs/core/tests/suite/approvals.rs
+    line: 264
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.approvals.rs.270
+    file: vac-rs/core/tests/suite/approvals.rs
+    line: 270
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.approvals.rs.414
+    file: vac-rs/core/tests/suite/approvals.rs
+    line: 414
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.approvals.rs.432
+    file: vac-rs/core/tests/suite/approvals.rs
+    line: 432
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.approvals.rs.456
+    file: vac-rs/core/tests/suite/approvals.rs
+    line: 456
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.approvals.rs.2014
+    file: vac-rs/core/tests/suite/approvals.rs
+    line: 2014
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.approvals.rs.2101
+    file: vac-rs/core/tests/suite/approvals.rs
+    line: 2101
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.approvals.rs.2121
+    file: vac-rs/core/tests/suite/approvals.rs
+    line: 2121
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.approvals.rs.2305
+    file: vac-rs/core/tests/suite/approvals.rs
+    line: 2305
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.approvals.rs.2444
+    file: vac-rs/core/tests/suite/approvals.rs
+    line: 2444
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.approvals.rs.2488
+    file: vac-rs/core/tests/suite/approvals.rs
+    line: 2488
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.hooks.rs.1567
+    file: vac-rs/core/tests/suite/hooks.rs
+    line: 1567
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.hooks.rs.1640
+    file: vac-rs/core/tests/suite/hooks.rs
+    line: 1640
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.hooks.rs.1804
+    file: vac-rs/core/tests/suite/hooks.rs
+    line: 1804
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.hooks.rs.1884
+    file: vac-rs/core/tests/suite/hooks.rs
+    line: 1884
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.hooks.rs.2073
+    file: vac-rs/core/tests/suite/hooks.rs
+    line: 2073
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.hooks.rs.2169
+    file: vac-rs/core/tests/suite/hooks.rs
+    line: 2169
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.items.rs.347
+    file: vac-rs/core/tests/suite/items.rs
+    line: 347
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.items.rs.388
+    file: vac-rs/core/tests/suite/items.rs
+    line: 388
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.items.rs.410
+    file: vac-rs/core/tests/suite/items.rs
+    line: 410
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.model.switching.rs.490
+    file: vac-rs/core/tests/suite/model_switching.rs
+    line: 490
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.model.switching.rs.547
+    file: vac-rs/core/tests/suite/model_switching.rs
+    line: 547
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.model.switching.rs.604
+    file: vac-rs/core/tests/suite/model_switching.rs
+    line: 604
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.model.switching.rs.671
+    file: vac-rs/core/tests/suite/model_switching.rs
+    line: 671
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.model.switching.rs.720
+    file: vac-rs/core/tests/suite/model_switching.rs
+    line: 720
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.model.switching.rs.777
+    file: vac-rs/core/tests/suite/model_switching.rs
+    line: 777
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.request.permissions.rs.340
+    file: vac-rs/core/tests/suite/request_permissions.rs
+    line: 340
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.request.permissions.rs.522
+    file: vac-rs/core/tests/suite/request_permissions.rs
+    line: 522
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.request.permissions.rs.623
+    file: vac-rs/core/tests/suite/request_permissions.rs
+    line: 623
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.request.permissions.rs.624
+    file: vac-rs/core/tests/suite/request_permissions.rs
+    line: 624
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.request.permissions.rs.690
+    file: vac-rs/core/tests/suite/request_permissions.rs
+    line: 690
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.request.permissions.rs.691
+    file: vac-rs/core/tests/suite/request_permissions.rs
+    line: 691
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.request.permissions.rs.726
+    file: vac-rs/core/tests/suite/request_permissions.rs
+    line: 726
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.request.permissions.rs.727
+    file: vac-rs/core/tests/suite/request_permissions.rs
+    line: 727
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.request.permissions.rs.793
+    file: vac-rs/core/tests/suite/request_permissions.rs
+    line: 793
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.request.permissions.rs.794
+    file: vac-rs/core/tests/suite/request_permissions.rs
+    line: 794
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.request.permissions.rs.827
+    file: vac-rs/core/tests/suite/request_permissions.rs
+    line: 827
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.request.permissions.rs.828
+    file: vac-rs/core/tests/suite/request_permissions.rs
+    line: 828
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.request.permissions.rs.901
+    file: vac-rs/core/tests/suite/request_permissions.rs
+    line: 901
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.request.permissions.rs.902
+    file: vac-rs/core/tests/suite/request_permissions.rs
+    line: 902
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.request.permissions.rs.932
+    file: vac-rs/core/tests/suite/request_permissions.rs
+    line: 932
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.request.permissions.rs.1007
+    file: vac-rs/core/tests/suite/request_permissions.rs
+    line: 1007
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.skill.approval.rs.174
+    file: vac-rs/core/tests/suite/skill_approval.rs
+    line: 174
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.skill.approval.rs.243
+    file: vac-rs/core/tests/suite/skill_approval.rs
+    line: 243
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.core.tests.suite.skill.approval.rs.250
+    file: vac-rs/core/tests/suite/skill_approval.rs
+    line: 250
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_test
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.exec.server.src.local.file.system.rs.332
+    file: vac-rs/exec-server/src/local_file_system.rs
+    line: 332
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.exec.server.src.local.file.system.rs.337
+    file: vac-rs/exec-server/src/local_file_system.rs
+    line: 337
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.feedback.src.lib.rs.745
+    file: vac-rs/feedback/src/lib.rs
+    line: 745
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.git.utils.src.baseline.rs.131
+    file: vac-rs/git-utils/src/baseline.rs
+    line: 131
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.git.utils.src.baseline.rs.133
+    file: vac-rs/git-utils/src/baseline.rs
+    line: 133
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.git.utils.src.baseline.rs.602
+    file: vac-rs/git-utils/src/baseline.rs
+    line: 602
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.hooks.src.schema.rs.470
+    file: vac-rs/hooks/src/schema.rs
+    line: 470
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.linux.sandbox.src.linux.run.main.rs.1001
+    file: vac-rs/linux-sandbox/src/linux_run_main.rs
+    line: 1001
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.linux.sandbox.src.linux.run.main.rs.1022
+    file: vac-rs/linux-sandbox/src/linux_run_main.rs
+    line: 1022
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.linux.sandbox.src.linux.run.main.rs.1053
+    file: vac-rs/linux-sandbox/src/linux_run_main.rs
+    line: 1053
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.linux.sandbox.src.linux.run.main.rs.1135
+    file: vac-rs/linux-sandbox/src/linux_run_main.rs
+    line: 1135
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.linux.sandbox.src.linux.run.main.rs.1137
+    file: vac-rs/linux-sandbox/src/linux_run_main.rs
+    line: 1137
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.linux.sandbox.src.linux.run.main.rs.1165
+    file: vac-rs/linux-sandbox/src/linux_run_main.rs
+    line: 1165
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.linux.sandbox.src.linux.run.main.tests.rs.314
+    file: vac-rs/linux-sandbox/src/linux_run_main_tests.rs
+    line: 314
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.linux.sandbox.src.linux.run.main.tests.rs.339
+    file: vac-rs/linux-sandbox/src/linux_run_main_tests.rs
+    line: 339
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.linux.sandbox.src.linux.run.main.tests.rs.394
+    file: vac-rs/linux-sandbox/src/linux_run_main_tests.rs
+    line: 394
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.linux.sandbox.src.proxy.routing.rs.405
+    file: vac-rs/linux-sandbox/src/proxy_routing.rs
+    line: 405
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.linux.sandbox.src.proxy.routing.rs.412
+    file: vac-rs/linux-sandbox/src/proxy_routing.rs
+    line: 412
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.linux.sandbox.src.proxy.routing.rs.455
+    file: vac-rs/linux-sandbox/src/proxy_routing.rs
+    line: 455
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.login.src.auth.storage.rs.90
+    file: vac-rs/login/src/auth/storage.rs
+    line: 90
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.memories.write.src.control.rs.37
+    file: vac-rs/memories/write/src/control.rs
+    line: 37
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.memories.write.src.control.rs.39
+    file: vac-rs/memories/write/src/control.rs
+    line: 39
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.memories.write.src.extensions.prune.rs.78
+    file: vac-rs/memories/write/src/extensions/prune.rs
+    line: 78
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.memories.write.src.storage.rs.97
+    file: vac-rs/memories/write/src/storage.rs
+    line: 97
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.memories.write.src.workspace.rs.55
+    file: vac-rs/memories/write/src/workspace.rs
+    line: 55
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.network.proxy.src.certs.rs.148
+    file: vac-rs/network-proxy/src/certs.rs
+    line: 148
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.network.proxy.src.certs.rs.201
+    file: vac-rs/network-proxy/src/certs.rs
+    line: 201
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.network.proxy.src.certs.rs.205
+    file: vac-rs/network-proxy/src/certs.rs
+    line: 205
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.network.proxy.src.certs.rs.216
+    file: vac-rs/network-proxy/src/certs.rs
+    line: 216
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.rmcp.client.src.oauth.rs.561
+    file: vac-rs/rmcp-client/src/oauth.rs
+    line: 561
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.rollout.src.recorder.tests.rs.346
+    file: vac-rs/rollout/src/recorder_tests.rs
+    line: 346
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.runtime.protocol.src.export.rs.588
+    file: vac-rs/runtime-protocol/src/export.rs
+    line: 588
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.runtime.protocol.src.export.rs.2387
+    file: vac-rs/runtime-protocol/src/export.rs
+    line: 2387
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.runtime.protocol.src.export.rs.2661
+    file: vac-rs/runtime-protocol/src/export.rs
+    line: 2661
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.runtime.protocol.src.export.rs.2700
+    file: vac-rs/runtime-protocol/src/export.rs
+    line: 2700
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.runtime.protocol.src.export.rs.2743
+    file: vac-rs/runtime-protocol/src/export.rs
+    line: 2743
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.runtime.protocol.src.export.rs.2818
+    file: vac-rs/runtime-protocol/src/export.rs
+    line: 2818
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.runtime.protocol.src.export.rs.2940
+    file: vac-rs/runtime-protocol/src/export.rs
+    line: 2940
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.runtime.protocol.src.schema.fixtures.rs.117
+    file: vac-rs/runtime-protocol/src/schema_fixtures.rs
+    line: 117
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.secrets.src.local.rs.244
+    file: vac-rs/secrets/src/local.rs
+    line: 244
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.secrets.src.local.rs.261
+    file: vac-rs/secrets/src/local.rs
+    line: 261
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.skills.src.lib.rs.46
+    file: vac-rs/skills/src/lib.rs
+    line: 46
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.log.db.rs.602
+    file: vac-rs/state/src/log_db.rs
+    line: 602
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.log.db.rs.633
+    file: vac-rs/state/src/log_db.rs
+    line: 633
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.log.db.rs.682
+    file: vac-rs/state/src/log_db.rs
+    line: 682
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.log.db.rs.715
+    file: vac-rs/state/src/log_db.rs
+    line: 715
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.rs.270
+    file: vac-rs/state/src/runtime.rs
+    line: 270
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.rs.276
+    file: vac-rs/state/src/runtime.rs
+    line: 276
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.rs.380
+    file: vac-rs/state/src/runtime.rs
+    line: 380
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.backfill.rs.204
+    file: vac-rs/state/src/runtime/backfill.rs
+    line: 204
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.backfill.rs.257
+    file: vac-rs/state/src/runtime/backfill.rs
+    line: 257
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.backfill.rs.309
+    file: vac-rs/state/src/runtime/backfill.rs
+    line: 309
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.device.key.tests.rs.48
+    file: vac-rs/state/src/runtime/device_key_tests.rs
+    line: 48
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.device.key.tests.rs.88
+    file: vac-rs/state/src/runtime/device_key_tests.rs
+    line: 88
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.601
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 601
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.698
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 698
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.759
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 759
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.777
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 777
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.856
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 856
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.941
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 941
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.995
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 995
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.1033
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 1033
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.1102
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 1102
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.1140
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 1140
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.1208
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 1208
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.1246
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 1246
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.1289
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 1289
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.1336
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 1336
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.1383
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 1383
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.1453
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 1453
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.1503
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 1503
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.1601
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 1601
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.1699
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 1699
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.1774
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 1774
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.1894
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 1894
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.logs.rs.1911
+    file: vac-rs/state/src/runtime/logs.rs
+    line: 1911
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.1372
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 1372
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.1427
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 1427
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.1495
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 1495
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.1563
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 1563
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.1652
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 1652
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.1747
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 1747
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.1818
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 1818
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.1927
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 1927
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.2051
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 2051
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.2135
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 2135
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.2205
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 2205
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.2280
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 2280
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.2405
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 2405
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.2501
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 2501
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.2563
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 2563
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.2633
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 2633
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.2736
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 2736
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.2805
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 2805
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.2873
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 2873
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.2988
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 2988
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.3081
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 3081
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.3170
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 3170
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.3289
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 3289
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.3432
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 3432
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.3582
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 3582
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.3702
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 3702
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.3821
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 3821
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.3917
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 3917
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.4013
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 4013
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.4099
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 4099
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.4241
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 4241
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.4319
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 4319
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.4414
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 4414
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.4447
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 4447
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.4497
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 4497
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.4572
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 4572
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.4636
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 4636
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.memories.rs.4700
+    file: vac-rs/state/src/runtime/memories.rs
+    line: 4700
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.remote.control.rs.204
+    file: vac-rs/state/src/runtime/remote_control.rs
+    line: 204
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.state.src.runtime.remote.control.rs.281
+    file: vac-rs/state/src/runtime/remote_control.rs
+    line: 281
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.tui.src.workflow.browser.rs.1399
+    file: vac-rs/tui/src/workflow_browser.rs
+    line: 1399
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.windows.sandbox.rs.src.env.rs.167
+    file: vac-rs/windows-sandbox-rs/src/env.rs
+    line: 167
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.windows.sandbox.rs.src.helper.materialization.rs.300
+    file: vac-rs/windows-sandbox-rs/src/helper_materialization.rs
+    line: 300
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.windows.sandbox.rs.src.setup.error.rs.156
+    file: vac-rs/windows-sandbox-rs/src/setup_error.rs
+    line: 156
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.windows.sandbox.rs.src.setup.main.win.rs.887
+    file: vac-rs/windows-sandbox-rs/src/setup_main_win.rs
+    line: 887
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []
+  - id: finding.live-init.vac.rs.windows.sandbox.rs.src.unified.exec.tests.rs.66
+    file: vac-rs/windows-sandbox-rs/src/unified_exec/tests.rs
+    line: 66
+    pattern: remove_file/remove_dir_all
+    inferred_risk: filesystem_delete
+    scope: product_runtime
+    ownership:
+      status: not_evaluated
+      capability: null
+      quarantine: none
+      reason: "ownership report is missing or seed/unpopulated; scanner does not fake ownership coverage"
+    confidence: 0.78
+    confidence_label: high
+    method: ast_exact
+    ambiguous: false
+    alternatives: []

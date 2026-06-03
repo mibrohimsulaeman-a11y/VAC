@@ -1,0 +1,57 @@
+schema_version: 1
+kind: static_validation_ledger
+id: o5o6.zero_residual.static_only.continuation
+updated_at: 2026-06-02T00:00:00Z
+mode: static_only_no_cargo_no_toolchain
+status: pass
+cargo_status: TV-Pending
+notes:
+  - cargo/check/test/clippy/benchmark intentionally not executed in this static-only continuation per user instruction.
+  - aggregate gates consume this ledger to avoid repeatedly re-running expensive historical scans.
+passed_scripts:
+  - scripts/check-vac-o5o6-zero-residual-static.sh
+  - scripts/check-vac-o5o6-actual-code-closure-static.sh
+  - scripts/check-vac-o5o6-continuation-blueprint-static.sh
+  - scripts/check-vac-layering-migration-static.sh
+  - scripts/check-vac-provider-prune-default-off-static.sh
+  - scripts/check-vac-source-artifact-packaging-gate.sh
+  - scripts/check-vac-o5o6-blueprint-all-static.sh
+  - scripts/check-vac-o5o6-cleanup-compile-surface-static.sh
+  - scripts/check-vac-o5o6-big-refactor-static.sh
+  - scripts/check-vac-o5o6-architecture-extraction-static.sh
+  - scripts/check-vac-o5o6-bounded-hotpath-static.sh
+  - scripts/check-vac-o5o6-cloud-coupling-isolation-static.sh
+  - scripts/check-vac-standard-cargo-hygiene-static.sh
+  - scripts/check-vac-technical-debt-markers-static.sh
+  - scripts/check-vac-o5o6-audit-remainder-static.sh
+  - scripts/check-vac-o5o6-current-auditfix-static.sh
+  - scripts/check-vac-regen-control-plane-projection.sh
+  - scripts/check-vac-tui-perf-ux-findings-static.sh
+  - scripts/check-vac-o5o6-three-audit-findings-static.sh
+  - scripts/check-vac-tui-init-no-interactive-static.sh
+  - scripts/check-vac-o5-o6-monolith-quality-slice.sh
+  - scripts/check-tui-source-artifact-hygiene.sh
+  - scripts/check-vac-o5-2-semantic-split-hash.sh
+  - scripts/check-vac-o5-2-godfile-staging-all.sh
+  - scripts/check-vac-f5-protocol-duplication.sh
+  - scripts/check-vac-o5-5-donor-delete-gate.sh
+  - scripts/check-vac-o6-2-safety-coverage.sh
+  - scripts/check-vac-o6-quality-triage.sh
+  - scripts/check-vac-runtime-engine-wiring-static.sh
+  - scripts/check-vac-runtime-agent-flow-fix-static.sh
+  - scripts/check-vac-tui-visual-parity-static.sh
+  - scripts/check-vac-tui-local-tool-cleanup-static.sh
+  - scripts/check-vac-control-plane-audit-findings-static.sh
+  - scripts/check-vac-init-gap-bc-depth-static.sh
+  - scripts/check-vac-init-remaining-audit-gaps-static.sh
+known_static_residuals: []
+tv_pending:
+  - cargo check
+  - cargo test
+  - cargo clippy
+  - real TUI benchmark
+not_evaluated:
+  - cargo_gates
+  - test_gates
+  - clippy_gates
+  - benchmark_gates

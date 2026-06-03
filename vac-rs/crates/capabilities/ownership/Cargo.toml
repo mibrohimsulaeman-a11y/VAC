@@ -1,0 +1,12 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "vac-capability-ownership"
+version.workspace = true
+
+[lib]
+name = "vac_capability_ownership"
+path = "src/lib.rs"
+
+[lints]
+workspace = true

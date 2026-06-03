@@ -1,0 +1,65 @@
+schema_version: 1
+kind: capability
+id: vac.init.fixtures-security-regression
+title: VAC-Init Fixture Matrix and Security Regression
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane::vac_init_fixture_security_regression
+ownership:
+  crates:
+  - vac-core
+  modules:
+  - control_plane::vac_init_fixture_security_regression
+  targets:
+  - kind: module
+    crate: vac-core
+    module: control_plane::vac_init_fixture_security_regression
+  - kind: path
+    include:
+    - vac-rs/control-plane/src/control_plane/vac_init_fixture_security_regression.rs
+    - scripts/check-vac-init-fixtures-security-regression-contract.sh
+    - .vac/capabilities/fixtures-security-regression.yaml
+    - .vac/workflows/maintenance.fixtures-security-regression.yaml
+    - docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_G_FIXTURES_SECURITY.md
+    - docs/validation/PRODUCTION_HARDENING_G1_G3_VALIDATION.md
+    exclude: []
+description: Production hardening contract for VAC-Init Fixture Matrix and Security Regression.
+depends_on:
+- vac.init.runtime-gate-enforcement
+- vac.init.registry-strictness
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - bash scripts/check-vac-init-fixtures-security-regression-contract.sh
+    - vac doctor release .
+  palette: true
+  tui:
+    routes:
+    - /capabilities
+    - /runtime
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for: []
+states:
+- empty
+- loading
+- success
+- failure
+validation:
+  gates:
+  - fixtures_security_regression
+  commands:
+  - id: vac.init.fixtures-security-regression.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-fixtures-security-regression-contract.sh
+    risk: execute_process
+    approval: policy
+docs:
+- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_G_FIXTURES_SECURITY.md
+- docs/validation/PRODUCTION_HARDENING_G1_G3_VALIDATION.md

@@ -1,0 +1,174 @@
+schema_version: 1
+kind: plan
+id: plan.o5o6.runtime-agent-flow-followup
+status: implemented_static
+updated_at: '2026-06-01T00:00:00Z'
+title: O5/O6 runtime agent flow follow-up hardening
+summary: >
+  Follow-up hardening after the first runtime agent-flow fix: remove a
+  compile-level duplicate plan_type field, make the critical owner-runtime
+  support guard non-no-op, fail-close Plan Mode on an explicit active semantic
+  plan, validate that active plan as part of the static gate, and keep the
+  aggregate audit gate fast by reusing the dedicated O6.1 scanner result instead
+  of rescanning multiple times.
+task:
+  description: >
+    Enforce the user's single-path requirement for Plan Mode by making runtime
+    Plan Mode require .vac/registry/runtime/active_plan.yaml and by keeping that
+    active plan valid under the same shared vac plan validate engine used by the
+    CLI. Re-pin O6.1 after adding the active runtime plan file and optimize the
+    aggregate gate without hiding the dedicated scanner gate.
+  capability: vac.local_runtime_owner
+allowed_files:
+  - path: vac-rs/tui/src/runtime_owner_session.rs
+    operation: modify
+    ownership: vac.local_runtime_owner
+    semantic_anchor:
+      kind: runtime_session
+      symbol: OwnerNativeSession.plan_mode_active_plan_gate
+    rationale: Remove duplicate bootstrap field, add non-no-op critical method support guard, and require active runtime semantic plan.
+  - path: .vac/registry/plans/plan.o5o6.runtime-agent-flow-fix.yaml
+    operation: modify
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: semantic_plan
+      symbol: plan.o5o6.runtime-agent-flow-fix.bounds
+    rationale: Add active_plan.yaml to the declared plan scope and make new-file bounds match declared creates.
+  - path: .vac/registry/runtime/active_plan.yaml
+    operation: modify
+    ownership: vac.runtime.plan
+    semantic_anchor:
+      kind: runtime_active_plan
+      symbol: plan.o5o6.runtime-agent-flow-followup.active
+    rationale: Provide the canonical active semantic plan consumed by runtime Plan Mode before turn execution.
+  - path: scripts/check-vac-runtime-agent-flow-fix-static.sh
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: script
+      symbol: runtime_agent_flow_static_gate.active_plan
+    rationale: Reject no-op owner runtime support guards and validate the active runtime plan bounds.
+  - path: .vac/registry/o6-panic-surface.yaml
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: registry
+      symbol: o6_panic_surface.runtime_files_scanned
+    rationale: Re-pin the O6.1 source scanner after adding one runtime registry file.
+  - path: scripts/check-vac-o6-1-depanic-surface.sh
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: script
+      symbol: o6_1_skip_rescan_aggregate_mode
+    rationale: Allow aggregate gates to reuse the dedicated scanner result while the standalone O6.1 gate still rescans.
+  - path: scripts/check-vac-o5o6-all-audit-remainder.sh
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: script
+      symbol: all_audit_remainder_skip_rescan
+    rationale: Avoid duplicate O6.1 rescans inside aggregate audit gates to prevent sandbox timeouts.
+  - path: scripts/check-vac-init-registry-strictness-contract.sh
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: script
+      symbol: registry_strictness_skip_generated_risk_findings
+    rationale: Keep registry strictness source/static validation bounded by excluding generated scanner risk-finding payloads owned by scanner gates.
+  - path: .vac/registry/plans/plan.o5o6.runtime-agent-flow-followup.yaml
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: semantic_plan
+      symbol: plan.o5o6.runtime-agent-flow-followup
+    rationale: Record this bounded follow-up slice as a semantic plan.
+  - path: .vac/registry/evidence/evidence.2026-06-01-o5o6-runtime-agent-flow-followup.yaml
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: evidence
+      symbol: evidence.2026-06-01-o5o6-runtime-agent-flow-followup
+    rationale: Record source/static evidence for the follow-up slice.
+  - path: .vac/registry/trajectory/o5o6-runtime-agent-flow-followup.yaml
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: trajectory
+      symbol: trajectory.o5o6-runtime-agent-flow-followup
+    rationale: Record safe rationale trajectory for follow-up changes.
+  - path: .vac/registry/trajectory/index.yaml
+    operation: modify
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: trajectory_index
+      symbol: evidence.2026-06-01-o5o6-runtime-agent-flow-followup
+    rationale: Add the follow-up evidence entry to safe rationale lookup.
+  - path: .vac/registry/compile-debt-ledger.yaml
+    operation: modify
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: compile_debt
+      symbol: O5O6-runtime-agent-flow-followup-2026-06-01
+    rationale: Keep cargo/live verification debt explicit because this sandbox has no Rust toolchain.
+  - path: docs/monolith-quality/O5O6_RUNTIME_AGENT_FLOW_FOLLOWUP_REPORT.md
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: report
+      symbol: runtime_agent_flow_followup_report
+    rationale: Document root cause, impact, gates, and remaining TV-Pending work.
+bounds:
+  max_patches: 21
+  max_new_files: 4
+  max_line_delta: 3200
+  timeout_seconds: 1800
+validation:
+  commands:
+    - id: vac.runtime.agent.flow.followup.static
+      runner: bash
+      args:
+        - scripts/check-vac-runtime-agent-flow-fix-static.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.o6.one.depanic.surface
+      runner: bash
+      args:
+        - scripts/check-vac-o6-1-depanic-surface.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.o5o6.all.audit.remainder
+      runner: bash
+      args:
+        - scripts/check-vac-o5o6-all-audit-remainder.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.init.runtime.gate.callsite
+      runner: bash
+      args:
+        - scripts/check-vac-init-runtime-gate-callsite-integration.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.runtime.engine.wiring.static
+      runner: bash
+      args:
+        - scripts/check-vac-runtime-engine-wiring-static.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+approval:
+  required: false
+truth:
+  sv_status: SV-Done
+  tv_status: TV-Pending
+  tv_pending:
+    - cargo check --manifest-path vac-rs/Cargo.toml -p vac-surface-tui
+    - cargo check --manifest-path vac-rs/Cargo.toml -p vac-surface-cli
+    - cargo test --manifest-path vac-rs/Cargo.toml -p vac-surface-tui runtime_owner_session
+    - live interactive vac smoke: start thread, one default turn, one plan-mode gated turn
+    - live command policy/evidence positive and negative tests
+    - full registry validator run with Rust toolchain available

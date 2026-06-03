@@ -1,0 +1,16 @@
+schema_version: 1
+kind: init_state
+id: vac.init.state
+generated_at: '2026-06-01T22:58:00Z'
+status: ready
+source_inventory: .vac/.init/source_inventory.yaml
+scan_report: .vac/.init/scan_report.yaml
+risk_findings: .vac/.init/risk_findings/index.yaml
+protected_buckets:
+  - .vac/registry/evidence
+  - .vac/registry/plans
+  - .vac/registry/trajectory
+  - .vac/registry/migrations
+  - .vac/registry/approvals
+  - docs/architecture/adr
+  - docs/architecture/decisions

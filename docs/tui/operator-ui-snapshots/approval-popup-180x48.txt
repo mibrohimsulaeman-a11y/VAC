@@ -1,0 +1,52 @@
+# VAC operator TUI snapshot
+scenario: destructive bash approval
+viewport: 180x48
+---
+● ● ●  vac · interactive — destructive bash                                                                                                                                         
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+[chat] · runtime · review · workbench · mcp                                                                                                                                 tab 1/5 
+                                                                                                                                                                                    
+cargo check  passed · 2 warnings                                                                                                                                                    
+                                                                                                                                                                                    
+┌─ approval required ───────────────────────────────────────────────────────────────────────────────────────────────────                                                            
+│ approval required                                                                                                    │                                                            
+│ BASH the agent wants to run a shell command                                                                          │                                                            
+│                                                                                                                      │                                                            
+│ $ rm -rf target/debug/incremental                                                                                    │                                                            
+│ cwd ~/code/vastar/vac                                                                                                │                                                            
+│ context runtime host · network inherit · writes allowed                                                              │                                                            
+│ risk DESTRUCTIVE recursive delete · no restore snapshot                                                              │                                                            
+│ policy policy-gated approval queue · vil.core → shell.destructive requires explicit approval                         │                                                            
+│                                                                                                                      │                                                            
+│ y approve once a approve+remember n reject r reject with reason                                                      │                                                            
+│ batch 1/2 — next: file_edit handlers/input.rs                                                                        │                                                            
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘                                                            
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+                                                                                                                                                                                    
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ ▸  / commands   @ files   shift+tab plan   ctrl+j newline                                                                                                                        │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+CONVERSATION | model claude-sonnet-4.5 | 68,240 tok | manual | valid 92% | lsp E0 W3 | profile default · rulebook vil.core                                                          

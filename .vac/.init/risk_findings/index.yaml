@@ -1,0 +1,11 @@
+schema_version: 1
+kind: risk_finding
+id: vac.init.risk_findings.index
+generated_at: '2026-06-01T22:58:00Z'
+summary:
+  chatgpt: 1308
+  expect: 9221
+  panic: 1199
+  unbounded_channel: 364
+  unwrap: 2381
+  files_with_hits: 732

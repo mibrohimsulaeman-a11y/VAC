@@ -1,0 +1,14 @@
+schema_version: 1
+kind: evidence
+id: evidence.2026-06-02-o5o6-actual-code-closure
+summary: actual-code closure implementation for latest O5/O6 continuation blueprint
+status: SV-Done-static
+validation:
+  - scripts/check-vac-o5o6-actual-code-closure-static.sh
+  - scripts/check-vac-provider-prune-default-off-static.sh
+  - scripts/check-vac-layering-migration-static.sh
+television_pending:
+  - cargo check
+  - cargo test
+  - cargo clippy
+  - benchmark timings

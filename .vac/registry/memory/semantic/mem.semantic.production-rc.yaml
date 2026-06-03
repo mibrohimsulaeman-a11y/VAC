@@ -1,0 +1,24 @@
+schema_version: 1
+kind: memory_record
+tier: semantic
+id: mem.semantic.production-rc
+created_at: '2026-05-29T00:00:00Z'
+expires_at: null
+source: operator
+content:
+  type: concept
+  text: VAC-Init production RC uses strict manifests, structured commands, runtime gates, and durable evidence stores.
+  structured: {}
+  references:
+    files: []
+    capabilities:
+    - vac.init.production-rc
+    evidence: []
+access:
+  readable_by:
+  - agent
+  - operator
+  writable_by:
+  - controlled_updater
+  deletable_by:
+  - operator

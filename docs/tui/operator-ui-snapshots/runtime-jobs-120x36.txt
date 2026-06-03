@@ -1,0 +1,40 @@
+# VAC operator TUI snapshot
+scenario: runtime jobs
+viewport: 120x36
+---
+● ● ●  vac · interactive — runtime jobs                                                                                 
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+chat · [runtime] · review · workbench · mcp                                                                     tab 2/5 
+autopilot ● running   pid 48213   uptime 2h 14m   mode monitor-only   env host   ·   queue 3   ·   running 1            
+                                                                                                                        
+  state      kind       id       trigger                            age          next-run                               
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────              
+● running    oneshot    7c0f1a   refactor handlers/input.rs         00:04:18     —                                      
+○ queued     cron       b82d4e   0 */6 * * * · validate             00:00:42     in 3h 41m                              
+○ queued     filewatch  f19ac3   crates/vil_llm/**/*.rs             00:12:06     on write                               
+● ok         oneshot    2e8b71   bump dependencies                  01:22:41     —                                      
+● ok         cron       a4d90e   @hourly · mutation gate            00:18:11     in 41m                                 
+● failed     oneshot    9aa0c2   knowledge loader: reindex          02:01:55     —                                      
+○ cancel     oneshot    0b7411   refactor vil_swarm tool            yesterday    —                                      
+                                                                                                                        
+┌─ inspect 7c0f1a ──────────────────────────────────────────────────────────────────────────────────────────            
+│ task graph [plan→read→write→edit→check→done] node 3/6 · 62%                                              │            
+│ tokens 68,240 / 200k ████░░░░░░░░ spend $0.142 retry 0/3                                                 │            
+│ c cancel r retry i open in editor enter attach                                                           │            
+│ policy: monitor-only scheduler; actions policy-gated; destructive tasks require approval gates           │            
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────┘            
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ ▸  runtime jobs monitor — c cancel · r retry · enter attach                                                          │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+WORKBENCH | model claude-sonnet-4.5 | 68,240 tok | manual | valid 92% | lsp E0 W3 | profile default · rulebook vil.core 

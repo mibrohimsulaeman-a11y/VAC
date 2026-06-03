@@ -1,0 +1,28 @@
+schema_version: 1
+kind: test_fixture
+id: fixture.migration.runtime-depth-matrix
+title: VAC-Init migration runtime depth matrix
+status: ready
+required_actions:
+  - AddField
+  - RemoveField
+  - RenameField
+  - ChangeKind
+  - ChangeId
+  - ChangeType
+  - VersionBump
+required_runtime_behaviors:
+  - dry_run_plan
+  - apply_plan
+  - rollback_plan
+  - reversible_action_pair_validation
+  - registry_doctor_verification
+  - yaml_text_transform
+required_failure_modes:
+  - InvalidVersionOrder
+  - MissingRollback
+  - VerificationMustRunRegistryDoctor
+  - RollbackMismatch
+  - TextPatternMissing
+validation:
+  source: vac-rs/core/src/control_plane/vac_init_migration_runtime.rs

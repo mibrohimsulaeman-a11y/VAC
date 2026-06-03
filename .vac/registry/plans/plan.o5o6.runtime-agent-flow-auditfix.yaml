@@ -1,0 +1,185 @@
+schema_version: 1
+kind: plan
+id: plan.o5o6.runtime-agent-flow-auditfix
+status: implemented_static
+updated_at: '2026-06-01T00:00:00Z'
+title: O5/O6 runtime agent flow auditfix hardening
+summary: >
+  Harden the remaining runtime-agent-flow audit findings after the follow-up
+  slice: structural owner-native support gating, Tier-2 thread read/list/resume
+  and branch routing, Plan Mode pre/post semantic validation, de-brittled
+  init-doctor readiness, and command gate/evidence verification anchors.
+task:
+  description: >
+    Implement every remaining finding from the latest runtime audit while
+    preserving the user's single-path decision: runtime Plan Mode must use the
+    same semantic plan validation engine as vac plan validate, with no separate
+    capability path.
+  capability: vac.local_runtime_owner
+allowed_files:
+  - path: vac-rs/tui/src/runtime_owner_session.rs
+    operation: modify
+    ownership: vac.local_runtime_owner
+    semantic_anchor:
+      kind: runtime_session
+      symbol: OwnerNativeSession.tier2_thread_store_and_plan_completion_gate
+    rationale: Route thread list/read/resume/branch through ThreadStore and ThreadManager, keep Plan Mode pre-gate, and add a static completion gate after turn submission.
+  - path: vac-rs/cli/src/init_cli.rs
+    operation: modify
+    ownership: vac.init.lifecycle
+    semantic_anchor:
+      kind: init_doctor
+      symbol: build_init_doctor_report.owner_native_support_manifest
+    rationale: Replace brittle runtime-owner source text scans with the structural owner-native support manifest consumed by init doctor.
+  - path: vac-rs/cli/src/doctor/runtime_owner_gates.rs
+    operation: modify
+    ownership: vac.local_runtime_owner
+    semantic_anchor:
+      kind: doctor_gate
+      symbol: validate_owner_native_support_manifest
+    rationale: Cross-check the owner-native support manifest, critical method status, and unsupported regression anchors structurally.
+  - path: .vac/registry/runtime/owner-native-support.yaml
+    operation: create
+    ownership: vac.local_runtime_owner
+    semantic_anchor:
+      kind: runtime_owner_support
+      symbol: runtime.owner_native_support
+    rationale: Provide the structural support contract used by init doctor and runtime-owner doctor gates instead of source-text readiness inference.
+  - path: .vac/capabilities/local_runtime_owner.yaml
+    operation: modify
+    ownership: vac.local_runtime_owner
+    semantic_anchor:
+      kind: capability_manifest
+      symbol: vac.local_runtime_owner.runtime_support
+    rationale: Register the runtime support manifest and structural gate for local runtime owner readiness.
+  - path: scripts/check-vac-runtime-agent-flow-fix-static.sh
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: script
+      symbol: runtime_agent_flow_static_gate.auditfix
+    rationale: Reject critical unsupported regressions, require Tier-2 owner-native method anchors, require Plan Mode completion gate, and validate the support manifest.
+  - path: scripts/check-vac-init-registry-strictness-contract.sh
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: script
+      symbol: registry_strictness.runtime_owner_support_kind
+    rationale: Teach registry strictness the runtime_owner_support manifest kind added for de-brittled runtime readiness.
+  - path: .vac/registry/runtime/active_plan.yaml
+    operation: modify
+    ownership: vac.runtime.plan
+    semantic_anchor:
+      kind: runtime_active_plan
+      symbol: plan.o5o6.runtime-agent-flow-auditfix.active
+    rationale: Make this auditfix slice the canonical active semantic plan consumed by Plan Mode runtime validation.
+  - path: .vac/registry/plans/plan.o5o6.runtime-agent-flow-auditfix.yaml
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: semantic_plan
+      symbol: plan.o5o6.runtime-agent-flow-auditfix
+    rationale: Record the bounded semantic plan for this auditfix slice.
+  - path: .vac/registry/evidence/evidence.2026-06-01-o5o6-runtime-agent-flow-auditfix.yaml
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: evidence
+      symbol: evidence.2026-06-01-o5o6-runtime-agent-flow-auditfix
+    rationale: Record source/static evidence and TV-pending toolchain truth for this auditfix slice.
+  - path: .vac/registry/trajectory/o5o6-runtime-agent-flow-auditfix.yaml
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: trajectory
+      symbol: trajectory.o5o6-runtime-agent-flow-auditfix
+    rationale: Record safe rationale trajectory for owner-native runtime and Plan Mode auditfix changes.
+  - path: .vac/registry/trajectory/index.yaml
+    operation: modify
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: trajectory_index
+      symbol: evidence.2026-06-01-o5o6-runtime-agent-flow-auditfix
+    rationale: Add this auditfix evidence entry to safe why lookup.
+  - path: .vac/registry/compile-debt-ledger.yaml
+    operation: modify
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: compile_debt
+      symbol: O5O6-runtime-agent-flow-auditfix-2026-06-01
+    rationale: Keep Rust typecheck and live runtime verification debt explicit because cargo/rustc are unavailable in this sandbox.
+  - path: docs/monolith-quality/O5O6_RUNTIME_AGENT_FLOW_AUDITFIX_REPORT.md
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: report
+      symbol: runtime_agent_flow_auditfix_report
+    rationale: Document root cause, implementation, validation, and remaining TV-pending work for the latest auditfix.
+bounds:
+  max_patches: 24
+  max_new_files: 6
+  max_line_delta: 4200
+  timeout_seconds: 1800
+validation:
+  commands:
+    - id: vac.runtime.agent.flow.auditfix.static
+      runner: bash
+      args:
+        - scripts/check-vac-runtime-agent-flow-fix-static.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.init.runtime.gate.callsite
+      runner: bash
+      args:
+        - scripts/check-vac-init-runtime-gate-callsite-integration.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.runtime.engine.wiring.static
+      runner: bash
+      args:
+        - scripts/check-vac-runtime-engine-wiring-static.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.init.registry.strictness
+      runner: bash
+      args:
+        - scripts/check-vac-init-registry-strictness-contract.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.init.registry.validator.source_static
+      runner: bash
+      args:
+        - scripts/check-vac-init-registry-validator-contract.sh
+      risk: safe_read
+      approval: never
+      result: PASS_SOURCE_STATIC
+    - id: vac.o6.one.depanic.surface
+      runner: bash
+      args:
+        - scripts/check-vac-o6-1-depanic-surface.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.o5o6.all.audit.remainder
+      runner: bash
+      args:
+        - scripts/check-vac-o5o6-all-audit-remainder.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+approval:
+  required: false
+truth:
+  sv_status: SV-Done
+  tv_status: TV-Pending
+  tv_pending:
+    - cargo check --manifest-path vac-rs/Cargo.toml -p vac-surface-tui
+    - cargo check --manifest-path vac-rs/Cargo.toml -p vac-surface-cli
+    - cargo test --manifest-path vac-rs/Cargo.toml -p vac-surface-tui runtime_owner_session
+    - live interactive vac smoke: start thread, thread list/read/resume/branch, one default turn
+    - live interactive vac Plan Mode pre/post gated turn
+    - live command policy/evidence positive and negative tests

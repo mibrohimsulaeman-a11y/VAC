@@ -1,0 +1,28 @@
+schema_version: 1
+kind: evidence_hash_vector
+id: vac.fixture.evidence.canonical_hash_vector
+title: Canonical evidence payload vector
+canonical_rules:
+  encoding: UTF-8
+  line_endings: LF
+  key_order: lexicographic
+  comments: quoted_as_scalars
+  timestamp: UTC_Z
+  excluded_fields:
+    - chain.self_hash
+expected_self_hash: e67319fa5fe18b60ec22b40fb18545b3ae2967f59989ff44ccd69c47f7315cc3
+canonical_payload: |
+  agent_id: agent.fixture
+  approved_by: operator
+  capability: vac.test.fixture
+  chain.previous: null
+  chain.previous_hash: null
+  commands_executed: cargo.test.fixture:cargo:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb:0:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd:10
+  files_modified: "src/lib.rs:modify:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:+1:-0"
+  gates_failed: ""
+  gates_passed: test
+  id: evidence.2026-05-29-canonical-vector
+  model: gpt-test
+  plan_id: plan.test.fixture
+  rationale_ref: .vac/registry/trajectory/test.yaml
+  timestamp: 2026-05-29T00:00:00Z

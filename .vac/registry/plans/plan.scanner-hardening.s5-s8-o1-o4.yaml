@@ -1,0 +1,103 @@
+schema_version: 1
+kind: plan
+id: plan.scanner-hardening.s5-s8-o1-o4
+title: Scanner hardening S5-S8 plus O1/O4 release blockers
+status: completed
+task:
+  description: Implement legal/build blocker tracking, safe provenance scrub, ownership/quarantine scanner annotation, init lifecycle rescan-ast support, scanner doctor gate, and evidence/trajectory.
+  requested_by: operator
+  timestamp: '2026-05-30T00:00:00Z'
+  capability: vac.init.scanner-policy-hardening
+memory_context:
+  working:
+  - artifact.vac-source-scanner-hardening-spec-flow-s0-s1-s3-s4
+  team:
+  - vac.no-hardcoded-readiness
+  - vac.safe-rationale
+  semantic:
+  - vac.init.scanner-hardening
+  - vac.release.legal-build-blockers
+  - vac.rebrand.safe-provenance-scrub
+allowed_files:
+- path: vac-rs/control-plane/src/control_plane/vac_init_live_scanner_policy.rs
+  operation: modify
+  ownership: vac.init.scanner-policy-hardening
+  rationale: Add ownership/quarantine annotation and scanner doctor report.
+- path: vac-rs/control-plane/src/control_plane/vac_init_cli_runtime.rs
+  operation: modify
+  ownership: vac.init.cli-runtime-foundation
+  rationale: Add rescan_ast lifecycle mode.
+- path: vac-rs/cli/src/init_cli.rs
+  operation: modify
+  ownership: vac.init.cli-runtime-foundation
+  rationale: Expose --rescan-ast and lifecycle state resolution.
+- path: docs/legal/**
+  operation: modify
+  ownership: vac.release.legal-build-blockers
+  rationale: Track legal and build blockers.
+- path: THIRD_PARTY_NOTICES.md
+  operation: create
+  ownership: vac.release.legal-build-blockers
+  rationale: Repository-level attribution.
+- path: scripts/check-legal-release-blockers.sh
+  operation: create
+  ownership: vac.release.legal-build-blockers
+  rationale: Legal/build truth gate.
+- path: scripts/check-safe-provenance-scrub-o4.sh
+  operation: create
+  ownership: vac.rebrand.safe-provenance-scrub
+  rationale: Safe provenance scrub gate.
+- path: scripts/check-vac-init-scanner-hardening-spec-flow.sh
+  operation: modify
+  ownership: vac.init.scanner-policy-hardening
+  rationale: Scanner doctor gate.
+forbidden:
+  files:
+  - target/**
+  - .git/**
+  - node_modules/**
+  - vac-rs/vendor/**
+  actions:
+  - full_workspace_build
+  - raw_chain_of_thought_persistence
+  - blanket_openai_rename
+validation:
+  pre_conditions:
+  - S0-S4 scanner hardening artifact is baseline.
+  - No full workspace build required.
+  post_conditions:
+  - Scanner reports include ownership annotations.
+  - Legal/build gates remain NotEvaluated unless executed.
+  - Safe provenance scrub is narrow and attribution is preserved.
+  commands:
+  - id: scanner.s5-s8.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-scanner-hardening-spec-flow.sh
+    risk: execute_process
+    approval: policy
+  - id: scanner.s5-s8.validation.cmd002
+    runner: bash
+    args:
+    - scripts/check-legal-release-blockers.sh
+    risk: execute_process
+    approval: policy
+  - id: scanner.s5-s8.validation.cmd003
+    runner: bash
+    args:
+    - scripts/check-safe-provenance-scrub-o4.sh
+    risk: execute_process
+    approval: policy
+approval:
+  required: false
+  approver: operator
+  approved_at: '2026-05-30T00:00:00Z'
+  content_hash: 6480a05f6f3198143dd5173dac525eb2987dc841bad14eae9a63117895be2425
+  signature:
+    algorithm: none
+    value: null
+bounds:
+  max_patches: 1
+  max_new_files: 20
+  max_line_delta: 1200
+  timeout_seconds: 180

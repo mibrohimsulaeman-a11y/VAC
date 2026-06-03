@@ -1,0 +1,59 @@
+schema_version: 1
+kind: workflow
+id: maintenance.dogfood-assistant-model
+title: Dogfood VAC with assistant model
+status: ready
+inputs: {}
+steps:
+- id: preflight
+  uses: capability.vac.init.dogfood-session.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+- id: bounded_patch
+  uses: capability.vac.init.dogfood-session.check
+  depends_on:
+  - preflight
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+- id: evidence
+  uses: capability.vac.init.dogfood-session.check
+  depends_on:
+  - bounded_patch
+  ui:
+    surface: /evidence
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+ui:
+  surface: /workflow
+  inspect_surface: /evidence
+  progress_panel: true
+  activity_log: true
+  approval_surface: false
+  evidence_surface: true
+policy:
+  default_risk: safe_read
+  mutates_files: true
+  network: false
+  redaction: true
+  approval_required_for:
+  - filesystem_write
+validation:
+  gates:
+  - vac_dogfood_session
+  commands:
+  - id: maintenance.dogfood-assistant-model.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-dogfood-session.sh
+    risk: execute_process
+    approval: policy

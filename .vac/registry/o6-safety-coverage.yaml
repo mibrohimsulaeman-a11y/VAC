@@ -1,0 +1,292 @@
+schema_version: 1
+kind: registry_status
+id: vac.o6.safety_coverage
+title: O6.2 runtime unsafe SAFETY annotation coverage
+status: ready
+updated_at: '2026-05-30T10:45:00Z'
+coverage_status: SV-Done
+tv_status: TV-Pending
+coverage_method: source_runtime_minus_path_tests_and_cfg_test_blocks
+scope: vac-rs Rust source, excluding test/fixture/bench paths, test-* support crates, *_test.rs, *_tests.rs, tests.rs, test_*.rs, and inline #[cfg(test)] items
+genuine_mode: direct_preceding_safety_comment_required_and_stale_generic_comments_rejected
+previous_inflated_metric_retired: '558/558 counted test-suffixed files and inline cfg(test) items'
+gate: scripts/check-vac-o6-2-safety-coverage.sh
+measurement_script: scripts/measure-vac-o6-2-runtime-safety-coverage.py
+safety_coverage:
+  source_runtime:
+    covered: 455
+    total: 455
+    percent: 100.0
+  linux_host_runtime:
+    covered: 163
+    total: 163
+    percent: 100.0
+  exclusions:
+    path_test_or_fixture: 52
+    cfg_test: 40
+  stale_generic_comments: 0
+by_file:
+  vac-rs/arg0/src/lib.rs:
+    total: 2
+    covered: 2
+    cfg_test_excluded: 0
+  vac-rs/config/src/loader/macos.rs:
+    total: 3
+    covered: 3
+    cfg_test_excluded: 0
+  vac-rs/config/src/loader/mod.rs:
+    total: 2
+    covered: 2
+    cfg_test_excluded: 0
+  vac-rs/core/src/shell.rs:
+    total: 5
+    covered: 5
+    cfg_test_excluded: 0
+  vac-rs/core/src/shell_snapshot.rs:
+    total: 1
+    covered: 1
+    cfg_test_excluded: 0
+  vac-rs/core/src/spawn.rs:
+    total: 1
+    covered: 1
+    cfg_test_excluded: 0
+  vac-rs/linux-sandbox/src/landlock.rs:
+    total: 1
+    covered: 1
+    cfg_test_excluded: 0
+  vac-rs/linux-sandbox/src/launcher.rs:
+    total: 3
+    covered: 3
+    cfg_test_excluded: 2
+  vac-rs/linux-sandbox/src/linux_run_main.rs:
+    total: 39
+    covered: 39
+    cfg_test_excluded: 0
+  vac-rs/linux-sandbox/src/proxy_routing.rs:
+    total: 28
+    covered: 28
+    cfg_test_excluded: 0
+  vac-rs/linux-sandbox/src/vendored_bwrap.rs:
+    total: 2
+    covered: 2
+    cfg_test_excluded: 0
+  vac-rs/login/src/auth/agent_identity.rs:
+    total: 0
+    covered: 0
+    cfg_test_excluded: 3
+  vac-rs/process-hardening/src/lib.rs:
+    total: 5
+    covered: 5
+    cfg_test_excluded: 0
+  vac-rs/protocol/src/permissions.rs:
+    total: 0
+    covered: 0
+    cfg_test_excluded: 1
+  vac-rs/rmcp-client/src/auth_status.rs:
+    total: 0
+    covered: 0
+    cfg_test_excluded: 3
+  vac-rs/rmcp-client/src/oauth.rs:
+    total: 0
+    covered: 0
+    cfg_test_excluded: 2
+  vac-rs/rmcp-client/src/utils.rs:
+    total: 0
+    covered: 0
+    cfg_test_excluded: 3
+  vac-rs/sandboxing/src/seatbelt.rs:
+    total: 2
+    covered: 2
+    cfg_test_excluded: 0
+  vac-rs/secrets/src/local.rs:
+    total: 1
+    covered: 1
+    cfg_test_excluded: 0
+  vac-rs/shell-escalation/src/unix/escalate_client.rs:
+    total: 2
+    covered: 2
+    cfg_test_excluded: 1
+  vac-rs/shell-escalation/src/unix/escalate_server.rs:
+    total: 1
+    covered: 1
+    cfg_test_excluded: 15
+  vac-rs/shell-escalation/src/unix/socket.rs:
+    total: 17
+    covered: 17
+    cfg_test_excluded: 1
+  vac-rs/tui/src/clipboard_copy.rs:
+    total: 2
+    covered: 2
+    cfg_test_excluded: 0
+  vac-rs/tui/src/external_editor.rs:
+    total: 0
+    covered: 0
+    cfg_test_excluded: 4
+  vac-rs/tui/src/ide_context/ipc.rs:
+    total: 17
+    covered: 17
+    cfg_test_excluded: 0
+  vac-rs/tui/src/ide_context/windows_pipe.rs:
+    total: 19
+    covered: 19
+    cfg_test_excluded: 0
+  vac-rs/tui/src/terminal_probe.rs:
+    total: 7
+    covered: 7
+    cfg_test_excluded: 0
+  vac-rs/tui/src/tui.rs:
+    total: 5
+    covered: 5
+    cfg_test_excluded: 0
+  vac-rs/tui/src/tui/job_control.rs:
+    total: 1
+    covered: 1
+    cfg_test_excluded: 0
+  vac-rs/tui/src/wrapping.rs:
+    total: 2
+    covered: 2
+    cfg_test_excluded: 0
+  vac-rs/uds/src/lib.rs:
+    total: 4
+    covered: 4
+    cfg_test_excluded: 0
+  vac-rs/utils/pty/src/pipe.rs:
+    total: 3
+    covered: 3
+    cfg_test_excluded: 0
+  vac-rs/utils/pty/src/process.rs:
+    total: 1
+    covered: 1
+    cfg_test_excluded: 0
+  vac-rs/utils/pty/src/process_group.rs:
+    total: 9
+    covered: 9
+    cfg_test_excluded: 0
+  vac-rs/utils/pty/src/pty.rs:
+    total: 7
+    covered: 7
+    cfg_test_excluded: 0
+  vac-rs/utils/pty/src/win/mod.rs:
+    total: 7
+    covered: 7
+    cfg_test_excluded: 0
+  vac-rs/utils/pty/src/win/procthreadattr.rs:
+    total: 5
+    covered: 5
+    cfg_test_excluded: 0
+  vac-rs/utils/pty/src/win/psuedocon.rs:
+    total: 12
+    covered: 12
+    cfg_test_excluded: 0
+  vac-rs/utils/sleep-inhibitor/src/iokit_bindings.rs:
+    total: 2
+    covered: 2
+    cfg_test_excluded: 0
+  vac-rs/utils/sleep-inhibitor/src/linux_inhibitor.rs:
+    total: 2
+    covered: 2
+    cfg_test_excluded: 0
+  vac-rs/utils/sleep-inhibitor/src/macos.rs:
+    total: 3
+    covered: 3
+    cfg_test_excluded: 0
+  vac-rs/utils/sleep-inhibitor/src/windows_inhibitor.rs:
+    total: 5
+    covered: 5
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/acl.rs:
+    total: 13
+    covered: 13
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/audit.rs:
+    total: 5
+    covered: 5
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/conpty/mod.rs:
+    total: 6
+    covered: 6
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/desktop.rs:
+    total: 5
+    covered: 5
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/dpapi.rs:
+    total: 8
+    covered: 8
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/elevated/command_runner_win.rs:
+    total: 24
+    covered: 24
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/elevated/runner_client.rs:
+    total: 22
+    covered: 22
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/elevated/runner_pipe.rs:
+    total: 9
+    covered: 9
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/elevated_impl.rs:
+    total: 3
+    covered: 3
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/firewall.rs:
+    total: 15
+    covered: 15
+    cfg_test_excluded: 6
+  vac-rs/windows-sandbox-rs/src/hide_users.rs:
+    total: 7
+    covered: 7
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/lib.rs:
+    total: 18
+    covered: 18
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/proc_thread_attr.rs:
+    total: 9
+    covered: 9
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/process.rs:
+    total: 8
+    covered: 8
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/read_acl_mutex.rs:
+    total: 8
+    covered: 8
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/sandbox_users.rs:
+    total: 21
+    covered: 21
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/setup_main_win.rs:
+    total: 10
+    covered: 10
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/setup_orchestrator.rs:
+    total: 5
+    covered: 5
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/spawn_prep.rs:
+    total: 6
+    covered: 6
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/token.rs:
+    total: 20
+    covered: 20
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/unified_exec/backends/legacy.rs:
+    total: 13
+    covered: 13
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/wfp.rs:
+    total: 15
+    covered: 15
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/winutil.rs:
+    total: 10
+    covered: 10
+    cfg_test_excluded: 0
+  vac-rs/windows-sandbox-rs/src/workspace_acl.rs:
+    total: 3
+    covered: 3
+    cfg_test_excluded: 0

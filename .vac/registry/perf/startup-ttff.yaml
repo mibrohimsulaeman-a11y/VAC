@@ -1,0 +1,10 @@
+schema_version: 1
+kind: perf_report
+id: perf.startup-ttff
+status: NotEvaluated
+metrics:
+  ttff_ms: NotEvaluated
+  interactive_ready_ms: NotEvaluated
+  mcp_ready_ms: NotEvaluated
+  skills_ready_ms: NotEvaluated
+reason: cargo_or_runtime_not_available_in_sandbox

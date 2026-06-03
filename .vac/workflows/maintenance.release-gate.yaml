@@ -1,0 +1,223 @@
+schema_version: 1
+kind: workflow
+id: maintenance.release-gate
+title: Release gate
+status: ready
+inputs: {}
+ui:
+  surface: /workflow
+  inspect_surface: /debug-config
+  progress_panel: true
+  activity_log: true
+  approval_surface: true
+  evidence_surface: true
+policy:
+  default_risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for:
+  - execute_process
+steps:
+- id: root_seed_coverage
+  uses: capability.root_seed.coverage
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: architecture_invariants
+  uses: capability.architecture.invariants
+  ui:
+    surface: /debug-config
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: identity_check
+  uses: capability.identity.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: registry_schema_check
+  uses: capability.registry.schema_check
+  ui:
+    surface: /debug-config
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: build_check
+  uses: capability.build.cargo_check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: capability_dashboard_check
+  uses: capability.dashboard.check
+  ui:
+    surface: /capabilities
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: workflow_browser_check
+  uses: capability.browser.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: no_duplicate_tui
+  uses: capability.tui.no_duplicate_runtime
+  ui:
+    surface: /debug-config
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: ownership_scan
+  uses: capability.ownership.scan
+  ui:
+    surface: /capabilities
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: donor_inventory_check
+  uses: capability.donor_migration.inventory_check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: donor_drift_check
+  uses: capability.donor_migration.drift_check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: donor_manifest_check
+  uses: capability.donor_migration.manifest_check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: donor_reachability_check
+  uses: capability.donor_migration.reachability_check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: donor_evidence_check
+  uses: capability.donor_migration.evidence_check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: donor_commit_phrase_check
+  uses: capability.donor_migration.commit_phrase_check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: policy_check
+  uses: capability.approval.request
+  ui:
+    surface: /workflow
+    inspect_surface: /debug-config
+    progress_panel: true
+    activity_log: true
+    approval_surface: true
+    evidence_surface: true
+- id: tui_pty_gate
+  release_policy: blocked_operator_policy
+  uses: capability.tui.pty_gate
+  ui:
+    surface: /debug-config
+    progress_panel: true
+    activity_log: true
+    approval_surface: true
+    evidence_surface: true
+- id: release_summary
+  uses: capability.activity.emit
+  ui:
+    surface: /workflow
+    inspect_surface: /debug-config
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+validation:
+  gates:
+  - architecture_invariants
+  - build_check
+  - capability_dashboard_check
+  - donor_commit_phrase_check
+  - donor_drift_check
+  - donor_evidence_check
+  - donor_inventory_check
+  - donor_manifest_check
+  - donor_reachability_check
+  - identity_check
+  - no_duplicate_tui
+  - ownership_scan
+  - policy_check
+  - registry_schema_check
+  - release_summary
+  - root_seed_coverage
+  - tui_pty_gate
+  - workflow_browser_check
+  commands:
+  - id: maintenance.release-gate.validation.cmd001
+    runner: cargo
+    args:
+    - +1.93.0
+    - build
+    - --manifest-path
+    - vac-rs/Cargo.toml
+    - -p
+    - vac-cli
+    risk: execute_process
+    approval: policy
+  - id: maintenance.release-gate.validation.cmd002
+    runner: vac
+    args:
+    - doctor
+    - registry
+    - .
+    risk: execute_process
+    approval: policy
+  - id: maintenance.release-gate.validation.cmd003
+    runner: vac
+    args:
+    - doctor
+    - surfaces
+    - .
+    risk: execute_process
+    approval: policy
+  - id: maintenance.release-gate.validation.cmd004
+    runner: vac
+    args:
+    - doctor
+    - policy
+    - .
+    risk: execute_process
+    approval: policy
+  - id: maintenance.release-gate.validation.cmd005
+    runner: vac
+    args:
+    - doctor
+    - release
+    - .
+    risk: execute_process
+    approval: policy
+  - id: maintenance.release-gate.validation.cmd006
+    runner: bash
+    args:
+    - scripts/check-donor-status.sh
+    - all
+    risk: execute_process
+    approval: policy

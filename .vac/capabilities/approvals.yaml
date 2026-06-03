@@ -1,0 +1,88 @@
+schema_version: 1
+kind: capability
+id: vac.approvals
+title: Approvals
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane.approval_lifecycle
+ownership:
+  crates:
+  - vac-core
+  - vac-tui
+  modules:
+  - control_plane.approval_lifecycle
+  - control_plane.approval_store
+  - bottom_pane.approval_overlay
+  targets:
+  - crate_name: vac-core
+    module: command_canonicalization
+description: Approval lifecycle, durable approval store, approval overlay, and approval-request handling in the root TUI.
+reason: 'Approval handling is ready for the default product path: workflow policy creates typed approval requests, approval decisions are auditable, FileApprovalStore provides durable SQLite-backed persistence with legacy JSON migration, approval requests export into the local runtime contract, and the release workflow carries an explicit approval step. Operator evidence remains release input, not an implementation gap.
+
+  '
+depends_on:
+- vac.chat
+surfaces:
+  slash:
+    commands:
+    - /approvals
+    - /permissions
+    - /review
+    - /sandbox-add-read-dir
+    - /setup-default-sandbox
+    - /test-approval
+  cli:
+    enabled: true
+    commands:
+    - vac review
+  palette: true
+states:
+- empty
+- loading
+- waiting_approval
+- approved
+- rejected
+- expired
+- failure
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for:
+  - write_files
+  - execute_process
+validation:
+  commands:
+  - id: vac.approvals.validation.cmd001
+    runner: cargo
+    args:
+    - test
+    - --manifest-path
+    - vac-rs/Cargo.toml
+    - -p
+    - vac-core
+    - approval
+    - --
+    - --nocapture
+    risk: execute_process
+    approval: policy
+  - id: vac.approvals.validation.cmd002
+    runner: vac
+    args:
+    - doctor
+    - policy
+    - .
+    risk: execute_process
+    approval: policy
+  - id: vac.approvals.validation.cmd003
+    runner: vac
+    args:
+    - doctor
+    - workflow
+    - .
+    risk: execute_process
+    approval: policy
+docs:
+- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

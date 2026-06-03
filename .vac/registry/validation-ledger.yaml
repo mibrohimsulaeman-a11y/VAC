@@ -1,0 +1,56 @@
+schema_version: 1
+kind: validation_ledger
+id: validation.o5o6.zero-residual-static
+updated_at: 2026-06-03T00:00:00Z
+mode: static_first_then_cargo_final
+status: static_pass_toolchain_blocked
+static_batches:
+  A1_provider_prune: pass
+  A2_transport_consolidation: pass
+  A3_surface_package_rename: pass
+  A4_core_decomposition: pass
+  A5_hygiene_governance: pass
+  A6_capability_readiness: pass
+  B1_semantic_anchor_syn_backend: pass
+  B2_risk_method_enum: pass
+  B3_canonical_evidence_coverage: pass
+  B4_spec_revalidation_manifest: pass
+  C1_tui_startup_task_graph: pass
+  C2_tui_benchmark_registry: pass
+  C3_tui_regression_lock: pass
+  D1_static_gate_path_portability: pass
+  D2_audit_policy_file_present: pass
+  E1_audit_snapshot8_tui_source_closure: pass
+  E2_height_cache_style_epoch_eviction: pass
+  E3_shimmer_and_startup_executor_source: pass
+static_gates:
+  - scripts/check-vac-o5o6-zero-residual-static.sh
+  - scripts/check-vac-tui-perf-ux-findings-static.sh
+  - VAC_STATIC_ONLY=1 bash scripts/bench-vac-tui-performance.sh
+cargo_gates_queued_for_end:
+  - cargo check --manifest-path vac-rs/Cargo.toml -p vac-control-plane
+  - cargo check --manifest-path vac-rs/Cargo.toml -p vac-core
+  - cargo check --manifest-path vac-rs/Cargo.toml -p vac-provider-http
+  - cargo check --manifest-path vac-rs/Cargo.toml -p vac-surface-tui
+  - cargo check --manifest-path vac-rs/Cargo.toml -p vac-surface-cli
+  - cargo test --manifest-path vac-rs/Cargo.toml -p vac-control-plane semantic_anchor
+  - cargo test --manifest-path vac-rs/Cargo.toml -p vac-surface-tui perf_bench_harness -- --ignored --nocapture
+  - cargo clippy --manifest-path vac-rs/Cargo.toml --workspace -- -D warnings
+benchmarks_queued_for_end:
+  - bash scripts/bench-vac-tui-performance.sh
+known_static_residuals: []
+
+known_residual_findings: []
+tv_pending: []
+not_evaluated: []
+
+toolchain_blocker:
+  status: TV-Blocked
+  reason: rustc/cargo unavailable and no valid Rust toolchain archive present in /mnt/data for this session.
+  blocked_gates:
+    - targeted cargo check
+    - targeted cargo test
+    - targeted cargo clippy
+    - native vac doctor gates
+    - runtime benchmark with compiled TUI harness
+  evidence_log: .vac/validation-runs/toolchain-and-doctor-probe.log

@@ -1,0 +1,58 @@
+schema_version: 1
+kind: workflow
+id: maintenance.o6-2-safety-coverage
+title: O6.2 unsafe SAFETY coverage
+status: ready
+inputs: {}
+steps:
+- id: enumerate_unsafe
+  uses: capability.vac.quality.unsafe-safety-coverage.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+- id: verify_safety_comments
+  uses: capability.vac.quality.unsafe-safety-coverage.check
+  depends_on:
+  - enumerate_unsafe
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+- id: record_tv_pending
+  uses: capability.vac.quality.unsafe-safety-coverage.check
+  depends_on:
+  - verify_safety_comments
+  ui:
+    surface: /release
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+ui:
+  surface: /workflow
+  inspect_surface: /release
+  progress_panel: true
+  activity_log: true
+  approval_surface: false
+  evidence_surface: true
+policy:
+  default_risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for: []
+validation:
+  gates:
+  - o6_2_safety_coverage
+  commands:
+  - id: maintenance.o6-2-safety-coverage.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-o6-2-safety-coverage.sh
+    risk: execute_process
+    approval: policy

@@ -1,0 +1,6 @@
+schema_version: 1
+kind: test_assertion
+id: security.broken-evidence-chain
+attack: broken_evidence_chain
+expected: rejected
+diagnostic_required: true

@@ -1,0 +1,66 @@
+schema_version: 1
+kind: evidence
+id: evidence.2026-05-31-o5o6-runtime-engine-tui-parity
+timestamp: '2026-05-31T00:00:00Z'
+chain:
+  previous: evidence.2026-05-30-o5o6-audit-closeout-remediation
+  previous_hash: null
+  self_hash: static-source-artifact-pending-final-zip
+changeset:
+  plan_id: plan.o5o6.runtime-engine-tui-parity
+  capability: vac.o5-o6.runtime-engine-tui-parity
+  files_modified:
+    - path: vac-rs/control-plane/src/control_plane/vac_init_runtime_bridge.rs
+      operation: create
+      diff_hash: static
+      lines_added: 1
+      lines_removed: 0
+    - path: vac-rs/core/src/apply_patch.rs
+      operation: modify
+      diff_hash: static
+      lines_added: 1
+      lines_removed: 1
+    - path: vac-rs/core/src/tools/handlers/unified_exec.rs
+      operation: modify
+      diff_hash: static
+      lines_added: 1
+      lines_removed: 1
+    - path: vac-rs/tui/src/operator_ui.rs
+      operation: modify
+      diff_hash: static
+      lines_added: 1
+      lines_removed: 1
+validation:
+  commands_executed:
+    - scripts/check-vac-runtime-engine-wiring-static.sh
+    - scripts/check-vac-tui-visual-parity-static.sh
+    - scripts/check-vac-o5o6-all-audit-remainder.sh
+    - scripts/check-vac-o6-1-depanic-surface.sh
+    - scripts/check-vac-init-registry-strictness-contract.sh
+    - scripts/check-vac-init-registry-validator-contract.sh
+    - scripts/check-vac-o6-2-safety-coverage.sh
+    - scripts/check-legal-release-blockers.sh
+    - scripts/check-tui-source-artifact-hygiene.sh
+    - scripts/check-vac-o5o6-upload-sha256.sh
+  gates_passed:
+    - runtime_engine_wiring_static
+    - tui_visual_parity_static
+    - o5_o6_existing_static_regression
+  gates_failed: []
+approval:
+  approved_by: operator
+  approved_at: '2026-05-31T00:00:00Z'
+  content_hash: static-source-artifact-pending-final-zip
+  signature:
+    algorithm: none
+    value: null
+attribution:
+  agent_id: chatgpt-vac-sandbox
+  model: GPT-5.5 Thinking
+  memory_snapshot:
+    working_facts: 0
+    team_rules_consulted:
+      - vac.static-vs-toolchain-truth
+      - vac.no-hardcoded-readiness
+    semantic_refs: []
+  rationale_ref: docs/monolith-quality/O5O6_RUNTIME_ENGINE_TUI_PARITY_FIX_REPORT.md

@@ -1,0 +1,195 @@
+schema_version: 1
+kind: capability
+id: vac.tools
+title: Tools
+status: ready
+owner:
+  crate: vac-capability-tools
+  module: contract
+ownership:
+  crates:
+  - vac-capability-tools
+  - vac-core
+  modules:
+  - tools
+  targets:
+  - crate_name: vac-apply-patch
+    module: invocation
+  - crate_name: vac-apply-patch
+    module: parser
+  - crate_name: vac-apply-patch
+    module: seek_sequence
+  - crate_name: vac-apply-patch
+    module: standalone_executable
+  - crate_name: vac-apply-patch
+    module: streaming_parser
+  - crate_name: vac-core
+    module: apply_patch
+  - crate_name: vac-exec
+    module: cli
+  - crate_name: vac-exec
+    module: exec_events
+  - crate_name: vac-exec
+    module: runtime_adapter
+  - crate_name: vac-exec-server
+    module: client
+  - crate_name: vac-exec-server
+    module: client_api
+  - crate_name: vac-exec-server
+    module: connection
+  - crate_name: vac-exec-server
+    module: environment
+  - crate_name: vac-exec-server
+    module: environment_provider
+  - crate_name: vac-exec-server
+    module: fs_helper
+  - crate_name: vac-exec-server
+    module: fs_helper_main
+  - crate_name: vac-exec-server
+    module: fs_sandbox
+  - crate_name: vac-exec-server
+    module: local_file_system
+  - crate_name: vac-exec-server
+    module: local_process
+  - crate_name: vac-exec-server
+    module: process
+  - crate_name: vac-exec-server
+    module: process_id
+  - crate_name: vac-exec-server
+    module: protocol
+  - crate_name: vac-exec-server
+    module: remote_file_system
+  - crate_name: vac-exec-server
+    module: remote_process
+  - crate_name: vac-exec-server
+    module: rpc
+  - crate_name: vac-exec-server
+    module: runtime_paths
+  - crate_name: vac-exec-server
+    module: sandboxed_file_system
+  - crate_name: vac-exec-server
+    module: server
+  - crate_name: vac-file-search
+    module: cli
+  - crate_name: vac-shell-command
+    module: bash
+  - crate_name: vac-shell-command
+    module: command_safety
+  - crate_name: vac-shell-command
+    module: parse_command
+  - crate_name: vac-shell-command
+    module: powershell
+  - crate_name: vac-shell-command
+    module: shell_detect
+  - crate_name: vac-tools
+    module: agent_job_tool
+  - crate_name: vac-tools
+    module: agent_tool
+  - crate_name: vac-tools
+    module: apply_patch_tool
+  - crate_name: vac-tools
+    module: code_mode
+  - crate_name: vac-tools
+    module: dynamic_tool
+  - crate_name: vac-tools
+    module: goal_tool
+  - crate_name: vac-tools
+    module: image_detail
+  - crate_name: vac-tools
+    module: json_schema
+  - crate_name: vac-tools
+    module: local_tool
+  - crate_name: vac-tools
+    module: mcp_resource_tool
+  - crate_name: vac-tools
+    module: mcp_tool
+  - crate_name: vac-tools
+    module: plan_tool
+  - crate_name: vac-tools
+    module: request_plugin_install
+  - crate_name: vac-tools
+    module: request_user_input_tool
+  - crate_name: vac-tools
+    module: responses_api
+  - crate_name: vac-tools
+    module: tool_config
+  - crate_name: vac-tools
+    module: tool_definition
+  - crate_name: vac-tools
+    module: tool_discovery
+  - crate_name: vac-tools
+    module: tool_registry_plan
+  - crate_name: vac-tools
+    module: tool_registry_plan_types
+  - crate_name: vac-tools
+    module: tool_spec
+  - crate_name: vac-tools
+    module: utility_tool
+  - crate_name: vac-tools
+    module: view_image
+  - crate_name: vac-utils-absolute-path
+    module: absolutize
+  - crate_name: vac-utils-absolute-path
+    module: test_support
+  - crate_name: vac-utils-pty
+    module: pipe
+  - crate_name: vac-utils-pty
+    module: process
+  - crate_name: vac-utils-pty
+    module: process_group
+  - crate_name: vac-utils-pty
+    module: pty
+  - crate_name: vac-utils-pty
+    module: win
+description: Tool invocation and tool-call execution for the product runtime.
+reason: 'Tool invocation surfaces, owner metadata, tool policy, and validation are represented in the root capability manifest and Plan 19 catalog. Future tool UX/provider work is feature work, not a root-manifest readiness blocker.
+
+  '
+depends_on:
+- vac.sessions
+surfaces:
+  slash:
+    commands:
+    - /apps
+    - /clean
+    - /diff
+    - /ide
+    - /mcp
+    - /mention
+    - /plugins
+    - /ps
+    - /rollout
+    - /stop
+  cli:
+    enabled: true
+    commands:
+    - vac a
+    - vac apply
+    - vac e
+  palette: true
+states:
+- empty
+- loading
+- success
+- failure
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for:
+  - write_files
+  - execute_process
+validation:
+  commands:
+  - id: vac.tools.validation.cmd001
+    runner: cargo
+    args:
+    - +1.93.0
+    - check
+    - -p
+    - vac-core
+    risk: execute_process
+    approval: policy
+docs:
+- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

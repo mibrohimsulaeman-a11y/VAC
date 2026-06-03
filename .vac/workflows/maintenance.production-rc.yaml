@@ -1,0 +1,61 @@
+schema_version: 1
+kind: workflow
+id: maintenance.production-rc
+title: VAC-Init Production RC readiness
+status: ready
+inputs: {}
+steps:
+- id: release_doctor_pass
+  uses: capability.vac.init.production-rc.check
+  ui:
+    surface: /runtime
+    progress_panel: true
+    activity_log: true
+    approval_surface: true
+    evidence_surface: true
+- id: e2e_dry_run_contract
+  uses: capability.vac.init.production-rc.check
+  depends_on:
+  - release_doctor_pass
+  ui:
+    surface: /runtime
+    progress_panel: true
+    activity_log: true
+    approval_surface: true
+    evidence_surface: true
+- id: production_rc_scoreboard
+  uses: capability.vac.init.production-rc.check
+  depends_on:
+  - e2e_dry_run_contract
+  ui:
+    surface: /runtime
+    progress_panel: true
+    activity_log: true
+    approval_surface: true
+    evidence_surface: true
+ui:
+  surface: /workflow
+  inspect_surface: /runtime
+  progress_panel: true
+  activity_log: true
+  approval_surface: true
+  evidence_surface: true
+policy:
+  default_risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for: []
+validation:
+  gates:
+  - e2e_dry_run_contract
+  - production_rc
+  - production_rc_scoreboard
+  - release_doctor_pass
+  commands:
+  - id: vac.init.production-rc.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-production-rc-contract.sh
+    risk: execute_process
+    approval: policy

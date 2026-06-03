@@ -1,0 +1,57 @@
+schema_version: 1
+kind: capability
+id: vac.init.lifecycle
+title: VAC-Init Lifecycle State Machine
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane::vac_init_lifecycle
+ownership:
+  crates:
+  - vac-core
+  modules:
+  - control_plane::vac_init_lifecycle
+  targets:
+  - crate_name: vac-core
+    module: control_plane::vac_init_lifecycle
+description: VAC-Init lifecycle contract covering uninitialized, discovered, partition_selected, policy_inferred, manifests_synthesized, doctor_verified, ready, and failure states with resume-safe state records.
+depends_on:
+- vac.init.schema-envelope
+- vac.init.registry-validator
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - bash scripts/check-vac-init-lifecycle-contract.sh
+    - vac init --dry-run
+    - vac init --resume
+    - vac init --status
+  palette: true
+  tui:
+    routes:
+    - /capabilities
+policy:
+  risk: safe_read
+  mutates_files: true
+  network: false
+  redaction: false
+  approval_required_for:
+  - filesystem_write
+states:
+- empty
+- loading
+- success
+- failure
+validation:
+  commands:
+  - id: vac.init.lifecycle.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-lifecycle-contract.sh
+    risk: execute_process
+    approval: policy
+  gates:
+  - vac_init_lifecycle_contract
+docs:
+- docs/vac-init/VAC_INIT_BATCH_02_05_IMPLEMENTATION.md
+- docs/validation/VAC_INIT_LIFECYCLE_GATE.md

@@ -1,0 +1,6 @@
+schema_version: 1
+kind: test_assertion
+id: security.unowned-file-patch
+attack: unowned_file_patch
+expected: rejected
+diagnostic_required: true

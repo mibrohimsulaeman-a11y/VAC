@@ -1,0 +1,12 @@
+schema_version: 1
+kind: fragmentation_migration_ledger
+id: fragmentation.o5o6.actual-code-closure
+updated_at: 2026-06-02T00:00:00Z
+convention:
+  shard_names: domain-first
+  numeric_split_files: migration-ledger-required
+  module_index_docs: required_for_new_shards
+renames_planned:
+  split_024_thread_id.rs: chatwidget/thread_identity_render.rs
+  split_015_set_thread_rename_block_message.rs: chatwidget/thread_rename_block_message.rs
+status: SV-Done-governance-TV-Pending-compile-guided-renames

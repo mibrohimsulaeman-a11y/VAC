@@ -1,0 +1,58 @@
+schema_version: 1
+kind: trajectory
+id: trajectory.o5o6-runtime-agent-flow-followup
+spans:
+  - file: vac-rs/tui/src/runtime_owner_session.rs
+    start_line: 300
+    end_line: 390
+    symbol: InProcessAppServerClient.active_runtime_plan_path
+    evidence_id: evidence.2026-06-01-o5o6-runtime-agent-flow-followup
+  - file: vac-rs/tui/src/runtime_owner_session.rs
+    start_line: 650
+    end_line: 720
+    symbol: OwnerNativeSession.assert_owner_runtime_supported
+    evidence_id: evidence.2026-06-01-o5o6-runtime-agent-flow-followup
+  - file: scripts/check-vac-runtime-agent-flow-fix-static.sh
+    start_line: 1
+    end_line: 120
+    symbol: runtime_agent_flow_static_gate.active_plan_checks
+    evidence_id: evidence.2026-06-01-o5o6-runtime-agent-flow-followup
+  - file: scripts/check-vac-o6-1-depanic-surface.sh
+    start_line: 1
+    end_line: 40
+    symbol: VAC_O6_1_RESCAN_skip_aggregate_mode
+    evidence_id: evidence.2026-06-01-o5o6-runtime-agent-flow-followup
+  - file: .vac/registry/runtime/active_plan.yaml
+    start_line: 1
+    end_line: 150
+    symbol: plan.o5o6.runtime-agent-flow-followup.active
+    evidence_id: evidence.2026-06-01-o5o6-runtime-agent-flow-followup
+results_by_evidence:
+  evidence.2026-06-01-o5o6-runtime-agent-flow-followup:
+    evidence_id: evidence.2026-06-01-o5o6-runtime-agent-flow-followup
+    timestamp: '2026-06-01T00:00:00Z'
+    task: O5/O6 runtime agent flow follow-up hardening
+    plan_id: plan.o5o6.runtime-agent-flow-followup
+    capability: vac.local_runtime_owner
+    rationale:
+      summary: >
+        Closed follow-up gaps in the runtime agent-flow fix: removed a compile
+        duplicate, made the critical owner-runtime method guard substantive,
+        required an active semantic plan for Plan Mode, validated that active
+        plan in the static gate, and optimized aggregate O5/O6 gates to avoid
+        duplicate O6.1 rescans while preserving the dedicated scanner gate.
+      policy_refs:
+        - vac.runtime-plan-mode-single-path
+        - vac.static-vs-toolchain-truth
+        - vac.no-hardcoded-readiness
+      evidence_refs:
+        - evidence.2026-06-01-o5o6-runtime-agent-flow-followup
+      excluded:
+        raw_chain_of_thought: true
+    changeset:
+      operation: modify
+      diff_excerpt: Active runtime semantic plan, non-no-op owner runtime guard, compile duplicate removal, O6.1 re-pin, aggregate skip-rescan optimization.
+    approval:
+      approved_by: operator
+      content_hash: source-artifact-final-pending-sha256
+    chain_depth: 2

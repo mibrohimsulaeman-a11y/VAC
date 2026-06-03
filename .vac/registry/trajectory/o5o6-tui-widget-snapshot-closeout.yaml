@@ -1,0 +1,40 @@
+schema_version: 1
+kind: trajectory
+id: trajectory.o5o6-tui-widget-snapshot-closeout
+spans:
+  - file: scripts/check-tui-operator-snapshot-contract.sh
+    start_line: 1
+    end_line: 120
+    symbol: operator_snapshot_static_gate
+    evidence_id: evidence.2026-05-31-o5o6-tui-widget-snapshot-closeout
+  - file: vac-rs/tui/src/operator_ui.rs
+    start_line: 1034
+    end_line: 1039
+    symbol: render_operator_snapshot
+    evidence_id: evidence.2026-05-31-o5o6-tui-widget-snapshot-closeout
+results_by_evidence:
+  evidence.2026-05-31-o5o6-tui-widget-snapshot-closeout:
+    evidence_id: evidence.2026-05-31-o5o6-tui-widget-snapshot-closeout
+    timestamp: '2026-05-31T00:00:00Z'
+    task: O5/O6 TUI widget snapshot closeout
+    plan_id: plan.o5o6.tui-widget-snapshot-closeout
+    capability: vac.tui.operator-visual-gate
+    rationale:
+      summary: >
+        Converted the snapshot gate away from obsolete direct rustc assumptions,
+        refreshed committed snapshots to rounded widget geometry, and preserved
+        explicit TV-Pending status for cargo/live screenshot validation.
+      policy_refs:
+        - vac.static-vs-toolchain-truth
+        - vac.no-hardcoded-readiness
+      evidence_refs:
+        - evidence.2026-05-31-o5o6-tui-widget-snapshot-closeout
+      excluded:
+        raw_chain_of_thought: true
+    changeset:
+      operation: modify
+      diff_excerpt: Widget snapshot contract now asserts Block/Tabs/Gauge/Table/Layout/Buffer-backed source and stale snapshot strings are rejected.
+    approval:
+      approved_by: operator
+      content_hash: source-artifact-checkpoint-004-pending-final
+    chain_depth: 1

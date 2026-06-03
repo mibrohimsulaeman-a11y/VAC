@@ -1,0 +1,445 @@
+# Current Docs Index
+
+Generated: 2026-06-01T22:58:00Z
+
+Markdown files indexed: 437
+
+## Files
+
+- `docs/DOCS_AUDIT.md` — VAC root documentation audit
+- `docs/DOCS_INDEX_CURRENT.md` — Current Docs Index
+- `docs/PLAN_CODEBASE_RECONCILIATION.md` — Docs plan ↔ codebase reconciliation
+- `docs/PROJECT_STATE_CURRENT.md` — VAC current project state from documentation scan
+- `docs/architecture/INDEX.md` — VAC architecture index
+- `docs/architecture/VAC_CONTROL_PLANE_REFACTOR_REPORT.md` — VAC Control Plane Refactor Report
+- `docs/architecture/adr/INDEX.md` — Architecture decision records
+- `docs/architecture/capability-model.md` — VAC capability model
+- `docs/architecture/changeset-evidence.md` — Changeset and Evidence contract
+- `docs/architecture/control-plane.md` — VAC control plane architecture
+- `docs/architecture/decisions/ADR-0006-vil-native-plus-knowledge-addon.md` — ADR-0006 — VIL support uses native core plus managed knowledge add-on
+- `docs/architecture/decisions/ADR-0007-local-runtime-contract.md` — ADR-0007 — VAC local product path uses Local Runtime Contract
+- `docs/architecture/decisions/INDEX.md` — Architecture decisions
+- `docs/architecture/execution-lifecycle.md` — VAC execution lifecycle
+- `docs/architecture/local-runtime-contract.md` — Local Runtime Contract
+- `docs/architecture/managed-connectors.md` — Managed Connectors architecture
+- `docs/architecture/migration-architecture.md` — VAC migration architecture
+- `docs/architecture/policy-and-approval.md` — VAC policy and approval model
+- `docs/architecture/product-architecture.md` — VAC product architecture
+- `docs/architecture/repository-pattern.md` — VAC repository pattern
+- `docs/architecture/runtime.md` — VAC runtime architecture
+- `docs/architecture/semantic-coding-loop.md` — Semantic Coding Loop architecture
+- `docs/architecture/session-engine.md` — Session Engine contract
+- `docs/architecture/tool-contract.md` — Tool Contract architecture
+- `docs/architecture/trust-zones-and-redaction.md` — Trust Zones and Redaction contract
+- `docs/architecture/tui-operator-surface.md` — VAC TUI operator surface
+- `docs/architecture/vil-native-and-knowledge-add-on.md` — VIL Native and VIL Knowledge Add-on architecture
+- `docs/architecture/workflow-model.md` — VAC workflow model
+- `docs/dogfood/2026-05-30-assistant-model-vac-dogfood.md` — VAC dogfood session — assistant model as bounded worker
+- `docs/executor-prompts/00A-build-unblock.md` — Executor prompt — 00A build unblock
+- `docs/executor-prompts/00B-local-runtime-contract-implementation-plan.md` — Implementation plan — 00B Local Runtime Contract
+- `docs/executor-prompts/00B-local-runtime-contract.md` — Executor prompt — 00B Local Runtime Contract
+- `docs/executor-prompts/00C-rewire-vac-exec.md` — Executor prompt — 00C rewire vac exec
+- `docs/executor-prompts/00D-rewire-vac-tui.md` — Executor prompt — 00D rewire root `vac` TUI path
+- `docs/executor-prompts/00E-runtime-delete-gate.md` — Executor prompt — 00E runtime delete gate
+- `docs/executor-prompts/INDEX.md` — Executor prompts
+- `docs/legal/LEGAL_RELEASE_BLOCKERS.md` — Legal and Build Release Blockers
+- `docs/legal/NOTICES.md` — Legal notices
+- `docs/legal/SAFE_PROVENANCE_SCRUB_O4.md` — O4 Safe Provenance Scrub
+- `docs/migration/00D_RESIDUAL_LEGACY_AUDIT.md` — 00D residual legacy audit (post-sidebar landing)
+- `docs/migration/00E_REACHABILITY_AUDIT.md` — 00E reachability audit (snapshot)
+- `docs/migration/APP_SERVER_TO_LOCAL_RUNTIME_MIGRATION.md` — App-server to Local Runtime migration
+- `docs/migration/CODE_REVIEW_LOCAL_RUNTIME_LANDED.md` — Code review — landed Local Runtime Contract work (00B + 00C-default + 00D-5 + 00D-8)
+- `docs/migration/INDEX.md` — VAC migration specs
+- `docs/migration/OLD_RUNTIME_DELETE_GATE.md` — Old runtime delete gate
+- `docs/migration/PHASE00_CLOSEOUT_STATUS.md` — Phase 00 closeout status
+- `docs/migration/VAC_EXEC_REWIRE_SPEC.md` — VAC exec rewire spec
+- `docs/migration/VAC_TUI_REWIRE_SPEC.md` — VAC TUI rewire spec
+- `docs/monolith-quality/O5O6_ALL_AUDIT_REMAINDER_REPORT.md` — O5/O6 All Audit Remainder Implementation Report
+- `docs/monolith-quality/O5O6_AUDIT_CLOSEOUT_REMEDIATION_REPORT.md` — O5/O6 Audit Closeout Remediation Report
+- `docs/monolith-quality/O5O6_AUDIT_REMAINDER_FIX_REPORT.md` — O5/O6 Audit Remainder Fix Report
+- `docs/monolith-quality/O5O6_AUDIT_REMEDIATION_REPORT.md` — O5/O6 Audit Remediation Report
+- `docs/monolith-quality/O5O6_AUTOPILOT_RUNTIME_EXECUTOR_CLOSEOUT_REPORT.md` — O5/O6 Autopilot Runtime Executor Closeout
+- `docs/monolith-quality/O5O6_AUTOPILOT_RUNTIME_SCHEDULER_GUARD_REPORT.md` — O5/O6 Autopilot Runtime Scheduler Guard Closeout
+- `docs/monolith-quality/O5O6_BIG_REFACTOR_STATIC_REPORT.md` — O5/O6 Big Refactor Static Report
+- `docs/monolith-quality/O5O6_CLEANUP_COMPILE_SURFACE_STATIC_REPORT.md` — O5/O6 Cleanup Compile-Surface Static Report
+- `docs/monolith-quality/O5O6_COMPILE_FIX_TARGETED_TV_REPORT.md` — O5/O6 Compile-Fix Targeted TV Report — 2026-05-31
+- `docs/monolith-quality/O5O6_CONTROL_PLANE_AUDIT_FINDINGS_REPORT.md` — O5/O6 Control Plane Audit Findings Remediation
+- `docs/monolith-quality/O5O6_CURRENT_AUDITFIX_REPORT.md` — O5/O6 Current Auditfix Report
+- `docs/monolith-quality/O5O6_EPIC_A_APP_SERVER_RETIREMENT_REPORT.md` — O5/O6 Epic A App-Server Retirement Report
+- `docs/monolith-quality/O5O6_GAP_BC_DEPTH_REMEDIATION_REPORT.md` — O5/O6 + VAC-Init GAP-B/C Depth Remediation Report
+- `docs/monolith-quality/O5O6_REGEN_AND_TUI_FINDINGS_REPORT.md` — O5/O6 Regen + TUI Findings Execution Report
+- `docs/monolith-quality/O5O6_REMAINING_AUDIT_GAPS_IMPLEMENTATION_REPORT.md` — O5/O6 Remaining Audit Gaps Implementation Report
+- `docs/monolith-quality/O5O6_RUNTIME_AGENT_FLOW_AUDITFIX_REPORT.md` — O5/O6 Runtime Agent Flow Auditfix Report
+- `docs/monolith-quality/O5O6_RUNTIME_AGENT_FLOW_FIX_REPORT.md` — O5/O6 Runtime Entrypoints and Agent Flow Fix Report
+- `docs/monolith-quality/O5O6_RUNTIME_AGENT_FLOW_FOLLOWUP_REPORT.md` — O5/O6 Runtime Agent Flow Follow-up Report
+- `docs/monolith-quality/O5O6_RUNTIME_AGENT_FLOW_STRUCTURAL_HARDENING_REPORT.md` — O5/O6 Runtime Agent Flow Structural Hardening
+- `docs/monolith-quality/O5O6_RUNTIME_ENGINE_TUI_PARITY_FIX_REPORT.md` — O5/O6 Runtime Engine Wiring + TUI Parity Fix Report
+- `docs/monolith-quality/O5O6_STANDARD_CARGO_HYGIENE_GATE.md` — O5/O6 Standard Cargo Hygiene Gate
+- `docs/monolith-quality/O5O6_TECHNICAL_DEBT_MARKER_TRACKING.md` — O5/O6 Technical Debt Marker Tracking
+- `docs/monolith-quality/O5O6_THREE_AUDIT_FINDINGS_CLOSEOUT.md` — O5/O6 Three Audit Findings Closeout
+- `docs/monolith-quality/O5O6_TOOLCHAIN_GATE_RETRY_REPORT.md` — O5/O6 Toolchain Gate Retry Report — 2026-05-30
+- `docs/monolith-quality/O5O6_TUI_LOCAL_TOOL_CLEANUP_REPORT.md` — O5/O6 TUI Local Coding Tool Cleanup Report
+- `docs/monolith-quality/O5O6_TUI_PERFORMANCE_HOTPATH_CLOSEOUT_REPORT.md` — O5/O6 TUI Performance Hot-Path Closeout
+- `docs/monolith-quality/O5O6_TUI_WIDGET_SNAPSHOT_CLOSEOUT_REPORT.md` — O5/O6 TUI Widget Snapshot Closeout Report
+- `docs/monolith-quality/O5O6_TUI_WIDGET_STYLE_OUTPUT_PATH_REPORT.md` — O5/O6 TUI Widget Styled Output Path Report
+- `docs/monolith-quality/O5_1_PROTOCOL_DEDUP_SLICE.md` — O5.1 Protocol Dedup Slice
+- `docs/monolith-quality/O5_2_GODFILE_STAGING_ALL.md` — O5.2 God-file Staging — Retired
+- `docs/monolith-quality/O5_2_GODFILE_STAGING_CHATWIDGET.md` — O5.2 Chatwidget God-file Staging — Retired
+- `docs/monolith-quality/O5_2_SEMANTIC_SOURCE_SPLIT.md` — O5.2 Semantic Source Split
+- `docs/monolith-quality/O5_3_UTILS_CONSOLIDATION_REPORT.md` — O5.3 Utils Consolidation Report
+- `docs/monolith-quality/O5_4_WORKSPACE_CONSOLIDATION_REPORT.md` — O5.4 Workspace Consolidation Report
+- `docs/monolith-quality/O5_5_DONOR_DELETE_GATE_REPORT.md` — O5.5 Donor Delete Gate Report
+- `docs/monolith-quality/O6_1_DEPANIC_TRIAGE.md` — O6.1 Runtime Panic Surface Triage
+- `docs/monolith-quality/O6_2_SAFETY_ANNOTATION_COVERAGE.md` — O6.2 SAFETY Annotation Coverage
+- `docs/monolith-quality/O6_2_UNSAFE_TRIAGE.md` — O6.2 Unsafe Static Triage
+- `docs/monolith-quality/O6_3_DOCS_PRUNING_CLASSIFICATION.md` — O6.3 Docs Pruning Classification
+- `docs/monolith-quality/O6_4_E2E_EXPANSION_SCAFFOLD.md` — O6.4 E2E Expansion Scaffold
+- `docs/monolith-quality/VAC_O5_O6_MONOLITH_QUALITY_IMPL_PLAN.md` — VAC — O5 Monolith/Refactor + O6 Quality De-risk — Implementation Plan
+- `docs/product/CAPABILITY_MAP.md` — VAC capability map
+- `docs/product/CAPABILITY_PRD_COVERAGE.md` — VAC capability PRD coverage matrix
+- `docs/product/INDEX.md` — VAC product documentation index
+- `docs/product/MASTER_PRD.md` — VAC Master PRD
+- `docs/product/domain-prds/agent-orchestration.md` — PRD — Agent orchestration
+- `docs/product/domain-prds/approvals-policy-governance.md` — PRD — Approvals, policy, and governance
+- `docs/product/domain-prds/autonomous-semantic-coding.md` — PRD — Autonomous Semantic Coding
+- `docs/product/domain-prds/changeset-diff-evidence.md` — PRD — Changeset, Diff, and Evidence
+- `docs/product/domain-prds/cli-and-tui.md` — PRD — CLI and TUI
+- `docs/product/domain-prds/context-rag-memory.md` — PRD — Context, RAG, Ingest, and Memory
+- `docs/product/domain-prds/import-export-restore.md` — PRD — Import, Export, Restore, and Migration
+- `docs/product/domain-prds/local-inference-and-model-routing.md` — PRD — Local Inference and Model Routing
+- `docs/product/domain-prds/observability-privacy-release.md` — PRD — Observability, privacy, and release operations
+- `docs/product/domain-prds/onboarding-doctor-readiness.md` — PRD — Onboarding, Doctor, and Readiness
+- `docs/product/domain-prds/remote-bridge-deferred.md` — PRD — Remote Bridge and Deferred Enterprise Runtime
+- `docs/product/domain-prds/runtime-scheduler-sessions.md` — PRD — Runtime, scheduler, and sessions
+- `docs/product/domain-prds/scheduler-hooks-monitor.md` — PRD — Scheduler, Hooks, Monitor, and Autopilot Triggers
+- `docs/product/domain-prds/tools-mcp-sandbox.md` — PRD — Tools, MCP, and sandbox
+- `docs/product/domain-prds/trace-signal-trajectory.md` — PRD — Trace, Signal, Trajectory, and Why
+- `docs/product/domain-prds/tui-action-recorder-replay.md` — PRD — TUI Action Registry, Recorder, and Replay
+- `docs/product/domain-prds/vil-native-knowledge-add-on.md` — PRD — VIL Native and Knowledge Add-on
+- `docs/product/domain-prds/vil-validation-passes.md` — PRD — VIL Validation Passes and Semantic IR
+- `docs/product/domain-prds/vil-vwfd-native.md` — PRD — VIL and VWFD native tooling
+- `docs/product/domain-prds/workflow-control-plane.md` — PRD — Workflow control plane
+- `docs/product/requirements-matrix.md` — VAC product requirements matrix
+- `docs/product/roadmap.md` — VAC product roadmap
+- `docs/product/source-material-digest.md` — Source material digest
+- `docs/scheduled-audits/2026-05-23/1702-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-23 17:02
+- `docs/scheduled-audits/2026-05-23/1712-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-23 17:12
+- `docs/scheduled-audits/2026-05-23/1802-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-23 18:02
+- `docs/scheduled-audits/2026-05-23/1902-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-23 19:02
+- `docs/scheduled-audits/2026-05-23/2002-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-23 20:02
+- `docs/scheduled-audits/2026-05-23/2102-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-23 21:02
+- `docs/scheduled-audits/2026-05-23/2202-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-23 22:02
+- `docs/scheduled-audits/2026-05-23/2302-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-23 23:02
+- `docs/scheduled-audits/2026-05-24/0002-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 00:02
+- `docs/scheduled-audits/2026-05-24/0102-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 01:02
+- `docs/scheduled-audits/2026-05-24/0202-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 02:02
+- `docs/scheduled-audits/2026-05-24/0302-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 03:02
+- `docs/scheduled-audits/2026-05-24/0402-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 04:02
+- `docs/scheduled-audits/2026-05-24/0502-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 05:02
+- `docs/scheduled-audits/2026-05-24/0602-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 06:02
+- `docs/scheduled-audits/2026-05-24/0703-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 07:03
+- `docs/scheduled-audits/2026-05-24/0705-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 07:05
+- `docs/scheduled-audits/2026-05-24/0802-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 08:02
+- `docs/scheduled-audits/2026-05-24/0902-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 09:02
+- `docs/scheduled-audits/2026-05-24/1002-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 10:02
+- `docs/scheduled-audits/2026-05-24/1104-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 11:04
+- `docs/scheduled-audits/2026-05-24/1203-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 12:03
+- `docs/scheduled-audits/2026-05-24/1204-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 12:04
+- `docs/scheduled-audits/2026-05-24/1304-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 13:04
+- `docs/scheduled-audits/2026-05-24/1305-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 13:05
+- `docs/scheduled-audits/2026-05-24/1403-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 14:03
+- `docs/scheduled-audits/2026-05-24/1503-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 15:03
+- `docs/scheduled-audits/2026-05-24/1504-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 15:04
+- `docs/scheduled-audits/2026-05-24/1603-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 16:03
+- `docs/scheduled-audits/2026-05-24/1604-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 16:04
+- `docs/scheduled-audits/2026-05-24/1703-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 17:03
+- `docs/scheduled-audits/2026-05-24/1704-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 17:04
+- `docs/scheduled-audits/2026-05-24/1803-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 18:03
+- `docs/scheduled-audits/2026-05-24/1804-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 18:04
+- `docs/scheduled-audits/2026-05-24/1903-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 19:03
+- `docs/scheduled-audits/2026-05-24/1904-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 19:04
+- `docs/scheduled-audits/2026-05-24/2003-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 20:03
+- `docs/scheduled-audits/2026-05-24/2004-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 20:04
+- `docs/scheduled-audits/2026-05-24/2104-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 21:04
+- `docs/scheduled-audits/2026-05-24/2204-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 22:04
+- `docs/scheduled-audits/2026-05-24/2205-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 22:05
+- `docs/scheduled-audits/2026-05-24/2303-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 23:03
+- `docs/scheduled-audits/2026-05-24/2304-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-24 23:04
+- `docs/scheduled-audits/2026-05-25/0003-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 00:03
+- `docs/scheduled-audits/2026-05-25/0004-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 00:04
+- `docs/scheduled-audits/2026-05-25/0104-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 01:04
+- `docs/scheduled-audits/2026-05-25/0203-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 02:03
+- `docs/scheduled-audits/2026-05-25/0204-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 02:04
+- `docs/scheduled-audits/2026-05-25/0303-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 03:03
+- `docs/scheduled-audits/2026-05-25/0304-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 03:04
+- `docs/scheduled-audits/2026-05-25/0403-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 04:03
+- `docs/scheduled-audits/2026-05-25/0404-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 04:04
+- `docs/scheduled-audits/2026-05-25/0503-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 05:03
+- `docs/scheduled-audits/2026-05-25/0504-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 05:04
+- `docs/scheduled-audits/2026-05-25/0603-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 06:03
+- `docs/scheduled-audits/2026-05-25/0604-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 06:04
+- `docs/scheduled-audits/2026-05-25/1803-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 18:03
+- `docs/scheduled-audits/2026-05-25/1903-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 19:03
+- `docs/scheduled-audits/2026-05-25/2003-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 20:03
+- `docs/scheduled-audits/2026-05-25/2103-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 21:03
+- `docs/scheduled-audits/2026-05-25/2203-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 22:03
+- `docs/scheduled-audits/2026-05-25/2303-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-25 23:03
+- `docs/scheduled-audits/2026-05-26/0003-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 00:03
+- `docs/scheduled-audits/2026-05-26/0103-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 01:03
+- `docs/scheduled-audits/2026-05-26/0203-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 02:03
+- `docs/scheduled-audits/2026-05-26/0303-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 03:03
+- `docs/scheduled-audits/2026-05-26/0403-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 04:03
+- `docs/scheduled-audits/2026-05-26/0503-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 05:03
+- `docs/scheduled-audits/2026-05-26/0603-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 06:03
+- `docs/scheduled-audits/2026-05-26/0703-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 07:03
+- `docs/scheduled-audits/2026-05-26/0803-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 08:03
+- `docs/scheduled-audits/2026-05-26/0903-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 09:03
+- `docs/scheduled-audits/2026-05-26/1003-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 10:03
+- `docs/scheduled-audits/2026-05-26/1103-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 11:03
+- `docs/scheduled-audits/2026-05-26/1203-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 12:03
+- `docs/scheduled-audits/2026-05-26/1303-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 13:03
+- `docs/scheduled-audits/2026-05-26/1403-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 14:03
+- `docs/scheduled-audits/2026-05-26/1704-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 17:04
+- `docs/scheduled-audits/2026-05-26/1804-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 18:04
+- `docs/scheduled-audits/2026-05-26/1904-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 19:04
+- `docs/scheduled-audits/2026-05-26/2004-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 20:04
+- `docs/scheduled-audits/2026-05-26/2104-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 21:04
+- `docs/scheduled-audits/2026-05-26/2204-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 22:04
+- `docs/scheduled-audits/2026-05-26/2304-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-26 23:04
+- `docs/scheduled-audits/2026-05-27/0004-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-27 00:04
+- `docs/scheduled-audits/2026-05-27/0104-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-27 01:04
+- `docs/scheduled-audits/2026-05-27/0204-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-27 02:04
+- `docs/scheduled-audits/2026-05-27/0304-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-27 03:04
+- `docs/scheduled-audits/2026-05-27/0404-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-27 04:04
+- `docs/scheduled-audits/2026-05-27/0504-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-27 05:04
+- `docs/scheduled-audits/2026-05-27/0604-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-27 06:04
+- `docs/scheduled-audits/2026-05-27/0704-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-27 07:04
+- `docs/scheduled-audits/2026-05-27/0804-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-27 08:04
+- `docs/scheduled-audits/2026-05-27/0904-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-27 09:04
+- `docs/scheduled-audits/2026-05-27/1004-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-27 10:04
+- `docs/scheduled-audits/2026-05-27/1104-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-27 11:04
+- `docs/scheduled-audits/2026-05-27/1204-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-27 12:04
+- `docs/scheduled-audits/2026-05-27/1304-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-27 13:04
+- `docs/scheduled-audits/2026-05-27/1404-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-27 14:04
+- `docs/scheduled-audits/2026-05-27/1504-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-27 15:04
+- `docs/scheduled-audits/2026-05-27/1604-repo-sentinel.md` — Hourly Repo Sentinel Audit — 2026-05-27 16:04
+- `docs/scheduled-audits/INDEX.md` — Repository Sentinel Audit Index
+- `docs/scheduled-audits/README.md` — Scheduled audit snapshots
+- `docs/scheduled-plans/2026-05-23-plan.md` — Scheduled Plan — 2026-05-23
+- `docs/scheduled-plans/2026-05-24-plan.md` — Scheduled Plan — 2026-05-24
+- `docs/scheduled-plans/2026-05-25-plan.md` — Scheduled Plan — 2026-05-25
+- `docs/scheduled-plans/2026-05-26-plan.md` — Scheduled Plan — 2026-05-26
+- `docs/scheduled-plans/commit-batches/2026-05-24-uncommitted-batches.md` — Uncommitted Work Batch Plan — 2026-05-24
+- `docs/tui/APPROVAL_SURFACE_CONTRACT.md` — Approval Surface contract
+- `docs/tui/CAPABILITY_DASHBOARD_CONTRACT.md` — Capability Dashboard contract
+- `docs/tui/DOCTOR_READINESS_SURFACE_CONTRACT.md` — Doctor and Readiness Surface contract
+- `docs/tui/EVIDENCE_SURFACE_CONTRACT.md` — Evidence Surface contract
+- `docs/tui/INDEX.md` — VAC TUI contracts
+- `docs/tui/OPERATOR_CONSOLE_LIVE_ADAPTER.md` — Operator Console Live Adapter
+- `docs/tui/OPERATOR_CONSOLE_STYLE_TOKENS.md` — Operator Console Style Tokens
+- `docs/tui/OPERATOR_CONSOLE_VISUAL_FIDELITY.md` — Operator Console Visual Fidelity Gate
+- `docs/tui/OPERATOR_UI_HARDENING_03_STATUS_OUTPUT.md` — Operator UI Hardening 03 — `/status` Output Contract
+- `docs/tui/OPERATOR_UI_HARDENING_04_10_IMPLEMENTATION.md` — VAC TUI Operator UI Hardening 4-10 Implementation
+- `docs/tui/OPERATOR_UI_HARDENING_PLAN_1_10.md` — VAC TUI Operator UI Hardening Plan 1-10
+- `docs/tui/PERFORMANCE_BENCHMARK_HARNESS.md` — VAC TUI performance benchmark harness
+- `docs/tui/STATUSLINE_CONTRACT.md` — Statusline contract
+- `docs/tui/STATUS_OUTPUT_DEEP_HARDENING.md` — TUI `/status` Deep Hardening Contract
+- `docs/tui/WORKFLOW_BROWSER_CONTRACT.md` — Workflow Browser contract
+- `docs/tui/operator-ui-visual-contract.md` — VAC TUI Operator UI Visual Contract
+- `docs/vac-init/VAC_INIT_BATCH_02_05_IMPLEMENTATION.md` — VAC-Init Batch 2-5 Implementation Notes
+- `docs/vac-init/VAC_INIT_BATCH_06_12_IMPLEMENTATION.md` — VAC-Init Batch 6-12 Implementation
+- `docs/vac-init/VAC_INIT_BATCH_13_15_IMPLEMENTATION.md` — VAC-Init Batch 13-15 Implementation
+- `docs/vac-init/VAC_INIT_DETERMINISTIC_HARDENING_P0_P4.md` — VAC-Init Deterministic Hardening P0-P4
+- `docs/vac-init/VAC_INIT_EXECUTION_PLAN.md` — VAC-Init Execution Plan
+- `docs/vac-init/VAC_INIT_GAP_BC_DEPTH_REMEDIATION.md` — VAC-Init GAP-B / GAP-C Remediation
+- `docs/vac-init/VAC_INIT_IMPLEMENTATION_MAP.md` — VAC-Init Implementation Map
+- `docs/vac-init/VAC_INIT_P5_LIVE_SCANNER_POLICY.md` — VAC-Init P5 Live Scanner and Policy Inference
+- `docs/vac-init/VAC_INIT_P6_TUI_REAL_DATA_ADAPTERS.md` — VAC-Init P6 TUI Real-Data Adapters
+- `docs/vac-init/VAC_INIT_P7_EVIDENCE_WHY_LIVE_INDEX.md` — VAC-Init P7 Evidence Writer and vac why Live Index
+- `docs/vac-init/VAC_INIT_P8_REGISTRY_MIGRATION_RUNTIME.md` — VAC-Init P8 Registry Migration Runtime
+- `docs/vac-init/VAC_INIT_P9_MINIMAL_E2E_DRY_RUN.md` — VAC-Init P9 Minimal E2E Dry Run
+- `docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md` — VAC-Init Production Hardening A
+- `docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_B.md` — VAC-Init Production Hardening B
+- `docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_C_RUNTIME_GATES.md` — VAC-Init Production Hardening C — Runtime Gate Enforcement
+- `docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_D_DURABLE_STORES.md` — VAC-Init Durable Stores
+- `docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_E_SCANNER_POLICY.md` — VAC-Init Scanner and Policy Inference Hardening
+- `docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_F_TUI_REAL_DATA.md` — VAC-Init TUI Real-Data Integration
+- `docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_G_FIXTURES_SECURITY.md` — VAC-Init Fixture Matrix and Security Regression
+- `docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_H_MIGRATION_RUNTIME.md` — VAC-Init Migration Runtime and Compatibility Cleanup
+- `docs/vac-init/VAC_INIT_PRODUCTION_RC1.md` — VAC-Init Production RC
+- `docs/vac-init/VAC_INIT_SCANNER_HARDENING_SPEC_FLOW.md` — VAC-Init Scanner Hardening — Executable Spec-Flow Plan
+- `docs/validation/CAPABILITY_DASHBOARD_GATE.md` — Capability Dashboard Gate
+- `docs/validation/INDEX.md` — VAC validation gates
+- `docs/validation/LOCAL_RUNTIME_GATE.md` — Local Runtime Gate
+- `docs/validation/P5_P9_VALIDATION.md` — P5-P9 Validation
+- `docs/validation/PRODUCTION_HARDENING_A1_A3_VALIDATION.md` — Production Hardening A1-A3 Validation
+- `docs/validation/PRODUCTION_HARDENING_B1_B4_VALIDATION.md` — Production Hardening B1-B4 Validation
+- `docs/validation/PRODUCTION_HARDENING_C1_C4_VALIDATION.md` — Production Hardening C1-C4 Validation
+- `docs/validation/PRODUCTION_HARDENING_D1_D3_VALIDATION.md` — VAC-Init Durable Stores Validation
+- `docs/validation/PRODUCTION_HARDENING_E1_E3_VALIDATION.md` — VAC-Init Scanner and Policy Inference Hardening Validation
+- `docs/validation/PRODUCTION_HARDENING_F1_F3_VALIDATION.md` — VAC-Init TUI Real-Data Integration Validation
+- `docs/validation/PRODUCTION_HARDENING_G1_G3_VALIDATION.md` — VAC-Init Fixture Matrix and Security Regression Validation
+- `docs/validation/PRODUCTION_HARDENING_H1_H2_VALIDATION.md` — VAC-Init Migration Runtime and Compatibility Cleanup Validation
+- `docs/validation/PRODUCTION_HARDENING_I1_I3_VALIDATION.md` — VAC-Init Production RC Validation
+- `docs/validation/RELEASE_GATE.md` — Release Gate
+- `docs/validation/TUI_OPERATOR_ANSI_STYLE_GATE.md` — TUI Operator ANSI Style Gate
+- `docs/validation/TUI_OPERATOR_UI_HARDENING_04_10_GATE.md` — TUI Operator UI Hardening 4-10 Gate
+- `docs/validation/TUI_OPERATOR_UI_HARDENING_GATE.md` — TUI Operator UI Hardening Gate
+- `docs/validation/TUI_OPERATOR_UI_SNAPSHOT_GATE.md` — TUI operator UI snapshot gate
+- `docs/validation/TUI_PTY_DOGFOOD_GATE.md` — TUI PTY Dogfood Gate Runbook
+- `docs/validation/TUI_STATUS_OUTPUT_DEEP_GATE.md` — TUI Status Output Deep Gate
+- `docs/validation/TUI_STATUS_OUTPUT_GATE.md` — TUI Status Output Gate
+- `docs/validation/VAC_INIT_APPROVAL_BINDING_GATE.md` — VAC-Init Approval Binding Gate
+- `docs/validation/VAC_INIT_BASELINE_AUDIT.md` — VAC-Init Baseline Audit
+- `docs/validation/VAC_INIT_BATCH_02_05_GATE.md` — VAC-Init Batch 2-5 Validation Gate
+- `docs/validation/VAC_INIT_BATCH_06_12_GATE.md` — VAC-Init Batch 6-12 Aggregate Gate
+- `docs/validation/VAC_INIT_BATCH_13_15_GATE.md` — VAC-Init Batch 13-15 Gate
+- `docs/validation/VAC_INIT_COMMAND_GATE.md` — VAC-Init Command Gate
+- `docs/validation/VAC_INIT_DETERMINISTIC_HARDENING_P0_P4_VALIDATION.md` — VAC-Init Deterministic Hardening P0-P4 Validation
+- `docs/validation/VAC_INIT_DOCTOR_RELEASE_GATE.md` — VAC-Init Doctor Release Gate
+- `docs/validation/VAC_INIT_EVIDENCE_CHAIN_GATE.md` — VAC-Init Evidence Chain Gate
+- `docs/validation/VAC_INIT_LIFECYCLE_GATE.md` — VAC-Init Lifecycle Gate
+- `docs/validation/VAC_INIT_MEMORY_GOVERNANCE_GATE.md` — VAC-Init Memory Governance Gate
+- `docs/validation/VAC_INIT_OWNERSHIP_SCANNER_GATE.md` — VAC-Init Ownership Scanner Gate
+- `docs/validation/VAC_INIT_PATCH_GUARD_GATE.md` — VAC-Init Patch Guard Gate
+- `docs/validation/VAC_INIT_POLICY_EVALUATOR_GATE.md` — VAC-Init Policy Evaluator Gate
+- `docs/validation/VAC_INIT_REGISTRY_VALIDATOR_GATE.md` — VAC-Init Registry Validator Gate
+- `docs/validation/VAC_INIT_RISK_POLICY_GATE.md` — VAC-Init Risk Policy Gate
+- `docs/validation/VAC_INIT_SAFE_RATIONALE_GATE.md` — VAC-Init Safe Rationale Gate
+- `docs/validation/VAC_INIT_SCHEMA_ENVELOPE_GATE.md` — VAC-Init Schema Envelope Gate
+- `docs/validation/VAC_INIT_SEMANTIC_PLAN_GATE.md` — VAC-Init Semantic Plan Gate
+- `docs/validation/WORKFLOW_BROWSER_GATE.md` — Workflow Browser Gate
+- `docs/workflow-control-plane/IMPLEMENTATION_PLAN.md` — VAC workflow control plane implementation plan
+- `docs/workflow-control-plane/INDEX.md` — Workflow Control Plane Index
+- `docs/workflow-control-plane/INITIAL_MANIFEST_SET.md` — Initial `.vac` manifest set
+- `docs/workflow-control-plane/INTERFERENCE_AUDIT.md` — VAC workflow-control-plane interference audit
+- `docs/workflow-control-plane/plans/00-operating-contract.md` — Plan 00 — Operating contract and architecture invariants
+- `docs/workflow-control-plane/plans/00A-build-unblock.md` — Plan 00A — Build unblock before control plane
+- `docs/workflow-control-plane/plans/00B-local-runtime-contract.md` — Plan 00B — Local Runtime Contract implementation
+- `docs/workflow-control-plane/plans/00C-rewire-vac-exec.md` — Plan 00C — Rewire `vac exec` to Local Runtime Contract
+- `docs/workflow-control-plane/plans/00D-rewire-vac-tui.md` — Plan 00D — Rewire root `vac` TUI to Local Runtime Contract
+- `docs/workflow-control-plane/plans/00E-evidence/2026-05-28-sandbox-delete-gate-supersession.md` — 00E delete-gate supersession evidence — 2026-05-28 sandbox
+- `docs/workflow-control-plane/plans/00E-runtime-reachability-delete-gate.md` — Plan 00E — Old runtime reachability and delete gate
+- `docs/workflow-control-plane/plans/00F-tui-legacy-transport-retirement.md` — Plan 00F - TUI legacy transport retirement
+- `docs/workflow-control-plane/plans/01-repo-layout-skeleton.md` — Plan 01 — Create `.vac` control plane skeleton
+- `docs/workflow-control-plane/plans/02-capability-schema.md` — Plan 02 — Capability manifest schema
+- `docs/workflow-control-plane/plans/02-evidence/2026-05-28-sandbox-capability-schema-closeout.md` — Plan 02 Evidence — Capability schema closeout sweep
+- `docs/workflow-control-plane/plans/03-evidence/2026-05-28-sandbox-workflow-schema-closeout.md` — Plan 03 Evidence — Workflow schema closeout sweep
+- `docs/workflow-control-plane/plans/03-workflow-schema.md` — Plan 03 — Workflow manifest schema
+- `docs/workflow-control-plane/plans/04-evidence/2026-05-28-sandbox-unknown-policy-default-deny.md` — Plan 04 Evidence — Unknown workflow step policy default-deny
+- `docs/workflow-control-plane/plans/04-policy-schema.md` — Plan 04 — Policy manifest schema
+- `docs/workflow-control-plane/plans/05-evidence/2026-05-28-sandbox-surface-schema-closeout.md` — Plan 05 Evidence — Surface schema closeout sweep
+- `docs/workflow-control-plane/plans/05-surface-schema.md` — Plan 05 — Surface manifest schema
+- `docs/workflow-control-plane/plans/06-evidence/2026-05-28-sandbox-registry-loader-closeout.md` — Plan 06 Evidence — Registry loader closeout sweep
+- `docs/workflow-control-plane/plans/06-registry-loader.md` — Plan 06 — Rust registry loader
+- `docs/workflow-control-plane/plans/07-evidence/2026-05-28-sandbox-registry-diagnostics-closeout.md` — Plan 07 Evidence — Registry diagnostics closeout sweep
+- `docs/workflow-control-plane/plans/07-registry-diagnostics.md` — Plan 07 — Registry diagnostics and error UX
+- `docs/workflow-control-plane/plans/08-evidence/2026-05-28-sandbox-root-seed-closeout.md` — Plan 08 Evidence — Root seed manifest closeout sweep
+- `docs/workflow-control-plane/plans/08-initial-root-manifests.md` — Plan 08 — Initial root capability and workflow manifests
+- `docs/workflow-control-plane/plans/09-capability-dashboard.md` — Plan 09 — TUI capability dashboard
+- `docs/workflow-control-plane/plans/10-workflow-browser.md` — Plan 10 — TUI workflow browser
+- `docs/workflow-control-plane/plans/11-evidence/2026-05-28-sandbox-surface-route-readiness.md` — Plan 11 evidence — sandbox surface route readiness closeout
+- `docs/workflow-control-plane/plans/11-evidence/2026-05-28-sandbox-surface-route-status-sync.md` — Plan 11 Evidence — Surface route status sync
+- `docs/workflow-control-plane/plans/11-slash-palette-convergence.md` — Plan 11 — Slash, palette, CLI surface convergence
+- `docs/workflow-control-plane/plans/12-safe-workflow-runner.md` — Plan 12 — Minimal safe workflow runner
+- `docs/workflow-control-plane/plans/13-workflow-progress-tui.md` — Plan 13 — Workflow progress and lifecycle in TUI
+- `docs/workflow-control-plane/plans/14-approval-policy-integration.md` — Plan 14 — Approval and policy integration
+- `docs/workflow-control-plane/plans/14-evidence/2026-05-28-sandbox-approval-readiness-closeout.md` — Plan 14 approval readiness closeout — 2026-05-28
+- `docs/workflow-control-plane/plans/15-maintenance-identity-check.md` — Plan 15 — Identity check maintenance workflow
+- `docs/workflow-control-plane/plans/16-evidence/2026-05-28-sandbox-build-readiness-closeout.md` — Plan 16 build readiness closeout — 2026-05-28
+- `docs/workflow-control-plane/plans/16-maintenance-build-check.md` — Plan 16 — Build check maintenance workflow
+- `docs/workflow-control-plane/plans/17-evidence/2026-05-28-sandbox-index-closeout.md` — Plan 17 index closeout evidence — 2026-05-28 sandbox
+- `docs/workflow-control-plane/plans/17-maintenance-no-duplicate-tui.md` — Plan 17 — No duplicate TUI maintenance workflow
+- `docs/workflow-control-plane/plans/18-evidence/2026-05-28-sandbox-index-closeout.md` — Plan 18 index closeout evidence — 2026-05-28 sandbox
+- `docs/workflow-control-plane/plans/18-release-gate.md` — Plan 18 — Release gate workflow
+- `docs/workflow-control-plane/plans/19-evidence/2026-05-28-sandbox-root-capability-ready-sync.md` — Plan 19 evidence — sandbox root capability ready sync
+- `docs/workflow-control-plane/plans/19-evidence/2026-05-28-sandbox-root-status-sync.md` — Plan 19 root capability promotion and status sync — 2026-05-28
+- `docs/workflow-control-plane/plans/19-root-feature-conversion.md` — Plan 19 — Convert root features into control-plane manifests
+- `docs/workflow-control-plane/plans/20-donor-gate.md` — Plan 20 — Donor-backed capability gate
+- `docs/workflow-control-plane/plans/20-evidence/2026-05-28-sandbox-donor-gate-ready.md` — Plan 20 evidence — sandbox donor gate ready sync
+- `docs/workflow-control-plane/plans/21-dead-code-and-ownership.md` — Plan 21 — Dead code and ownership enforcement
+- `docs/workflow-control-plane/plans/21-evidence/2026-05-28-sandbox-ownership-gate-ready.md` — Plan 21 evidence — sandbox ownership gate ready sync
+- `docs/workflow-control-plane/plans/22-enterprise-hygiene.md` — Plan 22 — Enterprise hygiene and documentation alignment
+- `docs/workflow-control-plane/plans/22-evidence/2026-05-28-sandbox-domain-status-sync.md` — Plan 22 domain/status sync — 2026-05-28
+- `docs/workflow-control-plane/plans/22-evidence/2026-05-28-sandbox-product-status-ready.md` — Product registry status ready sync — sandbox 2026-05-28
+- `docs/workflow-control-plane/plans/22-evidence/2026-05-28-sandbox-registry-status-ready.md` — Plan 22 Evidence — Registry status/domain sync ready
+- `docs/workflow-control-plane/plans/23-evidence/2026-05-26-L19-real-operator-runbook.md` — Plan 23 Evidence — L19 real-operator PTY runbook
+- `docs/workflow-control-plane/plans/23-evidence/2026-05-27-L23OPS-operator-evidence-status.md` — Plan 23 Evidence — L-23OPS operator evidence status
+- `docs/workflow-control-plane/plans/23-evidence/2026-05-28-sandbox-blocked-operator-release-policy.md` — Plan 23 BLOCKED-OPERATOR release policy closeout — 2026-05-28
+- `docs/workflow-control-plane/plans/23-pty-operator-gate.md` — Plan 23 — PTY operator gate as workflow capability
+- `docs/workflow-control-plane/plans/24-evidence/2026-05-28-sandbox-umbrella-closeout.md` — Plan 24 umbrella closeout evidence — sandbox 2026-05-28
+- `docs/workflow-control-plane/plans/24-local-runtime-owner-replacement.md` — Plan 24 — Local runtime owner replacement
+- `docs/workflow-control-plane/plans/25-evidence/2026-05-28-sandbox-semantic-contract-closeout.md` — Plan 25 semantic contract closeout evidence — 2026-05-28 sandbox
+- `docs/workflow-control-plane/plans/25-local-runtime-semantic-contract-hardening.md` — Plan 25 — Local runtime semantic contract hardening
+- `docs/workflow-control-plane/plans/26-evidence/2026-05-28-sandbox-owner-skeleton-closeout.md` — Plan 26 owner skeleton closeout evidence — 2026-05-28 sandbox
+- `docs/workflow-control-plane/plans/26-local-runtime-owner-skeleton.md` — Plan 26 — Local runtime owner skeleton
+- `docs/workflow-control-plane/plans/27-evidence/2026-05-28-sandbox-startup-fallback-sync.md` — Plan 27 startup fallback sync evidence — 2026-05-28 sandbox
+- `docs/workflow-control-plane/plans/27-retained-resources-startup-replacement.md` — Plan 27 — Retained resources and startup replacement
+- `docs/workflow-control-plane/plans/28-evidence/2026-05-28-sandbox-registry-closeout.md` — Plan 28 server-request registry closeout evidence — 2026-05-28 sandbox
+- `docs/workflow-control-plane/plans/28-server-request-registry-replacement.md` — Plan 28 — Server-request registry replacement
+- `docs/workflow-control-plane/plans/29-event-stream-replacement.md` — Plan 29 — Event stream replacement
+- `docs/workflow-control-plane/plans/29-evidence/2026-05-28-sandbox-event-stream-closeout.md` — Plan 29 event stream closeout evidence — 2026-05-28 sandbox
+- `docs/workflow-control-plane/plans/30-evidence/2026-05-25-30A-30E-completion.md` — Plan 30 evidence — 30A–30E completion
+- `docs/workflow-control-plane/plans/30-evidence/2026-05-25-30F-operator-ux-gate.md` — Plan 30F — Operator UX Gate Evidence
+- `docs/workflow-control-plane/plans/30-evidence/2026-05-25-30G-skills-external-agent.md` — Plan 30G — Skills/plugins + external-agent owner-bus migration evidence
+- `docs/workflow-control-plane/plans/30-evidence/2026-05-25-wave3a-plan30-closeout-reconciliation.md` — Wave 3A — Plan 30 closeout reconciliation
+- `docs/workflow-control-plane/plans/30-evidence/2026-05-26-30G-blocker3-closure.md` — Plan 30G blocker #3 closure — L24 TUI fallback scope
+- `docs/workflow-control-plane/plans/30-evidence/2026-05-26-30G-external-agent-import-completion.md` — Plan 30G external-agent import completion — L1 continuation
+- `docs/workflow-control-plane/plans/30-evidence/2026-05-26-30G-plugin-provider.md` — Plan 30G — W5C plugin owner provider evidence
+- `docs/workflow-control-plane/plans/30-evidence/2026-05-26-30G-provider-blockers.md` — Plan 30G — Provider blocker evidence (W5B)
+- `docs/workflow-control-plane/plans/30-evidence/2026-05-26-30G-residual-gap-audit.md` — Plan 30G residual provider gap audit — L12 read-only scout
+- `docs/workflow-control-plane/plans/30-evidence/2026-05-28-sandbox-owner-native-parity-closeout.md` — Plan 30 owner-native TUI session operation parity closeout — 2026-05-28
+- `docs/workflow-control-plane/plans/30-prompt-and-active-controls-cutover.md` — Plan 30 — Prompt submit and active controls cutover
+- `docs/workflow-control-plane/plans/31-evidence/2026-05-26-app-server-protocol-dep-graph.md` — L20 app-server-protocol dependency graph audit
+- `docs/workflow-control-plane/plans/31-evidence/2026-05-27-authmode-relocation.md` — L-AUTH AuthMode relocation evidence
+- `docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-compat-defer-marker.md` — Plan 31C Sandbox Evidence — Compatibility defer marker
+- `docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-compatibility-inventory.md` — Plan 31 Sandbox Compatibility Inventory — 2026-05-27
+- `docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-dto-owner-mapping.md` — Plan 31 evidence — DTO owner mapping snapshot
+- `docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-owner-native-default-cutover.md` — Plan 31C — Sandbox owner-native default cutover evidence
+- `docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-owner-native-runtime-protocol-complete.md` — Plan 31 — Owner-native runtime protocol completion evidence
+- `docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-runtime-protocol-dto-closure.md` — Plan 31D Evidence — Runtime Protocol DTO Closure
+- `docs/workflow-control-plane/plans/31-evidence/2026-05-27-threaditem-relocation.md` — L-THREADITEM relocation audit
+- `docs/workflow-control-plane/plans/31-evidence/2026-05-28-sandbox-mapping-superseded.md` — Plan 31 Evidence — Mapping blueprint superseded
+- `docs/workflow-control-plane/plans/31-inventory.md` — Plan 31 Inventory — App-server Protocol Retirement
+- `docs/workflow-control-plane/plans/31-mapping.md` — Plan 31 Mapping — App-server DTO Owner-Native Replacement
+- `docs/workflow-control-plane/plans/31-protocol-compatibility-retirement.md` — Plan 31 — Protocol compatibility retirement
+- `docs/workflow-control-plane/plans/32-evidence/2026-05-26-threshold-proposal.md` — Plan 32 L25 Threshold Proposal — 2026-05-26
+- `docs/workflow-control-plane/plans/32-evidence/2026-05-27-optional-manifest-ops.md` — Plan 32 optional manifest operations — 2026-05-27
+- `docs/workflow-control-plane/plans/32-evidence/2026-05-27-sandbox-runtime-owner-threshold-batch.md` — Plan 32 Sandbox Runtime-Owner Threshold Batch — 2026-05-27
+- `docs/workflow-control-plane/plans/32-evidence/2026-05-28-sandbox-hard-gate-promotion.md` — Plan 32 hard-gate promotion — 2026-05-28
+- `docs/workflow-control-plane/plans/32-evidence/2026-05-28-sandbox-threshold-doc-refresh.md` — Plan 32 Evidence — Threshold documentation refresh
+- `docs/workflow-control-plane/plans/32-vac-runtime-owner-gates.md` — Plan 32 — `.vac` runtime-owner gates
+- `docs/workflow-control-plane/plans/33-app-server-cargo-retirement-delete-defer-proof.md` — Plan 33 — App-server Cargo retirement and delete/defer proof
+- `docs/workflow-control-plane/plans/33-evidence/2026-05-24-plan00f-legacy-transport-reachability.md` — Plan 00F Legacy Transport Reachability Ledger — 2026-05-24
+- `docs/workflow-control-plane/plans/33-evidence/2026-05-24-stage3-summary.md` — Stage 3 Summary — 2026-05-24
+- `docs/workflow-control-plane/plans/33-evidence/2026-05-26-baseline-refresh.md` — Plan 33 baseline refresh — 2026-05-26
+- `docs/workflow-control-plane/plans/33-evidence/2026-05-26-mid-30G-snapshot.md` — Plan 33 mid-30G snapshot — 2026-05-26
+- `docs/workflow-control-plane/plans/33-evidence/2026-05-27-sandbox-cargo-defer-marker.md` — Plan 33 Sandbox Evidence — Cargo delete/defer marker
+- `docs/workflow-control-plane/plans/33-evidence/2026-05-27-sandbox-consumer-classification.md` — Plan 33 evidence — app-server consumer classification snapshot
+- `docs/workflow-control-plane/plans/33-evidence/2026-05-27-sandbox-default-cargo-cutover.md` — Plan 33 — Sandbox default Cargo cutover evidence
+- `docs/workflow-control-plane/plans/33-evidence/2026-05-27-sandbox-default-path-retirement-complete.md` — Plan 33 — Default product Cargo path retirement evidence
+- `docs/workflow-control-plane/plans/33-evidence/2026-05-27-sandbox-delete-defer-snapshot.md` — Plan 33 Sandbox Delete/Defer Snapshot — 2026-05-27
+- `docs/workflow-control-plane/plans/33-evidence/2026-05-27-sandbox-direct-tui-dependency-removal.md` — Plan 33F Evidence — Direct TUI Dependency Removal
+- `docs/workflow-control-plane/plans/33-evidence/README.md` — Plan 33 evidence pack — app-server reachability final proof
+- `docs/workflow-control-plane/plans/33-evidence/baseline-2026-05-25-post-30E/summary.md` — Plan 33 app-server reachability evidence capture
+- `docs/workflow-control-plane/plans/33-evidence/baseline-2026-05-25.md` — App-server reachability baseline evidence — 2026-05-25
+- `docs/workflow-control-plane/plans/33-evidence/closeout-evidence-index.md` — Plan 33 closeout evidence index — sandbox closeout 2026-05-28
+- `docs/workflow-control-plane/plans/33-evidence/inverse-cargo-tree-evidence.md` — Plan 33 inverse Cargo tree evidence — sandbox closeout 2026-05-28
+- `docs/workflow-control-plane/plans/33-evidence/runs/20260524T232817Z/summary.md` — Plan 33 app-server reachability evidence capture
+- `docs/workflow-control-plane/plans/33-evidence/source-grep-evidence.md` — Plan 33 source grep evidence — sandbox closeout 2026-05-28
+- `docs/workflow-control-plane/plans/33-evidence/validation-matrix.md` — Plan 33 validation matrix — sandbox closeout 2026-05-28
+- `docs/workflow-control-plane/plans/34-evidence/2026-05-27-sandbox-bootstrap-core.md` — Plan 34 evidence — sandbox bootstrap core
+- `docs/workflow-control-plane/plans/34-evidence/2026-05-27-sandbox-cli-tui-cutover.md` — Plan 34 Sandbox Evidence — CLI/TUI prompt cutover
+- `docs/workflow-control-plane/plans/34-evidence/2026-05-27-sandbox-rich-confirmation-strict-promotion.md` — Plan 34 — Rich confirmation and strict promotion evidence
+- `docs/workflow-control-plane/plans/34-evidence/2026-05-27-sandbox-tui-confirmation-strict-promotion-closeout.md` — Plan 34H Evidence — TUI Confirmation and Strict Promotion Closeout
+- `docs/workflow-control-plane/plans/34-evidence/2026-05-27-sandbox-zero-config-inventory.md` — Plan 34 Sandbox Zero-Config Inventory — 2026-05-27
+- `docs/workflow-control-plane/plans/34-evidence/2026-05-28-sandbox-blocker-closeout-sync.md` — Plan 34 blocker closeout sync — sandbox 2026-05-28
+- `docs/workflow-control-plane/plans/34-zero-config-project-workspace.md` — Plan 34 — Zero-config project workspace bootstrap
+- `docs/workflow-control-plane/plans/INDEX.md` — VAC workflow control plane split implementation plans
+- `docs/workflow-control-plane/plans/PLAN_QUALITY_RUBRIC.md` — Plan quality rubric — production-grade execution docs
+- `docs/workflow-control-plane/schema/INDEX.md` — `.vac` schema specifications
+- `docs/workflow-control-plane/schema/capability-manifest.schema.md` — Capability manifest schema
+- `docs/workflow-control-plane/schema/policy-manifest.schema.md` — Policy manifest schema
+- `docs/workflow-control-plane/schema/registry.schema.md` — Registry schema
+- `docs/workflow-control-plane/schema/surface-manifest.schema.md` — Surface manifest schema
+- `docs/workflow-control-plane/schema/workflow-manifest.schema.md` — Workflow manifest schema (v1)

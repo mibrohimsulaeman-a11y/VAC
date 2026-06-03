@@ -1,0 +1,25 @@
+---
+source: core/src/local_runtime/tests_serde.rs
+expression: fixed_approval_request()
+---
+{
+  "id": "33333333-3333-3333-3333-333333333333",
+  "task_id": "22222222-2222-2222-2222-222222222222",
+  "action": "write_files",
+  "risk": "safe_edit",
+  "reason": "VAC needs to update two files",
+  "resources": [
+    {
+      "File": "src/auth.rs"
+    },
+    {
+      "File": "tests/auth.rs"
+    }
+  ],
+  "preview": {
+    "Diff": "diff --git a/src/auth.rs b/src/auth.rs"
+  },
+  "validation_after": [
+    "cargo test -p auth"
+  ]
+}

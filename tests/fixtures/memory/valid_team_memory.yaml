@@ -1,0 +1,14 @@
+schema_version: 1
+kind: memory_record
+tier: team
+id: mem.team.ledger-rule
+created_at: 2026-05-29T00:00:00Z
+source: operator
+content:
+  type: rule
+  text: Ledger mutation must be append-only.
+access:
+  readable_by: [agent, operator]
+  writable_by: [operator]
+  deletable_by: [operator]
+approval_ref: approval.team-memory-ledger

@@ -1,0 +1,58 @@
+schema_version: 1
+kind: workflow
+id: maintenance.tui-operator-live-adapter
+title: TUI operator live adapter readiness
+status: ready
+inputs: {}
+ui:
+  surface: /runtime
+  inspect_surface: /capabilities
+  progress_panel: true
+  activity_log: true
+  evidence_surface: true
+policy:
+  default_risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for: []
+steps:
+- id: runtime_surface_uses_adapter
+  uses: capability.tui.operator_live_adapter.runtime
+  ui:
+    surface: /runtime
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: capability_surface_uses_adapter
+  uses: capability.tui.operator_live_adapter.capabilities
+  ui:
+    surface: /capabilities
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: deterministic_renderer_preserved
+  uses: capability.tui.operator_live_adapter.snapshot
+  ui:
+    surface: /capabilities
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+validation:
+  commands:
+  - id: maintenance.tui-operator-live-adapter.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-tui-operator-live-adapter.sh
+    risk: execute_process
+    approval: policy
+  - id: maintenance.tui-operator-live-adapter.validation.cmd002
+    runner: bash
+    args:
+    - scripts/check-tui-operator-snapshot-contract.sh
+    risk: execute_process
+    approval: policy
+  gates:
+  - capability_surface_uses_adapter
+  - deterministic_renderer_preserved
+  - runtime_surface_uses_adapter

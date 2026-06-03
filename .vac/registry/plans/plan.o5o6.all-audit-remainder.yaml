@@ -1,0 +1,54 @@
+schema_version: 1
+kind: plan
+id: plan.o5o6.all-audit-remainder
+status: ready
+title: O5/O6 all audit remainder source/static implementation
+updated_at: '2026-05-30T15:15:00Z'
+owner: vac.control_plane
+scope:
+  - vac-rs/**/split_manifest.yaml
+  - vac-rs/**/semantic_split.rs
+  - vac-rs/**/split_*.rs
+  - vac-rs/*/src/**/*.rs
+  - scripts/check-vac-o5-2-godfile-staging*.sh
+  - scripts/check-vac-o6-1-depanic-surface.sh
+  - scripts/measure-vac-o6-1-runtime-panic-surface.py
+  - scripts/check-vac-f5-protocol-duplication.sh
+  - scripts/check-vac-o5-5-donor-delete-gate.sh
+  - scripts/check-vac-o5o6-all-audit-remainder.sh
+  - .vac/registry/o5-godfile-staging-state.yaml
+  - .vac/registry/o6-panic-surface.yaml
+  - .vac/registry/o5-donor-delete-gate.yaml
+  - docs/monolith-quality/O5_2_SEMANTIC_SOURCE_SPLIT.md
+  - docs/monolith-quality/O6_1_DEPANIC_TRIAGE.md
+  - docs/monolith-quality/O5O6_ALL_AUDIT_REMAINDER_REPORT.md
+acceptance:
+  sv_done:
+    - Active O5.2 full-byte legacy_include.rs files are removed and replaced by reconstructable semantic source shards.
+    - O6.1 runtime panic denominator uses a source scanner that excludes tests/cfg(test), comments, and literals.
+    - App-server donor delete gate reflects source deletion and runtime-protocol schema bin relocation.
+    - F5 protocol duplication gate proves canonical protocol/v2.rs is single-source after app-server retirement.
+  tv_pending:
+    - cargo build --offline --workspace --locked
+    - cargo clippy --offline --workspace -- -D warnings
+    - cargo test --offline --workspace
+    - cargo tree -p vac-surface-tui --edges normal,build
+    - cargo geiger or equivalent unsafe audit
+validation:
+  commands:
+    - id: vac.o5o6.all-audit-remainder.static
+      runner: bash
+      args: [scripts/check-vac-o5o6-all-audit-remainder.sh]
+      risk: low
+      approval: never
+    - id: vac.o5o6.completion-state
+      runner: bash
+      args: [scripts/check-vac-o5-o6-completion-state.sh]
+      risk: low
+      approval: never
+rollback:
+  source_artifact: vac-o5o6-epic-a-app-server-retirement-source.zip
+  notes: Restore Epic A artifact and remove semantic shard split, O6.1 precise scanner, donor-gate update, and F5 duplicate gate.
+signature:
+  algorithm: none
+  value: null

@@ -1,0 +1,21 @@
+# VAC operator TUI snapshot
+scenario: agent working
+viewport: 140x40
+---
+● ● ●     vac · interactive   agent working
+you  14:22:06
+  refactor vac_tui_runtime/handlers/input.rs — extract popup routing
+vac  claude-sonnet-4.5 · turn 3 · 14:22:08
+╭tool timeline──────────────────────────────────────────────────────────────────╮
+│ tool          target                         state       detail               │
+│ ● file_read   handlers/input.rs              passed      1.2s · 82,969 B      │
+│ ● grep        "fn handle_popup" in handlers/ passed      0.3s · 8 matches     │
+│ ● file_write  handlers/popup.rs              streaming   streaming            │
+│ ○ cargo check vac-tui                        queued      waiting on gate      │
+╰───────────────────────────────────────────────────────────────────────────────╯
+⌁ thinking · reading controller and extracting popup routing safely ▌
+The controller file is monolithic; routing is moved behind a bounded surface.
+╭context────────────────────────────────────────────────────────────────────────╮
+│ 68k / 200k  ███████░░░░░░░░░░░                                                │
+╰───────────────────────────────────────────────────────────────────────────────╯
+CONVERSATION │ model claude-sonnet-4.5 │ 68k tok │ manual │ valid 92% │ profile default · rulebook vil.core

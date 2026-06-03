@@ -1,0 +1,989 @@
+schema_version: 1
+kind: registry_status
+id: init.source_inventory.vac_manifest
+title: 'VAC init source inventory by class: vac_manifest'
+status: ready
+summary:
+  class: vac_manifest
+  total_files: 196
+files:
+  - path: .vac/.init/doctor_report.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/policy_inference_report.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/risk_findings.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/risk_findings/by-risk/credential_read.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/risk_findings/by-risk/execute_process.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/risk_findings/by-risk/filesystem_delete.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/risk_findings/by-risk/filesystem_write.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/risk_findings/by-risk/network_access.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/risk_findings/by-scope/build_output.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/risk_findings/by-scope/documentation.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/risk_findings/by-scope/donor_quarantined.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/risk_findings/by-scope/donor_reference.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/risk_findings/by-scope/generated.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/risk_findings/by-scope/product.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/risk_findings/by-scope/test.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/risk_findings/by-scope/unknown.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/risk_findings/by-scope/vac_manifest.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/risk_findings/by-scope/vendor.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/risk_findings/full.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/risk_findings/index.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/scan_report.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/scanner_doctor_report.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/source_inventory.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/source_inventory/by-class/build_output.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/source_inventory/by-class/documentation.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/source_inventory/by-class/donor_quarantined.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/source_inventory/by-class/donor_reference.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/source_inventory/by-class/generated.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/source_inventory/by-class/product.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/source_inventory/by-class/test.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/source_inventory/by-class/unknown.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/source_inventory/by-class/vac_manifest.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/source_inventory/by-class/vendor.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/state.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/.init/strategy.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/approvals.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/architecture.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/autopilot-scheduler-monitor-only.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/autopilot-scheduler.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/build.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/chat.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/docs-plan-reconciliation.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/docs-state-refresh.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/dogfood-session.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/donor_migration.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/durable-stores.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/evidence-why-live.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/fixtures-security-regression.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/global-release-blockers.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/identity-check.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/identity.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/local_runtime_owner.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/migration-runtime.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/ownership.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/production-rc.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/release.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/runtime_approval_bridge.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/safe-provenance-scrub.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/sandbox.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/scanner-hardening-spec-flow.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/scanner-policy-hardening.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/sessions.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/tools.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/tui-agent-streaming-runtime.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/tui-ansi-style.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/tui-approval-popup-safety.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/tui-capability-dashboard-runtime.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/tui-operator-live-adapter.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/tui-operator-visual-fidelity-matrix.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/tui-operator-visual-gate.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/tui-pty-gate.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/tui-real-data.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/tui-renderer-semantic-contract.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/tui-source-artifact-hygiene.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/tui-spec-driven-consolidation.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/tui-status-output.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/tui.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/tui_session_runtime.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-approval-binding.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-cli-runtime-foundation.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-command-gate.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-control-plane.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-deterministic-hardening-p0-p4.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-doctor-release.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-evidence-chain.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-lifecycle.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-manifest-contracts.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-memory-governance.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-ownership-scanner.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-patch-guard.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-policy-evaluator.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-registry-strictness.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-registry-validator.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-risk-policy.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-runtime-gate-enforcement.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-safe-rationale.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-schema-envelope.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/vac-init-semantic-plan.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/capabilities/workflow.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/policies/approval.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/policies/default-local.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/policies/filesystem.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/policies/network.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/policies/runtime-owner-replacement.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/policies/sandbox.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/policies/tools.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/approvals/approval.production-rc-example.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/docs-state.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/domains.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/donor-inventory.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/evidence/evidence.2026-05-29-cli-runtime.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/evidence/evidence.2026-05-30-dogfood-assistant-model.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/evidence/evidence.2026-05-30-scanner-hardening-s5-s8-o1-o4.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/evidence/evidence.2026-05-30-scanner-hardening-spec-flow.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/evidence/evidence.2026-05-30-vac-init-command.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/legal-release-blockers.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/memory/semantic/mem.semantic.production-rc.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/migrations/migration.v1-hardening-h.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/ownership/report.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/plan-state.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/plans/plan.dogfood.assistant-model.vac-session.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/plans/plan.scanner-hardening.s5-s8-o1-o4.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/plans/plan.scanner-hardening.spec-flow.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/plans/plan.vac-init.command.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/product.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/status.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/trajectory/dogfood-assistant-model.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/trajectory/index.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/trajectory/scanner-hardening-s5-s8-o1-o4.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/trajectory/scanner-hardening-spec-flow.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/registry/trajectory/vac-init-command.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/surfaces/cli.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/surfaces/palette.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/surfaces/slash.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/surfaces/tui.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.autopilot-scheduler-monitor-only.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.autopilot-scheduler-readiness.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.build-check.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.docs-plan-reconciliation.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.docs-state-refresh.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.dogfood-assistant-model.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.donor-migration-gate.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.durable-stores.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.evidence-why-live.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.fixtures-security-regression.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.global-release-blockers.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.identity-check.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.migration-runtime.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.no-app-server-local-path.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.no-duplicate-tui.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.ownership-scan.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.production-rc.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.release-gate.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.runtime-owner-gate.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.safe-provenance-scrub-o4.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.scanner-hardening-spec-flow.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.scanner-policy-hardening.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.tui-agent-streaming-runtime.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.tui-approval-popup-safety.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.tui-capability-dashboard-runtime.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.tui-hardening-4-10.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.tui-hardening-regression-lock.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.tui-operator-ansi-style.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.tui-operator-live-adapter.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.tui-operator-visual-fidelity-matrix.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.tui-operator-visual-gate.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.tui-pty-gate.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.tui-real-data.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.tui-renderer-semantic-contract.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.tui-source-artifact-hygiene.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.tui-spec-driven-consolidation.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.tui-status-output-deep-hardening.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.tui-status-output.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-approval-binding.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-baseline-audit.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-batch13-15.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-batch2-5.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-batch6-12.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-cli-runtime-foundation.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-command-gate.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-deterministic-hardening-p0-p4.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-doctor-release.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-evidence-chain.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-lifecycle.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-manifest-contracts.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-memory-governance.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-ownership-scanner.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-patch-guard.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-policy-evaluator.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-registry-strictness.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-registry-validator.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-risk-policy.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-runtime-gate-enforcement.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-safe-rationale.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-schema-envelope.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"
+  - path: .vac/workflows/maintenance.vac-init-semantic-plan.yaml
+    class: vac_manifest
+    language: yaml
+    scan_eligible: true
+    reason: "VAC manifest is scanned for governance context"

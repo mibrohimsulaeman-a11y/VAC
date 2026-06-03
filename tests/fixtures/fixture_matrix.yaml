@@ -1,0 +1,24 @@
+schema_version: 1
+kind: fixture_matrix
+id: vac.fixture_matrix.vac_init_gap_b_c_d_remaining
+title: VAC-Init fixture matrix coverage
+updated_at: '2026-05-30T12:30:00Z'
+categories:
+  schema: tests/fixtures/schema/valid_capability.yaml
+  state_machine: tests/fixtures/state_machine/init_ready.yaml
+  policy: tests/fixtures/policy/multi_policy_merge_six_layer.yaml
+  workspace: tests/fixtures/workspace/ownership_paths.txt
+  evidence: tests/fixtures/evidence/canonical_hash_vector.yaml
+  plans: tests/fixtures/plans/valid_semantic_plan.yaml
+  patches: tests/fixtures/patches/semantic_anchor_resolver.yaml
+  doctor: tests/fixtures/doctor/release_pass.yaml
+  memory: tests/fixtures/memory/valid_team_memory.yaml
+  trajectory: tests/fixtures/trajectory/safe_why.yaml
+  approvals: tests/fixtures/approvals/replay_nonce_invalid.yaml
+  risk: tests/fixtures/risk/scanner_confidence_matrix.yaml
+  signatures_approval: tests/fixtures/signatures/approval_ed25519_required.yaml
+  signatures_evidence: tests/fixtures/signatures/evidence_ed25519_required.yaml
+  migrations: tests/fixtures/migrations/runtime_depth_matrix.yaml
+  tui_scheduler: tests/fixtures/tui/scheduler_monitor_states.yaml
+status: sv_done_static
+tv_status: TV-Pending

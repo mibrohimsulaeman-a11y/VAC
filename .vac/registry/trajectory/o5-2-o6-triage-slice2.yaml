@@ -1,0 +1,41 @@
+schema_version: 1
+kind: trajectory
+id: trajectory.o5-2-o6-triage-slice2
+spans:
+- file: vac-rs/tui/src/chatwidget.rs
+  start_line: 1
+  end_line: 8
+  symbol: chatwidget_include_wrapper
+  evidence_id: evidence.2026-05-30-o5-2-o6-triage-slice2
+- file: docs/monolith-quality/O6_1_DEPANIC_TRIAGE.md
+  start_line: 1
+  end_line: 120
+  symbol: o6_depanic_triage
+  evidence_id: evidence.2026-05-30-o5-2-o6-triage-slice2
+results_by_evidence:
+  evidence.2026-05-30-o5-2-o6-triage-slice2:
+    evidence_id: evidence.2026-05-30-o5-2-o6-triage-slice2
+    timestamp: '2026-05-30T00:00:00Z'
+    task: O5.2 chatwidget god-file staging and O6 quality triage
+    plan_id: plan.o5-2-o6-triage.slice2
+    capability: vac.monolith.godfile-staging
+    rationale:
+      summary: Staged the largest TUI god-file using include-preserving wrapper and recorded static quality triage while keeping build status NotEvaluated.
+      policy_refs:
+      - vac.no-hardcoded-readiness
+      evidence_refs:
+      - evidence.2026-05-30-o5-2-o6-triage-slice2
+      memory_refs:
+        team_rules: []
+        semantic_refs: []
+      excluded:
+        raw_chain_of_thought: true
+    changeset:
+      operation: modify
+      diff_excerpt: chatwidget.rs became an include wrapper; original content moved verbatim to legacy_include.rs.
+      lines_added: 0
+      lines_removed: 0
+    approval:
+      approved_by: operator
+      content_hash: d33d0b78e252f7fc424fd888aab2916da64f79624257cb78015070e9e06fcebb
+    chain_depth: 1

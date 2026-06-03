@@ -1,0 +1,343 @@
+schema_version: 1
+kind: plan
+id: plan.o5o6.tui-local-tool-cleanup
+status: implemented_static
+updated_at: '2026-06-01T00:00:00Z'
+title: O5/O6 TUI local coding tool cleanup and safety polish
+summary: Remove non-local TUI features, disable cloud ChatGPT Apps directory fetches while preserving MCP @mention helpers, make DESTRUCTIVE approval styling red, and harden static gates for draw-read-only and cleanup regressions.
+task:
+  description: Apply the approved local-tool cleanup target list plus the latest TUI visual/performance safety follow-ups without touching locked auth/provider/dashboard/external-agent/docs/script surfaces.
+  capability: vac.tui.operator-live-adapter
+allowed_files:
+  - path: vac-rs/tui/src/bottom_pane/approval_overlay.rs
+    operation: modify
+    ownership: vac.tui
+    semantic_anchor:
+      kind: audit_finding
+      symbol: approval_overlay.destructive_danger_red
+    rationale: Route DESTRUCTIVE label to red danger styling instead of warning yellow.
+  - path: vac-rs/tui/src/lib.rs
+    operation: modify
+    ownership: vac.tui
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: tui.voice_audio.local_stub
+    rationale: Keep explicit disabled voice/audio compatibility stubs after removing implementation files and realtime crate.
+  - path: vac-rs/tui/src/app_event.rs
+    operation: modify
+    ownership: vac.tui
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: tui.realtime.transport_types.local_stub
+    rationale: Remove dependency on the realtime WebRTC crate while keeping old event shapes degradable.
+  - path: vac-rs/tui/src/chatwidget/realtime.rs
+    operation: modify
+    ownership: vac.tui
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: tui.chatwidget.realtime.removed_stub
+    rationale: Replace realtime voice/WebRTC behavior with explicit local-tool removed messaging.
+  - path: vac-rs/tui/src/ide_context.rs
+    operation: modify
+    ownership: vac.tui
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: tui.ide_context.removed_stub
+    rationale: Remove VSCode/IDE IPC integration and keep local fallback hints.
+  - path: vac-rs/tui/src/chatwidget/ide_context.rs
+    operation: modify
+    ownership: vac.tui
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: tui.chatwidget.ide_context.removed_stub
+    rationale: Make /ide degrade locally without IPC/socket fetches.
+  - path: vac-rs/tui/src/multi_agents.rs
+    operation: modify
+    ownership: vac.tui
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: tui.multi_agent_collaboration.removed_stub
+    rationale: Remove interactive multi-agent collaboration behavior while preserving external-agent import features elsewhere.
+  - path: vac-rs/realtime-webrtc
+    operation: delete
+    ownership: vac.tui
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: crate.realtime_webrtc.delete
+    rationale: Remove voice/realtime crate from local coding tool source.
+  - path: vac-rs/tui/src/audio_device.rs
+    operation: delete
+    ownership: vac.tui
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: tui.audio_device.delete
+    rationale: Remove audio-device implementation; lib.rs keeps explicit disabled stub.
+  - path: vac-rs/tui/src/voice.rs
+    operation: delete
+    ownership: vac.tui
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: tui.voice.delete
+    rationale: Remove voice implementation; lib.rs keeps explicit disabled stub.
+  - path: vac-rs/tui/src/ide_context
+    operation: delete
+    ownership: vac.tui
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: tui.ide_ipc.delete
+    rationale: Remove VSCode/IDE IPC, prompt, and Windows pipe modules.
+  - path: vac-rs/connectors/src/lib.rs
+    operation: modify
+    ownership: vac.mcp
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: connectors.local_mcp_helpers_only
+    rationale: Remove cloud directory/cache/fetch API from connectors crate while preserving MCP @mention helper modules.
+  - path: vac-rs/connectors/src/filter.rs
+    operation: modify
+    ownership: vac.mcp
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: connectors.filter.local_compat
+    rationale: Keep compatibility filtering API without cloud originator/disallowed ChatGPT Apps blocklists.
+  - path: vac-rs/core/src/connectors.rs
+    operation: modify
+    ownership: vac.mcp
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: core.connectors.no_cloud_directory
+    rationale: Remove ChatGPT Apps directory fetch and use local MCP-derived accessible connectors only.
+  - path: vac-rs/chatgpt/src/connectors.rs
+    operation: modify
+    ownership: vac.auth
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: chatgpt.connectors.local_plugins_only
+    rationale: Keep auth crate but remove cloud directory connector listing from local coding build.
+  - path: vac-rs/core/src/session/mcp.rs
+    operation: modify
+    ownership: vac.mcp
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: session.mcp.no_cloud_apps_injection
+    rationale: Stop injecting cloud ChatGPT Apps MCP server into session runtime.
+  - path: vac-rs/core/src/session/mod.rs
+    operation: modify
+    ownership: vac.mcp
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: session.mod.no_cloud_apps_import
+    rationale: Remove unused cloud Apps MCP import from core session module.
+  - path: vac-rs/vac-mcp/src/mcp/mod.rs
+    operation: modify
+    ownership: vac.mcp
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: vac_mcp.with_vac_apps_mcp.noop
+    rationale: Keep compatibility helper but make it an explicit local-build no-op.
+  - path: vac-rs/thread-store/src/remote
+    operation: delete
+    ownership: vac.thread_store
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: thread_store.remote_rpc.delete
+    rationale: Remove remote thread-store RPC client while keeping local rollout/thread-store path.
+  - path: vac-rs/thread-store/src/remote_disabled.rs
+    operation: create
+    ownership: vac.thread_store
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: thread_store.remote_rpc.fail_closed_shim
+    rationale: Preserve public type shape with a local-only fail-closed shim.
+  - path: vac-rs/thread-store/src/lib.rs
+    operation: modify
+    ownership: vac.thread_store
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: thread_store.remote_rpc.unwire
+    rationale: Point remote export at the fail-closed local shim.
+  - path: vac-rs/Cargo.toml
+    operation: modify
+    ownership: vac.workspace
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: workspace.remove_realtime_member_dep
+    rationale: Remove realtime-webrtc member/dependency and cpal target dependency.
+  - path: vac-rs/tui/Cargo.toml
+    operation: modify
+    ownership: vac.workspace
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: tui.remove_realtime_dep
+    rationale: Remove realtime crate/cpal dependency from TUI crate.
+  - path: pnpm-workspace.yaml
+    operation: modify
+    ownership: vac.workspace
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: pnpm.remove_dangling_members
+    rationale: Remove nonexistent sdk/typescript and responses-api-proxy npm workspace entries.
+  - path: pnpm-lock.yaml
+    operation: modify
+    ownership: vac.workspace
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: pnpm_lock.remove_dangling_importers
+    rationale: Remove dangling npm importer entries that no longer exist in the artifact.
+  - path: vac-rs/tui/src/wrapping.rs
+    operation: modify
+    ownership: vac.tui
+    semantic_anchor:
+      kind: performance_watch_item
+      symbol: wrapping.range_preallocation
+    rationale: Add conservative capacity preallocation for repeated wrap range computations.
+  - path: scripts/check-vac-tui-local-tool-cleanup-static.sh
+    operation: create
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: gate.local_tool_cleanup_static
+    rationale: Reject regressions that restore removed voice/IDE/cloud-directory/remote-thread-store surfaces.
+  - path: scripts/check-vac-tui-operator-draw-readonly-contract.sh
+    operation: create
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: performance_watch_item
+      symbol: gate.operator_draw_readonly_contract
+    rationale: Lock the draw-read-only contract so operator ticks cannot execute workflow schedulers.
+  - path: scripts/check-vac-control-plane-audit-findings-static.sh
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: gate.aggregate_cleanup_hooks
+    rationale: Run local-tool cleanup and draw-read-only gates from the existing audit static gate.
+  - path: .vac/registry/o6-panic-surface.yaml
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: o6_1_repin_after_cleanup
+    rationale: Re-pin O6.1 scanner metadata after deleting runtime files and adding cleanup shims.
+  - path: .vac/registry/o6-safety-coverage.yaml
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: o6_2_repin_after_cleanup
+    rationale: Re-pin O6.2 safety coverage metadata after removing safety-comment-heavy runtime files.
+  - path: .vac/registry/o6-quality-triage.yaml
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: o6_quality_triage_repin_after_cleanup
+    rationale: Keep O6 aggregate metadata aligned with reproduced scanners.
+  - path: .vac/registry/o5-o6-completion-state.yaml
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: completion_state_repin_after_cleanup
+    rationale: Keep completion state scanner summaries aligned after cleanup.
+  - path: .vac/registry/o5-o6-monolith-quality-state.yaml
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: monolith_quality_state_repin_after_cleanup
+    rationale: Keep monolith-quality state scanner summaries aligned after cleanup.
+  - path: .vac/registry/runtime/active_plan.yaml
+    operation: modify
+    ownership: vac.runtime.plan
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: plan.o5o6.tui-local-tool-cleanup.active
+    rationale: Make this cleanup slice the active runtime semantic plan.
+  - path: .vac/registry/plans/plan.o5o6.tui-local-tool-cleanup.yaml
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: plan.o5o6.tui-local-tool-cleanup
+    rationale: Record bounded plan for local-tool cleanup.
+  - path: .vac/registry/evidence/evidence.2026-06-01-o5o6-tui-local-tool-cleanup.yaml
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: evidence.2026-06-01-o5o6-tui-local-tool-cleanup
+    rationale: Record static validation evidence and TV-pending truth.
+  - path: .vac/registry/trajectory/o5o6-tui-local-tool-cleanup.yaml
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: trajectory.o5o6-tui-local-tool-cleanup
+    rationale: Preserve safe rationale for vac why.
+  - path: .vac/registry/trajectory/index.yaml
+    operation: modify
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: trajectory_index.tui_local_tool_cleanup
+    rationale: Register this cleanup evidence in safe rationale lookup.
+  - path: .vac/registry/compile-debt-ledger.yaml
+    operation: modify
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: compile_debt.tui_local_tool_cleanup
+    rationale: Mark cargo/live cleanup verification as TV-Pending because Rust toolchain is unavailable.
+  - path: docs/monolith-quality/O5O6_TUI_LOCAL_TOOL_CLEANUP_REPORT.md
+    operation: create
+    ownership: vac.docs
+    semantic_anchor:
+      kind: cleanup_target
+      symbol: tui_local_tool_cleanup_report
+    rationale: Document cleanup scope, kept surfaces, removed surfaces, validation, and TV-pending items.
+bounds:
+  max_patches: 64
+  max_new_files: 6
+  max_line_delta: 12000
+  timeout_seconds: 2400
+validation:
+  commands:
+    - id: vac.tui.local_tool_cleanup.static
+      runner: bash
+      args: [scripts/check-vac-tui-local-tool-cleanup-static.sh]
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.tui.operator_draw_readonly.contract
+      runner: bash
+      args: [scripts/check-vac-tui-operator-draw-readonly-contract.sh]
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.control-plane.audit-findings.static
+      runner: bash
+      args: [scripts/check-vac-control-plane-audit-findings-static.sh]
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.o6.depanic.surface
+      runner: bash
+      args: [scripts/check-vac-o6-1-depanic-surface.sh]
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.o6.safety.coverage
+      runner: bash
+      args: [scripts/check-vac-o6-2-safety-coverage.sh]
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.o5o6.audit.remainder
+      runner: bash
+      args: [scripts/check-vac-o5o6-all-audit-remainder.sh]
+      env:
+        VAC_O6_1_RESCAN: '0'
+      risk: safe_read
+      approval: never
+      result: PASS

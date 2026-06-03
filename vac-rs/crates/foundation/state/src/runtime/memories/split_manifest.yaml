@@ -1,0 +1,17 @@
+schema_version: 1
+kind: o5_godfile_semantic_split
+id: memories
+wrapper: vac-rs/state/src/runtime/memories.rs
+original_full_byte_sha256: f0eae337d2e157c9be6b0c25bb5c0e643911da136976951ae0edd142ba8cf534
+reconstruct_command: cat vac-rs/state/src/runtime/memories/split_001_job_kind_memory_stage1.rs vac-rs/state/src/runtime/memories/split_002_mark_global_phase2_job_succeeded_row.rs
+shards:
+  - path: vac-rs/state/src/runtime/memories/split_001_job_kind_memory_stage1.rs
+  start_line: 1
+  end_line: 1187
+  bytes: 38089
+  sha256: f9013c7e605ffa0911b96e86adb2e36813edd353eb792b25a0bf4754ca8628d3
+  - path: vac-rs/state/src/runtime/memories/split_002_mark_global_phase2_job_succeeded_row.rs
+  start_line: 1188
+  end_line: 4702
+  bytes: 67
+  sha256: da14c2fc0410a3b38328b7b20a2c309c3e4dc71e3671d725efc7e63b2bbb097e

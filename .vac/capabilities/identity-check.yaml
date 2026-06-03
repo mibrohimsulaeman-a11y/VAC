@@ -1,0 +1,44 @@
+schema_version: 1
+kind: capability
+id: vac.identity.check
+title: Identity Check
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane
+ownership:
+  crates:
+  - vac-core
+  modules:
+  - control_plane
+description: Product identity and legacy term scanning for the root product.
+reason: 'Identity-check workflow validation, palette exposure, ownership metadata, and root catalog source-domain mapping are synchronized after Plan 19/21 closeout.
+
+  '
+depends_on:
+- vac.workflow
+surfaces:
+  palette: true
+states:
+- empty
+- loading
+- success
+- failure
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+validation:
+  commands:
+  - id: vac.identity.check.validation.cmd001
+    runner: cargo
+    args:
+    - +1.93.0
+    - check
+    - -p
+    - vac-cli
+    risk: execute_process
+    approval: policy
+docs:
+- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

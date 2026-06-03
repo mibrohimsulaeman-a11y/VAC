@@ -1,0 +1,1884 @@
+schema_version: 1
+kind: risk_finding
+id: vac.init.risk_findings.full
+generated_at: '2026-06-01T22:58:00Z'
+generator: scripts/regen-vac-control-plane-projection.py
+scope: source_scan_regex
+findings:
+  - path: vac-rs/agent-identity/src/lib.rs
+    expect: 18
+    chatgpt: 38
+  - path: vac-rs/analytics/src/analytics_client_tests.rs
+    expect: 49
+  - path: vac-rs/ansi-escape/src/lib.rs
+    panic: 2
+  - path: vac-rs/apply-patch/src/invocation.rs
+    unwrap: 20
+    expect: 2
+    panic: 8
+  - path: vac-rs/apply-patch/src/lib.rs
+    unwrap: 95
+    expect: 2
+    panic: 5
+  - path: vac-rs/apply-patch/src/parser.rs
+    unwrap: 9
+  - path: vac-rs/apply-patch/src/streaming_parser.rs
+    unwrap: 1
+  - path: vac-rs/apply-patch/tests/suite/tool.rs
+    expect: 3
+  - path: vac-rs/arg0/src/lib.rs
+    expect: 1
+  - path: vac-rs/async-utils/src/lib.rs
+    expect: 1
+  - path: vac-rs/aws-auth/src/lib.rs
+    expect: 2
+  - path: vac-rs/cli/src/apply_cli.rs
+    chatgpt: 1
+  - path: vac-rs/cli/src/auth_cli.rs
+    expect: 1
+  - path: vac-rs/cli/src/doctor_cli.rs
+    unwrap: 15
+    expect: 69
+    panic: 1
+  - path: vac-rs/cli/src/main.rs
+    expect: 9
+    panic: 1
+  - path: vac-rs/cli/tests/runtime_owner_gates.rs
+    expect: 20
+  - path: vac-rs/code-mode/src/description.rs
+    unwrap: 2
+  - path: vac-rs/code-mode/src/runtime/mod.rs
+    unwrap: 6
+    panic: 1
+    unbounded_channel: 6
+  - path: vac-rs/code-mode/src/service.rs
+    unwrap: 16
+    unbounded_channel: 8
+  - path: vac-rs/config/src/config_requirements.rs
+    expect: 8
+    panic: 1
+  - path: vac-rs/config/src/config_toml.rs
+    chatgpt: 6
+  - path: vac-rs/config/src/constraint.rs
+    expect: 5
+  - path: vac-rs/config/src/hooks_tests.rs
+    expect: 4
+  - path: vac-rs/config/src/loader/mod.rs
+    expect: 4
+    chatgpt: 1
+  - path: vac-rs/config/src/marketplace_edit.rs
+    unwrap: 18
+  - path: vac-rs/config/src/mcp_types_tests.rs
+    expect: 21
+  - path: vac-rs/config/src/merge_tests.rs
+    expect: 3
+  - path: vac-rs/config/src/plugin_edit.rs
+    unwrap: 21
+  - path: vac-rs/config/src/profile_toml.rs
+    chatgpt: 3
+  - path: vac-rs/config/src/state_tests.rs
+    expect: 2
+  - path: vac-rs/config/src/thread_config/remote.rs
+    expect: 8
+  - path: vac-rs/config/src/thread_config.rs
+    expect: 3
+  - path: vac-rs/config/src/tui_keymap.rs
+    expect: 1
+  - path: vac-rs/config/src/types_tests.rs
+    expect: 4
+  - path: vac-rs/connectors/src/filter.rs
+    chatgpt: 1
+  - path: vac-rs/connectors/src/lib.rs
+    chatgpt: 1
+  - path: vac-rs/control-plane/src/control_plane/approval_lifecycle.rs
+    expect: 4
+  - path: vac-rs/control-plane/src/control_plane/approval_readiness.rs
+    expect: 9
+  - path: vac-rs/control-plane/src/control_plane/approval_store.rs
+    expect: 28
+  - path: vac-rs/control-plane/src/control_plane/architecture_invariants.rs
+    expect: 26
+  - path: vac-rs/control-plane/src/control_plane/build_check.rs
+    expect: 16
+  - path: vac-rs/control-plane/src/control_plane/build_readiness.rs
+    expect: 7
+  - path: vac-rs/control-plane/src/control_plane/capability_manifest_tests.rs
+    expect: 3
+  - path: vac-rs/control-plane/src/control_plane/capability_registry_tests.rs
+    expect: 18
+    panic: 2
+  - path: vac-rs/control-plane/src/control_plane/docs_maintenance.rs
+    expect: 19
+  - path: vac-rs/control-plane/src/control_plane/donor_domain_contract.rs
+    expect: 1
+  - path: vac-rs/control-plane/src/control_plane/donor_status.rs
+    expect: 8
+  - path: vac-rs/control-plane/src/control_plane/identity_check.rs
+    expect: 19
+  - path: vac-rs/control-plane/src/control_plane/kind_registry.rs
+    unwrap: 5
+    expect: 1
+  - path: vac-rs/control-plane/src/control_plane/no_duplicate_tui.rs
+    expect: 29
+  - path: vac-rs/control-plane/src/control_plane/ownership_scan_tests.rs
+    expect: 61
+  - path: vac-rs/control-plane/src/control_plane/policy_manifest_tests.rs
+    expect: 2
+  - path: vac-rs/control-plane/src/control_plane/policy_registry_tests.rs
+    expect: 19
+    panic: 2
+  - path: vac-rs/control-plane/src/control_plane/registry_diagnostics_tests.rs
+    expect: 83
+  - path: vac-rs/control-plane/src/control_plane/registry_tests.rs
+    expect: 32
+  - path: vac-rs/control-plane/src/control_plane/root_feature_conversion.rs
+    expect: 44
+  - path: vac-rs/control-plane/src/control_plane/schema_envelope.rs
+    expect: 6
+  - path: vac-rs/control-plane/src/control_plane/surface_doctor_tests.rs
+    expect: 30
+  - path: vac-rs/control-plane/src/control_plane/surface_manifest.rs
+    expect: 5
+  - path: vac-rs/control-plane/src/control_plane/surface_manifest_tests.rs
+    expect: 7
+  - path: vac-rs/control-plane/src/control_plane/surface_readiness.rs
+    expect: 4
+  - path: vac-rs/control-plane/src/control_plane/surface_registry_tests.rs
+    expect: 23
+    panic: 2
+  - path: vac-rs/control-plane/src/control_plane/vac_init_approval_binding.rs
+    unwrap: 2
+  - path: vac-rs/control-plane/src/control_plane/vac_init_autopilot_scheduler.rs
+    unwrap: 21
+    expect: 1
+  - path: vac-rs/control-plane/src/control_plane/vac_init_cli_runtime.rs
+    unwrap: 6
+  - path: vac-rs/control-plane/src/control_plane/vac_init_durable_stores.rs
+    unwrap: 1
+  - path: vac-rs/control-plane/src/control_plane/vac_init_evidence_chain.rs
+    unwrap: 1
+  - path: vac-rs/control-plane/src/control_plane/vac_init_evidence_writer.rs
+    unwrap: 2
+    expect: 1
+  - path: vac-rs/control-plane/src/control_plane/vac_init_lifecycle.rs
+    unwrap: 2
+  - path: vac-rs/control-plane/src/control_plane/vac_init_live_scanner_policy.rs
+    unwrap: 11
+    expect: 1
+  - path: vac-rs/control-plane/src/control_plane/vac_init_live_stores.rs
+    unwrap: 2
+    expect: 1
+  - path: vac-rs/control-plane/src/control_plane/vac_init_migration_runtime.rs
+    unwrap: 5
+  - path: vac-rs/control-plane/src/control_plane/vac_init_ownership_scanner.rs
+    unwrap: 1
+  - path: vac-rs/control-plane/src/control_plane/vac_init_patch_guard.rs
+    unwrap: 1
+  - path: vac-rs/control-plane/src/control_plane/vac_init_registry_strictness.rs
+    expect: 1
+  - path: vac-rs/control-plane/src/control_plane/vac_init_registry_validator.rs
+    unwrap: 8
+  - path: vac-rs/control-plane/src/control_plane/vac_init_tui_real_data.rs
+    unwrap: 17
+    expect: 1
+  - path: vac-rs/control-plane/src/control_plane/workflow_manifest_tests.rs
+    expect: 8
+  - path: vac-rs/control-plane/src/control_plane/workflow_registry_tests.rs
+    expect: 15
+  - path: vac-rs/control-plane/src/control_plane/workflow_runner/split_001_build_check.rs
+    expect: 80
+    panic: 1
+  - path: vac-rs/control-plane/src/local_runtime/projection.rs
+    expect: 6
+    panic: 1
+  - path: vac-rs/control-plane/src/local_runtime/tests.rs
+    unwrap: 4
+    expect: 15
+    panic: 1
+  - path: vac-rs/control-plane/src/local_runtime/tests_serde.rs
+    expect: 8
+  - path: vac-rs/core/src/agent/control_tests.rs
+    expect: 151
+    panic: 7
+  - path: vac-rs/core/src/agent/mailbox.rs
+    expect: 7
+  - path: vac-rs/core/src/agent/registry_tests.rs
+    expect: 36
+    panic: 6
+  - path: vac-rs/core/src/agent/role_tests.rs
+    expect: 42
+    panic: 1
+  - path: vac-rs/core/src/agents_md_tests.rs
+    unwrap: 35
+    expect: 52
+  - path: vac-rs/core/src/apply_patch_tests.rs
+    expect: 1
+  - path: vac-rs/core/src/apps/render.rs
+    expect: 1
+  - path: vac-rs/core/src/arc_monitor.rs
+    chatgpt: 1
+  - path: vac-rs/core/src/arc_monitor_tests.rs
+    expect: 5
+    chatgpt: 5
+  - path: vac-rs/core/src/client.rs
+    chatgpt: 4
+  - path: vac-rs/core/src/client_common_tests.rs
+    expect: 9
+  - path: vac-rs/core/src/client_tests.rs
+    expect: 6
+    chatgpt: 1
+  - path: vac-rs/core/src/cloud_account_disabled.rs
+    chatgpt: 3
+  - path: vac-rs/core/src/commit_attribution_tests.rs
+    expect: 1
+  - path: vac-rs/core/src/compact_tests.rs
+    expect: 1
+    panic: 5
+  - path: vac-rs/core/src/config/config_loader_tests.rs
+    expect: 64
+    panic: 2
+    chatgpt: 2
+  - path: vac-rs/core/src/config/config_tests.rs
+    unwrap: 2
+    expect: 118
+    panic: 17
+    chatgpt: 12
+  - path: vac-rs/core/src/config/edit_tests.rs
+    expect: 176
+  - path: vac-rs/core/src/config/mod/split_001_agentsmdmanager.rs
+    expect: 3
+    chatgpt: 4
+  - path: vac-rs/core/src/config/mod/split_002_multiagentv2config.rs
+    chatgpt: 7
+  - path: vac-rs/core/src/config/mod/split_005_env.rs
+    chatgpt: 7
+  - path: vac-rs/core/src/config/network_proxy_spec_tests.rs
+    expect: 16
+  - path: vac-rs/core/src/config/permissions_tests.rs
+    expect: 3
+  - path: vac-rs/core/src/config/schema_tests.rs
+    expect: 14
+    panic: 1
+  - path: vac-rs/core/src/connectors.rs
+    chatgpt: 8
+  - path: vac-rs/core/src/connectors_tests.rs
+    expect: 20
+  - path: vac-rs/core/src/context/contextual_user_message_tests.rs
+    expect: 2
+    panic: 3
+  - path: vac-rs/core/src/context/permissions_instructions.rs
+    panic: 4
+  - path: vac-rs/core/src/context/permissions_instructions_tests.rs
+    expect: 2
+  - path: vac-rs/core/src/context_manager/history_tests.rs
+    unwrap: 16
+    expect: 9
+    panic: 7
+  - path: vac-rs/core/src/environment_selection.rs
+    expect: 8
+  - path: vac-rs/core/src/event_mapping_tests.rs
+    expect: 14
+    panic: 14
+  - path: vac-rs/core/src/exec_policy_tests.rs
+    expect: 42
+  - path: vac-rs/core/src/exec_tests.rs
+    expect: 39
+  - path: vac-rs/core/src/file_watcher_tests.rs
+    expect: 64
+    unbounded_channel: 1
+  - path: vac-rs/core/src/git_info_tests.rs
+    unwrap: 32
+    expect: 66
+  - path: vac-rs/core/src/goals.rs
+    panic: 4
+  - path: vac-rs/core/src/guardian/review_session.rs
+    unwrap: 1
+    expect: 28
+    panic: 4
+  - path: vac-rs/core/src/guardian/tests.rs
+    expect: 47
+    panic: 6
+  - path: vac-rs/core/src/hook_runtime.rs
+    panic: 2
+  - path: vac-rs/core/src/installation_id.rs
+    expect: 12
+  - path: vac-rs/core/src/mcp_tool_call_tests.rs
+    expect: 88
+    panic: 3
+    chatgpt: 10
+  - path: vac-rs/core/src/mcp_tool_exposure_test.rs
+    expect: 4
+  - path: vac-rs/core/src/mcp_vastar_file.rs
+    expect: 26
+    chatgpt: 11
+  - path: vac-rs/core/src/message_history_tests.rs
+    expect: 35
+  - path: vac-rs/core/src/network_policy_decision_tests.rs
+    expect: 2
+  - path: vac-rs/core/src/network_proxy_loader_tests.rs
+    expect: 30
+  - path: vac-rs/core/src/plugins/discoverable_tests.rs
+    unwrap: 10
+    expect: 17
+  - path: vac-rs/core/src/plugins/render_tests.rs
+    expect: 1
+  - path: vac-rs/core/src/plugins/test_support.rs
+    unwrap: 2
+    expect: 2
+  - path: vac-rs/core/src/project_workspace.rs
+    expect: 24
+  - path: vac-rs/core/src/realtime_context_tests.rs
+    expect: 28
+  - path: vac-rs/core/src/realtime_conversation.rs
+    chatgpt: 1
+  - path: vac-rs/core/src/review_prompts.rs
+    expect: 4
+    panic: 5
+  - path: vac-rs/core/src/safety_tests.rs
+    unwrap: 11
+  - path: vac-rs/core/src/sandbox_tags_tests.rs
+    expect: 2
+  - path: vac-rs/core/src/session/config_lock.rs
+    expect: 10
+  - path: vac-rs/core/src/session/mod.rs
+    chatgpt: 1
+  - path: vac-rs/core/src/session/rollout_reconstruction_tests.rs
+    unwrap: 2
+    expect: 32
+  - path: vac-rs/core/src/session/session.rs
+    chatgpt: 2
+  - path: vac-rs/core/src/session/tests/guardian_tests.rs
+    expect: 31
+    panic: 2
+  - path: vac-rs/core/src/session/tests.rs
+    unwrap: 6
+    expect: 258
+    panic: 30
+    chatgpt: 3
+  - path: vac-rs/core/src/shell_snapshot_tests.rs
+    expect: 5
+    panic: 1
+  - path: vac-rs/core/src/shell_tests.rs
+    unwrap: 6
+  - path: vac-rs/core/src/skills_watcher.rs
+    expect: 2
+  - path: vac-rs/core/src/stream_events_utils_tests.rs
+    expect: 18
+    panic: 1
+  - path: vac-rs/core/src/tasks/mod_tests.rs
+    expect: 5
+    panic: 3
+  - path: vac-rs/core/src/tasks/review.rs
+    panic: 3
+  - path: vac-rs/core/src/test_support.rs
+    panic: 1
+  - path: vac-rs/core/src/thread_manager.rs
+    panic: 2
+  - path: vac-rs/core/src/thread_manager_tests.rs
+    unwrap: 10
+    expect: 92
+    panic: 1
+    chatgpt: 8
+  - path: vac-rs/core/src/thread_rollout_truncation_tests.rs
+    unwrap: 20
+    expect: 1
+  - path: vac-rs/core/src/tools/code_mode/execute_handler_tests.rs
+    expect: 2
+  - path: vac-rs/core/src/tools/context_tests.rs
+    expect: 2
+    panic: 11
+  - path: vac-rs/core/src/tools/handlers/agent_jobs_tests.rs
+    expect: 1
+    panic: 1
+  - path: vac-rs/core/src/tools/handlers/apply_patch_tests.rs
+    expect: 17
+    panic: 1
+  - path: vac-rs/core/src/tools/handlers/grep_files_tests.rs
+    unwrap: 9
+    expect: 4
+  - path: vac-rs/core/src/tools/handlers/list_dir_tests.rs
+    expect: 43
+  - path: vac-rs/core/src/tools/handlers/mcp_resource_tests.rs
+    unwrap: 3
+    expect: 8
+  - path: vac-rs/core/src/tools/handlers/mod.rs
+    expect: 8
+  - path: vac-rs/core/src/tools/handlers/multi_agents_tests.rs
+    expect: 228
+    panic: 31
+  - path: vac-rs/core/src/tools/handlers/request_plugin_install_tests.rs
+    expect: 16
+  - path: vac-rs/core/src/tools/handlers/request_user_input_tests.rs
+    panic: 1
+  - path: vac-rs/core/src/tools/handlers/shell_tests.rs
+    expect: 2
+  - path: vac-rs/core/src/tools/handlers/tool_search.rs
+    expect: 1
+  - path: vac-rs/core/src/tools/network_approval_tests.rs
+    expect: 2
+  - path: vac-rs/core/src/tools/router_tests.rs
+    expect: 2
+    panic: 1
+  - path: vac-rs/core/src/tools/runtimes/apply_patch_tests.rs
+    expect: 2
+  - path: vac-rs/core/src/tools/runtimes/mod_tests.rs
+    expect: 55
+  - path: vac-rs/core/src/tools/runtimes/shell/unix_escalation_tests.rs
+    unwrap: 21
+  - path: vac-rs/core/src/tools/runtimes/unified_exec.rs
+    panic: 1
+  - path: vac-rs/core/src/tools/spec_tests.rs
+    unwrap: 2
+    expect: 2
+    panic: 11
+  - path: vac-rs/core/src/turn_diff_tracker_tests.rs
+    unwrap: 47
+  - path: vac-rs/core/src/turn_metadata_tests.rs
+    expect: 27
+  - path: vac-rs/core/src/turn_timing_tests.rs
+    expect: 2
+  - path: vac-rs/core/src/unified_exec/async_watcher_tests.rs
+    unwrap: 1
+    expect: 4
+  - path: vac-rs/core/src/unified_exec/mod_tests.rs
+    expect: 9
+    panic: 1
+  - path: vac-rs/core/src/unified_exec/process_manager_tests.rs
+    expect: 4
+    panic: 1
+  - path: vac-rs/core/src/unified_exec/process_tests.rs
+    expect: 2
+  - path: vac-rs/core/src/user_shell_command_tests.rs
+    panic: 2
+  - path: vac-rs/core/src/util.rs
+    panic: 1
+  - path: vac-rs/core/src/util_tests.rs
+    unwrap: 14
+    chatgpt: 3
+  - path: vac-rs/core/src/vac_delegate_tests.rs
+    unwrap: 3
+    expect: 24
+    panic: 1
+  - path: vac-rs/core/src/windows_sandbox.rs
+    panic: 1
+  - path: vac-rs/core/src/windows_sandbox_read_grants_tests.rs
+    expect: 4
+  - path: vac-rs/core/tests/common/apps_test_server.rs
+    chatgpt: 3
+  - path: vac-rs/core/tests/common/context_snapshot.rs
+    expect: 1
+  - path: vac-rs/core/tests/common/lib.rs
+    expect: 13
+    panic: 3
+  - path: vac-rs/core/tests/common/responses.rs
+    unwrap: 29
+    expect: 14
+    panic: 13
+  - path: vac-rs/core/tests/common/streaming_sse.rs
+    expect: 33
+  - path: vac-rs/core/tests/common/test_vac.rs
+    expect: 3
+    panic: 6
+  - path: vac-rs/core/tests/common/test_vac_exec.rs
+    expect: 4
+  - path: vac-rs/core/tests/common/zsh_branch.rs
+    expect: 3
+  - path: vac-rs/core/tests/responses_headers.rs
+    expect: 28
+    chatgpt: 2
+  - path: vac-rs/core/tests/suite/abort_tasks.rs
+    unwrap: 13
+    expect: 3
+  - path: vac-rs/core/tests/suite/agent_jobs.rs
+    expect: 17
+    panic: 2
+  - path: vac-rs/core/tests/suite/agent_websocket.rs
+    expect: 20
+  - path: vac-rs/core/tests/suite/agents_md.rs
+    expect: 3
+  - path: vac-rs/core/tests/suite/apply_patch_cli.rs
+    expect: 16
+    panic: 1
+  - path: vac-rs/core/tests/suite/approvals.rs
+    unwrap: 10
+    expect: 19
+    panic: 12
+  - path: vac-rs/core/tests/suite/branch_thread.rs
+    unwrap: 8
+    expect: 12
+    panic: 3
+  - path: vac-rs/core/tests/suite/cli_stream.rs
+    unwrap: 41
+    expect: 3
+    panic: 5
+  - path: vac-rs/core/tests/suite/client.rs
+    unwrap: 78
+    expect: 73
+    panic: 6
+    chatgpt: 22
+  - path: vac-rs/core/tests/suite/client_websockets.rs
+    unwrap: 8
+    expect: 78
+  - path: vac-rs/core/tests/suite/code_mode.rs
+    expect: 22
+    panic: 4
+    chatgpt: 3
+  - path: vac-rs/core/tests/suite/collaboration_instructions.rs
+    expect: 1
+  - path: vac-rs/core/tests/suite/compact.rs
+    unwrap: 73
+    expect: 47
+    panic: 14
+    chatgpt: 9
+  - path: vac-rs/core/tests/suite/compact_remote.rs
+    unwrap: 1
+    expect: 7
+    panic: 1
+    chatgpt: 23
+  - path: vac-rs/core/tests/suite/compact_resume_branch.rs
+    expect: 14
+    panic: 11
+  - path: vac-rs/core/tests/suite/deprecation_notice.rs
+    expect: 4
+  - path: vac-rs/core/tests/suite/exec.rs
+    unwrap: 5
+    expect: 8
+  - path: vac-rs/core/tests/suite/exec_policy.rs
+    expect: 9
+    panic: 1
+  - path: vac-rs/core/tests/suite/hierarchical_agents.rs
+    expect: 10
+  - path: vac-rs/core/tests/suite/hooks.rs
+    expect: 61
+    panic: 29
+  - path: vac-rs/core/tests/suite/hooks_mcp.rs
+    expect: 4
+    panic: 4
+  - path: vac-rs/core/tests/suite/image_rollout.rs
+    expect: 6
+  - path: vac-rs/core/tests/suite/items.rs
+    unwrap: 6
+    expect: 16
+    panic: 1
+  - path: vac-rs/core/tests/suite/live_cli.rs
+    unwrap: 3
+    expect: 9
+  - path: vac-rs/core/tests/suite/live_reload.rs
+    expect: 4
+    panic: 1
+  - path: vac-rs/core/tests/suite/model_overrides.rs
+    expect: 8
+  - path: vac-rs/core/tests/suite/model_switching.rs
+    expect: 9
+    chatgpt: 5
+  - path: vac-rs/core/tests/suite/model_visible_layout.rs
+    expect: 4
+  - path: vac-rs/core/tests/suite/models_cache_ttl.rs
+    expect: 4
+    chatgpt: 4
+  - path: vac-rs/core/tests/suite/models_etag_responses.rs
+    expect: 2
+    chatgpt: 1
+  - path: vac-rs/core/tests/suite/otel.rs
+    unwrap: 58
+    expect: 14
+    panic: 6
+  - path: vac-rs/core/tests/suite/override_updates.rs
+    expect: 3
+  - path: vac-rs/core/tests/suite/pending_input.rs
+    unwrap: 3
+    expect: 2
+    panic: 21
+  - path: vac-rs/core/tests/suite/permissions_messages.rs
+    expect: 4
+  - path: vac-rs/core/tests/suite/personality.rs
+    expect: 21
+    panic: 1
+    chatgpt: 2
+  - path: vac-rs/core/tests/suite/plugins.rs
+    expect: 18
+    panic: 1
+    chatgpt: 10
+  - path: vac-rs/core/tests/suite/prompt_caching.rs
+    unwrap: 5
+    expect: 26
+  - path: vac-rs/core/tests/suite/quota_exceeded.rs
+    unwrap: 1
+  - path: vac-rs/core/tests/suite/realtime_conversation.rs
+    expect: 37
+    panic: 7
+    chatgpt: 4
+  - path: vac-rs/core/tests/suite/remote_env.rs
+    expect: 1
+    panic: 2
+  - path: vac-rs/core/tests/suite/remote_models.rs
+    unwrap: 1
+    expect: 9
+    panic: 2
+    chatgpt: 15
+  - path: vac-rs/core/tests/suite/request_compression.rs
+    expect: 2
+    chatgpt: 1
+  - path: vac-rs/core/tests/suite/request_permissions.rs
+    unwrap: 8
+    expect: 42
+    panic: 17
+  - path: vac-rs/core/tests/suite/request_permissions_tool.rs
+    unwrap: 8
+    expect: 9
+    panic: 6
+  - path: vac-rs/core/tests/suite/request_plugin_install.rs
+    expect: 5
+    panic: 1
+    chatgpt: 3
+  - path: vac-rs/core/tests/suite/request_user_input.rs
+    expect: 1
+    panic: 4
+  - path: vac-rs/core/tests/suite/responses_api_proxy_headers.rs
+    expect: 1
+  - path: vac-rs/core/tests/suite/resume.rs
+    expect: 6
+    panic: 3
+  - path: vac-rs/core/tests/suite/resume_warning.rs
+    expect: 3
+    panic: 1
+  - path: vac-rs/core/tests/suite/review.rs
+    unwrap: 35
+    expect: 22
+    panic: 3
+  - path: vac-rs/core/tests/suite/rmcp_client.rs
+    expect: 58
+    panic: 11
+    chatgpt: 1
+  - path: vac-rs/core/tests/suite/rollout_list_find.rs
+    unwrap: 28
+    expect: 1
+  - path: vac-rs/core/tests/suite/safety_check_downgrade.rs
+    expect: 1
+    panic: 8
+  - path: vac-rs/core/tests/suite/search_tool.rs
+    expect: 17
+    panic: 1
+    chatgpt: 12
+  - path: vac-rs/core/tests/suite/shell_command.rs
+    expect: 1
+  - path: vac-rs/core/tests/suite/shell_serialization.rs
+    expect: 25
+  - path: vac-rs/core/tests/suite/shell_snapshot.rs
+    expect: 11
+  - path: vac-rs/core/tests/suite/skill_approval.rs
+    unwrap: 2
+  - path: vac-rs/core/tests/suite/skills.rs
+    unwrap: 2
+    expect: 4
+  - path: vac-rs/core/tests/suite/spawn_agent_description.rs
+    expect: 2
+    panic: 1
+    chatgpt: 1
+  - path: vac-rs/core/tests/suite/sqlite_state.rs
+    expect: 23
+  - path: vac-rs/core/tests/suite/stream_error_allows_next_turn.rs
+    unwrap: 3
+    expect: 1
+  - path: vac-rs/core/tests/suite/stream_no_completed.rs
+    unwrap: 2
+    panic: 1
+  - path: vac-rs/core/tests/suite/subagent_notifications.rs
+    expect: 11
+    panic: 1
+  - path: vac-rs/core/tests/suite/tool_harness.rs
+    expect: 4
+    panic: 2
+  - path: vac-rs/core/tests/suite/tool_parallelism.rs
+    expect: 3
+  - path: vac-rs/core/tests/suite/tools.rs
+    expect: 14
+  - path: vac-rs/core/tests/suite/truncation.rs
+    unwrap: 1
+    expect: 6
+  - path: vac-rs/core/tests/suite/turn_state.rs
+    expect: 3
+  - path: vac-rs/core/tests/suite/unified_exec.rs
+    expect: 73
+    panic: 5
+  - path: vac-rs/core/tests/suite/unstable_features_warning.rs
+    expect: 8
+    panic: 1
+  - path: vac-rs/core/tests/suite/user_notification.rs
+    unwrap: 1
+  - path: vac-rs/core/tests/suite/user_shell_cmd.rs
+    unwrap: 5
+    expect: 7
+  - path: vac-rs/core/tests/suite/vac_delegate.rs
+    expect: 10
+    panic: 2
+  - path: vac-rs/core/tests/suite/vastar_file_mcp.rs
+    expect: 4
+    panic: 4
+    chatgpt: 6
+  - path: vac-rs/core/tests/suite/view_image.rs
+    expect: 34
+    panic: 2
+    chatgpt: 1
+  - path: vac-rs/core/tests/suite/web_search.rs
+    expect: 24
+  - path: vac-rs/core/tests/suite/websocket_fallback.rs
+    expect: 2
+  - path: vac-rs/core/tests/suite/window_headers.rs
+    expect: 2
+    panic: 3
+  - path: vac-rs/core-plugins/src/loader_tests.rs
+    expect: 29
+  - path: vac-rs/core-plugins/src/manager.rs
+    chatgpt: 13
+  - path: vac-rs/core-plugins/src/manager_tests.rs
+    unwrap: 235
+    expect: 26
+    panic: 1
+    chatgpt: 20
+  - path: vac-rs/core-plugins/src/manifest.rs
+    expect: 14
+  - path: vac-rs/core-plugins/src/marketplace_add/metadata.rs
+    unwrap: 7
+  - path: vac-rs/core-plugins/src/marketplace_add/source.rs
+    unwrap: 13
+    panic: 1
+  - path: vac-rs/core-plugins/src/marketplace_add.rs
+    panic: 4
+  - path: vac-rs/core-plugins/src/marketplace_remove.rs
+    unwrap: 29
+  - path: vac-rs/core-plugins/src/marketplace_tests.rs
+    unwrap: 202
+    chatgpt: 5
+  - path: vac-rs/core-plugins/src/remote/remote_installed_plugin_sync.rs
+    expect: 8
+    chatgpt: 3
+  - path: vac-rs/core-plugins/src/remote/share/tests.rs
+    unwrap: 29
+    expect: 11
+    chatgpt: 11
+  - path: vac-rs/core-plugins/src/remote/share.rs
+    chatgpt: 7
+  - path: vac-rs/core-plugins/src/remote.rs
+    chatgpt: 23
+  - path: vac-rs/core-plugins/src/remote_bundle.rs
+    expect: 17
+    panic: 3
+    chatgpt: 7
+  - path: vac-rs/core-plugins/src/remote_legacy.rs
+    chatgpt: 9
+  - path: vac-rs/core-plugins/src/startup_remote_sync_tests.rs
+    expect: 4
+    chatgpt: 3
+  - path: vac-rs/core-plugins/src/startup_sync.rs
+    chatgpt: 5
+  - path: vac-rs/core-plugins/src/startup_sync_tests.rs
+    unwrap: 2
+    expect: 83
+  - path: vac-rs/core-plugins/src/store.rs
+    panic: 1
+  - path: vac-rs/core-plugins/src/store_tests.rs
+    unwrap: 45
+  - path: vac-rs/core-plugins/src/test_support.rs
+    unwrap: 2
+    expect: 4
+    chatgpt: 1
+  - path: vac-rs/core-skills/src/loader_tests.rs
+    unwrap: 30
+    expect: 64
+  - path: vac-rs/core-skills/src/manager_tests.rs
+    unwrap: 6
+    expect: 73
+  - path: vac-rs/core-skills/src/remote.rs
+    chatgpt: 10
+  - path: vac-rs/core-skills/src/render.rs
+    expect: 17
+  - path: vac-rs/device-key/src/lib.rs
+    expect: 29
+    chatgpt: 22
+  - path: vac-rs/exec/src/cli_tests.rs
+    panic: 2
+  - path: vac-rs/exec/src/lib.rs
+    chatgpt: 4
+  - path: vac-rs/exec/src/main_tests.rs
+    panic: 1
+  - path: vac-rs/exec/src/runtime_adapter.rs
+    unwrap: 3
+    expect: 1
+  - path: vac-rs/exec/tests/suite/apply_patch.rs
+    panic: 2
+  - path: vac-rs/exec/tests/suite/output_schema.rs
+    expect: 2
+  - path: vac-rs/exec/tests/suite/resume.rs
+    unwrap: 1
+    expect: 15
+  - path: vac-rs/exec/tests/suite/sandbox.rs
+    unwrap: 1
+    expect: 22
+    panic: 1
+  - path: vac-rs/exec-server/src/client.rs
+    expect: 28
+    panic: 4
+  - path: vac-rs/exec-server/src/environment.rs
+    expect: 21
+  - path: vac-rs/exec-server/src/environment_provider.rs
+    expect: 7
+  - path: vac-rs/exec-server/src/fs_helper.rs
+    expect: 2
+  - path: vac-rs/exec-server/src/fs_sandbox.rs
+    expect: 23
+  - path: vac-rs/exec-server/src/local_process.rs
+    expect: 8
+  - path: vac-rs/exec-server/src/process.rs
+    expect: 4
+  - path: vac-rs/exec-server/src/protocol.rs
+    expect: 3
+  - path: vac-rs/exec-server/src/remote_file_system.rs
+    expect: 3
+  - path: vac-rs/exec-server/src/rpc.rs
+    panic: 10
+  - path: vac-rs/exec-server/src/server/file_system_handler.rs
+    expect: 7
+  - path: vac-rs/exec-server/src/server/handler/tests.rs
+    expect: 21
+  - path: vac-rs/exec-server/src/server/processor.rs
+    expect: 17
+    panic: 2
+  - path: vac-rs/exec-server/src/server/transport_tests.rs
+    expect: 4
+  - path: vac-rs/exec-server/tests/exec_process.rs
+    expect: 3
+  - path: vac-rs/exec-server/tests/file_system.rs
+    panic: 7
+  - path: vac-rs/exec-server/tests/http_client.rs
+    expect: 8
+  - path: vac-rs/exec-server/tests/http_request.rs
+    expect: 1
+  - path: vac-rs/exec-server/tests/initialize.rs
+    panic: 1
+  - path: vac-rs/exec-server/tests/process.rs
+    panic: 7
+  - path: vac-rs/exec-server/tests/websocket.rs
+    panic: 2
+  - path: vac-rs/execpolicy/src/amend.rs
+    unwrap: 2
+    expect: 21
+  - path: vac-rs/execpolicy/src/parser.rs
+    expect: 2
+  - path: vac-rs/execpolicy/src/policy.rs
+    expect: 1
+  - path: vac-rs/execpolicy/tests/basic.rs
+    expect: 2
+    panic: 3
+  - path: vac-rs/external-agent-migration/src/lib.rs
+    unwrap: 14
+    expect: 42
+  - path: vac-rs/external-agent-sessions/src/detect.rs
+    expect: 20
+  - path: vac-rs/external-agent-sessions/src/export.rs
+    expect: 31
+  - path: vac-rs/external-agent-sessions/src/lib.rs
+    expect: 7
+  - path: vac-rs/features/src/lib.rs
+    chatgpt: 3
+  - path: vac-rs/features/src/tests.rs
+    expect: 4
+    panic: 1
+    chatgpt: 4
+  - path: vac-rs/feedback/src/lib.rs
+    unwrap: 3
+    expect: 5
+  - path: vac-rs/file-search/src/lib.rs
+    unwrap: 56
+    expect: 17
+  - path: vac-rs/file-search/src/main.rs
+    unwrap: 2
+    expect: 1
+  - path: vac-rs/git-utils/src/apply.rs
+    unwrap: 10
+    expect: 12
+    panic: 1
+  - path: vac-rs/git-utils/src/baseline.rs
+    expect: 45
+  - path: vac-rs/git-utils/src/branch.rs
+    unwrap: 1
+    expect: 2
+  - path: vac-rs/hooks/src/config_rules.rs
+    expect: 6
+  - path: vac-rs/hooks/src/engine/discovery.rs
+    expect: 2
+  - path: vac-rs/hooks/src/engine/mod_tests.rs
+    expect: 37
+  - path: vac-rs/hooks/src/engine/output_parser.rs
+    expect: 3
+  - path: vac-rs/hooks/src/engine/schema_loader.rs
+    panic: 1
+  - path: vac-rs/hooks/src/events/post_tool_use.rs
+    expect: 2
+  - path: vac-rs/hooks/src/events/pre_tool_use.rs
+    expect: 2
+  - path: vac-rs/hooks/src/legacy_notify.rs
+    expect: 1
+  - path: vac-rs/hooks/src/schema.rs
+    expect: 13
+    panic: 2
+  - path: vac-rs/hooks/src/types.rs
+    expect: 4
+  - path: vac-rs/linux-sandbox/build.rs
+    panic: 3
+  - path: vac-rs/linux-sandbox/src/bwrap.rs
+    expect: 138
+  - path: vac-rs/linux-sandbox/src/launcher.rs
+    expect: 5
+    panic: 8
+  - path: vac-rs/linux-sandbox/src/lib.rs
+    panic: 1
+  - path: vac-rs/linux-sandbox/src/linux_run_main.rs
+    expect: 2
+    panic: 54
+  - path: vac-rs/linux-sandbox/src/linux_run_main_tests.rs
+    expect: 38
+  - path: vac-rs/linux-sandbox/src/proxy_routing.rs
+    expect: 13
+  - path: vac-rs/linux-sandbox/src/vendored_bwrap.rs
+    panic: 2
+  - path: vac-rs/linux-sandbox/tests/suite/landlock.rs
+    unwrap: 4
+    expect: 41
+    panic: 5
+  - path: vac-rs/linux-sandbox/tests/suite/managed_proxy.rs
+    expect: 9
+    panic: 4
+  - path: vac-rs/lmstudio/src/client.rs
+    expect: 2
+  - path: vac-rs/local-runtime-owner/src/command_bus.rs
+    chatgpt: 1
+  - path: vac-rs/local-runtime-owner/src/event_stream.rs
+    expect: 20
+  - path: vac-rs/local-runtime-owner/src/external_agent_config.rs
+    expect: 10
+  - path: vac-rs/local-runtime-owner/src/lib.rs
+    expect: 31
+    panic: 3
+    chatgpt: 1
+  - path: vac-rs/local-runtime-owner/src/server_requests.rs
+    panic: 1
+  - path: vac-rs/local-runtime-owner/src/startup.rs
+    chatgpt: 12
+  - path: vac-rs/login/src/auth/agent_identity.rs
+    chatgpt: 3
+  - path: vac-rs/login/src/auth/auth_tests.rs
+    unwrap: 33
+    expect: 57
+    panic: 1
+    chatgpt: 87
+  - path: vac-rs/login/src/auth/default_client.rs
+    chatgpt: 5
+  - path: vac-rs/login/src/auth/default_client_tests.rs
+    unwrap: 4
+    expect: 5
+    chatgpt: 1
+  - path: vac-rs/login/src/auth/manager.rs
+    unwrap: 2
+    chatgpt: 153
+  - path: vac-rs/login/src/auth/revoke.rs
+    expect: 1
+    chatgpt: 5
+  - path: vac-rs/login/src/auth/storage.rs
+    chatgpt: 6
+  - path: vac-rs/login/src/auth/storage_tests.rs
+    expect: 7
+    chatgpt: 7
+  - path: vac-rs/login/src/device_code_auth.rs
+    chatgpt: 2
+  - path: vac-rs/login/src/server.rs
+    expect: 5
+    panic: 2
+    chatgpt: 17
+  - path: vac-rs/login/src/token_data.rs
+    chatgpt: 31
+  - path: vac-rs/login/src/token_data_tests.rs
+    unwrap: 2
+    expect: 9
+    chatgpt: 26
+  - path: vac-rs/login/tests/suite/auth_refresh.rs
+    expect: 15
+    panic: 2
+    chatgpt: 23
+  - path: vac-rs/login/tests/suite/device_code_login.rs
+    unwrap: 7
+    expect: 5
+    chatgpt: 6
+  - path: vac-rs/login/tests/suite/login_server_e2e.rs
+    unwrap: 7
+    expect: 2
+    panic: 1
+    chatgpt: 20
+  - path: vac-rs/login/tests/suite/logout.rs
+    expect: 3
+    chatgpt: 9
+  - path: vac-rs/memories/read/src/citations_tests.rs
+    expect: 3
+  - path: vac-rs/memories/read/src/prompts.rs
+    panic: 1
+  - path: vac-rs/memories/read/src/prompts_tests.rs
+    unwrap: 5
+  - path: vac-rs/memories/write/src/control.rs
+    expect: 13
+  - path: vac-rs/memories/write/src/extensions/ad_hoc_tests.rs
+    expect: 6
+  - path: vac-rs/memories/write/src/extensions/prune_tests.rs
+    expect: 13
+  - path: vac-rs/memories/write/src/phase1.rs
+    expect: 8
+  - path: vac-rs/memories/write/src/prompts.rs
+    panic: 1
+  - path: vac-rs/memories/write/src/prompts_tests.rs
+    unwrap: 5
+  - path: vac-rs/memories/write/src/startup_tests.rs
+    expect: 3
+    panic: 1
+  - path: vac-rs/memories/write/src/storage_tests.rs
+    expect: 18
+  - path: vac-rs/memories/write/src/workspace_tests.rs
+    expect: 11
+  - path: vac-rs/model-provider/src/amazon_bedrock/auth.rs
+    expect: 1
+  - path: vac-rs/model-provider/src/amazon_bedrock/catalog.rs
+    expect: 1
+  - path: vac-rs/model-provider/src/amazon_bedrock/mantle.rs
+    expect: 1
+  - path: vac-rs/model-provider/src/amazon_bedrock/mod.rs
+    expect: 2
+  - path: vac-rs/model-provider/src/auth.rs
+    expect: 1
+    chatgpt: 1
+  - path: vac-rs/model-provider/src/bearer_auth_provider.rs
+    chatgpt: 2
+  - path: vac-rs/model-provider/src/models_endpoint.rs
+    expect: 3
+  - path: vac-rs/model-provider/src/provider.rs
+    expect: 8
+    chatgpt: 2
+  - path: vac-rs/model-provider-info/src/lib.rs
+    chatgpt: 7
+  - path: vac-rs/model-provider-info/src/model_provider_info_tests.rs
+    unwrap: 10
+    expect: 2
+  - path: vac-rs/models-manager/src/collaboration_mode_presets.rs
+    panic: 2
+  - path: vac-rs/models-manager/src/collaboration_mode_presets_tests.rs
+    expect: 2
+  - path: vac-rs/models-manager/src/manager_tests.rs
+    expect: 42
+    panic: 1
+    chatgpt: 30
+  - path: vac-rs/models-manager/src/model_info_overrides_tests.rs
+    expect: 2
+  - path: vac-rs/network-proxy/src/certs.rs
+    unwrap: 10
+  - path: vac-rs/network-proxy/src/config.rs
+    unwrap: 28
+    panic: 1
+  - path: vac-rs/network-proxy/src/connect_policy.rs
+    expect: 4
+  - path: vac-rs/network-proxy/src/http_proxy.rs
+    unwrap: 20
+    expect: 13
+  - path: vac-rs/network-proxy/src/mitm_tests.rs
+    unwrap: 10
+    expect: 3
+  - path: vac-rs/network-proxy/src/network_policy.rs
+    unwrap: 6
+    expect: 6
+  - path: vac-rs/network-proxy/src/policy.rs
+    unwrap: 31
+  - path: vac-rs/network-proxy/src/proxy.rs
+    unwrap: 17
+    expect: 2
+    panic: 2
+  - path: vac-rs/network-proxy/src/runtime.rs
+    unwrap: 54
+    expect: 5
+  - path: vac-rs/network-proxy/src/socks5.rs
+    unwrap: 1
+    expect: 3
+  - path: vac-rs/ollama/src/client.rs
+    expect: 9
+  - path: vac-rs/otel/src/config.rs
+    chatgpt: 1
+  - path: vac-rs/otel/src/lib.rs
+    chatgpt: 2
+  - path: vac-rs/otel/src/metrics/tags.rs
+    expect: 2
+  - path: vac-rs/otel/src/otlp.rs
+    expect: 3
+  - path: vac-rs/otel/src/trace_context.rs
+    unwrap: 2
+    expect: 2
+  - path: vac-rs/otel/tests/harness/mod.rs
+    panic: 5
+  - path: vac-rs/otel/tests/suite/manager_metrics.rs
+    expect: 3
+    panic: 6
+  - path: vac-rs/otel/tests/suite/otel_export_routing_policy.rs
+    expect: 24
+    panic: 2
+    chatgpt: 4
+  - path: vac-rs/otel/tests/suite/otlp_http_loopback.rs
+    expect: 29
+    panic: 4
+  - path: vac-rs/otel/tests/suite/runtime_summary.rs
+    expect: 1
+  - path: vac-rs/otel/tests/suite/send.rs
+    unwrap: 1
+    expect: 5
+    panic: 11
+  - path: vac-rs/otel/tests/suite/snapshot.rs
+    expect: 3
+    panic: 4
+  - path: vac-rs/otel/tests/suite/timing.rs
+    panic: 3
+  - path: vac-rs/plugin/src/plugin_namespace.rs
+    expect: 6
+  - path: vac-rs/protocol/src/account.rs
+    expect: 6
+  - path: vac-rs/protocol/src/agent_path.rs
+    expect: 6
+  - path: vac-rs/protocol/src/approvals.rs
+    expect: 3
+  - path: vac-rs/protocol/src/auth.rs
+    expect: 2
+    chatgpt: 13
+  - path: vac-rs/protocol/src/config_types.rs
+    expect: 4
+    panic: 2
+  - path: vac-rs/protocol/src/dynamic_tools.rs
+    expect: 2
+  - path: vac-rs/protocol/src/error_tests.rs
+    unwrap: 12
+    chatgpt: 14
+  - path: vac-rs/protocol/src/items.rs
+    expect: 3
+    panic: 1
+  - path: vac-rs/protocol/src/mcp.rs
+    expect: 3
+  - path: vac-rs/protocol/src/models.rs
+    unwrap: 4
+    expect: 12
+    panic: 12
+  - path: vac-rs/protocol/src/num_format.rs
+    expect: 2
+  - path: vac-rs/protocol/src/permissions.rs
+    expect: 113
+    panic: 2
+  - path: vac-rs/protocol/src/protocol/split_005_websearchbeginevent.rs
+    unwrap: 20
+    expect: 33
+    panic: 6
+    chatgpt: 4
+  - path: vac-rs/protocol/src/vastar_models.rs
+    expect: 1
+    chatgpt: 3
+  - path: vac-rs/provider-http/src/api_bridge_tests.rs
+    expect: 1
+    panic: 7
+    chatgpt: 1
+  - path: vac-rs/provider-http/src/endpoint/memories.rs
+    expect: 6
+  - path: vac-rs/provider-http/src/endpoint/models.rs
+    unwrap: 6
+    expect: 3
+  - path: vac-rs/provider-http/src/endpoint/realtime_call.rs
+    unwrap: 12
+    expect: 11
+    panic: 1
+    chatgpt: 4
+  - path: vac-rs/provider-http/src/endpoint/realtime_websocket/methods.rs
+    expect: 130
+  - path: vac-rs/provider-http/src/endpoint/responses_websocket.rs
+    expect: 10
+    panic: 3
+    unbounded_channel: 2
+  - path: vac-rs/provider-http/src/files.rs
+    expect: 3
+    chatgpt: 4
+  - path: vac-rs/provider-http/src/rate_limits.rs
+    expect: 5
+  - path: vac-rs/provider-http/src/sse/responses.rs
+    unwrap: 1
+    expect: 11
+    panic: 8
+  - path: vac-rs/response-debug-context/src/lib.rs
+    chatgpt: 2
+  - path: vac-rs/rmcp-client/src/auth_status.rs
+    expect: 10
+  - path: vac-rs/rmcp-client/src/bin/rmcp_test_server.rs
+    expect: 2
+  - path: vac-rs/rmcp-client/src/bin/test_stdio_server.rs
+    expect: 9
+  - path: vac-rs/rmcp-client/src/bin/test_streamable_http_server.rs
+    expect: 4
+  - path: vac-rs/rmcp-client/src/elicitation_client_service.rs
+    expect: 3
+    panic: 1
+  - path: vac-rs/rmcp-client/src/oauth.rs
+    unwrap: 2
+    expect: 10
+  - path: vac-rs/rmcp-client/src/perform_oauth_login.rs
+    expect: 1
+  - path: vac-rs/rmcp-client/src/utils.rs
+    expect: 3
+  - path: vac-rs/rmcp-client/tests/resources.rs
+    expect: 2
+  - path: vac-rs/rollout/src/lib.rs
+    chatgpt: 1
+  - path: vac-rs/rollout/src/list.rs
+    unwrap: 1
+  - path: vac-rs/rollout/src/metadata_tests.rs
+    expect: 45
+  - path: vac-rs/rollout/src/recorder_tests.rs
+    expect: 57
+    panic: 1
+  - path: vac-rs/rollout/src/session_index_tests.rs
+    unwrap: 1
+    expect: 2
+  - path: vac-rs/rollout/src/state_db_tests.rs
+    expect: 4
+  - path: vac-rs/rollout/src/tests.rs
+    unwrap: 60
+    expect: 27
+  - path: vac-rs/rollout-trace/src/inference.rs
+    expect: 2
+  - path: vac-rs/rollout-trace/src/reducer/code_cell_tests.rs
+    expect: 1
+  - path: vac-rs/rollout-trace/src/reducer/conversation_tests.rs
+    expect: 1
+  - path: vac-rs/rollout-trace/src/reducer/test_support.rs
+    panic: 1
+  - path: vac-rs/rollout-trace/src/reducer/tool/agents_tests.rs
+    panic: 3
+  - path: vac-rs/rollout-trace/src/reducer/tool/terminal_tests.rs
+    expect: 1
+  - path: vac-rs/rollout-trace/src/thread_tests.rs
+    expect: 1
+  - path: vac-rs/runtime-protocol/src/export.rs
+    expect: 10
+    panic: 2
+  - path: vac-rs/runtime-protocol/src/protocol/common.rs
+    chatgpt: 18
+  - path: vac-rs/runtime-protocol/src/protocol/common_tests.rs
+    panic: 1
+  - path: vac-rs/runtime-protocol/src/protocol/event_mapping.rs
+    expect: 1
+    panic: 3
+  - path: vac-rs/runtime-protocol/src/protocol/thread_history.rs
+    expect: 12
+  - path: vac-rs/runtime-protocol/src/protocol/v1.rs
+    chatgpt: 2
+  - path: vac-rs/runtime-protocol/src/protocol/v2_parts/v2_part_000.rs
+    chatgpt: 2
+  - path: vac-rs/runtime-protocol/src/protocol/v2_parts/v2_part_001.rs
+    chatgpt: 21
+  - path: vac-rs/runtime-protocol/src/protocol/v2_parts/v2_part_002.rs
+    chatgpt: 1
+  - path: vac-rs/runtime-protocol/src/protocol/v2_parts/v2_part_006.rs
+    expect: 13
+  - path: vac-rs/runtime-protocol/src/protocol/v2_parts/v2_part_007.rs
+    expect: 58
+    chatgpt: 11
+  - path: vac-rs/runtime-protocol/src/protocol/v2_parts/v2_part_008.rs
+    unwrap: 34
+    expect: 12
+    chatgpt: 4
+  - path: vac-rs/runtime-protocol/src/protocol/v2_parts/v2_part_009.rs
+    unwrap: 14
+    expect: 17
+  - path: vac-rs/runtime-protocol/tests/schema_fixtures.rs
+    panic: 2
+  - path: vac-rs/sandboxing/src/bwrap_tests.rs
+    expect: 16
+  - path: vac-rs/sandboxing/src/landlock.rs
+    panic: 5
+  - path: vac-rs/sandboxing/src/manager_tests.rs
+    expect: 14
+  - path: vac-rs/sandboxing/src/policy_transforms_tests.rs
+    expect: 55
+  - path: vac-rs/sandboxing/src/seatbelt.rs
+    panic: 1
+  - path: vac-rs/sandboxing/src/seatbelt_tests.rs
+    unwrap: 1
+    expect: 63
+  - path: vac-rs/secrets/src/lib.rs
+    expect: 4
+  - path: vac-rs/secrets/src/local.rs
+    expect: 3
+  - path: vac-rs/secrets/src/sanitizer.rs
+    panic: 1
+  - path: vac-rs/shell-command/src/bash.rs
+    unwrap: 11
+    expect: 1
+  - path: vac-rs/shell-command/src/command_safety/powershell_parser.rs
+    unwrap: 4
+  - path: vac-rs/shell-command/src/command_safety/windows_safe_commands.rs
+    unwrap: 5
+  - path: vac-rs/shell-command/src/powershell.rs
+    expect: 6
+  - path: vac-rs/shell-escalation/src/unix/escalate_client.rs
+    expect: 2
+  - path: vac-rs/shell-escalation/src/unix/escalate_server.rs
+    expect: 4
+  - path: vac-rs/shell-escalation/src/unix/socket.rs
+    unwrap: 3
+    expect: 2
+  - path: vac-rs/shell-escalation/src/unix/stopwatch.rs
+    expect: 3
+  - path: vac-rs/state/src/bin/logs_client.rs
+    expect: 1
+  - path: vac-rs/state/src/extract.rs
+    expect: 4
+  - path: vac-rs/state/src/log_db.rs
+    expect: 17
+    panic: 3
+  - path: vac-rs/state/src/model/thread_metadata.rs
+    expect: 5
+  - path: vac-rs/state/src/runtime/agent_jobs.rs
+    expect: 2
+  - path: vac-rs/state/src/runtime/backfill.rs
+    expect: 25
+  - path: vac-rs/state/src/runtime/device_key_tests.rs
+    expect: 9
+  - path: vac-rs/state/src/runtime/goals.rs
+    unwrap: 5
+    expect: 71
+    panic: 10
+  - path: vac-rs/state/src/runtime/logs.rs
+    expect: 78
+  - path: vac-rs/state/src/runtime/memories/split_002_mark_global_phase2_job_succeeded_row.rs
+    expect: 396
+    panic: 52
+  - path: vac-rs/state/src/runtime/remote_control.rs
+    expect: 12
+  - path: vac-rs/state/src/runtime/test_support.rs
+    expect: 1
+  - path: vac-rs/state/src/runtime/threads.rs
+    expect: 113
+  - path: vac-rs/state/src/runtime.rs
+    expect: 6
+  - path: vac-rs/test-binary-support/lib.rs
+    panic: 2
+  - path: vac-rs/thread-store/src/local/archive_thread.rs
+    expect: 16
+  - path: vac-rs/thread-store/src/local/list_threads.rs
+    expect: 22
+  - path: vac-rs/thread-store/src/local/mod.rs
+    expect: 62
+  - path: vac-rs/thread-store/src/local/read_thread.rs
+    unwrap: 1
+    expect: 106
+    panic: 3
+  - path: vac-rs/thread-store/src/local/unarchive_thread.rs
+    expect: 15
+  - path: vac-rs/thread-store/src/local/update_thread_metadata.rs
+    expect: 51
+  - path: vac-rs/tools/src/agent_tool_tests.rs
+    expect: 10
+    panic: 7
+  - path: vac-rs/tools/src/dynamic_tool_tests.rs
+    expect: 2
+  - path: vac-rs/tools/src/goal_tool.rs
+    expect: 1
+    panic: 1
+  - path: vac-rs/tools/src/image_detail_tests.rs
+    expect: 1
+  - path: vac-rs/tools/src/json_schema_tests.rs
+    expect: 23
+  - path: vac-rs/tools/src/mcp_tool_tests.rs
+    expect: 3
+  - path: vac-rs/tools/src/request_plugin_install_tests.rs
+    chatgpt: 4
+  - path: vac-rs/tools/src/responses_api_tests.rs
+    expect: 3
+  - path: vac-rs/tools/src/tool_config.rs
+    chatgpt: 1
+  - path: vac-rs/tools/src/tool_config_tests.rs
+    unwrap: 2
+    expect: 1
+  - path: vac-rs/tools/src/tool_registry_plan_tests.rs
+    expect: 10
+    panic: 20
+    chatgpt: 1
+  - path: vac-rs/tools/src/tool_spec_tests.rs
+    expect: 4
+  - path: vac-rs/tui/src/activity_sidebar.rs
+    expect: 1
+  - path: vac-rs/tui/src/additional_dirs.rs
+    expect: 2
+  - path: vac-rs/tui/src/app/agent_navigation.rs
+    expect: 3
+  - path: vac-rs/tui/src/app/app_server_events.rs
+    chatgpt: 2
+  - path: vac-rs/tui/src/app/app_server_requests.rs
+    expect: 19
+    chatgpt: 1
+  - path: vac-rs/tui/src/app/background_requests.rs
+    expect: 1
+  - path: vac-rs/tui/src/app/config_persistence.rs
+    expect: 1
+  - path: vac-rs/tui/src/app/loaded_threads.rs
+    expect: 5
+  - path: vac-rs/tui/src/app/side.rs
+    panic: 2
+  - path: vac-rs/tui/src/app/test_support.rs
+    expect: 1
+  - path: vac-rs/tui/src/app/tests/model_catalog.rs
+    expect: 20
+    unbounded_channel: 2
+  - path: vac-rs/tui/src/app/tests.rs
+    unwrap: 3
+    expect: 100
+    panic: 21
+    unbounded_channel: 3
+    chatgpt: 5
+  - path: vac-rs/tui/src/app/thread_events.rs
+    expect: 3
+    panic: 1
+  - path: vac-rs/tui/src/app/thread_session_state.rs
+    expect: 10
+  - path: vac-rs/tui/src/app.rs
+    panic: 1
+    chatgpt: 8
+  - path: vac-rs/tui/src/app_backtrack.rs
+    expect: 6
+  - path: vac-rs/tui/src/app_event_sender.rs
+    unbounded_channel: 4
+  - path: vac-rs/tui/src/app_server_approval_conversions.rs
+    expect: 1
+  - path: vac-rs/tui/src/bottom_pane/app_link_view.rs
+    expect: 1
+    panic: 14
+    unbounded_channel: 14
+    chatgpt: 9
+  - path: vac-rs/tui/src/bottom_pane/approval_overlay.rs
+    expect: 3
+    unbounded_channel: 27
+  - path: vac-rs/tui/src/bottom_pane/chat_composer/history_search.rs
+    expect: 1
+    unbounded_channel: 13
+  - path: vac-rs/tui/src/bottom_pane/chat_composer/split_002_footerflash_tests.rs
+    unwrap: 5
+    expect: 23
+    panic: 53
+    unbounded_channel: 142
+  - path: vac-rs/tui/src/bottom_pane/chat_composer_history.rs
+    unwrap: 2
+    expect: 11
+    panic: 4
+    unbounded_channel: 9
+  - path: vac-rs/tui/src/bottom_pane/command_popup.rs
+    panic: 5
+  - path: vac-rs/tui/src/bottom_pane/feedback_view.rs
+    expect: 2
+    unbounded_channel: 4
+  - path: vac-rs/tui/src/bottom_pane/footer.rs
+    unwrap: 3
+    expect: 3
+  - path: vac-rs/tui/src/bottom_pane/hooks_browser_view.rs
+    expect: 2
+    panic: 1
+    unbounded_channel: 10
+  - path: vac-rs/tui/src/bottom_pane/list_selection_view.rs
+    expect: 5
+    panic: 2
+    unbounded_channel: 32
+  - path: vac-rs/tui/src/bottom_pane/mcp_server_elicitation.rs
+    expect: 27
+    panic: 4
+    unbounded_channel: 4
+  - path: vac-rs/tui/src/bottom_pane/mod.rs
+    unbounded_channel: 32
+  - path: vac-rs/tui/src/bottom_pane/multi_select_picker.rs
+    unbounded_channel: 2
+  - path: vac-rs/tui/src/bottom_pane/paste_burst.rs
+    expect: 1
+  - path: vac-rs/tui/src/bottom_pane/request_user_input/mod.rs
+    expect: 48
+    panic: 11
+    unbounded_channel: 4
+  - path: vac-rs/tui/src/bottom_pane/scroll_state.rs
+    panic: 1
+  - path: vac-rs/tui/src/bottom_pane/skills_toggle_view.rs
+    unbounded_channel: 2
+  - path: vac-rs/tui/src/bottom_pane/slash_commands.rs
+    expect: 6
+  - path: vac-rs/tui/src/bottom_pane/status_line_setup.rs
+    unbounded_channel: 2
+  - path: vac-rs/tui/src/bottom_pane/status_line_style.rs
+    expect: 4
+  - path: vac-rs/tui/src/bottom_pane/textarea.rs
+    unwrap: 23
+  - path: vac-rs/tui/src/bottom_pane/title_setup.rs
+    unbounded_channel: 2
+  - path: vac-rs/tui/src/capability_dashboard.rs
+    expect: 51
+  - path: vac-rs/tui/src/chatwidget/interrupts.rs
+    expect: 2
+    panic: 1
+  - path: vac-rs/tui/src/chatwidget/plugins.rs
+    chatgpt: 6
+  - path: vac-rs/tui/src/chatwidget/split_001_btreemap.rs
+    unbounded_channel: 1
+    chatgpt: 1
+  - path: vac-rs/tui/src/chatwidget/split_002_new.rs
+    chatgpt: 2
+  - path: vac-rs/tui/src/chatwidget/split_003_vacoptarget.rs
+    unbounded_channel: 1
+  - path: vac-rs/tui/src/chatwidget/split_010_handle_elicitation_request_now.rs
+    chatgpt: 2
+  - path: vac-rs/tui/src/chatwidget/split_015_set_thread_rename_block_message.rs
+    chatgpt: 1
+  - path: vac-rs/tui/src/chatwidget/split_020_open_windows_sandbox_fallback_prompt.rs
+    chatgpt: 6
+  - path: vac-rs/tui/src/chatwidget/split_021_sync_image_paste_enabled.rs
+    chatgpt: 1
+  - path: vac-rs/tui/src/chatwidget/tests/app_server.rs
+    expect: 10
+    panic: 1
+    chatgpt: 1
+  - path: vac-rs/tui/src/chatwidget/tests/approval_requests.rs
+    expect: 13
+  - path: vac-rs/tui/src/chatwidget/tests/composer_submission.rs
+    unwrap: 10
+    expect: 11
+    panic: 8
+  - path: vac-rs/tui/src/chatwidget/tests/exec_flow.rs
+    unwrap: 5
+    expect: 30
+    panic: 3
+  - path: vac-rs/tui/src/chatwidget/tests/goal_menu.rs
+    unbounded_channel: 1
+  - path: vac-rs/tui/src/chatwidget/tests/guardian.rs
+    expect: 20
+  - path: vac-rs/tui/src/chatwidget/tests/helpers.rs
+    unwrap: 1
+    expect: 6
+    panic: 9
+    unbounded_channel: 11
+    chatgpt: 7
+  - path: vac-rs/tui/src/chatwidget/tests/history_replay.rs
+    unwrap: 5
+    expect: 29
+    panic: 7
+  - path: vac-rs/tui/src/chatwidget/tests/mcp_startup.rs
+    expect: 5
+  - path: vac-rs/tui/src/chatwidget/tests/permissions.rs
+    expect: 21
+    panic: 1
+  - path: vac-rs/tui/src/chatwidget/tests/plan_mode.rs
+    unwrap: 2
+    expect: 37
+    panic: 18
+    unbounded_channel: 1
+    chatgpt: 7
+  - path: vac-rs/tui/src/chatwidget/tests/popups_and_settings.rs
+    expect: 29
+    panic: 9
+    unbounded_channel: 1
+    chatgpt: 18
+  - path: vac-rs/tui/src/chatwidget/tests/review_mode.rs
+    unwrap: 17
+    expect: 9
+    panic: 18
+  - path: vac-rs/tui/src/chatwidget/tests/side.rs
+    expect: 12
+    panic: 6
+    unbounded_channel: 2
+  - path: vac-rs/tui/src/chatwidget/tests/slash_commands.rs
+    unwrap: 8
+    expect: 17
+    panic: 32
+    unbounded_channel: 1
+    chatgpt: 3
+  - path: vac-rs/tui/src/chatwidget/tests/status_and_layout.rs
+    unwrap: 6
+    expect: 49
+    panic: 3
+    unbounded_channel: 3
+    chatgpt: 17
+  - path: vac-rs/tui/src/chatwidget/tests/status_command_tests.rs
+    panic: 5
+    chatgpt: 6
+  - path: vac-rs/tui/src/chatwidget/tests/status_surface_previews.rs
+    expect: 2
+  - path: vac-rs/tui/src/chatwidget/tests/terminal_title.rs
+    expect: 5
+  - path: vac-rs/tui/src/chatwidget/tests.rs
+    expect: 1
+    panic: 1
+    unbounded_channel: 1
+    chatgpt: 1
+  - path: vac-rs/tui/src/clipboard_copy.rs
+    unwrap: 1
+    expect: 1
+    panic: 3
+  - path: vac-rs/tui/src/clipboard_paste.rs
+    expect: 10
+  - path: vac-rs/tui/src/custom_terminal.rs
+    expect: 10
+  - path: vac-rs/tui/src/cwd_prompt.rs
+    expect: 4
+  - path: vac-rs/tui/src/debug_config.rs
+    expect: 14
+  - path: vac-rs/tui/src/diff_render.rs
+    expect: 7
+    panic: 1
+  - path: vac-rs/tui/src/exec_cell/render.rs
+    panic: 1
+  - path: vac-rs/tui/src/exec_command.rs
+    expect: 1
+  - path: vac-rs/tui/src/external_agent_config_migration.rs
+    expect: 2
+  - path: vac-rs/tui/src/external_agent_config_migration_startup.rs
+    expect: 8
+  - path: vac-rs/tui/src/external_editor.rs
+    unwrap: 6
+  - path: vac-rs/tui/src/history_cell/split_004_compositehistorycell.rs
+    chatgpt: 1
+  - path: vac-rs/tui/src/history_cell/split_006_finalmessageseparator.rs
+    unwrap: 2
+    expect: 19
+  - path: vac-rs/tui/src/insert_history.rs
+    unwrap: 8
+    expect: 22
+    panic: 6
+  - path: vac-rs/tui/src/keymap.rs
+    expect: 7
+  - path: vac-rs/tui/src/keymap_setup.rs
+    unwrap: 4
+    expect: 30
+    panic: 8
+    unbounded_channel: 5
+  - path: vac-rs/tui/src/lib.rs
+    expect: 6
+    panic: 2
+    chatgpt: 7
+  - path: vac-rs/tui/src/local_chatgpt_auth.rs
+    expect: 14
+    chatgpt: 45
+  - path: vac-rs/tui/src/local_runtime_session.rs
+    chatgpt: 8
+  - path: vac-rs/tui/src/markdown_render.rs
+    panic: 2
+  - path: vac-rs/tui/src/markdown_render_tests.rs
+    unwrap: 1
+    expect: 1
+  - path: vac-rs/tui/src/markdown_stream.rs
+    expect: 1
+    panic: 3
+  - path: vac-rs/tui/src/model_migration.rs
+    expect: 10
+  - path: vac-rs/tui/src/motion.rs
+    unwrap: 2
+    expect: 4
+    panic: 1
+  - path: vac-rs/tui/src/notifications/osc9.rs
+    expect: 3
+  - path: vac-rs/tui/src/npm_registry.rs
+    expect: 3
+  - path: vac-rs/tui/src/onboarding/auth/headless_chatgpt_login.rs
+    unwrap: 6
+    chatgpt: 5
+  - path: vac-rs/tui/src/onboarding/auth.rs
+    unwrap: 6
+    expect: 1
+    chatgpt: 47
+  - path: vac-rs/tui/src/onboarding/onboarding_screen.rs
+    chatgpt: 1
+  - path: vac-rs/tui/src/onboarding/trust_directory.rs
+    expect: 4
+  - path: vac-rs/tui/src/operator_ui.rs
+    expect: 1
+  - path: vac-rs/tui/src/pager_overlay.rs
+    unwrap: 1
+    expect: 12
+  - path: vac-rs/tui/src/palette_surface.rs
+    expect: 2
+  - path: vac-rs/tui/src/permission_compat.rs
+    expect: 3
+  - path: vac-rs/tui/src/render/highlight.rs
+    unwrap: 19
+    expect: 8
+    panic: 5
+  - path: vac-rs/tui/src/resume_picker.rs
+    unwrap: 22
+    expect: 8
+    panic: 1
+  - path: vac-rs/tui/src/runtime_adapter/tests.rs
+    unwrap: 3
+    expect: 4
+    panic: 37
+  - path: vac-rs/tui/src/runtime_owner_session.rs
+    chatgpt: 4
+  - path: vac-rs/tui/src/session_resume.rs
+    expect: 2
+  - path: vac-rs/tui/src/slash_command.rs
+    expect: 2
+  - path: vac-rs/tui/src/status/card.rs
+    chatgpt: 1
+  - path: vac-rs/tui/src/status/helpers.rs
+    expect: 8
+  - path: vac-rs/tui/src/status/rate_limits.rs
+    panic: 2
+  - path: vac-rs/tui/src/status/tests.rs
+    expect: 80
+  - path: vac-rs/tui/src/status_indicator_widget.rs
+    expect: 10
+    unbounded_channel: 8
+  - path: vac-rs/tui/src/streaming/controller.rs
+    expect: 1
+  - path: vac-rs/tui/src/surface_route_catalog.rs
+    expect: 18
+  - path: vac-rs/tui/src/terminal_title.rs
+    expect: 1
+  - path: vac-rs/tui/src/test_support.rs
+    panic: 1
+  - path: vac-rs/tui/src/text_formatting.rs
+    unwrap: 12
+  - path: vac-rs/tui/src/theme_picker.rs
+    expect: 10
+  - path: vac-rs/tui/src/transcript_reflow.rs
+    expect: 3
+  - path: vac-rs/tui/src/tui/event_stream.rs
+    unwrap: 4
+    expect: 4
+    panic: 4
+    unbounded_channel: 3
+  - path: vac-rs/tui/src/tui/frame_requester.rs
+    expect: 11
+  - path: vac-rs/tui/src/tui/keyboard_modes.rs
+    unwrap: 1
+  - path: vac-rs/tui/src/update_prompt.rs
+    expect: 2
+  - path: vac-rs/tui/src/update_versions.rs
+    expect: 1
+  - path: vac-rs/tui/src/workflow_browser.rs
+    expect: 52
+  - path: vac-rs/tui/src/workflow_progress.rs
+    expect: 2
+  - path: vac-rs/tui/src/wrapping.rs
+    unwrap: 1
+    panic: 1
+  - path: vac-rs/tui/tests/manager_dependency_regression.rs
+    panic: 5
+  - path: vac-rs/tui/tests/suite/vt100_history.rs
+    expect: 2
+  - path: vac-rs/tui/tests/suite/vt100_live_commit.rs
+    expect: 1
+    panic: 1
+  - path: vac-rs/uds/src/lib_tests.rs
+    expect: 20
+    panic: 2
+  - path: vac-rs/utils/absolute-path/src/lib.rs
+    expect: 51
+  - path: vac-rs/utils/cache/src/lib.rs
+    expect: 3
+  - path: vac-rs/utils/cli/src/config_override.rs
+    unwrap: 2
+    expect: 8
+  - path: vac-rs/utils/fuzzy-match/src/lib.rs
+    panic: 9
+  - path: vac-rs/utils/home-dir/src/lib.rs
+    expect: 13
+  - path: vac-rs/utils/image/src/lib.rs
+    expect: 9
+  - path: vac-rs/utils/output-truncation/src/truncate_tests.rs
+    panic: 4
+  - path: vac-rs/utils/plugins/src/plugin_namespace.rs
+    expect: 13
+  - path: vac-rs/utils/pty/src/tests.rs
+    expect: 4
+  - path: vac-rs/utils/pty/src/win/conpty.rs
+    unwrap: 5
+  - path: vac-rs/utils/pty/src/win/mod.rs
+    unwrap: 13
+  - path: vac-rs/utils/pty/src/win/psuedocon.rs
+    unwrap: 1
+    expect: 1
+  - path: vac-rs/utils/readiness/src/lib.rs
+    expect: 6
+  - path: vac-rs/utils/sandbox-summary/src/sandbox_summary.rs
+    unwrap: 1
+  - path: vac-rs/utils/stream-parser/src/utf8_stream.rs
+    panic: 12
+  - path: vac-rs/utils/string/src/json.rs
+    expect: 2
+  - path: vac-rs/utils/string/src/lib.rs
+    unwrap: 1
+  - path: vac-rs/utils/template/src/lib.rs
+    unwrap: 8
+  - path: vac-rs/vac-client/src/chatgpt_cloudflare_cookies.rs
+    unwrap: 8
+    expect: 2
+    chatgpt: 31
+  - path: vac-rs/vac-client/src/chatgpt_hosts.rs
+    chatgpt: 17
+  - path: vac-rs/vac-client/src/custom_ca.rs
+    expect: 4
+    panic: 1
+  - path: vac-rs/vac-client/src/lib.rs
+    chatgpt: 16
+  - path: vac-rs/vac-client/src/request.rs
+    expect: 1
+  - path: vac-rs/vac-client/tests/ca_env.rs
+    expect: 16
+    panic: 21
+  - path: vac-rs/vac-mcp/src/connection_manager_tests.rs
+    expect: 32
+    chatgpt: 3
+  - path: vac-rs/vac-mcp/src/mcp/mod.rs
+    chatgpt: 6
+  - path: vac-rs/vac-mcp/src/mcp/mod_tests.rs
+    expect: 6
+    panic: 5
+    chatgpt: 11
+  - path: vac-rs/vac-mcp/src/rmcp_client.rs
+    expect: 3
+  - path: vac-rs/vac-mcp/src/vac_apps.rs
+    chatgpt: 4
+  - path: vac-rs/windows-sandbox-rs/src/allow.rs
+    unwrap: 12
+    expect: 6
+  - path: vac-rs/windows-sandbox-rs/src/audit.rs
+    expect: 7
+  - path: vac-rs/windows-sandbox-rs/src/bin/command_runner.rs
+    panic: 1
+  - path: vac-rs/windows-sandbox-rs/src/bin/setup_main.rs
+    panic: 1
+  - path: vac-rs/windows-sandbox-rs/src/cap.rs
+    expect: 7
+  - path: vac-rs/windows-sandbox-rs/src/elevated/ipc_framed.rs
+    expect: 4
+    panic: 1
+  - path: vac-rs/windows-sandbox-rs/src/elevated_impl.rs
+    unwrap: 4
+  - path: vac-rs/windows-sandbox-rs/src/firewall.rs
+    expect: 1
+  - path: vac-rs/windows-sandbox-rs/src/helper_materialization.rs
+    expect: 36
+  - path: vac-rs/windows-sandbox-rs/src/lib.rs
+    expect: 5
+  - path: vac-rs/windows-sandbox-rs/src/logging.rs
+    unwrap: 1
+  - path: vac-rs/windows-sandbox-rs/src/policy.rs
+    unwrap: 2
+  - path: vac-rs/windows-sandbox-rs/src/setup_main_win.rs
+    expect: 2
+  - path: vac-rs/windows-sandbox-rs/src/setup_orchestrator.rs
+    expect: 59
+  - path: vac-rs/windows-sandbox-rs/src/spawn_prep.rs
+    expect: 6
+  - path: vac-rs/windows-sandbox-rs/src/ssh_config_dependencies.rs
+    expect: 7
+  - path: vac-rs/windows-sandbox-rs/src/unified_exec/tests.rs
+    expect: 29
+    panic: 5

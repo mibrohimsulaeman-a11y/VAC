@@ -1,0 +1,10 @@
+---
+source: tui/src/chatwidget/tests/side.rs
+assertion_line: 311
+expression: terminal.backend()
+---
+"                                                                                "
+"                                                                                "
+"› Check recently modified functions for compatibility                           "
+"                                                                                "
+"  gpt-5.5 auto · /tm… Side from main thread · main needs input · Esc to return  "

@@ -1,0 +1,44 @@
+schema_version: 1
+kind: workflow
+id: maintenance.tui-hardening-regression-lock
+title: TUI operator hardening regression lock
+status: ready
+owner:
+  crate: vac-surface-tui
+  module: operator_ui
+description: Aggregated Hardening 1 regression lock for Batch 1-3 operator-console gates.
+triggers:
+- kind: manual
+  id: check_tui_hardening_regression_lock
+steps:
+- id: regression_lock
+  uses: capability.vac.tui.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+policy:
+  mutates_files: false
+  network: false
+  default_risk: safe_read
+  redaction: false
+  approval_required_for: []
+ui:
+  surface: /workflow
+  inspect_surface: /capabilities
+  progress_panel: true
+  activity_log: true
+  approval_surface: false
+  evidence_surface: true
+validation:
+  gates:
+  - regression_lock
+  commands:
+  - id: maintenance.tui-hardening-regression-lock.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-tui-hardening-regression-lock.sh
+    risk: execute_process
+    approval: policy

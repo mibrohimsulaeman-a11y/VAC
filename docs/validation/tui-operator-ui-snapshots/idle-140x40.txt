@@ -1,0 +1,14 @@
+# VAC operator TUI snapshot
+scenario: idle
+viewport: 140x40
+---
+● ● ●     vac · interactive   idle
+ VIL-native    ready   — VIL Engine connected · rulebook vil.core enforcing
+The agent will stream thinking, tools, and approvals here.
+Keyboard-only:    tab  focus    /  commands    @  files    shift+tab  plan mode
+recent tasks
+› no persisted recent task loaded   .vac/registry/trajectory is the runtime source of truth
+╭composer────────────────────────────────────────────────────────────────────────╮
+│ ▸ INPUT                                                                       │
+╰───────────────────────────────────────────────────────────────────────────────╯
+INPUT │ model claude-sonnet-4.5 │ 0 tok │ manual │ validity tracked by runtime gates │ profile default · rulebook vil.core

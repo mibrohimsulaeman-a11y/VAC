@@ -1,0 +1,334 @@
+schema_version: 1
+kind: plan
+id: plan.o5o6.control-plane-audit-findings
+status: implemented_static
+updated_at: '2026-06-01T00:00:00Z'
+title: O5/O6 control-plane audit findings closure
+summary: 'Close the remaining control-plane audit findings: AST-exact source-static
+  scanner, autopilot scheduler runtime producer/executor, runtime operator console
+  actions, workflow run execution, packaging gate, and docs/evidence truth.'
+task:
+  description: Fix every finding from the latest control-plane, runtime, and TUI runtime-readiness
+    audits without splitting Plan Mode from the shared semantic validation path.
+  capability: vac.local_runtime_owner
+allowed_files:
+- path: vac-rs/control-plane/src/control_plane/vac_init_live_scanner_policy.rs
+  operation: modify
+  ownership: vac.init.scanner-hardening-spec-flow
+  semantic_anchor:
+    kind: audit_finding
+    symbol: live_scanner.ast_exact
+  rationale: Upgrade risk scanner from heuristic string matching to dependency-free
+    source-structural ast_exact detection and mark Phase 2 AST exact as evaluated.
+- path: vac-rs/control-plane/src/control_plane/vac_init_autopilot_scheduler.rs
+  operation: create
+  ownership: vac.autopilot.scheduler
+  semantic_anchor:
+    kind: audit_finding
+    symbol: vac_init_autopilot_scheduler
+  rationale: Add a runtime producer/executor for autopilot status.yaml and job actions
+    so /runtime is no longer a read-only fixture view.
+- path: vac-rs/control-plane/src/control_plane/mod.rs
+  operation: modify
+  ownership: vac.autopilot.scheduler
+  semantic_anchor:
+    kind: audit_finding
+    symbol: control_plane.autopilot_scheduler_exports
+  rationale: Export autopilot scheduler runtime refresh and action functions for TUI
+    and future CLI surfaces.
+- path: vac-rs/tui/src/operator_ui.rs
+  operation: modify
+  ownership: vac.tui.runtime-surface
+  semantic_anchor:
+    kind: audit_finding
+    symbol: AutopilotSchedulerState.from_workspace.refresh_runtime_status
+  rationale: Refresh autopilot runtime status before rendering /runtime so the viewer
+    has a real producer.
+- path: vac-rs/tui/src/operator_console.rs
+  operation: create
+  ownership: vac.tui.runtime-surface
+  semantic_anchor:
+    kind: audit_finding
+    symbol: operator_console.runtime_operator_console
+  rationale: Add a persistent runtime operator console pane with chrome and key actions
+    for cancel/retry/inspect/attach.
+- path: vac-rs/tui/src/lib.rs
+  operation: modify
+  ownership: vac.tui.runtime-surface
+  semantic_anchor:
+    kind: audit_finding
+    symbol: operator_console_module
+  rationale: Register the runtime operator console module.
+- path: vac-rs/tui/src/chatwidget/semantic_split.rs
+  operation: modify
+  ownership: vac.tui.runtime-surface
+  semantic_anchor:
+    kind: audit_finding
+    symbol: add_runtime_jobs_output.operator_console
+  rationale: Open the runtime operator console instead of appending a display-only
+    history cell.
+- path: vac-rs/tui/src/chatwidget/split_015_set_thread_rename_block_message.rs
+  operation: modify
+  ownership: vac.tui.runtime-surface
+  semantic_anchor:
+    kind: audit_finding
+    symbol: add_runtime_jobs_output.operator_console_split
+  rationale: Mirror runtime operator console dispatch in the split file used by build
+    gates.
+- path: vac-rs/tui/src/chatwidget/split_manifest.yaml
+  operation: modify
+  ownership: vac.quality-gates
+  semantic_anchor:
+    kind: audit_finding
+    symbol: chatwidget_split_manifest.runtime_console_hash
+  rationale: Re-pin semantic split hashes after runtime console dispatch changes.
+- path: vac-rs/tui/src/operator_widget_render.rs
+  operation: modify
+  ownership: vac.tui.runtime-surface
+  semantic_anchor:
+    kind: audit_finding
+    symbol: runtime_status_bar.config_labels
+  rationale: Replace hardcoded profile/rulebook status text with runtime-derived labels.
+- path: vac-rs/tui/src/workflow_browser.rs
+  operation: modify
+  ownership: vac.tui.workflow-surface
+  semantic_anchor:
+    kind: audit_finding
+    symbol: workflow_browser.execute_workflow_manifest
+  rationale: Wire /workflow run to the existing workflow runner instead of rendering
+    a display-only request line.
+- path: scripts/check-vac-control-plane-audit-findings-static.sh
+  operation: create
+  ownership: vac.quality-gates
+  semantic_anchor:
+    kind: audit_finding
+    symbol: control_plane_audit_findings_static_gate
+  rationale: Add a source/static regression gate for AST scanner, autopilot runtime,
+    TUI runtime actions, workflow run, and packaging gate wiring.
+- path: scripts/check-vac-source-artifact-packaging-gate.sh
+  operation: create
+  ownership: vac.quality-gates
+  semantic_anchor:
+    kind: audit_finding
+    symbol: source_artifact_packaging_gate
+  rationale: Add a packaging hygiene gate that enforces source artifact excludes and
+    required validation/evidence files.
+- path: scripts/check-vac-tui-visual-parity-static.sh
+  operation: modify
+  ownership: vac.quality-gates
+  semantic_anchor:
+    kind: audit_finding
+    symbol: tui_visual_parity_static.runtime_console
+  rationale: Require the runtime operator console and action executor wiring for /runtime
+    parity.
+- path: scripts/check-vac-init-scanner-hardening-spec-flow.sh
+  operation: modify
+  ownership: vac.quality-gates
+  semantic_anchor:
+    kind: audit_finding
+    symbol: scanner_hardening_spec_flow.ast_exact
+  rationale: Update scanner hardening contract from ast_heuristic to ast_exact.
+- path: scripts/check-vac-o6-1-depanic-surface.sh
+  operation: modify
+  ownership: vac.quality-gates
+  semantic_anchor:
+    kind: audit_finding
+    symbol: o6_1_depanic_surface.audit_findings_repin
+  rationale: Re-pin O6.1 reproducibility counters after adding runtime scheduler and
+    operator console files.
+- path: scripts/check-vac-o5-2-godfile-staging-all.sh
+  operation: modify
+  ownership: vac.quality-gates
+  semantic_anchor:
+    kind: audit_finding
+    symbol: o5_2_chatwidget_split_repin
+  rationale: Re-pin O5.2 semantic split checksum after runtime console dispatch changes.
+- path: .vac/capabilities/source-artifact-packaging-gate.yaml
+  operation: create
+  ownership: vac.quality-gates
+  semantic_anchor:
+    kind: audit_finding
+    symbol: vac.source_artifact.packaging_gate
+  rationale: Register the source artifact packaging gate as a ready capability.
+- path: .vac/registry/runtime/active_plan.yaml
+  operation: modify
+  ownership: vac.runtime.plan
+  semantic_anchor:
+    kind: audit_finding
+    symbol: plan.o5o6.control-plane-audit-findings.active
+  rationale: Make this audit findings slice the canonical active semantic plan consumed
+    by runtime Plan Mode.
+- path: .vac/registry/plans/plan.o5o6.control-plane-audit-findings.yaml
+  operation: create
+  ownership: vac.evidence
+  semantic_anchor:
+    kind: audit_finding
+    symbol: plan.o5o6.control-plane-audit-findings
+  rationale: Record this bounded semantic plan.
+- path: .vac/registry/evidence/evidence.2026-06-01-o5o6-control-plane-audit-findings.yaml
+  operation: create
+  ownership: vac.evidence
+  semantic_anchor:
+    kind: audit_finding
+    symbol: evidence.2026-06-01-o5o6-control-plane-audit-findings
+  rationale: Record source/static evidence and TV-pending truth for this audit findings
+    slice.
+- path: .vac/registry/trajectory/o5o6-control-plane-audit-findings.yaml
+  operation: create
+  ownership: vac.evidence
+  semantic_anchor:
+    kind: audit_finding
+    symbol: trajectory.o5o6-control-plane-audit-findings
+  rationale: Record safe rationale trajectory for this audit findings slice.
+- path: .vac/registry/trajectory/index.yaml
+  operation: modify
+  ownership: vac.evidence
+  semantic_anchor:
+    kind: audit_finding
+    symbol: evidence.2026-06-01-o5o6-control-plane-audit-findings
+  rationale: Add this audit findings evidence entry to safe why lookup.
+- path: .vac/registry/compile-debt-ledger.yaml
+  operation: modify
+  ownership: vac.evidence
+  semantic_anchor:
+    kind: audit_finding
+    symbol: O5O6-control-plane-audit-findings-2026-06-01
+  rationale: Keep Rust typecheck and live runtime verification debt explicit because
+    cargo/rustc are unavailable in this sandbox.
+- path: .vac/registry/o6-panic-surface.yaml
+  operation: modify
+  ownership: vac.quality-gates
+  semantic_anchor:
+    kind: audit_finding
+    symbol: o6_panic_surface.audit_findings_repin
+  rationale: Re-pin O6.1 scanner metadata after adding runtime source files.
+- path: .vac/registry/o6-quality-triage.yaml
+  operation: modify
+  ownership: vac.quality-gates
+  semantic_anchor:
+    kind: audit_finding
+    symbol: o6_quality_triage.audit_findings_repin
+  rationale: Keep O6 quality triage metadata aligned with scanner output.
+- path: .vac/registry/o5-godfile-staging-state.yaml
+  operation: modify
+  ownership: vac.quality-gates
+  semantic_anchor:
+    kind: audit_finding
+    symbol: o5_godfile_staging.chatwidget_split_repin
+  rationale: Keep O5 godfile staging metadata aligned with the split manifest.
+- path: docs/monolith-quality/O5O6_CONTROL_PLANE_AUDIT_FINDINGS_REPORT.md
+  operation: create
+  ownership: vac.evidence
+  semantic_anchor:
+    kind: audit_finding
+    symbol: control_plane_audit_findings_report
+  rationale: Document root cause, implementation, validation, and TV-pending status
+    for all audit findings.
+- path: docs/vac-init/VAC_INIT_SCANNER_HARDENING_SPEC_FLOW.md
+  operation: modify
+  ownership: vac.docs
+  semantic_anchor:
+    kind: audit_finding
+    symbol: scanner_hardening_docs.ast_exact
+  rationale: Update scanner docs to reflect ast_exact evaluation.
+- path: docs/vac-init/VAC_INIT_P5_LIVE_SCANNER_POLICY.md
+  operation: modify
+  ownership: vac.docs
+  semantic_anchor:
+    kind: audit_finding
+    symbol: live_scanner_policy_docs.ast_exact
+  rationale: Update live scanner policy docs to reflect source-structural AST exact
+    detection.
+- path: docs/PROJECT_STATE_CURRENT.md
+  operation: modify
+  ownership: vac.docs
+  semantic_anchor:
+    kind: audit_finding
+    symbol: project_state.control_plane_audit_findings
+  rationale: Record current state after control-plane audit findings fixes.
+bounds:
+  max_patches: 64
+  max_new_files: 20
+  max_line_delta: 9000
+  timeout_seconds: 2400
+validation:
+  commands:
+  - id: vac.control-plane.audit-findings.static
+    runner: bash
+    args:
+    - scripts/check-vac-control-plane-audit-findings-static.sh
+    risk: safe_read
+    approval: never
+    result: PASS
+  - id: vac.source-artifact.packaging.gate
+    runner: bash
+    args:
+    - scripts/check-vac-source-artifact-packaging-gate.sh
+    risk: safe_read
+    approval: never
+    result: PASS
+  - id: vac.init.scanner.hardening.spec-flow
+    runner: bash
+    args:
+    - scripts/check-vac-init-scanner-hardening-spec-flow.sh
+    risk: safe_read
+    approval: never
+    result: PASS
+  - id: vac.tui.visual.parity.static
+    runner: bash
+    args:
+    - scripts/check-vac-tui-visual-parity-static.sh
+    risk: safe_read
+    approval: never
+    result: PASS
+  - id: vac.runtime.agent.flow.static
+    runner: bash
+    args:
+    - scripts/check-vac-runtime-agent-flow-fix-static.sh
+    risk: safe_read
+    approval: never
+    result: PASS
+  - id: vac.init.registry.strictness
+    runner: bash
+    args:
+    - scripts/check-vac-init-registry-strictness-contract.sh
+    risk: safe_read
+    approval: never
+    result: PASS
+  - id: vac.init.registry.validator
+    runner: bash
+    args:
+    - scripts/check-vac-init-registry-validator-contract.sh
+    risk: safe_read
+    approval: never
+    result: PASS
+  - id: vac.o6.depanic.surface
+    runner: bash
+    args:
+    - scripts/check-vac-o6-1-depanic-surface.sh
+    risk: safe_read
+    approval: never
+    result: PASS
+  - id: vac.o5o6.audit.remainder
+    runner: bash
+    args:
+    - scripts/check-vac-o5o6-all-audit-remainder.sh
+    env:
+      VAC_O6_1_RESCAN: '0'
+    risk: safe_read
+    approval: never
+    result: PASS
+truth:
+  sv_done: true
+  tv_status: TV-Pending
+  tv_pending:
+  - cargo check --manifest-path vac-rs/Cargo.toml -p vac-core -p vac-surface-tui -p vac-surface-cli
+  - cargo test --manifest-path vac-rs/Cargo.toml -p vac-core vac_init_live_scanner_policy
+    vac_init_autopilot_scheduler
+  - cargo test --manifest-path vac-rs/Cargo.toml -p vac-surface-tui operator_console operator_ui
+    operator_widget_render
+  - live vac init/doctor/plan/why smoke
+  - live interactive vac default turn and Plan Mode gated turn smoke
+  - live /runtime autopilot action smoke and /workflow run smoke
+rollback: restore vac-o5o6-runtime-agent-flow-structural-hardening-final-source.zip
+  and reapply this slice with cargo/live feedback.

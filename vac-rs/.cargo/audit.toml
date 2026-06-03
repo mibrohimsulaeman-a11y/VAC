@@ -1,0 +1,15 @@
+# VAC cargo-audit policy.
+# Keep this file synchronized with `vac-rs/deny.toml` advisories.
+# Each ignored advisory below is reviewed and must retain a dependency-path
+# rationale plus a removal condition in the paired deny policy.
+
+[advisories]
+ignore = [
+  "RUSTSEC-2024-0388", # derivative via starlark v0.13.0; remove when upstream ships a fixed release.
+  "RUSTSEC-2025-0057", # fxhash via starlark_map/starlark v0.13.0; remove when upstream ships a fixed release.
+  "RUSTSEC-2024-0436", # paste via ratatui/rmcp/starlark; remove when upstream chain drops paste or fixes advisory.
+  "RUSTSEC-2024-0320", # yaml-rust via syntect v5.3.0; remove when syntect updates dependency.
+  "RUSTSEC-2025-0141", # bincode via syntect v5.3.0; remove when syntect updates dependency.
+  "RUSTSEC-2026-0118", # hickory-proto via rama-dns/rama-tcp; DNSSEC not enabled; remove when rama updates.
+  "RUSTSEC-2026-0119", # hickory-proto via rama-dns/rama-tcp; remove when fixed rama/hickory path is available.
+]

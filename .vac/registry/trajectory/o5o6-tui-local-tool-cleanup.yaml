@@ -1,0 +1,21 @@
+schema_version: 1
+kind: trajectory
+id: trajectory.o5o6.tui-local-tool-cleanup
+timestamp: '2026-06-01T00:00:00Z'
+plan_id: plan.o5o6.tui-local-tool-cleanup
+capability: vac.tui.operator-live-adapter
+rationale:
+  summary: Scope was narrowed to local TUI+CLI coding tool while preserving locked auth/provider/dashboard/external-agent/docs surfaces. Removed or disabled non-local voice, IDE IPC, cloud connector directory, interactive multi-agent collaboration, and remote thread-store RPC surfaces; added static gates to prevent regression.
+  policy_refs:
+    - vac.static-vs-toolchain-truth
+    - vac.local-tool-scope
+  evidence_refs:
+    - evidence.2026-06-01-o5o6-tui-local-tool-cleanup
+  raw_chain_of_thought_excluded: true
+changeset:
+  operation: cleanup
+  diff_excerpt: Local-tool cleanup stubs/deletions, connector Path A, pnpm cleanup, danger styling, draw-read-only regression gates, O6 scanner re-pin.
+approval:
+  approved_by: operator
+  content_hash: source-artifact-final-pending-sha256
+rollback: restore vac-o5o6-tui-performance-hotpath-final-source.zip before reapplying local-tool cleanup with cargo-backed feedback.

@@ -1,0 +1,12 @@
+schema_version: 1
+kind: init_state
+id: vac.init.scanner_doctor_report
+generated_at: '2026-06-01T22:58:00Z'
+generator: scripts/regen-vac-control-plane-projection.py
+status: ready
+checks:
+  protected_registry_history: preserved
+  generated_bucket: regenerated
+  docs_projection: regenerated
+  donor_docs: pruned
+  deterministic_generator: scripts/regen-vac-control-plane-projection.py

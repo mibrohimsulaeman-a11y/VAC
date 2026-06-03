@@ -1,0 +1,51 @@
+schema_version: 1
+kind: workflow
+id: maintenance.autopilot-scheduler-monitor-only
+title: Autopilot Scheduler Monitor-Only Gate
+status: ready
+owner:
+  crate: vac-surface-tui
+  module: operator_ui
+triggers:
+- kind: manual
+  id: check_autopilot_scheduler_monitor_only
+steps:
+- id: monitor_only_contract
+  uses: capability.vac.autopilot.scheduler-monitor-only.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+policy:
+  mutates_files: false
+  network: false
+  approval_required_for:
+  - retry_task
+  - cancel_task
+  - attach_session
+  - execute_process
+  - write_files
+  - destructive_task
+  default_risk: safe_read
+  redaction: false
+notes:
+- The scheduler is monitor-only by default; all mutating controls are policy-gated.
+ui:
+  surface: /workflow
+  inspect_surface: /capabilities
+  progress_panel: true
+  activity_log: true
+  approval_surface: false
+  evidence_surface: true
+validation:
+  gates:
+  - monitor_only_contract
+  commands:
+  - id: maintenance.autopilot-scheduler-monitor-only.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-autopilot-scheduler-monitor-only-contract.sh
+    risk: execute_process
+    approval: policy

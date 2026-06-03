@@ -1,0 +1,69 @@
+schema_version: 1
+kind: workflow
+id: maintenance.tui-pty-gate
+title: TUI PTY Operator Gate
+status: ready
+inputs: {}
+ui:
+  surface: /workflow
+  inspect_surface: /debug-config
+  progress_panel: true
+  activity_log: true
+  approval_surface: true
+  evidence_surface: true
+policy:
+  default_risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: true
+  approval_required_for:
+  - execute_process
+steps:
+- id: orient
+  uses: capability.activity.emit
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: validate
+  uses: capability.tui.pty_gate
+  ui:
+    surface: /debug-config
+    progress_panel: true
+    activity_log: true
+    approval_surface: true
+    evidence_surface: true
+- id: report
+  uses: capability.activity.emit
+  ui:
+    surface: /workflow
+    inspect_surface: /debug-config
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+validation:
+  gates:
+  - orient
+  - report
+  - validate
+  commands:
+  - id: maintenance.tui-pty-gate.validation.cmd001
+    runner: cargo
+    args:
+    - +1.93.0
+    - check
+    - -p
+    - vac-core
+    risk: execute_process
+    approval: policy
+  - id: maintenance.tui-pty-gate.validation.cmd002
+    runner: cargo
+    args:
+    - +1.93.0
+    - check
+    - -p
+    - vac-tui
+    - --tests
+    risk: execute_process
+    approval: policy

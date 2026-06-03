@@ -1,0 +1,61 @@
+schema_version: 1
+kind: workflow
+id: maintenance.tui-real-data
+title: VAC-Init TUI Real-Data Integration readiness
+status: ready
+inputs: {}
+steps:
+- id: capability_dashboard_real_reports
+  uses: capability.vac.init.tui-real-data.check
+  ui:
+    surface: /runtime
+    progress_panel: true
+    activity_log: true
+    approval_surface: true
+    evidence_surface: true
+- id: approval_popup_store_binding
+  uses: capability.vac.init.tui-real-data.check
+  depends_on:
+  - capability_dashboard_real_reports
+  ui:
+    surface: /runtime
+    progress_panel: true
+    activity_log: true
+    approval_surface: true
+    evidence_surface: true
+- id: autopilot_doctor_monitor
+  uses: capability.vac.init.tui-real-data.check
+  depends_on:
+  - approval_popup_store_binding
+  ui:
+    surface: /runtime
+    progress_panel: true
+    activity_log: true
+    approval_surface: true
+    evidence_surface: true
+ui:
+  surface: /workflow
+  inspect_surface: /runtime
+  progress_panel: true
+  activity_log: true
+  approval_surface: true
+  evidence_surface: true
+policy:
+  default_risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for: []
+validation:
+  gates:
+  - approval_popup_store_binding
+  - autopilot_doctor_monitor
+  - capability_dashboard_real_reports
+  - tui_real_data
+  commands:
+  - id: vac.init.tui-real-data.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-tui-real-data-contract.sh
+    risk: execute_process
+    approval: policy

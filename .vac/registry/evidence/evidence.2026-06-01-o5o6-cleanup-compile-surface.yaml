@@ -1,0 +1,23 @@
+schema_version: 1
+kind: evidence
+id: evidence.2026-06-01-o5o6-cleanup-compile-surface
+created_at: '2026-06-01T00:00:00Z'
+plan_id: plan.o5o6.cleanup-compile-surface
+capability: vac.local_runtime_owner
+summary: Cleanup compile-surface hardening removed stale workspace dependency paths for deleted crates and added a source/static gate covering workspace path integrity, inherited dependency resolution, locked local-agent crates, disabled TUI stubs, local MCP connector Path A, and the remote thread-store fail-closed shim.
+status: SV-Done
+truth:
+  cargo_status: TV-Pending
+  live_tui_status: TV-Pending
+  reason: Rust toolchain is unavailable in this sandbox; cargo check/test/clippy and live TUI smoke were not executed.
+static_gates:
+  - scripts/check-vac-o5o6-cleanup-compile-surface-static.sh: PASS
+  - scripts/check-vac-o5o6-all-audit-remainder.sh: PASS
+changed_files:
+  - vac-rs/Cargo.toml
+  - scripts/check-vac-o5o6-cleanup-compile-surface-static.sh
+  - scripts/check-vac-tui-local-tool-cleanup-static.sh
+  - scripts/check-vac-o5-o6-completion-state.sh
+  - scripts/check-vac-o5o6-all-audit-remainder.sh
+  - docs/monolith-quality/O5O6_CLEANUP_COMPILE_SURFACE_STATIC_REPORT.md
+raw_chain_of_thought_excluded: true

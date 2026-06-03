@@ -1,0 +1,36 @@
+schema_version: 1
+kind: trajectory
+id: trajectory.o5-o6-monolith-quality-slice1
+spans:
+- file: vac-rs/app-server-protocol/src/lib.rs
+  start_line: 1
+  end_line: 20
+  symbol: compatibility-shim
+  evidence_id: evidence.2026-05-30-o5-o6-monolith-quality-slice1
+results_by_evidence:
+  evidence.2026-05-30-o5-o6-monolith-quality-slice1:
+    evidence_id: evidence.2026-05-30-o5-o6-monolith-quality-slice1
+    timestamp: '2026-05-30T00:00:00Z'
+    task: 'O5/O6 monolith quality slice 1: protocol dedup and gate robustness'
+    plan_id: plan.o5-o6.monolith-quality.slice1
+    capability: vac.o5-o6.monolith-quality
+    rationale:
+      summary: Registered O5/O6 plan, fixed scanner gate missing-rustc behavior, and deduplicated app-server protocol implementation via runtime-protocol compatibility re-export without claiming Cargo pass.
+      policy_refs:
+      - vac.not-evaluated-unrun-gates
+      evidence_refs:
+      - evidence.2026-05-30-o5-o6-monolith-quality-slice1
+      memory_refs:
+        team_rules: []
+        semantic_refs: []
+      excluded:
+        raw_chain_of_thought: true
+    changeset:
+      operation: modify
+      diff_excerpt: vac-app-server-protocol now re-exports vac-runtime-protocol; Cargo gates remain NotEvaluated.
+      lines_added: 0
+      lines_removed: 0
+    approval:
+      approved_by: operator
+      content_hash: 19effcb226c0a06e75737fac9289903efc992bb231ba853f57a99fe50a0d05ec
+    chain_depth: 1

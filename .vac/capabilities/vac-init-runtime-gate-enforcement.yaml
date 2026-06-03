@@ -1,0 +1,72 @@
+schema_version: 1
+kind: capability
+id: vac.init.runtime-gate-enforcement
+title: VAC-Init Runtime Gate Enforcement
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane::vac_init_runtime_enforcement
+ownership:
+  crates:
+  - vac-core
+  modules:
+  - control_plane::vac_init_runtime_enforcement
+  targets:
+  - kind: module
+    crate: vac-core
+    module: control_plane::vac_init_runtime_enforcement
+  - kind: path
+    include:
+    - vac-rs/control-plane/src/control_plane/vac_init_runtime_enforcement.rs
+    - scripts/check-vac-init-runtime-gate-enforcement-contract.sh
+    - .vac/capabilities/vac-init-runtime-gate-enforcement.yaml
+    - .vac/workflows/maintenance.vac-init-runtime-gate-enforcement.yaml
+    - docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_C_RUNTIME_GATES.md
+    - docs/validation/PRODUCTION_HARDENING_C1_C4_VALIDATION.md
+    exclude: []
+description: Code-backed runtime enforcement contract for pre-plan, pre-patch, pre-command, and evidence completion gates.
+depends_on:
+- vac.init.semantic-plan
+- vac.init.patch-guard
+- vac.init.command-gate
+- vac.init.evidence-chain
+- vac.init.policy-evaluator
+- vac.init.ownership-scanner
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - bash scripts/check-vac-init-runtime-gate-enforcement-contract.sh
+    - vac doctor release .
+  palette: true
+  tui:
+    routes:
+    - /capabilities
+    - /runtime
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for: []
+states:
+- empty
+- loading
+- success
+- failure
+validation:
+  gates:
+  - pre_plan_gate_contract
+  - pre_patch_gate_contract
+  - pre_command_gate_contract
+  - evidence_completion_gate_contract
+  commands:
+  - id: vac.init.runtime-gate-enforcement.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-runtime-gate-enforcement-contract.sh
+    risk: execute_process
+    approval: policy
+docs:
+- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_C_RUNTIME_GATES.md
+- docs/validation/PRODUCTION_HARDENING_C1_C4_VALIDATION.md

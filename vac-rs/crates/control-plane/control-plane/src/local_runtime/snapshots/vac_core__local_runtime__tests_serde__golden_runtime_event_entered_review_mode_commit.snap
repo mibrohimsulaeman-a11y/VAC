@@ -1,0 +1,15 @@
+---
+source: core/src/local_runtime/tests_serde.rs
+expression: "RuntimeEvent::EnteredReviewMode(EnteredReviewMode::new(ReviewTarget::Commit\n{ sha: \"deadbeef\".to_string(), title: Some(\"fix auth bug\".to_string()), },\nSome(\"focus on error handling\".to_string()),),)"
+---
+{
+  "EnteredReviewMode": {
+    "target": {
+      "commit": {
+        "sha": "deadbeef",
+        "title": "fix auth bug"
+      }
+    },
+    "user_facing_hint": "focus on error handling"
+  }
+}

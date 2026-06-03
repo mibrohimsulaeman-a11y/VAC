@@ -1,0 +1,71 @@
+schema_version: 1
+kind: plan
+id: plan.dogfood.assistant-model.vac-session
+title: Dogfood VAC with assistant model as bounded worker
+status: completed
+task:
+  description: 'Run this assistant as if it were a VAC model worker: load current control-plane state, run pre-flight gates, apply a bounded script hygiene patch, and write safe evidence.'
+  requested_by: operator
+  timestamp: '2026-05-30T00:00:00Z'
+  capability: vac.init.dogfood-session
+memory_context:
+  working:
+  - dogfood.current-artifact
+  team:
+  - vac.no-hardcoded-readiness
+  - vac.safe-rationale
+  semantic:
+  - vac.workflow-control-plane
+  - vac.runtime-gate-enforcement
+allowed_files:
+- path: scripts/check-no-hardcoded-readiness-scoreboard.sh
+  operation: modify
+  semantic_anchor:
+    symbol: reject_pattern
+    kind: function
+  ownership: vac.init.dogfood-session
+  rationale: Pre-flight found deterministic gate noise caused by fixed /tmp output files.
+- path: docs/dogfood/2026-05-30-assistant-model-vac-dogfood.md
+  operation: create
+  ownership: vac.init.dogfood-session
+  rationale: Record operator-visible dogfood session report.
+- path: .vac/registry/evidence/evidence.2026-05-30-dogfood-assistant-model.yaml
+  operation: create
+  ownership: vac.init.dogfood-session
+  rationale: Persist safe evidence for dogfood session.
+forbidden:
+  files:
+  - vac-rs/vendor/**
+  - target/**
+  - .git/**
+  actions:
+  - full_workspace_build
+  - raw_chain_of_thought_persistence
+validation:
+  pre_conditions:
+  - Artifact baseline is vac-source-docs-plan-codebase-reconciliation.zip.
+  - Pre-flight docs/state/registry/workflow/hygiene gates pass before mutation.
+  post_conditions:
+  - No hardcoded readiness gate writes to fixed /tmp paths.
+  - Dogfood evidence contains safe rationale only.
+  - Registry strictness and workflow spec gates still pass.
+  commands:
+  - id: dogfood.validation.session
+    runner: bash
+    args:
+    - scripts/check-vac-dogfood-session.sh
+    risk: execute_process
+    approval: policy
+approval:
+  required: false
+  approver: operator
+  approved_at: '2026-05-30T00:00:00Z'
+  content_hash: e58674dcdf168d0a4488a2fc057d7c9b509d633de4fe795eee613eab40d5eb71
+  signature:
+    algorithm: none
+    value: null
+bounds:
+  max_patches: 1
+  max_new_files: 5
+  max_line_delta: 120
+  timeout_seconds: 120

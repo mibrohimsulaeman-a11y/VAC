@@ -1,0 +1,81 @@
+schema_version: 1
+kind: capability
+id: vac.init.production-rc
+title: VAC-Init Production RC
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane::vac_init_production_rc
+ownership:
+  crates:
+  - vac-core
+  modules:
+  - control_plane::vac_init_production_rc
+  targets:
+  - kind: module
+    crate: vac-core
+    module: control_plane::vac_init_production_rc
+  - kind: path
+    include:
+    - vac-rs/control-plane/src/control_plane/vac_init_production_rc.rs
+    - scripts/check-vac-init-production-rc-contract.sh
+    - .vac/capabilities/production-rc.yaml
+    - .vac/workflows/maintenance.production-rc.yaml
+    - docs/vac-init/VAC_INIT_PRODUCTION_RC1.md
+    - docs/validation/PRODUCTION_HARDENING_I1_I3_VALIDATION.md
+    exclude: []
+description: Production hardening contract for VAC-Init Production RC.
+depends_on:
+- vac.init.durable-stores
+- vac.init.scanner-policy-hardening
+- vac.init.tui-real-data
+- vac.init.fixtures-security-regression
+- vac.init.migration-runtime
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - bash scripts/check-vac-init-production-rc-contract.sh
+    - vac doctor release .
+  palette: true
+  tui:
+    routes:
+    - /capabilities
+    - /runtime
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for: []
+states:
+- empty
+- loading
+- success
+- failure
+validation:
+  gates:
+  - production_rc
+  commands:
+  - id: vac.init.production-rc.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-production-rc-contract.sh
+    risk: execute_process
+    approval: policy
+  - id: vac.init.production-rc.validation.cmd002
+    runner: bash
+    args:
+    - scripts/check-vac-minimal-e2e-dry-run.sh
+    risk: execute_process
+    approval: policy
+  - id: vac.init.production-rc.validation.cmd003
+    runner: bash
+    args:
+    - scripts/check-vac-evidence-why-live-index.sh
+    risk: execute_process
+    approval: policy
+docs:
+- docs/vac-init/VAC_INIT_PRODUCTION_RC1.md
+- docs/validation/PRODUCTION_HARDENING_I1_I3_VALIDATION.md
+- docs/validation/P5_P9_VALIDATION.md

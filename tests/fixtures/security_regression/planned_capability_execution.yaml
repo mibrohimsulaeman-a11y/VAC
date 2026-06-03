@@ -1,0 +1,6 @@
+schema_version: 1
+kind: test_assertion
+id: security.planned-capability-execution
+attack: planned_capability_execution
+expected: rejected
+diagnostic_required: true

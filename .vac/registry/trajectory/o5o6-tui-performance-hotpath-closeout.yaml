@@ -1,0 +1,29 @@
+schema_version: 1
+kind: trajectory
+id: trajectory.o5o6-tui-performance-hotpath-closeout
+status: complete
+created_at: '2026-06-01T00:00:00Z'
+plan_id: plan.o5o6.tui-performance-hotpath-closeout
+capability: vac.tui.operator-live-adapter
+rationale:
+  safe_summary: The performance audit found that operator-console draw ticks still triggered heavy autopilot refresh behavior. This slice makes draw/tick read-only and dirty-checked, removes scheduler execution from runtime state loading, and memoizes repeated markdown rendering.
+  policy_refs:
+    - vac.static-vs-toolchain-truth
+    - vac.no-hardcoded-readiness
+  evidence_refs:
+    - evidence.2026-06-01-o5o6-tui-performance-hotpath-closeout
+  raw_chain_of_thought_excluded: true
+changes:
+  - file: vac-rs/tui/src/operator_console.rs
+    operation: modify
+    summary: Replaced unconditional refresh with refresh_view(force), file signatures, and conditional redraw; pre_draw_tick no longer executes scheduler.
+  - file: vac-rs/tui/src/operator_ui.rs
+    operation: modify
+    summary: Removed scheduler execution from AutopilotSchedulerState::from_workspace.
+  - file: vac-rs/tui/src/markdown_render.rs
+    operation: modify
+    summary: Added bounded memo cache for repeated markdown renders keyed by input, width, and cwd.
+  - file: scripts/check-vac-control-plane-audit-findings-static.sh
+    operation: modify
+    summary: Static gate now rejects render/draw execution of autopilot scheduler and requires markdown memoization.
+rollback: restore vac-o5o6-autopilot-runtime-scheduler-guard-final-source.zip before reapplying this performance hot-path slice.

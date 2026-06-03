@@ -1,0 +1,9 @@
+---
+source: core/src/local_runtime/tests_serde.rs
+expression: "RuntimeCommand::ResumeSession { session_id: fixed_session_id(), }"
+---
+{
+  "ResumeSession": {
+    "session_id": "11111111-1111-1111-1111-111111111111"
+  }
+}

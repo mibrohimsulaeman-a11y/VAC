@@ -1,0 +1,53 @@
+schema_version: 1
+kind: capability
+id: vac.init.safe-rationale
+title: VAC-Init Safe Rationale and vac why Trajectory
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane::vac_init_safe_rationale
+ownership:
+  crates:
+  - vac-core
+  modules:
+  - control_plane::vac_init_safe_rationale
+  targets:
+  - crate_name: vac-core
+    module: control_plane::vac_init_safe_rationale
+description: Safe rationale contract stores audit summaries, policy refs, evidence refs, and memory refs while excluding raw/private chain-of-thought.
+depends_on:
+- vac.init.evidence-chain
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - bash scripts/check-vac-init-why-contract.sh
+  palette: true
+  tui:
+    routes:
+    - /capabilities
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for:
+  - execute_process
+states:
+- empty
+- loading
+- success
+- failure
+validation:
+  gates:
+  - vac_init_safe_rationale_contract
+  commands:
+  - id: vac.init.safe-rationale.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-why-contract.sh
+    risk: execute_process
+    approval: policy
+docs:
+- docs/vac-init/VAC_INIT_BATCH_13_15_IMPLEMENTATION.md
+- docs/validation/VAC_INIT_SAFE_RATIONALE_GATE.md

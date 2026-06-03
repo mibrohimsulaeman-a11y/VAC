@@ -1,0 +1,14 @@
+schema_version: 1
+kind: trajectory
+id: trajectory.o5o6.three-audit-findings
+plan_id: plan.o5o6.three-audit-findings
+entries:
+  - step: audit-pack-read
+    status: completed
+    note: Three uploaded audit packs were mapped to server-prune, TUI perf/UX, and control-plane CLI/spec gaps.
+  - step: source-patch
+    status: completed
+    note: Implemented CLI surfaces, TUI hot-path guards, default-off legacy provider gates, canonical evidence hashing, optional evidence signing, and anchor resolver hardening.
+  - step: static-gates
+    status: completed
+    note: Static gate passed in sandbox; cargo gates remain TV-Pending.

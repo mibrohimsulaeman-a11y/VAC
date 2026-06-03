@@ -1,0 +1,40 @@
+schema_version: 1
+kind: plan
+id: plan.o5o6.three-audit-findings
+status: completed_source_static
+task:
+  capability: vac.o5o6.monolith-quality
+summary: Close out the three latest advisory audit packs with source/static implementation.
+allowed_files:
+  - path: vac-rs/cli/src/main.rs
+    operation: modify
+    ownership: vac.cli
+  - path: vac-rs/cli/src/plan_cli.rs
+    operation: modify
+    ownership: vac.cli
+  - path: vac-rs/cli/src/approve_cli.rs
+    operation: create
+    ownership: vac.cli
+  - path: vac-rs/cli/src/workflow_cli.rs
+    operation: create
+    ownership: vac.cli
+  - path: vac-rs/tui/src
+    operation: modify
+    ownership: vac.tui
+  - path: vac-rs/control-plane/src/control_plane
+    operation: modify
+    ownership: vac.control-plane
+  - path: vac-rs/vac-client/src/lib.rs
+    operation: modify
+    ownership: vac.provider-http
+validation:
+  commands:
+    - id: vac.o5o6.three-audit-findings.static
+      runner: bash
+      args:
+        - scripts/check-vac-o5o6-three-audit-findings-static.sh
+      risk: low
+      approval: never
+verification:
+  SV-Done: source/static gates only
+  TV-Pending: cargo check/test/clippy and live TUI smoke

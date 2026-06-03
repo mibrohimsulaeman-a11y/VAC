@@ -1,0 +1,62 @@
+schema_version: 1
+kind: capability
+id: vac.o5-o6.monolith-quality
+title: VAC O5/O6 Monolith Quality
+status: ready
+owner:
+  crate: vac-workspace
+  module: monolith_quality
+ownership:
+  crates:
+  - vac-workspace
+  modules:
+  - monolith_quality
+  targets:
+  - kind: path
+    include:
+    - docs/monolith-quality/**
+    - .vac/registry/o5-o6-monolith-quality-state.yaml
+    - scripts/check-vac-o5-o6-monolith-quality-slice.sh
+    - vac-rs/app-server-protocol/**
+    - vac-rs/runtime-protocol/**
+    exclude: []
+description: Tracks O5 monolith/refactor and O6 quality de-risk slices without fake build/E2E readiness claims.
+depends_on:
+- vac.release.legal-build-blockers
+- vac.init.scanner-policy-hardening
+policy:
+  risk: medium
+  mutates_files: true
+  network: false
+  redaction: false
+  approval_required_for:
+  - filesystem_write
+  - crate_dedup
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - bash scripts/check-vac-o5-o6-monolith-quality-slice.sh
+  palette: true
+  tui:
+    routes:
+    - /workflow
+    - /release
+states:
+- empty
+- loading
+- success
+- failure
+validation:
+  gates:
+  - o5_o6_monolith_quality_slice
+  commands:
+  - id: vac.o5-o6.monolith-quality.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-o5-o6-monolith-quality-slice.sh
+    risk: execute_process
+    approval: policy
+docs:
+- docs/monolith-quality/VAC_O5_O6_MONOLITH_QUALITY_IMPL_PLAN.md
+- docs/monolith-quality/O5_1_PROTOCOL_DEDUP_SLICE.md

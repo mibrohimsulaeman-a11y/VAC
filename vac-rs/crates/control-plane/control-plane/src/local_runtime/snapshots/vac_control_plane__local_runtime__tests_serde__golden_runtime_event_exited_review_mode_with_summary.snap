@@ -1,0 +1,9 @@
+---
+source: core/src/local_runtime/tests_serde.rs
+expression: "RuntimeEvent::ExitedReviewMode(ExitedReviewMode::new(Some(\"3 findings\".to_string())),)"
+---
+{
+  "ExitedReviewMode": {
+    "summary": "3 findings"
+  }
+}

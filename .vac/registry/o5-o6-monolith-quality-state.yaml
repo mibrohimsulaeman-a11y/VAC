@@ -1,0 +1,350 @@
+schema_version: 1
+kind: registry_status
+id: vac.o5_o6.monolith_quality_state
+title: O5/O6 monolith quality state
+status: ready
+updated_at: '2026-06-01T00:00:00Z'
+baseline: vac-source-scanner-hardening-o1-o4-s5-s8.zip
+implemented_slices:
+- id: O5.1
+  title: Protocol dedup compatibility shim
+  status: Implemented_NotEvaluated
+  summary: vac-app-server-protocol re-exports vac-runtime-protocol; duplicate source implementation files removed.
+- id: O5.2
+  title: Active god-file semantic source split
+  status: SV-Done_TV-Pending
+  summary: Active O5.2 targets no longer use full-byte legacy_include.rs; each target is split into ordered semantic shards with reconstructable hashes. Deep module-per-symbol extraction remains TV-Pending.
+- id: O5.3
+  title: Utils consolidation report
+  status: Planned_NotEvaluated
+  summary: Utility and small-crate candidates recorded; no crate merge performed without cargo build gate.
+- id: O5.4
+  title: Workspace consolidation report
+  status: Planned_NotEvaluated
+  summary: Workspace member inventory recorded; consolidation deferred until cargo dependency graph/build is available.
+- id: O5.5
+  title: App-server donor delete gate
+  status: SV-Done_TV-Pending
+  summary: Non-default app-server donor crates are removed and schema bins relocated to runtime-protocol; cargo/tree verification remains TV-Pending.
+- id: O6.1
+  title: De-panic runtime surface
+  status: SV-Done_TV-Pending
+  summary: Retired grep upper-bound; active source scanner excludes tests/cfg(test), comments, and literals, measuring 251 runtime panic-capable sites; code refactor remains TV-Pending.
+- id: O6.2
+  title: Unsafe static triage
+  status: Implemented_NotEvaluated
+  summary: Corrected source-runtime SAFETY audit is SV-Done; retired inflated 558/558 metric and rejected stale generic comments; cargo/geiger remains TV-Pending.
+- id: O6.3
+  title: Docs pruning classification
+  status: Implemented_NotEvaluated
+  summary: Docs classified; no physical delete without link/check gates.
+- id: O6.4
+  title: E2E expansion scaffold
+  status: Scaffolded_NotEvaluated
+  summary: E2E flows registered; cargo/e2e run remains NotEvaluated.
+- id: O6.2.SAFETY
+  title: Runtime unsafe SAFETY annotation coverage
+  status: SV-Done_TV-Pending
+  summary: Source-runtime unsafe coverage is 491/491 with direct preceding SAFETY comments, cfg(test)/test paths excluded, and stale generic comments rejected; cargo/geiger verification remains TV-Pending.
+cargo_gates:
+  cargo_build_workspace_offline: AbortedBySandboxReset
+  cargo_clippy_workspace_offline: NotEvaluated_BlockedByBuildReset
+  cargo_test_workspace_offline: NotEvaluated_BlockedByBuildReset
+scanner_gate_toolchain_behavior: rustc_missing_reports_NotEvaluated_not_127
+registry_gate_toolchain_behavior: rustc_missing_reports_NotEvaluated_not_127
+overall_status: Implemented_NotEvaluated
+completion_caveat: O5/O6 plan has implementation scaffolding, mechanical staging, and static triage, but true Done requires cargo build/clippy/test workspace to pass with usable toolchain/vendor.
+sv_done_latest: cleanup compile-surface static implementation
+tv_status: TV-Pending_SandboxResetBlocked
+
+# ============================================================
+# Sandbox continuation session (notion-ai-sandbox) 2026-05-30
+# Two-tier acceptance: SV-Done (static gates, no toolchain) vs TV-Pending (cargo).
+# ============================================================
+sandbox_continuation_2026_05_30:
+  completed_sv_done:
+    - id: O5.1c
+      desc: app-server-protocol consumer migration (1729 path refs / 114 files -> vac_runtime_protocol) + 1 alias + 4 manifest deps
+      gate: scripts/check-vac-o5-1c-app-server-protocol-consumer-migration.sh
+      result: PASS
+      evidence: .vac/registry/evidence/evidence.2026-05-30-o5-1c-consumer-migration.yaml
+    - id: O6.1-baseline
+      desc: true-runtime panic surface re-baseline excluding cfg(test) modules (~360 sites, not thousands)
+      script: scripts/measure-vac-o6-1-runtime-panic-surface.py
+      evidence: .vac/registry/evidence/evidence.2026-05-30-o6-1-runtime-panic-baseline.yaml
+    - id: infra-sandbox-gate-suite
+      desc: aggregate harness; toolchain gates reported NotEvaluated instead of exit 127
+      script: scripts/check-vac-sandbox-suite.sh
+  repin_side_effect:
+    reason: O5.1c edited import lines inside 2 staged god-files; md5 pins advanced intentionally and recorded
+    files:
+      - vac-rs/app-server/src/vac_message_processor/legacy_include.rs
+      - vac-rs/app-server/src/bespoke_event_handling/legacy_include.rs
+    pins_updated_in: [scripts/check-vac-o5-2-godfile-staging-all.sh, .vac/registry/o5-godfile-staging-state.yaml, wrappers, docs/monolith-quality/O5_2_GODFILE_STAGING_ALL.md]
+  compile_debt_ledger: .vac/registry/compile-debt-ledger.yaml
+  not_done_tv_or_pending:
+    - O5.2 deeper module-per-symbol extraction after source-shard split
+    - O5.3 utils merge / O5.4 workspace consolidation (reports only)
+    - O5.5 non-app-server donor inventory decisions beyond app-server scope
+    - O6.1 code-level de-panic refactor and O6.2 cargo/geiger TV verification
+    - O6.3 docs archive execution
+    - app-server-protocol crate deletion (needs bin relocation + architecture-invariant update + toolchain)
+  pre_existing_red_gates_not_regressed_here:
+    - check-vac-o6-2-safety-coverage.sh (fails in pristine snapshot: missing .vac/registry/o6-safety-coverage.yaml)
+    - check-vac-o6-quality-triage.sh (fails in pristine snapshot)
+    - check-vac-o5-o6-completion-state.sh (aggregates the two above)
+
+
+toolchain_session_2026_05_30:
+  checksum_parts: PASS
+  restored_bundle_observed_before_reset:
+    file_count: 205291
+    vendor_crate_count: 1151
+    rustc: rustc 1.93.0 (254b59607 2026-01-19)
+    cargo: cargo 1.93.0 (083ac5135 2025-12-15)
+  full_workspace_build:
+    command: cargo build --offline --workspace --locked
+    result: AbortedBySandboxReset
+  targeted_protocol_build_first:
+    command: cargo build --offline -p vac-runtime-protocol -p vac-app-server-protocol
+    result: Failed_E0753
+    root_cause: staged legacy_include.rs used inner doc comments that rustc rejects through include!
+  targeted_protocol_build_retry:
+    command: cargo build --offline -p vac-runtime-protocol -p vac-app-server-protocol
+    result: AbortedBySandboxReset
+    last_observed_phase: compiling vac-runtime-protocol
+  static_fix_after_cargo_failure:
+    description: converted staged inner doc comments to include-safe regular comments and re-pinned current legacy hashes
+    gate: scripts/check-vac-o5-2-godfile-staging-all.sh
+    result: PASS
+  resulting_truth:
+    O5.1c: SV-Done_TV-Pending
+    O5.2: SV-Done_TV-Pending
+    O6.1: SV-Done_TV-Pending
+    O6.2_plus: Pending_or_StaticOnly
+
+
+audit_remediation_2026_05_30:
+  source_audit: Pasted markdown.md
+  fixes:
+    - retired inflated O6.2 558/558 metric
+    - added runtime-only safety scanner excluding test paths and inline cfg(test) items
+    - replaced stale generic SAFETY comments with direct call-site-adjacent rationales
+    - changed sandbox suite skip behavior from cargo/rustc substring grep to explicit markers
+    - fixed strict registry envelope issues in compile-debt/evidence artifacts
+  corrected_metrics:
+    source_runtime_safety_coverage: 455/455
+    linux_host_runtime_safety_coverage: 163/163
+    excluded_path_test_or_fixture: 52
+    excluded_cfg_test: 40
+    stale_generic_safety_comments: 0
+  validation:
+    targeted_gates: PASS
+    log: docs/monolith-quality/logs/audit-remediation-targeted-gates.log
+  tv_status: TV-Pending
+
+gap_bc_depth_2026_05_30:
+  source_audit: Pasted markdown.md
+  scope: VAC-Init GAP-B/GAP-C implementation gaps from the latest O5/O6 re-audit
+  fixes:
+    - added multi-policy merge, canonical hash, approval replay, risk confidence, semantic anchor, and fixture-matrix fixtures
+    - implemented source-level semantic-anchor resolver in vac_init_patch_guard.rs
+    - added rustc-free static gate scripts/check-vac-init-gap-bc-depth-static.sh
+    - changed registry-validator direct gate to static PASS plus rustc unit NotEvaluated instead of rc=127
+    - changed upload-sha gate to verify external upload bundles through VAC_UPLOAD_SHA256SUMS/VAC_UPLOAD_DIR
+  validation:
+    targeted_static_gates: PASS
+    upload_sha256_with_current_mnt_data_uploads: PASS
+    log: docs/monolith-quality/logs/gap-bc-depth-targeted-gates-summary.log
+  tv_status: TV-Pending
+
+
+remaining_audit_gaps_2026_05_30:
+  status: SV-Done_TV-Pending
+  summary: >
+    Implemented remaining source/static audit gaps: Ed25519 approval/evidence
+    signature paths, migration runtime depth, TUI scheduler state fixtures,
+    legal provenance notice expansion, and no-rustc fallback behavior for direct
+    contract gates. Cargo build/clippy/test remains TV-Pending.
+  validation:
+    - scripts/check-vac-init-remaining-audit-gaps-static.sh: PASS
+    - scripts/check-vac-init-approval-binding-contract.sh: PASS_static_cargo_NotEvaluated
+    - scripts/check-vac-init-evidence-chain-contract.sh: PASS_static_cargo_NotEvaluated
+    - scripts/check-vac-init-migration-runtime-contract.sh: PASS_static_cargo_NotEvaluated
+    - scripts/check-vac-init-tui-real-data-contract.sh: PASS_static_cargo_NotEvaluated
+    - scripts/check-legal-release-blockers.sh: PASS
+  tv_status: TV-Pending
+
+app_server_retirement:
+  id: O5O6-epic-a-app-server-retirement-2026-05-30
+  status: SV-Done_TV-Pending
+  local_semantics: in_process_without_separate_app_server_process
+  offline_full_scope: archived_not_requested
+  provider_network_retained: true
+  retired_crate_paths:
+    - vac-rs/app-server
+    - vac-rs/app-server-client
+    - vac-rs/app-server-protocol
+    - vac-rs/app-server-transport
+  retired_tui_feature: legacy-app-server-compat
+  active_tui_session_boundary: vac-rs/tui/src/runtime_owner_session.rs
+  relocated_schema_bins:
+    - vac-rs/runtime-protocol/src/bin/export.rs
+    - vac-rs/runtime-protocol/src/bin/write_schema_fixtures.rs
+  static_gates:
+    - scripts/check-no-app-server-local-path-contract.sh
+    - scripts/check-vac-epic-a-app-server-retirement.sh
+    - scripts/check-vac-o5-1c-app-server-protocol-consumer-migration.sh
+    - scripts/check-vac-o5-o6-monolith-quality-slice.sh
+  tv_status: TV-Pending
+
+
+all_audit_remainder_2026_05_30:
+  status: SV-Done_TV-Pending
+  summary: >
+    Continued the latest audit after Epic A: replaced full-byte O5.2 legacy_include
+    staging with reconstructable semantic source shards, added precise O6.1 runtime
+    panic surface scanner, closed the app-server donor delete gate, and added F5
+    protocol duplication proof. Cargo build/clippy/test remains TV-Pending.
+  validation:
+    - scripts/check-vac-o5-2-godfile-staging-all.sh: PASS
+    - scripts/check-vac-o6-1-depanic-surface.sh: PASS
+    - scripts/check-vac-f5-protocol-duplication.sh: PASS
+    - scripts/check-vac-o5-5-donor-delete-gate.sh: PASS
+  tv_status: TV-Pending
+
+
+audit_closeout_remediation_2026_05_30:
+  status: SV-Done_TV-Pending
+  summary: O5.2 split hash gate now verifies reconstructed shard hashes; O6.1 panic-surface count is reproducible by scanner JSON; donor/ and root logs removed from source artifact.
+  gates:
+    - scripts/check-vac-o5-2-semantic-split-hash.sh
+    - scripts/check-vac-o6-1-depanic-surface.sh
+    - scripts/check-vac-o5-5-donor-delete-gate.sh
+    - scripts/check-tui-source-artifact-hygiene.sh
+  tv_pending:
+    - cargo build --offline --workspace --locked
+    - cargo clippy --offline --workspace -- -D warnings
+    - cargo test --offline --workspace
+
+runtime_engine_tui_parity_2026_05_31:
+  status: SV-Done_TV-Pending
+  summary: >
+    Added engine-backed runtime bridge and TUI panel/live-data source remediation
+    in response to the latest control-plane wiring and visual parity audits.
+  static_gates:
+    - scripts/check-vac-runtime-engine-wiring-static.sh: PASS
+    - scripts/check-vac-tui-visual-parity-static.sh: PASS
+  tv_status: TV-Pending
+
+
+cleanup_compile_surface_2026_06_01:
+  status: SV-Done_TV-Pending
+  summary: >
+    Closed cleanup compile-surface debt from the latest local-tool audit: removed
+    stale missing workspace dependency paths and added a rustc-free gate that
+    checks workspace members, path dependencies, inherited workspace deps, locked
+    provider/auth crates, local disabled stubs, connector Path A, and the remote
+    thread-store fail-closed shim. Cargo build/clippy/test remains TV-Pending.
+  validation:
+    - scripts/check-vac-o5o6-cleanup-compile-surface-static.sh: PASS
+    - scripts/check-vac-o5o6-all-audit-remainder.sh: PASS
+  tv_status: TV-Pending
+
+big_refactor_2026_06_01:
+  status: SV-Done_TV-Pending
+  summary: >
+    Implemented the audit's high-confidence architecture cleanup at source/static level:
+    retired vac-chatgpt cloud-task and backend OpenAPI island crates, added
+    vac-control-plane and vac-provider-http crate seams, removed active ChatGPT
+    account sign-in selection from CLI/TUI, moved connector helper code to
+    vac_core::connectors, bounded the TUI frame request, file watcher, agent mailbox, and session event channels, and removed production unwrap/expect from onboarding auth lock handling. Full
+    workspace-wide layer relocation, legacy auth-variant removal, and cargo-backed compile/test
+    validation remain TV-Pending.
+  validation:
+    - scripts/check-vac-o5o6-big-refactor-static.sh: PASS
+    - scripts/check-vac-o5o6-cleanup-compile-surface-static.sh: PASS
+    - scripts/check-vac-tui-local-tool-cleanup-static.sh: PASS
+    - scripts/check-no-app-server-local-path-contract.sh: PASS
+  evidence: .vac/registry/evidence/evidence.2026-06-01-o5o6-big-refactor.yaml
+  trajectory: .vac/registry/trajectory/o5o6-big-refactor.yaml
+  tv_status: TV-Pending
+auditfix_remainder_2026_06_01:
+  status: SV-Done_TV-Pending
+  summary: >
+    Closed the latest physical-extraction re-audit remainder at source/static level:
+    R-03 production core .expect surface, R-04 default ChatGPT remote cloud fail-closed,
+    R-05 semantic_split dispatcher shrink, R-06 production core/tui bounded channel
+    surface, S-07 target layer map, and S-12 technical-debt marker drift.
+  validation:
+    - scripts/check-vac-o5o6-audit-remainder-static.sh: PASS
+    - scripts/check-vac-o5o6-bounded-hotpath-static.sh: PASS
+    - scripts/check-vac-o5-2-semantic-split-hash.sh: PASS
+    - scripts/check-vac-o5-2-godfile-staging-all.sh: PASS
+    - scripts/check-vac-o5o6-cloud-coupling-isolation-static.sh: PASS
+    - scripts/check-vac-o5o6-architecture-extraction-static.sh: PASS
+    - scripts/check-vac-technical-debt-markers-static.sh: PASS
+  evidence: .vac/registry/evidence/evidence.2026-06-01-o5o6-auditfix-remainder.yaml
+  trajectory: .vac/registry/trajectory/o5o6-auditfix-remainder.yaml
+  tv_pending:
+    - cargo check/test/clippy
+    - live TUI smoke
+    - full crates/<layer>/<name> physical workspace relocation
+    - full semantic shard-to-domain-module extraction
+    - full legacy ChatGPT auth enum/copy removal
+  tv_status: TV-Pending
+
+
+current_auditfix_2026_06_01:
+  status: SV-Done_TV-Pending
+  source_static:
+    c05_large_file_targets: SV-Done
+    c07_production_channel_surface: SV-Done
+    c08_production_unwrap_expect_surface: SV-Done
+    c09_legacy_chatgpt_fail_closed: SV-Done
+    c03_c04_layer_target_contract: SV-Done
+  tv_pending:
+    - cargo check/test/clippy
+    - full crates/<layer>/<name> physical relocation
+    - full core capability extraction
+    - full panic invariant review under rustc/clippy
+
+regen_tui_findings_2026_06_01:
+  status: SV-Done_TV-Pending
+  source_static:
+    vac_init_generated_projection: SV-Done
+    docs_living_projection_refresh: SV-Done
+    donor_living_docs_prune_with_provenance: SV-Done
+    tui_benchmark_harness_entrypoint: SV-Done_NotEvaluated_runtime
+    markdown_cache_capacity_and_lookup: SV-Done
+    operator_console_idle_tick_reduction: SV-Done
+    slash_memory_deadend_hidden: SV-Done
+    realtime_settings_guidance: SV-Done
+    workflow_action_hints: SV-Done
+    startup_profile_spans: SV-Done
+  tv_pending:
+    - cargo check/test/clippy
+    - real benchmark timing numbers
+    - live TUI smoke
+
+three_audit_findings_2026_06_01:
+  status: SV-Done_TV-Pending
+  source_static:
+    server_bound_chatgpt_transport_gated: SV-Done
+    vac_api_cloud_tests_retired: SV-Done
+    authmode_chatgpt_default_off_gate: SV-Done
+    provider_realtime_default_off_gate: SV-Done
+    tui_desired_height_cache: SV-Done
+    resize_height_only_reflow_avoidance: SV-Done
+    workflow_run_tui_direct_manifest_execution: SV-Done
+    debug_config_rules_output: SV-Done
+    cli_plan_approve_workflow_surfaces: SV-Done
+    interactive_init_operator_choices: SV-Done
+    canonical_evidence_yaml_and_optional_signing: SV-Done
+    semantic_anchor_candidate_collection: SV-Done
+  tv_pending:
+    - cargo check/test/clippy
+    - criterion/divan benchmarks with numeric results
+    - live TUI smoke
+    - full windowed transcript rendering
+    - full AST-backed multilingual semantic anchors

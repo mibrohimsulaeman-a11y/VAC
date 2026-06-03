@@ -1,0 +1,49 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "vac-core-plugins"
+version.workspace = true
+
+[lib]
+doctest = false
+name = "vac_core_plugins"
+path = "src/lib.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+vac-analytics = { workspace = true }
+vac-runtime-protocol = { workspace = true }
+vac-config = { workspace = true }
+vac-core-skills = { workspace = true }
+vac-exec-server = { workspace = true }
+vac-git-utils = { workspace = true }
+vac-login = { workspace = true }
+vac-model-provider = { workspace = true }
+vac-otel = { workspace = true }
+vac-plugin = { workspace = true }
+vac-protocol = { workspace = true }
+vac-utils-absolute-path = { workspace = true }
+vac-utils-plugins = { workspace = true }
+chrono = { workspace = true }
+dirs = { workspace = true }
+flate2 = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+tar = { workspace = true }
+tempfile = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["fs", "macros", "rt", "time"] }
+toml = { workspace = true }
+tracing = { workspace = true }
+url = { workspace = true }
+zip = { workspace = true }
+
+[dev-dependencies]
+libc = { workspace = true }
+pretty_assertions = { workspace = true }
+tempfile = { workspace = true }
+wiremock = { workspace = true }

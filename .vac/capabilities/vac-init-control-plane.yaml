@@ -1,0 +1,69 @@
+schema_version: 1
+kind: capability
+id: vac.init.control-plane
+title: VAC-Init Engine and Workflow Control Plane Foundation
+status: partial
+owner:
+  crate: vac-core
+  module: control_plane::schema_envelope
+ownership:
+  crates:
+  - vac-core
+  modules:
+  - control_plane::schema_envelope
+  - control_plane::kind_registry
+  targets:
+  - crate_name: vac-core
+    module: control_plane::schema_envelope
+  - crate_name: vac-core
+    module: control_plane::kind_registry
+reason: Batch 0-1 implements the schema envelope, kind registry, execution plan, and baseline gate. Full interactive vac init lifecycle, scanners, policy evaluator, command gate, approval replay protection, evidence chain, and vac why remain scheduled for later batches.
+description: Manifest-first foundation for turning repositories into VAC-controlled agentic workspaces.
+depends_on:
+- vac.workflow
+surfaces:
+  cli:
+    enabled: false
+    commands:
+    - vac init --dry-run
+    - vac doctor registry .
+  palette: true
+  tui:
+    routes:
+    - /capabilities
+states:
+- empty
+- loading
+- success
+- failure
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for:
+  - filesystem_write
+  - execute_process
+validation:
+  gates:
+  - vac_init_schema_envelope_contract
+  - vac_init_kind_registry_contract
+  - vac_init_baseline_audit
+  - source_artifact_hygiene
+  commands:
+  - id: vac.init.control-plane.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-schema-envelope-contract.sh
+    risk: execute_process
+    approval: policy
+  - id: vac.init.control-plane.validation.cmd002
+    runner: bash
+    args:
+    - scripts/check-vac-init-baseline-contract.sh
+    risk: execute_process
+    approval: policy
+docs:
+- docs/vac-init/VAC_INIT_EXECUTION_PLAN.md
+- docs/vac-init/VAC_INIT_IMPLEMENTATION_MAP.md
+- docs/validation/VAC_INIT_BASELINE_AUDIT.md

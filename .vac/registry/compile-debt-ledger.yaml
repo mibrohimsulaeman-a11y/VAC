@@ -1,0 +1,34 @@
+schema_version: 1
+kind: compile_debt_ledger
+id: compile-debt.o5o6.zero-residual-static
+updated_at: 2026-06-03T00:00:00Z
+entries:
+  - id: o5o6.zero_residual.static_first
+    status: TV-Pending
+    tv_status_reason: cargo_validation_queued
+    reason: user_requested_all_static_implementation_before_cargo_check_test_clippy
+    static_gate: scripts/check-vac-o5o6-zero-residual-static.sh
+    risk: final cargo/test/clippy may expose compile debt; do not claim TV pass until executed
+  - id: o5o6.runtime_protocol_split_boundary
+    status: source_repaired_tv_queued
+    reason: split include boundaries repaired; rerun vac-surface-tui at final validation stage
+    static_gate: scripts/check-vac-o5o6-zero-residual-static.sh
+    risk: generated shards can regress if future splits cut Rust items across files
+
+  - id: o5o6.toolchain_missing.current_session
+    status: TV-Blocked
+    tv_status_reason: rustc_cargo_missing_and_no_toolchain_archive_uploaded
+    reason: current sandbox can run static/source gates only; cargo check/test/clippy and doctor binary gates cannot execute without Rust toolchain and native VAC binary
+    static_gate: scripts/check-vac-o5o6-zero-residual-static.sh
+    risk: final runtime-validated closeout cannot be claimed until targeted cargo/test/clippy/benchmark gates are rerun in a toolchain-enabled sandbox
+  - id: o5o6.audit_snapshot8.source_closure
+    status: SV-Done_TV-Blocked
+    tv_status_reason: rustc_cargo_missing_and_no_toolchain_archive_uploaded
+    reason: uploaded audit findings CL-1 through CL-5 and P-6 were patched source-effectively; CL-6/CL-7 verified as existing source-effective closures
+    static_gate: scripts/check-vac-tui-perf-ux-findings-static.sh
+    risk: cargo may expose type/API mismatches in ChatWidget field additions, height-cache metrics, shimmer span grouping, or StartupGraphExecutor until rustc/cargo gates are rerun
+
+release_claim_policy:
+  sv_done_requires_static_gate: true
+  tv_done_requires_cargo_or_benchmark_execution: true
+  no_not_evaluated_final_claim: true

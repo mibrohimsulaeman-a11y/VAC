@@ -1,0 +1,16 @@
+---
+source: tui/src/chatwidget/tests.rs
+expression: popup
+---
+  Upload logs?
+
+  The following files will be sent:
+    • vac-logs.log
+    • auto-review-rollout-thread-1.jsonl
+    • vac-connectivity-diagnostics.txt
+
+› 1. Yes  Share the current VAC session logs with the team for
+          troubleshooting.
+  2. No
+
+  Press enter to confirm or esc to go back

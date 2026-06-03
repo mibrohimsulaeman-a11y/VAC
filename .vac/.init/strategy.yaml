@@ -1,0 +1,9 @@
+schema_version: 1
+kind: init_state
+id: vac.init.regen_strategy
+generated_at: '2026-06-01T22:58:00Z'
+strategy: freeze_prune_scan_scaffold_reconcile_gate
+bucket_policy:
+  generated: delete_and_regenerate
+  authored_intent: scaffold_and_reconcile
+  history: append_only_preserve

@@ -1,0 +1,8 @@
+schema_version: 1
+kind: capability
+id: vac.fixture.invalid-freeform
+title: Invalid freeform fixture
+status: ready
+validation:
+  commands:
+  - bash -c echo bad

@@ -1,0 +1,40 @@
+schema_version: 1
+kind: workflow
+id: maintenance.o5-o6-monolith-quality
+title: O5/O6 monolith quality slice
+status: ready
+inputs: {}
+steps:
+- id: o5_1_protocol_dedup
+  uses: capability.vac.o5-o6.monolith-quality.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+ui:
+  surface: /workflow
+  inspect_surface: /release
+  progress_panel: true
+  activity_log: true
+  approval_surface: false
+  evidence_surface: true
+policy:
+  default_risk: medium
+  mutates_files: true
+  network: false
+  redaction: false
+  approval_required_for:
+  - filesystem_write
+  - crate_dedup
+validation:
+  gates:
+  - o5_o6_monolith_quality_slice
+  commands:
+  - id: maintenance.o5-o6-monolith-quality.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-o5-o6-monolith-quality-slice.sh
+    risk: execute_process
+    approval: policy

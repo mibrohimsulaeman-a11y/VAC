@@ -1,0 +1,49 @@
+[package]
+name = "vac-surface-tui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+autobins = false
+
+[[bin]]
+name = "vac-tui"
+path = "src/main.rs"
+
+[[bin]]
+name = "md-events"
+path = "src/bin/md-events.rs"
+
+[lib]
+name = "vac_tui"
+path = "src/lib.rs"
+
+[lints]
+workspace = true
+
+[features]
+default = []
+full-tui = []
+provider-chatgpt = ["vac-login/provider-chatgpt"]
+provider-realtime = []
+provider-cloud-tests = ["provider-chatgpt", "provider-realtime"]
+telemetry = ["vac-feedback/feedback-upload"]
+feedback = ["vac-feedback/feedback-upload"]
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
+pulldown-cmark = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+shlex = { workspace = true }
+supports-color = { workspace = true }
+vac-arg0 = { workspace = true }
+vac-config = { workspace = true }
+vac-core = { workspace = true }
+vac-install-context = { workspace = true }
+vac-login = { workspace = true, optional = true }
+vac-feedback = { workspace = true, optional = true }
+vac-protocol = { workspace = true }
+vac-utils-cli = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }

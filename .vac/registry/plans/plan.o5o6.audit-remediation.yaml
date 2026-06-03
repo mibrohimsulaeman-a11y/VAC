@@ -1,0 +1,78 @@
+schema_version: 1
+kind: plan
+id: plan.o5o6.audit_remediation
+status: implemented_static
+updated_at: '2026-05-30T10:30:00Z'
+title: O5/O6 audit remediation plan
+task:
+  description: Correct audit-flagged O6.2 false-green metric and sandbox suite false-skip harness behavior without claiming cargo TV-Done.
+  requested_by: operator
+  timestamp: '2026-05-30T10:30:00Z'
+  capability: vac.o5o6.audit-remediation
+allowed_files:
+  - path: scripts/check-vac-o6-2-safety-coverage.sh
+    operation: modify
+    ownership: vac.o6.safety
+    rationale: Use corrected runtime-only denominator and stale generic SAFETY rejection.
+  - path: scripts/measure-vac-o6-2-runtime-safety-coverage.py
+    operation: create
+    ownership: vac.o6.safety
+    rationale: Provide rustc-free scanner that excludes test paths and inline cfg(test) items.
+  - path: vac-rs/**/*.rs
+    operation: modify
+    ownership: vac.o6.safety
+    rationale: Replace boilerplate SAFETY comments with direct call-site-adjacent rationale.
+  - path: scripts/check-vac-sandbox-suite.sh
+    operation: modify
+    ownership: vac.sandbox.gate-suite
+    rationale: Replace grep substring skip with explicit marker dispatch.
+  - path: scripts/run-vac-sandbox-suite.py
+    operation: create
+    ownership: vac.sandbox.gate-suite
+    rationale: Bounded explicit-marker suite runner.
+  - path: .vac/registry/**/*.yaml
+    operation: modify
+    ownership: vac.registry
+    rationale: Update evidence/state/ledger with corrected metrics and strict envelope compliance.
+  - path: docs/monolith-quality/**
+    operation: modify
+    ownership: vac.evidence
+    rationale: Record audit remediation report and validation logs.
+forbidden:
+  files:
+    - target/**
+    - vac-rs/vendor/**
+    - .git/**
+  actions:
+    - claim_cargo_tv_done_without_completed_cargo
+    - hide_o6_2_test_denominator_pollution
+validation:
+  commands:
+    - id: o5o6.audit.safety
+      runner: bash
+      args: [scripts/check-vac-o6-2-safety-coverage.sh]
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: o5o6.audit.quality
+      runner: bash
+      args: [scripts/check-vac-o6-quality-triage.sh]
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: o5o6.audit.registry-strictness
+      runner: bash
+      args: [scripts/check-vac-init-registry-strictness-contract.sh]
+      risk: safe_read
+      approval: never
+      result: PASS_rustc_unit_NotEvaluated
+    - id: o5o6.audit.completion
+      runner: bash
+      args: [scripts/check-vac-o5-o6-completion-state.sh]
+      risk: safe_read
+      approval: never
+      result: PASS
+approval:
+  required: false
+  approver: operator
+  approved_at: '2026-05-30T10:30:00Z'

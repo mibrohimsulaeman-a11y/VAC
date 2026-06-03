@@ -1,0 +1,61 @@
+schema_version: 1
+kind: domains
+id: registry.domains
+status: ready
+domains:
+- id: approvals
+  status: ready
+- id: architecture
+  status: ready
+- id: build
+  status: ready
+- id: chat
+  status: ready
+- id: donor_migration
+  status: ready
+- id: identity
+  status: ready
+- id: identity.check
+  status: ready
+- id: init.control_plane
+  status: partial
+- id: init.schema_envelope
+  status: ready
+- id: local_runtime_owner
+  status: ready
+- id: ownership
+  status: ready
+- id: release
+  status: ready
+- id: runtime_approval_bridge
+  status: ready
+- id: sandbox
+  status: ready
+- id: sessions
+  status: ready
+- id: tools
+  status: ready
+- id: tui
+  status: ready
+- id: tui.pty_gate
+  status: ready
+- id: tui_session_runtime
+  status: ready
+- id: workflow
+  status: ready
+- id: init
+  status: partial
+- id: init.control-plane
+  status: partial
+- id: init.schema-envelope
+  status: ready
+- id: init.manifest-contracts
+  status: ready
+- id: init.registry-validator
+  status: ready
+- id: init.lifecycle
+  status: ready
+- id: init.ownership-scanner
+  status: ready
+- id: docs.state-refresh
+  status: ready

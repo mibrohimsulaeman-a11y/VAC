@@ -1,0 +1,32 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "vac-tools"
+version.workspace = true
+
+[lib]
+name = "vac_tools"
+path = "src/lib.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+vac-runtime-protocol = { workspace = true }
+vac-code-mode = { workspace = true }
+vac-features = { workspace = true }
+vac-protocol = { workspace = true }
+vac-utils-absolute-path = { workspace = true }
+vac-utils-pty = { workspace = true }
+rmcp = { workspace = true, default-features = false, features = [
+    "base64",
+    "macros",
+    "schemars",
+    "server",
+] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions = { workspace = true }

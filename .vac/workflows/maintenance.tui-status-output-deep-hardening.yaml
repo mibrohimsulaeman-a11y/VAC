@@ -1,0 +1,75 @@
+schema_version: 1
+kind: workflow
+id: maintenance.tui-status-output-deep-hardening
+title: TUI status output deep hardening readiness
+status: ready
+owner:
+  crate: vac-surface-tui
+  module: status
+summary: Validate that /status keeps model/provider/token/context rows while removing legacy limit and credit display rows.
+description: Hardening 3 workflow for the status output contract, including semantic status labels, multi-provider/model readiness, and no legacy rate-limit/credit operator card output.
+triggers:
+- kind: manual
+  id: check_tui_status_output_deep_hardening
+steps:
+- id: status_output_contract
+  uses: capability.vac.tui.status-output.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+- id: status_output_deep_contract
+  uses: capability.vac.tui.status-output.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+- id: regression_lock
+  uses: capability.vac.tui.status-output.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+policy:
+  mutates_files: false
+  network: false
+  default_risk: safe_read
+  redaction: false
+  approval_required_for: []
+ui:
+  surface: /workflow
+  inspect_surface: /capabilities
+  progress_panel: true
+  activity_log: true
+  approval_surface: false
+  evidence_surface: true
+validation:
+  gates:
+  - regression_lock
+  - status_output_contract
+  - status_output_deep_contract
+  commands:
+  - id: maintenance.tui-status-output-deep-hardening.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-tui-status-output-contract.sh
+    risk: execute_process
+    approval: policy
+  - id: maintenance.tui-status-output-deep-hardening.validation.cmd002
+    runner: bash
+    args:
+    - scripts/check-tui-status-deep-hardening-contract.sh
+    risk: execute_process
+    approval: policy
+  - id: maintenance.tui-status-output-deep-hardening.validation.cmd003
+    runner: bash
+    args:
+    - scripts/check-tui-hardening-regression-lock.sh
+    risk: execute_process
+    approval: policy

@@ -1,0 +1,6 @@
+schema_version: 1
+kind: test_assertion
+id: security.undeclared-new-file
+attack: undeclared_new_file
+expected: rejected
+diagnostic_required: true

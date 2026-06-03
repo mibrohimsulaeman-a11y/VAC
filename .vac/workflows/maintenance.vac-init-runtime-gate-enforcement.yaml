@@ -1,0 +1,73 @@
+schema_version: 1
+kind: workflow
+id: maintenance.vac-init-runtime-gate-enforcement
+title: VAC-Init Production Hardening C runtime gate enforcement
+status: ready
+inputs: {}
+steps:
+- id: pre_plan_gate
+  uses: capability.vac.init.runtime-gate-enforcement.check
+  ui:
+    surface: /runtime
+    progress_panel: true
+    activity_log: true
+    approval_surface: true
+    evidence_surface: true
+- id: pre_patch_gate
+  uses: capability.vac.init.runtime-gate-enforcement.check
+  depends_on:
+  - pre_plan_gate
+  ui:
+    surface: /runtime
+    progress_panel: true
+    activity_log: true
+    approval_surface: true
+    evidence_surface: true
+- id: pre_command_gate
+  uses: capability.vac.init.runtime-gate-enforcement.check
+  depends_on:
+  - pre_plan_gate
+  ui:
+    surface: /runtime
+    progress_panel: true
+    activity_log: true
+    approval_surface: true
+    evidence_surface: true
+- id: evidence_completion_gate
+  uses: capability.vac.init.runtime-gate-enforcement.check
+  depends_on:
+  - pre_patch_gate
+  - pre_command_gate
+  ui:
+    surface: /evidence
+    progress_panel: true
+    activity_log: true
+    approval_surface: true
+    evidence_surface: true
+ui:
+  surface: /workflow
+  inspect_surface: /runtime
+  progress_panel: true
+  activity_log: true
+  approval_surface: true
+  evidence_surface: true
+policy:
+  default_risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for: []
+validation:
+  gates:
+  - evidence_completion_gate
+  - pre_command_gate
+  - pre_patch_gate
+  - pre_plan_gate
+  - vac_init_runtime_gate_enforcement_contract
+  commands:
+  - id: maintenance.vac-init-runtime-gate-enforcement.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-runtime-gate-enforcement-contract.sh
+    risk: execute_process
+    approval: policy

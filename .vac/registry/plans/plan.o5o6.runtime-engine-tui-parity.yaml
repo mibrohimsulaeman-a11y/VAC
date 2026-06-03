@@ -1,0 +1,77 @@
+schema_version: 1
+kind: plan
+id: plan.o5o6.runtime-engine-tui-parity
+title: O5/O6 runtime engine wiring and TUI parity remediation
+status: completed
+task:
+  capability: vac.o5-o6.runtime-engine-tui-parity
+allowed_files:
+  - path: vac-rs/control-plane/src/control_plane/vac_init_runtime_bridge.rs
+    operation: create
+    ownership: vac.o5-o6.runtime-engine-tui-parity
+    semantic_anchor:
+      kind: module
+      symbol: vac_init_runtime_bridge
+  - path: vac-rs/core/src/apply_patch.rs
+    operation: modify
+    ownership: vac.o5-o6.runtime-engine-tui-parity
+    semantic_anchor:
+      kind: function
+      symbol: enforce_vac_init_patch_runtime_gates
+  - path: vac-rs/core/src/tools/handlers/unified_exec.rs
+    operation: modify
+    ownership: vac.o5-o6.runtime-engine-tui-parity
+    semantic_anchor:
+      kind: function
+      symbol: enforce_vac_init_pre_command_runtime_gate
+  - path: vac-rs/cli/src/init_cli.rs
+    operation: modify
+    ownership: vac.o5-o6.runtime-engine-tui-parity
+    semantic_anchor:
+      kind: function
+      symbol: build_lifecycle_state_record
+  - path: vac-rs/cli/src/plan_cli.rs
+    operation: modify
+    ownership: vac.o5-o6.runtime-engine-tui-parity
+    semantic_anchor:
+      kind: function
+      symbol: run
+  - path: vac-rs/cli/src/why_cli.rs
+    operation: modify
+    ownership: vac.o5-o6.runtime-engine-tui-parity
+    semantic_anchor:
+      kind: function
+      symbol: run
+  - path: vac-rs/cli/src/registry_cli.rs
+    operation: modify
+    ownership: vac.o5-o6.runtime-engine-tui-parity
+    semantic_anchor:
+      kind: function
+      symbol: run
+  - path: vac-rs/tui/src/operator_ui.rs
+    operation: modify
+    ownership: vac.o5-o6.runtime-engine-tui-parity
+    semantic_anchor:
+      kind: function
+      symbol: render_capability_dashboard_body_lines
+validation:
+  commands:
+    - id: vac.o5o6.runtime_engine_wiring_static
+      runner: bash
+      args:
+        - scripts/check-vac-runtime-engine-wiring-static.sh
+      risk: safe_read
+      approval: never
+    - id: vac.o5o6.tui_visual_parity_static
+      runner: bash
+      args:
+        - scripts/check-vac-tui-visual-parity-static.sh
+      risk: safe_read
+      approval: never
+approval:
+  required: false
+bounds:
+  max_patches: 32
+  max_new_files: 8
+  max_line_delta: 2500
+  timeout_seconds: 600

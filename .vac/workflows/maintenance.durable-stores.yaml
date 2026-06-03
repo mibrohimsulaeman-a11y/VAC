@@ -1,0 +1,61 @@
+schema_version: 1
+kind: workflow
+id: maintenance.durable-stores
+title: VAC-Init Durable Stores readiness
+status: ready
+inputs: {}
+steps:
+- id: init_ownership_risk_stores
+  uses: capability.vac.init.durable-stores.check
+  ui:
+    surface: /runtime
+    progress_panel: true
+    activity_log: true
+    approval_surface: true
+    evidence_surface: true
+- id: approval_store_replay
+  uses: capability.vac.init.durable-stores.check
+  depends_on:
+  - init_ownership_risk_stores
+  ui:
+    surface: /runtime
+    progress_panel: true
+    activity_log: true
+    approval_surface: true
+    evidence_surface: true
+- id: trajectory_memory_stores
+  uses: capability.vac.init.durable-stores.check
+  depends_on:
+  - approval_store_replay
+  ui:
+    surface: /runtime
+    progress_panel: true
+    activity_log: true
+    approval_surface: true
+    evidence_surface: true
+ui:
+  surface: /workflow
+  inspect_surface: /runtime
+  progress_panel: true
+  activity_log: true
+  approval_surface: true
+  evidence_surface: true
+policy:
+  default_risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for: []
+validation:
+  gates:
+  - approval_store_replay
+  - durable_stores
+  - init_ownership_risk_stores
+  - trajectory_memory_stores
+  commands:
+  - id: vac.init.durable-stores.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-durable-stores-contract.sh
+    risk: execute_process
+    approval: policy

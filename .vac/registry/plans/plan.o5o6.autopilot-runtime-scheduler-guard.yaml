@@ -1,0 +1,139 @@
+schema_version: 1
+kind: plan
+id: plan.o5o6.autopilot-runtime-scheduler-guard
+status: implemented_static
+updated_at: '2026-06-01T00:00:00Z'
+title: O5/O6 autopilot runtime scheduler guard closeout
+summary: Close the executor follow-up audit by preventing per-tick workflow respawn, adding run-state schedule dedupe, binding autopilot workflow execution to approval policy when registry is available, and hardening static gates.
+task:
+  description: Fix remaining autopilot runtime executor findings from the latest audit while keeping /runtime live refresh safe and evidence-backed.
+  capability: vac.autopilot.scheduler
+allowed_files:
+  - path: vac-rs/control-plane/src/control_plane/vac_init_autopilot_scheduler.rs
+    operation: modify
+    ownership: vac.autopilot.scheduler
+    semantic_anchor:
+      kind: audit_finding
+      symbol: autopilot.scheduler.run_state_dedupe
+    rationale: Persist run-state, compute next-run windows, skip already-terminal jobs until due, and bind workflow_runner execution to approval policy in real registries.
+  - path: scripts/check-vac-control-plane-audit-findings-static.sh
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: audit_finding
+      symbol: audit_findings_static.scheduler_guard_assertions
+    rationale: Reject regressions to per-tick respawn or approval-policy-free autopilot execution.
+  - path: scripts/check-vac-o6-1-depanic-surface.sh
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: audit_finding
+      symbol: o6_1_depanic_surface.scheduler_guard_repin
+    rationale: Re-pin O6.1 scanner metadata after scheduler guard tests and helpers.
+  - path: .vac/registry/o6-panic-surface.yaml
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: audit_finding
+      symbol: o6_panic_surface.scheduler_guard_repin
+    rationale: Align O6.1 reproducibility metadata with the current source tree.
+  - path: .vac/registry/o6-quality-triage.yaml
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: audit_finding
+      symbol: o6_quality_triage.scheduler_guard_repin
+    rationale: Keep O6 quality triage metadata aligned with scanner output.
+  - path: .vac/registry/runtime/active_plan.yaml
+    operation: modify
+    ownership: vac.runtime.plan
+    semantic_anchor:
+      kind: audit_finding
+      symbol: plan.o5o6.autopilot-runtime-scheduler-guard.active
+    rationale: Make the scheduler guard closeout the active runtime semantic plan.
+  - path: .vac/registry/plans/plan.o5o6.autopilot-runtime-scheduler-guard.yaml
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: audit_finding
+      symbol: plan.o5o6.autopilot-runtime-scheduler-guard
+    rationale: Record the bounded semantic plan for this follow-up slice.
+  - path: .vac/registry/evidence/evidence.2026-06-01-o5o6-autopilot-runtime-scheduler-guard.yaml
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: audit_finding
+      symbol: evidence.2026-06-01-o5o6-autopilot-runtime-scheduler-guard
+    rationale: Record source/static validation evidence and TV-pending truth for this slice.
+  - path: .vac/registry/trajectory/o5o6-autopilot-runtime-scheduler-guard.yaml
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: audit_finding
+      symbol: trajectory.o5o6-autopilot-runtime-scheduler-guard
+    rationale: Preserve safe rationale trajectory for vac why.
+  - path: .vac/registry/trajectory/index.yaml
+    operation: modify
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: audit_finding
+      symbol: trajectory_index.autopilot_runtime_scheduler_guard
+    rationale: Add this evidence record to safe rationale lookup.
+  - path: .vac/registry/compile-debt-ledger.yaml
+    operation: modify
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: audit_finding
+      symbol: compile_debt.autopilot_runtime_scheduler_guard
+    rationale: Mark cargo/live runtime validation as TV-Pending because Rust toolchain is unavailable in this sandbox.
+  - path: docs/monolith-quality/O5O6_AUTOPILOT_RUNTIME_SCHEDULER_GUARD_REPORT.md
+    operation: create
+    ownership: vac.docs
+    semantic_anchor:
+      kind: audit_finding
+      symbol: autopilot_runtime_scheduler_guard_report
+    rationale: Document root cause, implementation, validation, remaining TV gates, and honest caveats.
+bounds:
+  max_patches: 24
+  max_new_files: 4
+  max_line_delta: 2500
+  timeout_seconds: 1800
+validation:
+  commands:
+    - id: vac.control-plane.audit-findings.static
+      runner: bash
+      args:
+        - scripts/check-vac-control-plane-audit-findings-static.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.o6.depanic.surface
+      runner: bash
+      args:
+        - scripts/check-vac-o6-1-depanic-surface.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.init.registry.strictness
+      runner: bash
+      args:
+        - scripts/check-vac-init-registry-strictness-contract.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.init.registry.validator
+      runner: bash
+      args:
+        - scripts/check-vac-init-registry-validator-contract.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.o5o6.audit.remainder
+      runner: bash
+      args:
+        - scripts/check-vac-o5o6-all-audit-remainder.sh
+      env:
+        VAC_O6_1_RESCAN: '0'
+      risk: safe_read
+      approval: never
+      result: PASS

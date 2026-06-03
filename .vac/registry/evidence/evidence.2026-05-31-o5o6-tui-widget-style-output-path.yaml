@@ -1,0 +1,104 @@
+schema_version: 1
+kind: evidence
+id: evidence.2026-05-31-o5o6-tui-widget-style-output-path
+status: ready
+updated_at: '2026-05-31T00:00:00Z'
+title: O5/O6 TUI widget styled output path evidence
+chain:
+  previous: evidence.2026-05-31-o5o6-tui-widget-snapshot-closeout
+  previous_hash: null
+  self_hash: source-artifact-final-pending-sha256
+changeset:
+  plan_id: plan.o5o6.tui-widget-style-output-path
+  capability: vac.tui.operator-visual-gate
+  files_modified:
+    - path: vac-rs/tui/src/operator_widget_render.rs
+      operation: modify
+      summary: buffer_to_lines now groups Buffer cells into styled Span values preserving fg/bg/modifier instead of flattening symbols into plain String rows
+    - path: vac-rs/tui/src/operator_ui.rs
+      operation: modify
+      summary: added production visual-line helpers returning ratatui Line values for first launch, idle, runtime jobs, agent, approval, and capability dashboard surfaces
+    - path: vac-rs/tui/src/history_cell/split_003_approvaldecisionactor.rs
+      operation: modify
+      summary: first launch and idle history surfaces now consume styled widget visual lines directly
+    - path: vac-rs/tui/src/capability_dashboard.rs
+      operation: modify
+      summary: capability dashboard shell now preserves widget styling instead of round-tripping through string/spec classification
+    - path: vac-rs/tui/src/chatwidget/split_015_set_thread_rename_block_message.rs
+      operation: modify
+      summary: runtime jobs output now consumes styled widget visual lines directly
+    - path: vac-rs/tui/src/chatwidget/semantic_split.rs
+      operation: modify
+      summary: mirrored semantic split runtime jobs path to keep generated surface aligned
+    - path: scripts/check-vac-tui-visual-parity-static.sh
+      operation: modify
+      summary: static gate now requires style-preserving Buffer cell conversion and live styled visual-line call sites
+    - path: scripts/check-tui-operator-snapshot-contract.sh
+      operation: modify
+      summary: snapshot static gate now requires the style-preservation regression test and rejects symbol-only row flattening
+    - path: vac-rs/tui/src/chatwidget/split_manifest.yaml
+      operation: modify
+      summary: repinned O5.2 semantic split hash after runtime jobs call-site change
+    - path: vac-rs/tui/src/history_cell/split_manifest.yaml
+      operation: modify
+      summary: repinned O5.2 semantic split hash after first-launch/idle call-site changes
+    - path: .vac/registry/o6-panic-surface.yaml
+      operation: modify
+      summary: repinned cfg_test_lines_removed after adding a cfg(test) style-preservation test; runtime panic surface count unchanged
+    - path: .vac/registry/o6-quality-triage.yaml
+      operation: modify
+      summary: aligned O6.1 triage scanner hash and cfg_test_lines_removed with the current source tree
+validation:
+  commands_executed:
+    - docs/monolith-quality/logs/o5o6-tui-widget-style-output-path-final-validation-clean.log
+    - bash -n scripts/check-vac-tui-visual-parity-static.sh scripts/check-tui-operator-snapshot-contract.sh scripts/check-vac-o5o6-all-audit-remainder.sh scripts/check-vac-o5-o6-monolith-quality-slice.sh
+    - scripts/check-vac-tui-visual-parity-static.sh
+    - scripts/check-tui-operator-snapshot-contract.sh
+    - scripts/check-vac-runtime-engine-wiring-static.sh
+    - scripts/check-tui-source-artifact-hygiene.sh
+    - scripts/check-legal-release-blockers.sh
+    - scripts/check-vac-init-registry-strictness-contract.sh
+    - scripts/check-vac-init-registry-validator-contract.sh
+    - scripts/check-vac-o5-2-semantic-split-hash.sh
+    - scripts/check-vac-o5-2-godfile-staging-all.sh
+    - scripts/check-vac-o6-1-depanic-surface.sh
+    - scripts/check-vac-o6-2-safety-coverage.sh
+    - scripts/check-vac-o6-quality-triage.sh
+    - scripts/check-vac-o5-5-donor-delete-gate.sh
+    - scripts/check-vac-o5-o6-completion-state.sh
+    - scripts/check-vac-o5-o6-monolith-quality-slice.sh
+    - scripts/check-vac-o5o6-all-audit-remainder.sh
+  gates_passed:
+    - styled_widget_output_static_contract
+    - operator_snapshot_static_contract
+    - runtime_engine_wiring_static
+    - source_artifact_hygiene
+    - legal_release_blockers
+    - vac_init_registry_strictness_contract
+    - vac_init_registry_validator_contract
+    - o5_semantic_split_hash
+    - o5_godfile_staging_all
+    - o6_1_depanic_surface
+    - o6_2_safety_coverage
+    - o6_quality_triage
+    - o5_donor_delete_gate
+    - o5_o6_completion_state
+    - o5_o6_monolith_quality_slice
+    - o5o6_all_audit_remainder
+  gates_failed: []
+truth:
+  sv_done: true
+  tv_status: TV-Pending
+  tv_reason: >
+    This sandbox has no rustc/cargo, so cargo-backed vac-tui tests, cargo check,
+    clippy/test, and live terminal screenshot/pixel parity remain NotEvaluated.
+approval:
+  approved_by: operator
+  approved_at: '2026-05-31T00:00:00Z'
+  signature:
+    algorithm: none
+    value: null
+attribution:
+  agent_id: chatgpt-vac-sandbox
+  model: GPT-5.5 Thinking
+  rationale_ref: docs/monolith-quality/O5O6_TUI_WIDGET_STYLE_OUTPUT_PATH_REPORT.md

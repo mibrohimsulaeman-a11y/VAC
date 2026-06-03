@@ -1,0 +1,80 @@
+schema_version: 1
+kind: capability
+id: vac.init.scanner-policy-hardening
+title: VAC-Init Scanner and Policy Inference Hardening
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane::vac_init_scanner_policy_hardening
+ownership:
+  crates:
+  - vac-core
+  modules:
+  - control_plane::vac_init_scanner_policy_hardening
+  targets:
+  - kind: module
+    crate: vac-core
+    module: control_plane::vac_init_scanner_policy_hardening
+  - kind: path
+    include:
+    - vac-rs/control-plane/src/control_plane/vac_init_scanner_policy_hardening.rs
+    - scripts/check-vac-init-scanner-policy-hardening-contract.sh
+    - .vac/capabilities/scanner-policy-hardening.yaml
+    - .vac/workflows/maintenance.scanner-policy-hardening.yaml
+    - docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_E_SCANNER_POLICY.md
+    - docs/validation/PRODUCTION_HARDENING_E1_E3_VALIDATION.md
+    exclude: []
+description: Production hardening contract for VAC-Init Scanner and Policy Inference Hardening.
+depends_on:
+- vac.init.ownership-scanner
+- vac.init.risk-policy
+- vac.init.policy-evaluator
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - bash scripts/check-vac-init-scanner-policy-hardening-contract.sh
+    - vac doctor release .
+  palette: true
+  tui:
+    routes:
+    - /capabilities
+    - /runtime
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for: []
+states:
+- empty
+- loading
+- success
+- failure
+validation:
+  gates:
+  - scanner_policy_hardening
+  commands:
+  - id: vac.init.scanner-policy-hardening.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-scanner-policy-hardening-contract.sh
+    risk: execute_process
+    approval: policy
+  - id: vac.init.scanner-policy-hardening.validation.cmd002
+    runner: bash
+    args:
+    - scripts/check-vac-init-live-scanner-policy.sh
+    risk: execute_process
+    approval: policy
+  - id: vac.init.scanner-policy-hardening.validation.cmd003
+    runner: bash
+    args:
+    - scripts/check-vac-init-scanner-hardening-spec-flow.sh
+    risk: execute_process
+    approval: policy
+docs:
+- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_E_SCANNER_POLICY.md
+- docs/validation/PRODUCTION_HARDENING_E1_E3_VALIDATION.md
+- docs/validation/P5_P9_VALIDATION.md
+- docs/vac-init/VAC_INIT_SCANNER_HARDENING_SPEC_FLOW.md

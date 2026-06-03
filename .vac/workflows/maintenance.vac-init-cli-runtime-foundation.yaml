@@ -1,0 +1,72 @@
+schema_version: 1
+kind: workflow
+id: maintenance.vac-init-cli-runtime-foundation
+title: VAC-Init Production Hardening B CLI runtime foundation
+status: ready
+inputs: {}
+steps:
+- id: init_cli_state
+  uses: capability.vac.init.cli-runtime-foundation.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+- id: plan_validate_cli
+  uses: capability.vac.init.cli-runtime-foundation.check
+  depends_on:
+  - init_cli_state
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+- id: why_cli_safe_rationale
+  uses: capability.vac.init.cli-runtime-foundation.check
+  depends_on:
+  - plan_validate_cli
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+- id: doctor_taxonomy
+  uses: capability.vac.init.cli-runtime-foundation.check
+  depends_on:
+  - why_cli_safe_rationale
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+ui:
+  surface: /workflow
+  inspect_surface: /capabilities
+  progress_panel: true
+  activity_log: true
+  approval_surface: false
+  evidence_surface: true
+policy:
+  default_risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: true
+  approval_required_for: []
+validation:
+  gates:
+  - doctor_taxonomy
+  - init_cli_state
+  - plan_validate_cli
+  - vac_init_cli_runtime_foundation_contract
+  - why_cli_safe_rationale
+  commands:
+  - id: maintenance.vac-init-cli-runtime-foundation.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-cli-runtime-foundation-contract.sh
+    risk: execute_process
+    approval: policy

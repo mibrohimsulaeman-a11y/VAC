@@ -1,0 +1,53 @@
+schema_version: 1
+kind: capability
+id: vac.init.memory-governance
+title: VAC-Init Memory Governance
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane::vac_init_memory_governance
+ownership:
+  crates:
+  - vac-core
+  modules:
+  - control_plane::vac_init_memory_governance
+  targets:
+  - crate_name: vac-core
+    module: control_plane::vac_init_memory_governance
+description: Memory governance contract enforces tier permissions, TTL/size rules, approval for governed tiers, and secret-content rejection.
+depends_on:
+- vac.init.safe-rationale
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - bash scripts/check-vac-init-memory-governance-contract.sh
+  palette: true
+  tui:
+    routes:
+    - /capabilities
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for:
+  - execute_process
+states:
+- empty
+- loading
+- success
+- failure
+validation:
+  gates:
+  - vac_init_memory_governance_contract
+  commands:
+  - id: vac.init.memory-governance.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-memory-governance-contract.sh
+    risk: execute_process
+    approval: policy
+docs:
+- docs/vac-init/VAC_INIT_BATCH_13_15_IMPLEMENTATION.md
+- docs/validation/VAC_INIT_MEMORY_GOVERNANCE_GATE.md

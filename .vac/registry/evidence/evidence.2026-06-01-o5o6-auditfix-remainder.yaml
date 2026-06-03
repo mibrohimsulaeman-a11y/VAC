@@ -1,0 +1,58 @@
+schema_version: 1
+kind: evidence
+id: evidence.2026-06-01-o5o6-auditfix-remainder
+created_at: '2026-06-01T00:00:00Z'
+plan_id: plan.o5o6.auditfix-remainder
+capability: vac.architecture
+summary: >
+  Closed the latest physical-extraction re-audit remainder at source/static level:
+  removed production core .expect(...) panic surface, bounded production core/tui
+  channel surfaces, converted semantic_split.rs godfiles to deterministic dispatchers,
+  fail-closed legacy ChatGPT remote plugin/skill cloud paths by default, and encoded
+  the layered workspace target for future cargo-backed relocation.
+status: SV-Done
+truth:
+  cargo_status: TV-Pending
+  live_tui_status: TV-Pending
+  reason: Rust toolchain is unavailable in this sandbox; cargo check/test/clippy and live TUI smoke were not executed.
+static_gates:
+  - scripts/check-vac-o5o6-audit-remainder-static.sh: PASS
+  - scripts/check-vac-o5o6-bounded-hotpath-static.sh: PASS
+  - scripts/check-vac-o5-2-semantic-split-hash.sh: PASS
+  - scripts/check-vac-o5-2-godfile-staging-all.sh: PASS
+  - scripts/check-vac-o5o6-cloud-coupling-isolation-static.sh: PASS
+  - scripts/check-vac-o5o6-architecture-extraction-static.sh: PASS
+  - scripts/check-vac-o5o6-cleanup-compile-surface-static.sh: PASS
+  - scripts/check-vac-o5o6-big-refactor-static.sh: PASS
+  - scripts/check-vac-technical-debt-markers-static.sh: PASS
+  - scripts/check-vac-standard-cargo-hygiene-static.sh: PASS
+  - scripts/check-vac-source-artifact-packaging-gate.sh: PASS
+  - scripts/check-tui-source-artifact-hygiene.sh: PASS
+scope_closure:
+  R_03_core_expect_surface: SV-Done_static_TV-Pending
+  R_04_chatgpt_cloud_coupling: FailClosed_Default_SV-Done_Full_Removal_TV-Pending
+  R_05_semantic_split_godfiles: Dispatcher_Shrink_SV-Done_Domain_Module_Extraction_TV-Pending
+  R_06_unbounded_channels: Production_Core_Tui_Static_Surface_SV-Done_Full_Runtime_Validation_TV-Pending
+  S_07_layered_workspace: Target_Manifested_Physical_Relocation_TV-Pending
+  S_12_debt_markers: Inventory_Gated_SV-Done_Burndown_TV-Pending
+changed_files:
+  - scripts/check-vac-o5o6-audit-remainder-static.sh
+  - scripts/check-vac-o5o6-all-audit-remainder.sh
+  - scripts/check-vac-o5-o6-completion-state.sh
+  - scripts/check-vac-control-plane-audit-findings-static.sh
+  - vac-rs/core/src/tools/mod.rs
+  - vac-rs/core-plugins/src/remote.rs
+  - vac-rs/core-skills/src/remote.rs
+  - vac-rs/tui/src/app_event_sender.rs
+  - vac-rs/tui/src/app.rs
+  - vac-rs/tui/src/resume_picker.rs
+  - vac-rs/tui/src/public_widgets/composer_input.rs
+  - vac-rs/tui/src/chatwidget/split_001_btreemap.rs
+  - vac-rs/tui/src/chatwidget/split_003_vacoptarget.rs
+  - vac-rs/tui/src/chatwidget/split_023_submit_user_message_with_mode.rs
+  - vac-rs/**/semantic_split.rs
+  - vac-rs/**/split_manifest.yaml
+  - .vac/registry/technical-debt-markers.yaml
+  - .vac/registry/architecture-layer-map.yaml
+  - docs/monolith-quality/O5O6_AUDIT_REMAINDER_FIX_REPORT.md
+raw_chain_of_thought_excluded: true

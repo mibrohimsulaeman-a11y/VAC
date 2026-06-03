@@ -1,0 +1,177 @@
+schema_version: 1
+kind: surface
+id: surface.tui
+title: TUI surface
+capabilities:
+- vac.init.evidence-chain
+- vac.init.patch-guard
+- vac.init.approval-binding
+- vac.init.semantic-plan
+- vac.init.command-gate
+- vac.init.policy-evaluator
+- vac.init.risk-policy
+- vac.init.control-plane
+- vac.init.schema-envelope
+- vac.tui.operator-visual-gate
+- vac.tui.operator-live-adapter
+- vac.tui.ansi-style
+- vac.autopilot.scheduler
+- vac.tui
+- vac.tui.capability-dashboard-runtime
+- vac.tui.agent-streaming-runtime
+- vac.tui.approval-popup-safety
+- vac.autopilot.scheduler-monitor-only
+- vac.tui.operator-visual-fidelity-matrix
+- vac.tui.spec-driven-consolidation
+- vac.tui.source-artifact-hygiene
+- vac.init.manifest-contracts
+- vac.init.registry-validator
+- vac.init.lifecycle
+- vac.init.ownership-scanner
+routes:
+- kind: tui
+  path: /
+  capability: vac.tui
+  owner: vac-tui/lib
+  visible: true
+  status: ready
+- kind: tui
+  path: /capabilities
+  capability: vac.tui
+  owner: vac-tui/lib
+  visible: true
+  status: ready
+- kind: tui
+  path: /workflow
+  capability: vac.tui
+  owner: vac-tui/lib
+  visible: true
+  status: ready
+- kind: tui
+  path: /debug-config
+  capability: vac.tui
+  owner: vac-tui/lib
+  visible: true
+  status: ready
+- kind: tui
+  path: /activity
+  capability: vac.tui
+  owner: vac-tui/lib
+  visible: true
+  status: ready
+- kind: tui
+  path: /approvals
+  capability: vac.tui
+  owner: vac-tui/lib
+  visible: true
+  status: ready
+- kind: tui
+  path: /evidence
+  capability: vac.tui
+  owner: vac-tui/lib
+  visible: true
+  status: ready
+- kind: tui
+  path: /runtime
+  capability: vac.autopilot.scheduler
+  owner: vac-tui/operator_ui
+  visible: true
+  status: ready
+- kind: tui
+  path: /runtime/jobs
+  capability: vac.autopilot.scheduler
+  owner: vac-tui/operator_ui
+  visible: true
+  status: ready
+- kind: tui
+  path: /visual-gate
+  capability: vac.tui.operator-visual-gate
+  owner: vac-tui/operator_ui
+  visible: false
+  status: ready
+- kind: tui
+  path: /style-tokens
+  capability: vac.tui.ansi-style
+  owner: vac-tui/operator_style
+  visible: false
+  status: ready
+- kind: tui
+  path: /agent-streaming
+  capability: vac.tui.agent-streaming-runtime
+  owner: vac-tui/operator_ui
+  visible: false
+  status: ready
+- kind: tui
+  path: /approval-popup
+  capability: vac.tui.approval-popup-safety
+  owner: vac-tui/bottom_pane.approval_overlay
+  visible: false
+  status: ready
+- kind: tui
+  path: /visual-matrix
+  capability: vac.tui.operator-visual-fidelity-matrix
+  owner: vac-tui/operator_ui
+  visible: false
+  status: ready
+- kind: tui
+  path: /hardening
+  capability: vac.tui.spec-driven-consolidation
+  owner: vac-tui/operator_ui
+  visible: false
+  status: ready
+- kind: tui
+  path: /artifact-hygiene
+  capability: vac.tui.source-artifact-hygiene
+  owner: vac-tui/operator_ui
+  visible: false
+  status: ready
+- kind: tui
+  path: /runtime/monitor-only
+  capability: vac.autopilot.scheduler-monitor-only
+  owner: vac-tui/operator_ui
+  visible: false
+  status: ready
+- kind: tui
+  path: /vac-init
+  capability: vac.init.control-plane
+  owner: vac-core/control_plane/schema_envelope
+  visible: false
+  status: partial
+  reason: Full interactive init progress surface is scheduled for the lifecycle/TUI integration batches.
+
+- kind: tui
+  path: /init/manifests
+  capability: vac.init.manifest-contracts
+  owner: vac-tui/capability_dashboard
+  visible: false
+  status: ready
+- kind: tui
+  path: /init/registry
+  capability: vac.init.registry-validator
+  owner: vac-tui/capability_dashboard
+  visible: false
+  status: ready
+- kind: tui
+  path: /init/lifecycle
+  capability: vac.init.lifecycle
+  owner: vac-tui/capability_dashboard
+  visible: false
+  status: ready
+- kind: tui
+  path: /init/ownership
+  capability: vac.init.ownership-scanner
+  owner: vac-tui/capability_dashboard
+  visible: false
+  status: ready
+
+# VAC-Init Batch 13-15 readiness routes
+vac_init_batch13_15:
+  capabilities:
+    - vac.init.safe-rationale
+    - vac.init.memory-governance
+    - vac.init.doctor-release
+  commands:
+    - bash scripts/check-vac-init-batch13-15-contract.sh
+  routes:
+    - /capabilities
+    - /runtime

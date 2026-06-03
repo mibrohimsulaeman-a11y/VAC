@@ -1,0 +1,17 @@
+schema_version: 1
+kind: plan
+id: plan.o5o6.tui-init-no-interactive
+title: O5/O6 TUI VAC-Init no-interactive flag correction
+status: implemented_static
+scope:
+  - vac-rs/tui/src/slash_command.rs
+  - vac-rs/tui/src/chatwidget/slash_dispatch.rs
+  - vac-rs/tui/src/chatwidget/tests/slash_commands.rs
+  - scripts/check-vac-tui-init-no-interactive-static.sh
+summary: >
+  Corrects the VAC-Init operator UX so the TUI does not require the CLI-only
+  `vac init --interactive` spelling. The TUI writes operator choices directly
+  and guides users to run plain `vac init` from the TUI/local command surface.
+validation:
+  static_gate: scripts/check-vac-tui-init-no-interactive-static.sh
+  cargo: TV-Pending

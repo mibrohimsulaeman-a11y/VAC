@@ -1,0 +1,492 @@
+schema_version: 1
+kind: evidence
+id: evidence.2026-05-30-o6-2-safety-coverage-sv-done
+timestamp: '2026-05-30T00:00:00Z'
+chain:
+  previous: evidence.2026-05-30-o5-o6-completion-not-evaluated
+  previous_hash: null
+  self_hash: 90d3c0f139d805759b284bc325aee6c220657eac974d806b30ecb49c297cc6f4
+changeset:
+  plan_id: plan.o6-2.safety-coverage.sv-done
+  capability: vac.quality.unsafe-safety-coverage
+  files_modified:
+  - path: .vac/registry/o6-safety-coverage.yaml
+    operation: modify
+    diff_hash: 08ec52165639ae4d43048425a46ce26b69a1e85cde6d3e02dc30ae87020b83be
+    lines_added: 237
+    lines_removed: 0
+  - path: .vac/registry/compile-debt-ledger.yaml
+    operation: modify
+    diff_hash: 38136841e248a3d245ae6f9ba6a218ebd83b5c43038088125ffa6b42fa814563
+    lines_added: 110
+    lines_removed: 0
+  - path: .vac/registry/o5-godfile-staging-state.yaml
+    operation: modify
+    diff_hash: 53d930fe78ca5257a86060edbb202160b04c8b3f26cbc73f85f1d13b5cac586b
+    lines_added: 71
+    lines_removed: 0
+  - path: .vac/registry/o5-o6-completion-state.yaml
+    operation: modify
+    diff_hash: 864a5a6eae23ba68322eca31b47b4f028b556fcfbecf15e09e676ac70a97cecd
+    lines_added: 58
+    lines_removed: 0
+  - path: .vac/registry/o5-o6-monolith-quality-state.yaml
+    operation: modify
+    diff_hash: 0d142d645acc37a4870328db7a3f7287fbfa265cd1bed84b8f8f64a0afbf8718
+    lines_added: 58
+    lines_removed: 0
+  - path: .vac/registry/o6-quality-triage.yaml
+    operation: modify
+    diff_hash: 10a44a55a7557b08786bb938a552347e8755ea4b0abe757ea60114dccbe960f4
+    lines_added: 25
+    lines_removed: 0
+  - path: .vac/registry/plans/plan.o6-2.safety-coverage.sv-done.yaml
+    operation: modify
+    diff_hash: 2ca4b9c0c091bff45db4cff3a88c45667d2270bda0f7e70ebea93e9790f4be4a
+    lines_added: 84
+    lines_removed: 0
+  - path: .vac/capabilities/o6-2-safety-coverage.yaml
+    operation: modify
+    diff_hash: d7a723325d21b7aa0e045583c8dee8fb752ce015ea001f6235cb840f406fd4a3
+    lines_added: 59
+    lines_removed: 0
+  - path: .vac/workflows/maintenance.o6-2-safety-coverage.yaml
+    operation: modify
+    diff_hash: a7cb0ba53e33384ebf395529bcf606e221be1084305c26e8a66007d6349dedf2
+    lines_added: 58
+    lines_removed: 0
+  - path: docs/monolith-quality/O6_2_SAFETY_ANNOTATION_COVERAGE.md
+    operation: modify
+    diff_hash: 71cb7e991f56069911da11ce4e09aacfb5b1d7aa3c48c55ff6b5b8c5e3f676c3
+    lines_added: 244
+    lines_removed: 0
+  - path: docs/monolith-quality/O6_2_UNSAFE_TRIAGE.md
+    operation: modify
+    diff_hash: bd51a944ee8f36b6f26d77196c20a59f9c8b55be1486cd6bbe41010820609cc1
+    lines_added: 108
+    lines_removed: 0
+  - path: scripts/check-vac-o6-2-safety-coverage.sh
+    operation: modify
+    diff_hash: 44e633ee0638734fc793d126d53ac41a1477f02caec3b1e578bdcaae7661a30b
+    lines_added: 71
+    lines_removed: 0
+  - path: scripts/check-vac-sandbox-suite.sh
+    operation: modify
+    diff_hash: 87e1bb447917101e44be13e170d965e2eb54f300aabe89b084fa6bb544891612
+    lines_added: 25
+    lines_removed: 0
+  - path: scripts/check-vac-o6-quality-triage.sh
+    operation: modify
+    diff_hash: 8adaddd084fb81adbe3ef9b529f85da94d80434819047833ab024f160b41072f
+    lines_added: 21
+    lines_removed: 0
+  - path: scripts/check-vac-o5-2-godfile-staging-all.sh
+    operation: modify
+    diff_hash: 48dcad8dbbec8dfd84c6165f496b22c43bc318a47f8dceb53ce3dfa3fe0c9e78
+    lines_added: 37
+    lines_removed: 0
+  - path: scripts/check-vac-o5-2-godfile-staging.sh
+    operation: modify
+    diff_hash: 900f4446c31a194c6bb2e8443b67844fc1de9fd2a2d271b598a816c411e930a7
+    lines_added: 29
+    lines_removed: 0
+  - path: vac-rs/arg0/src/lib.rs
+    operation: modify
+    diff_hash: 33860ec000e7d512a985013ee1cbbd80bfee471d8325143025d3ada92fa7c7bb
+    lines_added: 587
+    lines_removed: 0
+  - path: vac-rs/config/src/loader/macos.rs
+    operation: modify
+    diff_hash: f0b124fcb7b60d7908ba0a42997f392365503365245f51f03dd22c44c2ec840f
+    lines_added: 179
+    lines_removed: 0
+  - path: vac-rs/config/src/loader/mod.rs
+    operation: modify
+    diff_hash: 54ad9141732d6c23b81bfbf2566d61ed823d7a1971cd1953fe8b9aa2586ce113
+    lines_added: 1241
+    lines_removed: 0
+  - path: vac-rs/core/src/agents_md_tests.rs
+    operation: modify
+    diff_hash: 350c4c1a0721d51ccafd535216a88600a1a8646ce75409444e9b736a9d188b90
+    lines_added: 507
+    lines_removed: 0
+  - path: vac-rs/core/src/arc_monitor_tests.rs
+    operation: modify
+    diff_hash: 1817ec327f069e227ed803549b4f894be6d0f61cb28791771d9f5b0039dd257d
+    lines_added: 441
+    lines_removed: 0
+  - path: vac-rs/core/src/exec_tests.rs
+    operation: modify
+    diff_hash: ab79208a032ee731e024dfcccadd96c796e84162b20680b8225dc3115fddf497
+    lines_added: 1075
+    lines_removed: 0
+  - path: vac-rs/core/src/shell.rs
+    operation: modify
+    diff_hash: 762c11444571c676fad4ec48094f9ddc188adca3b99433b60f2a58e375dae4e5
+    lines_added: 414
+    lines_removed: 0
+  - path: vac-rs/core/src/shell_snapshot.rs
+    operation: modify
+    diff_hash: 5768ef18f33b38a77b68dcf0f5f8ae1698d1280956dfab1c6c6fe4fddec53e76
+    lines_added: 568
+    lines_removed: 0
+  - path: vac-rs/core/src/shell_snapshot_tests.rs
+    operation: modify
+    diff_hash: d93bb0af9e1798a2fd4238a5ceff272f9074b8f96cd29b16e06975eea8ab5ae8
+    lines_added: 501
+    lines_removed: 0
+  - path: vac-rs/core/src/spawn.rs
+    operation: modify
+    diff_hash: ca80c76bc8c5c7cc1bab69c537bff1b1fa12bb737610e67edb5d487fa6342eae
+    lines_added: 127
+    lines_removed: 0
+  - path: vac-rs/core-plugins/src/startup_sync_tests.rs
+    operation: modify
+    diff_hash: 4c907d3757c7f63e3a61fba70cce7cc9584620b35b02ffefbce73da0d9497395
+    lines_added: 770
+    lines_removed: 0
+  - path: vac-rs/linux-sandbox/src/landlock.rs
+    operation: modify
+    diff_hash: 6721606f3ed860c087cd04227b426131e903b5c2db474161f07bffe7a77d650c
+    lines_added: 347
+    lines_removed: 0
+  - path: vac-rs/linux-sandbox/src/launcher.rs
+    operation: modify
+    diff_hash: e745fd84e71dc92d29da2875f04420d3e92261b14ae7f3b0b11457b1836773c7
+    lines_added: 226
+    lines_removed: 0
+  - path: vac-rs/linux-sandbox/src/linux_run_main.rs
+    operation: modify
+    diff_hash: 47a8e52c7e0ab708269eea4a1a96fdd4cf780f1260647c22f1b85b0288d6be5e
+    lines_added: 1493
+    lines_removed: 0
+  - path: vac-rs/linux-sandbox/src/linux_run_main_tests.rs
+    operation: modify
+    diff_hash: 19f1f21d99215fcb72fce09a55c1fd689d7d5fa27002b63ef2929af3b39f6928
+    lines_added: 630
+    lines_removed: 0
+  - path: vac-rs/linux-sandbox/src/proxy_routing.rs
+    operation: modify
+    diff_hash: 06f126350296c79e818b3ac364cc8c73f6467feb243767b4e23ff3bf3e8eabae
+    lines_added: 827
+    lines_removed: 0
+  - path: vac-rs/linux-sandbox/src/vendored_bwrap.rs
+    operation: modify
+    diff_hash: 2a6dce7b17705e051f7269e7fea5819e54149c4cf35f24eccb4f389e34668b33
+    lines_added: 79
+    lines_removed: 0
+  - path: vac-rs/login/src/auth/agent_identity.rs
+    operation: modify
+    diff_hash: 47bfa9f3b415ec3405464413a5f5a1ed151a399fa6be1d14e937acc2304adc3d
+    lines_added: 143
+    lines_removed: 0
+  - path: vac-rs/login/src/auth/auth_tests.rs
+    operation: modify
+    diff_hash: f012af1035fe304aac44d9fd5395bc516d1af0d4131ba6e47f17cc3dd38a198b
+    lines_added: 1213
+    lines_removed: 0
+  - path: vac-rs/process-hardening/src/lib.rs
+    operation: modify
+    diff_hash: 7c95e981c9538633c49d0025513af46e878f787a05584a95f9383d2fc8733afb
+    lines_added: 205
+    lines_removed: 0
+  - path: vac-rs/protocol/src/permissions.rs
+    operation: modify
+    diff_hash: e874bb2623bb135114f8218959aa94293dad57341172a3d948bff7d323ecf208
+    lines_added: 2952
+    lines_removed: 0
+  - path: vac-rs/rmcp-client/src/auth_status.rs
+    operation: modify
+    diff_hash: 31b56f16bf5aa384d8fdcb5ed0d1f635343d3f1cf774f38b83bdf722425af66c
+    lines_added: 376
+    lines_removed: 0
+  - path: vac-rs/rmcp-client/src/oauth.rs
+    operation: modify
+    diff_hash: 94a6f201a5090337199067dc8f7407f75fabcd6027ed74a144d50d57e9df589c
+    lines_added: 915
+    lines_removed: 0
+  - path: vac-rs/rmcp-client/src/utils.rs
+    operation: modify
+    diff_hash: 612e9f75fd10e4b8060017e9be9a5e26768a1692c9f747a80e48ff087ce9cfe0
+    lines_added: 310
+    lines_removed: 0
+  - path: vac-rs/sandboxing/src/seatbelt.rs
+    operation: modify
+    diff_hash: 643e4fee09d41f0dcdaff3651154c17d99dc09905e18f0b9fa240a1c2d33b032
+    lines_added: 775
+    lines_removed: 0
+  - path: vac-rs/secrets/src/local.rs
+    operation: modify
+    diff_hash: be4dd03bc0030bda5a34375dacfb8559cd4573706678577f52363d36a6fab629
+    lines_added: 411
+    lines_removed: 0
+  - path: vac-rs/shell-escalation/src/unix/escalate_client.rs
+    operation: modify
+    diff_hash: 2e826521345f54337948e54cfe3b96d1074ba4515221da5ac1acba0dbd4e9598
+    lines_added: 147
+    lines_removed: 0
+  - path: vac-rs/shell-escalation/src/unix/escalate_server.rs
+    operation: modify
+    diff_hash: 5708d8b0829a6f775fdb65ca4407e1619eb1675595ee2f923760ea174060f6fd
+    lines_added: 1077
+    lines_removed: 0
+  - path: vac-rs/shell-escalation/src/unix/socket.rs
+    operation: modify
+    diff_hash: e0834d37da0c89c731658a90b7443c3306e393e491c7a3c40d89f9dcda85508b
+    lines_added: 536
+    lines_removed: 0
+  - path: vac-rs/test-binary-support/lib.rs
+    operation: modify
+    diff_hash: cecd8ac32cd7e8f5e60a5f0637c7a9a1c6040ae231a2eb1ff6c9bf682ca67042
+    lines_added: 80
+    lines_removed: 0
+  - path: vac-rs/tui/src/clipboard_copy.rs
+    operation: modify
+    diff_hash: 441d52d843d34f760637f0a5bc18e80db59d98742d27464a505577cb50251550
+    lines_added: 640
+    lines_removed: 0
+  - path: vac-rs/tui/src/external_editor.rs
+    operation: modify
+    diff_hash: 093f6133506216622e3ba760ccd8d5a0b3af8e98c23da4ac6d8eda8572fb5865
+    lines_added: 174
+    lines_removed: 0
+  - path: vac-rs/tui/src/ide_context/ipc.rs
+    operation: modify
+    diff_hash: 80fef0fd5028305e2ca60da9bd48697b1f36cfa11883beb3acf00bc09ba7f6e4
+    lines_added: 1029
+    lines_removed: 0
+  - path: vac-rs/tui/src/ide_context/windows_pipe.rs
+    operation: modify
+    diff_hash: 7f73e537598ed66aa6f92b0b5e276160537c32cdaf615ae4e109ca8412da7ea2
+    lines_added: 358
+    lines_removed: 0
+  - path: vac-rs/tui/src/terminal_probe.rs
+    operation: modify
+    diff_hash: 147c4ee6143ee225b55e4e9ea5b7cc61e527333848abbda6aebe198f4eb4a2b7
+    lines_added: 570
+    lines_removed: 0
+  - path: vac-rs/tui/src/tui/job_control.rs
+    operation: modify
+    diff_hash: ae0128960f25955b58b78eab0dbf98e9f71a965163637f73ece1ddaef0a067ae
+    lines_added: 183
+    lines_removed: 0
+  - path: vac-rs/tui/src/tui.rs
+    operation: modify
+    diff_hash: 9bcec2c66953666b66f09d33b00b247e5db9088f9fad720be199f1bae4e1ab79
+    lines_added: 858
+    lines_removed: 0
+  - path: vac-rs/tui/src/wrapping.rs
+    operation: modify
+    diff_hash: d6c0817f7edd7ae0d6fc11d929ce0de92668a7622149a42669f03daeeb7b237d
+    lines_added: 1409
+    lines_removed: 0
+  - path: vac-rs/uds/src/lib.rs
+    operation: modify
+    diff_hash: 513ec1ab9322cb3fb5f045e4336ce6b22a090396261a7346ea2df837829f609e
+    lines_added: 334
+    lines_removed: 0
+  - path: vac-rs/utils/pty/src/pipe.rs
+    operation: modify
+    diff_hash: 0194e26999e55a0196f17109aed4949454b3b6ef18dd1f1d802613b33f0a47e0
+    lines_added: 293
+    lines_removed: 0
+  - path: vac-rs/utils/pty/src/process.rs
+    operation: modify
+    diff_hash: ae9dee11d8758afb90d3d70cf88e89de1e25aa6404fdfbbaeb22a44e7594a285
+    lines_added: 409
+    lines_removed: 0
+  - path: vac-rs/utils/pty/src/process_group.rs
+    operation: modify
+    diff_hash: cc3b81e2b548682bdc3f22de1c0bdca27341693d190007727c12c784ec8fd972
+    lines_added: 192
+    lines_removed: 0
+  - path: vac-rs/utils/pty/src/pty.rs
+    operation: modify
+    diff_hash: c62a89ff14fa1af52d2f4237abc5f06fe2a84b64b912a153c6345a0704b6c1a7
+    lines_added: 490
+    lines_removed: 0
+  - path: vac-rs/utils/pty/src/win/mod.rs
+    operation: modify
+    diff_hash: 87f82497898f5d168f5b93923284dbfd398ce7067d993ee4677f55f0035391b9
+    lines_added: 181
+    lines_removed: 0
+  - path: vac-rs/utils/pty/src/win/procthreadattr.rs
+    operation: modify
+    diff_hash: fa6746d0bcfceec968445738ef18d94bf8b5b74db435145d31f1fcf0696b1c85
+    lines_added: 96
+    lines_removed: 0
+  - path: vac-rs/utils/pty/src/win/psuedocon.rs
+    operation: modify
+    diff_hash: d29219e459034fd994d2e4ed6d0bd5243e29047e279aa6e3e62032ccfb7854b2
+    lines_added: 386
+    lines_removed: 0
+  - path: vac-rs/utils/sleep-inhibitor/src/iokit_bindings.rs
+    operation: modify
+    diff_hash: 3b5f479aa397168aeba46317c44e28924524b11c1148d3facc8f2f4a3de1a5d3
+    lines_added: 29
+    lines_removed: 0
+  - path: vac-rs/utils/sleep-inhibitor/src/linux_inhibitor.rs
+    operation: modify
+    diff_hash: 0a80bad734a7ddc4d18b98dad4e0f51b91763f02c2a7759844349baeab648461
+    lines_added: 240
+    lines_removed: 0
+  - path: vac-rs/utils/sleep-inhibitor/src/macos.rs
+    operation: modify
+    diff_hash: 31e38a9eecd19f8825360a95e90f300c07264f171a7657be494112410bc6677e
+    lines_added: 110
+    lines_removed: 0
+  - path: vac-rs/utils/sleep-inhibitor/src/windows_inhibitor.rs
+    operation: modify
+    diff_hash: cec48fce455e4e3e693d718e4d839ede6daf36a1e5fbbfc0ffc67560f97e801c
+    lines_added: 119
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/acl.rs
+    operation: modify
+    diff_hash: 49c31a5fb62ee46e8bc611ed618fa64e3f6fb04e176b4032aca96799a091ca65
+    lines_added: 651
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/audit.rs
+    operation: modify
+    diff_hash: a7ef918e4cb2a3402bf88d23c80bed3d924f13b8c0275d3e9d7b3d96c0ff6745
+    lines_added: 339
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/conpty/mod.rs
+    operation: modify
+    diff_hash: 383668e242f5d0342ff92b4fa2734520b6324963de71dee93ee84fbb8df71df4
+    lines_added: 156
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/desktop.rs
+    operation: modify
+    diff_hash: b2d4da211931716b6d626764ee8825c9b44cb27ca22ed5385edf43d4bc901d1b
+    lines_added: 201
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/dpapi.rs
+    operation: modify
+    diff_hash: b92ac16ba5d9bc5ca287adae76f4bf6842341e0b01001f86dff1cead98fabb71
+    lines_added: 91
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/elevated/command_runner_win.rs
+    operation: modify
+    diff_hash: 63a1e7b864d23bc2a8c472c8c762e37d55f29dc984f6517a4e0ee47b76cc904a
+    lines_added: 658
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/elevated/runner_client.rs
+    operation: modify
+    diff_hash: 0467433f83d6f46cace5963a31c3dd044ca4bf64a9db89131ab74db55bf8848d
+    lines_added: 410
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/elevated/runner_pipe.rs
+    operation: modify
+    diff_hash: fa9c5af553e7c2880393191b33bdd075cae3aa0ab4ce4c58d1bddf3861fc5f20
+    lines_added: 142
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/elevated_impl.rs
+    operation: modify
+    diff_hash: 2b20e9e8ce975f55f467efdfb5d2381f1690ffdc4c45dfc800e31f1f5faf6391
+    lines_added: 312
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/firewall.rs
+    operation: modify
+    diff_hash: fc5863b40fcd2f353d3953ff1ce136c6542125a107edeb36552c064fa2bf3782
+    lines_added: 532
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/hide_users.rs
+    operation: modify
+    diff_hash: 93c1ca255e660cfa87bb924573b89fb55167741bacda756346918dabdfd129ff
+    lines_added: 165
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/lib.rs
+    operation: modify
+    diff_hash: 705f8b80027f95595d9af4f5acc2233dfc341abb0ed1f3d2b9898ccad210667e
+    lines_added: 753
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/proc_thread_attr.rs
+    operation: modify
+    diff_hash: 496064f655afc1bce14a9ce30fac3da5ae087b30de64c15d6003288ad7678f88
+    lines_added: 108
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/process.rs
+    operation: modify
+    diff_hash: 691cb09768ced0cabfab84bbecbd85f5c910b34d75070c246232b43e31d47f80
+    lines_added: 363
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/read_acl_mutex.rs
+    operation: modify
+    diff_hash: 507582ece346e4e8abd35fbaaf433c72e311caf27ae067ccf816ec932bdc9764
+    lines_added: 67
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/sandbox_users.rs
+    operation: modify
+    diff_hash: 060b3fc84c576e6d0a2278ff0ec965d4f80ee0ff32c8facb9811073e51069411
+    lines_added: 514
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/setup_main_win.rs
+    operation: modify
+    diff_hash: 92657289852b384935a9d3ef817f4c31279129a41bb540218f1e03a85334cd1a
+    lines_added: 967
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/setup_orchestrator.rs
+    operation: modify
+    diff_hash: 88375ddc07b980ff4c9ec02f60c4eede2f32b49fd4465af8d593e76388de6985
+    lines_added: 1457
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/spawn_prep.rs
+    operation: modify
+    diff_hash: 7232a71dfc5e77b8492a15ee85002ceb1a42c165832a54737b245110ab23515e
+    lines_added: 418
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/token.rs
+    operation: modify
+    diff_hash: 25a29fb9b7a2bec0263958e6ddd0b5077d7f2c6c35b13fa7a7848fe16212632d
+    lines_added: 475
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/unified_exec/backends/legacy.rs
+    operation: modify
+    diff_hash: 328bb95f062414ffa8751061974cfb092f39d1adfb0ae2ec956835efbe2485f5
+    lines_added: 451
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/wfp.rs
+    operation: modify
+    diff_hash: 053c447bda1f2d97515d41fba39211e3fbae25932376b401230ae6e5c4b2bdf7
+    lines_added: 423
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/winutil.rs
+    operation: modify
+    diff_hash: d8486cc5dd45fe3cbc3e9b6e633766cb87da1ba75ebd83f009bf2963fcc101a5
+    lines_added: 244
+    lines_removed: 0
+  - path: vac-rs/windows-sandbox-rs/src/workspace_acl.rs
+    operation: modify
+    diff_hash: 3342dd2b568921ff26e56fb09f67edaf83522089e2cd4b1168d9187075192afa
+    lines_added: 33
+    lines_removed: 0
+validation:
+  commands_executed: []
+  gates_passed:
+  - o6-2-safety-coverage
+  - sandbox-suite
+  - o5-o6-completion-state
+  - docs-state-refresh
+  - registry-strictness
+  - workflow-spec
+  - artifact-hygiene
+  gates_failed: []
+approval:
+  approved_by: operator
+  approved_at: '2026-05-30T00:00:00Z'
+  content_hash: 1b599a31c19bdb9252f9a1f88b8fae632a146e0d1fd6c9b844c6867eba7171dc
+  signature:
+    algorithm: none
+    value: null
+attribution:
+  agent_id: chatgpt-gpt-5.5-thinking-as-vac-model
+  model: GPT-5.5 Thinking
+  memory_snapshot:
+    working_facts: 4
+    team_rules_consulted:
+    - vac.no-hardcoded-readiness
+    - vac.sv-tv-done-separation
+    semantic_refs:
+    - o6.unsafe-safety-coverage
+    - compile-debt-ledger
+  rationale_ref: .vac/registry/trajectory/o6-2-safety-coverage-sv-done.yaml

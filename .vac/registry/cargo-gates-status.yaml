@@ -1,0 +1,31 @@
+schema_version: 1
+kind: registry_status
+id: vac.cargo_gate.status
+title: Cargo gate availability status
+status: blocked
+updated_at: '2026-06-03T00:00:00Z'
+toolchain:
+  rustc_available: false
+  cargo_available: false
+  uploaded_toolchain_archive: none_uploaded_in_current_sandbox
+  archive_status: not_present
+vendor:
+  source_artifact_vendor_present: false
+  supplemental_vendor_uploads_present: false
+gates:
+  cargo_metadata_offline_no_deps: NotEvaluated
+  cargo_build_workspace_offline: NotEvaluated
+  cargo_check_targeted: NotEvaluated
+  cargo_test_targeted: NotEvaluated
+  cargo_clippy_targeted: NotEvaluated
+  doctor_binary_gates: NotEvaluated
+blocker:
+  id: cargo-toolchain-unavailable-2026-06-03
+  reason: rustc and cargo are not available in the sandbox, and no valid Rust toolchain/vendor archive was uploaded with this baseline.
+  evidence_log: .vac/validation-runs/toolchain-and-doctor-probe.log
+release_claim_policy:
+  static_source_gates_can_pass: true
+  runtime_validated_final_claim_allowed: false
+  required_to_continue:
+    - upload valid rust-toolchain-1.93.0-x86_64-unknown-linux-gnu archive
+    - upload matching cargo vendor/cache if offline execution is required

@@ -1,0 +1,40 @@
+# VAC operator TUI snapshot
+scenario: capability dashboard
+viewport: 120x36
+---
+● ● ●  vac · interactive — agent working                                                                                
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+chat · runtime · review · [workbench] · mcp                                                                     tab 4/5 
+TUI Capability Dashboard                                                                                                
+Control plane registry view for manifest ownership, surfaces, policy, validation, and diagnostics.                      
+metrics  [5 CAPABILITIES]  [42 OWNED DOMAINS]  [3 UNOWNED]  [80% VALID]                                                 
+                                                                                                                        
+layout  left: command/nav + workspace feed | center: capability table + tabs/filter + registry card | right / Diagnostic
+diagnostics fallback: YAML/control-plane errors are rendered in-panel                                                   
+                                                                                                                        
+› /capabilities          │ Capability registry                                      │ right / Diagnostics               
+                         │ filters: [all] ready partial planned broken              │ Structured errors render her      
+WORKSPACE FEED           │                                                          │                                   
+registry    .vac/capabil │ /capabilities                         control plane regi │ ┌─ YAML diagnostic ─────────      
+workflows   .vac/workflo │ Control plane registry:                                  │ │ error                    │      
+surface     tui + cli +  │   .vac/capabilities/ manifest scan loaded 18 files · 0 b │ │ .vac/capabilities/tui.ym │      
+                         │   .vac/policies/ strict approval gates wired             │ │ status almost_ready is   │      
+ownership   42 owned     │   vac_tui_runtime surface route summary ready            │ │ not one of ready,        │      
+unowned     3 domains    │                                                          │ │ partial, planned,        │      
+policy      strict gates │ ID | STATUS | OWNER | SURFACES | POLICY | VALIDATION / D │ │ broken, cli-only         │      
+                         │ vac.approvals | ready | vac-core/policy | tui, cli, runn │ │ warning registry:        │      
+/             ready / va │ vac.tui.capabilities | ready | vac-tui/lib | /capabiliti │ │ Registry parse degraded; │      
+/capabilities ready / re │ vac.workflow.browser | partial | vac-workflow | /workflo │ │ policy gates and surface │      
+/runtime      ready / sc │ vac.root.convert | planned | vac-registry | cli-only | m │ │ routes remain ready      │      
+                         │ vac.yaml.parser | broken | vac-core/config | tui, cli |  │ └──────────────────────────┘      
+                         │                                                          │                                   
+                         │ ┌─ Ownership scan ────────────────────────────────────── │ ┌─ Policy gates ────────────      
+                         │ │ vac-tui/lib owned                                    │ │ │ ready                    │      
+                         │ │ vac-core/policy owned                                │ │ │ ████████████████████     │      
+                         │ └──────────────────────────────────────────────────────┘ │ └──────────────────────────┘      
+                         │                                                          │                                   
+                         │                                                          │ ┌─ Surface routes ──────────      
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ ▸  / commands   @ files   shift+tab plan   ctrl+j newline                                                            │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+CONVERSATION | model claude-sonnet-4.5 | 68,240 tok | manual | valid 92% lsp E0 W3 | profile default · rulebook vil.core

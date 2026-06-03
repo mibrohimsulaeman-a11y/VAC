@@ -1,0 +1,42 @@
+schema_version: 1
+kind: spec_conformance_ledger
+id: spec-conformance.o5o6.zero-residual
+updated_at: 2026-06-02T00:00:00Z
+status: static_closed
+semantic_anchor:
+  strict_backend: syn
+  rust_ast_lite_default: false
+  degraded_fallback_default: false
+  unresolved_anchor_requires_plan_refresh: true
+  ambiguous_anchor_rejected: true
+  tests_pass: pending_final_validation
+risk_method_enum:
+  out_of_vocab_methods: 0
+  live_scanner_uses_enum: true
+  generated_findings_validate: pending_final_validation
+canonical_hashing:
+  field_coverage_report: pass
+  missing_fields: []
+  unexpected_fields: []
+  self_hash_excluded: true
+  sorted_keys: true
+  lf_newline: true
+  tests_pass: pending_final_validation
+spec_conformance:
+  section_12: static_closed
+  section_13: static_closed
+  section_15: static_closed
+  section_17: static_closed
+  section_18: static_closed
+  section_19: static_closed
+  section_20: static_closed
+  section_22: static_closed
+  section_23: static_closed
+  section_24: static_closed
+  section_24_1: static_closed
+  section_25: static_closed
+  section_27: static_closed
+  section_28: static_closed
+  section_31: static_closed
+  partial: []
+  gaps: []

@@ -1,0 +1,424 @@
+schema_version: 1
+kind: registry_status
+id: vac.donor_inventory
+title: Donor migration machine inventory
+status: ready
+source_docs:
+  status_board: docs/donor-migration/DONOR_STATUS_BOARD.md
+  matrix: docs/donor-migration/DONOR_INVENTORY_MATRIX.md
+  domain_contracts: docs/donor-migration/domain-plans/
+owner:
+  crate: vac-core
+  module: control_plane::donor_domain_contract
+domain_contracts:
+- plan_id: '01'
+  title: Session Engine
+  stance: ready_for_gated_slices
+  doc: docs/donor-migration/domain-plans/01-session-engine.md
+  owner: vac-core/control_plane::donor_domain_contract
+- plan_id: '02'
+  title: Tool Contract
+  stance: ready_for_gated_slices
+  doc: docs/donor-migration/domain-plans/02-tool-contract.md
+  owner: vac-core/control_plane::donor_domain_contract
+- plan_id: '03'
+  title: Managed Connectors
+  stance: ready_for_gated_slices
+  doc: docs/donor-migration/domain-plans/03-managed-connectors.md
+  owner: vac-core/control_plane::donor_domain_contract
+- plan_id: '04'
+  title: Changeset and Evidence
+  stance: ready_for_gated_slices
+  doc: docs/donor-migration/domain-plans/04-changeset-evidence.md
+  owner: vac-core/control_plane::donor_domain_contract
+- plan_id: '05'
+  title: Trust and Redaction
+  stance: ready_for_gated_slices
+  doc: docs/donor-migration/domain-plans/05-trust-redaction.md
+  owner: vac-core/control_plane::donor_domain_contract
+- plan_id: '06'
+  title: Context, Memory, Search, and RAG
+  stance: ready_for_gated_slices
+  doc: docs/donor-migration/domain-plans/06-context-rag-memory.md
+  owner: vac-core/control_plane::donor_domain_contract
+- plan_id: '07'
+  title: VIL Native
+  stance: ready_for_gated_slices
+  doc: docs/donor-migration/domain-plans/07-vil-native.md
+  owner: vac-core/control_plane::donor_domain_contract
+- plan_id: 08
+  title: Trace, Signal, and Trajectory
+  stance: ready_for_gated_slices
+  doc: docs/donor-migration/domain-plans/08-trace-signal-trajectory.md
+  owner: vac-core/control_plane::donor_domain_contract
+- plan_id: 09
+  title: Agent Orchestration
+  stance: deferred_guardrail
+  doc: docs/donor-migration/domain-plans/09-agent-orchestration.md
+  owner: vac-core/control_plane::donor_domain_contract
+- plan_id: '10'
+  title: TUI Concept Extraction
+  stance: ready_for_gated_slices
+  doc: docs/donor-migration/domain-plans/10-tui-concept-extraction.md
+  owner: vac-core/control_plane::donor_domain_contract
+- plan_id: '11'
+  title: External Agent Concept Adoption
+  stance: doc_only_overlay
+  doc: docs/donor-migration/domain-plans/11-external-agent-concept-adoption.md
+  owner: vac-core/control_plane::donor_domain_contract
+inventory_entries:
+- donor_source: vac_apply_patch
+  domain: patch/apply
+  decision: ADAPT
+  target_capability: vac.patch, vac.changeset
+  root_target: core/local runtime/tools
+  surface: approval/evidence
+  priority: P1
+  status: ADAPT_PLANNED
+- donor_source: vac_approvals
+  domain: approval
+  decision: ADAPT
+  target_capability: vac.approval, vac.policy
+  root_target: approval/policy
+  surface: /approvals
+  priority: P0/P1
+  status: ADAPT_PLANNED
+- donor_source: vac_changeset
+  domain: diff/evidence
+  decision: ADAPT
+  target_capability: vac.changeset, vac.semantic_diff
+  root_target: changeset/evidence
+  surface: /evidence, approval preview
+  priority: P1
+  status: ADAPT_PLANNED
+- donor_source: vac_tool_core
+  domain: tool contract
+  decision: ADAPT
+  target_capability: vac.tool_contract
+  root_target: tools
+  surface: activity/approval
+  priority: P0
+  status: ADAPT_PLANNED
+- donor_source: vac_tools
+  domain: tools
+  decision: ADAPT
+  target_capability: vac.tools
+  root_target: tools
+  surface: activity
+  priority: P1
+  status: ADAPT_PLANNED
+- donor_source: vac_mcp_core
+  domain: connectors
+  decision: ADAPT
+  target_capability: vac.connectors, vac.connector_acl
+  root_target: connectors
+  surface: /connectors, /status
+  priority: P1
+  status: ADAPT_PLANNED
+- donor_source: vac_session_engine
+  domain: session
+  decision: ADAPT
+  target_capability: vac.session_engine, vac.transcript
+  root_target: session engine
+  surface: /sessions, activity
+  priority: P0/P1
+  status: ADAPT_IN_PROGRESS
+- donor_source: vac_session_control
+  domain: session control
+  decision: ADAPT
+  target_capability: vac.session_control, vac.checkpoint
+  root_target: session engine
+  surface: /sessions, /recovery
+  priority: P1
+  status: ADAPT_PLANNED
+- donor_source: vac_session_primitives
+  domain: scheduler/hooks
+  decision: DEFER
+  target_capability: vac.scheduler, vac.hooks
+  root_target: scheduler
+  surface: /scheduler
+  priority: P2/P3
+  status: DEFERRED
+- donor_source: vac_manifest
+  domain: manifests
+  decision: ADAPT
+  target_capability: control-plane registry
+  root_target: registry loader
+  surface: /capabilities, /workflow
+  priority: P1
+  status: ADAPT_PLANNED
+- donor_source: vac_workflow
+  domain: workflows
+  decision: ADAPT
+  target_capability: vac.workflow_runner
+  root_target: workflow runner
+  surface: /workflow
+  priority: P1
+  status: ADAPT_PLANNED
+- donor_source: vac_workflow_runner
+  domain: workflows
+  decision: ADAPT
+  target_capability: vac.workflow_runner
+  root_target: workflow runner
+  surface: /workflow
+  priority: P1
+  status: ADAPT_PLANNED
+- donor_source: vac_workflow_progress
+  domain: progress
+  decision: ADAPT
+  target_capability: vac.workflow_progress
+  root_target: runtime/TUI projection
+  surface: /workflow, statusline
+  priority: P1
+  status: ADAPT_PLANNED
+- donor_source: vac_runtime
+  domain: runtime
+  decision: REFERENCE_ONLY
+  target_capability: vac.local_runtime
+  root_target: local runtime
+  surface: activity/status
+  priority: P0
+  status: REFERENCE_ONLY
+- donor_source: vac_sandbox
+  domain: sandbox
+  decision: ADAPT
+  target_capability: vac.sandbox, vac.doctor
+  root_target: sandbox/readiness
+  surface: /doctor, statusline
+  priority: P0/P1
+  status: ADAPT_PLANNED
+- donor_source: vac_memory
+  domain: curated memory
+  decision: DEFER
+  target_capability: vac.curated_memory, vac.memory_mutation_contract
+  root_target: memory/context
+  surface: /memory
+  priority: P2
+  status: DEFERRED
+- donor_source: vac_ingest
+  domain: source ingest
+  decision: ADAPT
+  target_capability: vac.source_ingest, vac.source_catalog
+  root_target: context pipeline
+  surface: /context, /status
+  priority: P1
+  status: ADAPT_PLANNED
+- donor_source: vac_signal
+  domain: signal
+  decision: DEFER
+  target_capability: vac.signal
+  root_target: observability
+  surface: /why, evidence
+  priority: P2
+  status: DEFERRED
+- donor_source: vac_trace
+  domain: trace
+  decision: DEFER
+  target_capability: vac.trace
+  root_target: observability
+  surface: /evidence
+  priority: P2
+  status: DEFERRED
+- donor_source: vac_trajectory
+  domain: trajectory
+  decision: DEFER
+  target_capability: vac.trajectory, vac.why
+  root_target: observability
+  surface: /why
+  priority: P2
+  status: DEFERRED
+- donor_source: vac_skill
+  domain: rules/skills
+  decision: DEFER
+  target_capability: add-ons/rules
+  root_target: connectors/rules
+  surface: /capabilities
+  priority: P2
+  status: DEFERRED
+- donor_source: vac_bridge
+  domain: remote
+  decision: DEFER
+  target_capability: vac.bridge
+  root_target: remote bridge
+  surface: future /remote
+  priority: P3
+  status: DEFERRED
+- donor_source: vac_cli
+  domain: old CLI
+  decision: REFERENCE_ONLY
+  target_capability: CLI concepts
+  root_target: root CLI
+  surface: help/exec
+  priority: P0
+  status: REFERENCE_ONLY
+- donor_source: vac_core
+  domain: old core
+  decision: REFERENCE_ONLY
+  target_capability: concepts only
+  root_target: root core
+  surface: none direct
+  priority: P0
+  status: REFERENCE_ONLY
+- donor_source: vac_shell (base)
+  domain: shell/frontend
+  decision: QUARANTINE
+  target_capability: concepts only
+  root_target: root TUI only
+  surface: root TUI
+  priority: P0
+  status: QUARANTINED
+- donor_source: vac_shell_*
+  domain: shell/frontend
+  decision: QUARANTINE
+  target_capability: concepts only
+  root_target: root TUI only
+  surface: root TUI
+  priority: P0
+  status: QUARANTINED
+- donor_source: vac_tui_runtime
+  domain: old TUI runtime
+  decision: QUARANTINE
+  target_capability: concepts only
+  root_target: root TUI only
+  surface: root TUI
+  priority: P0
+  status: QUARANTINED
+- donor_source: vac_shell_test_support
+  domain: test support
+  decision: REFERENCE_ONLY
+  target_capability: recorder/replay ideas
+  root_target: root tests
+  surface: validation
+  priority: P2
+  status: REFERENCE_ONLY
+- donor_source: vac_test_snapshot
+  domain: test support
+  decision: REFERENCE_ONLY
+  target_capability: snapshot ideas
+  root_target: root tests
+  surface: validation
+  priority: P2
+  status: REFERENCE_ONLY
+- donor_source: vil_expr
+  domain: VIL expressions
+  decision: ADAPT
+  target_capability: vac.vil_expr
+  root_target: VIL native
+  surface: /vil, /vwfd
+  priority: P2
+  status: ADAPT_PLANNED
+- donor_source: vil_ir
+  domain: VIL semantic IR
+  decision: ADAPT
+  target_capability: vac.vil_ir
+  root_target: VIL native
+  surface: /vil
+  priority: P2
+  status: ADAPT_PLANNED
+- donor_source: vil_validate
+  domain: VIL validation
+  decision: ADAPT
+  target_capability: vac.vil_validation_passes
+  root_target: VIL native
+  surface: /vil, /vwfd
+  priority: P2
+  status: ADAPT_PLANNED
+- donor_source: vil_vwfd
+  domain: VWFD
+  decision: ADAPT
+  target_capability: vac.vwfd_workbench
+  root_target: VIL native
+  surface: /vwfd
+  priority: P2
+  status: ADAPT_PLANNED
+- donor_source: vil_knowledge
+  domain: knowledge
+  decision: ADAPT
+  target_capability: vac.vil_knowledge
+  root_target: managed connector
+  surface: /vil, connectors
+  priority: P2
+  status: ADAPT_PLANNED
+- donor_source: vil_trust
+  domain: trust
+  decision: ADAPT
+  target_capability: vac.trust_zones, vac.redaction
+  root_target: policy/redaction
+  surface: /doctor, evidence
+  priority: P1
+  status: ADAPT_PLANNED
+- donor_source: vil_context
+  domain: context assembly
+  decision: ADAPT
+  target_capability: vac.context_bundle, vac.context_attribution, vac.context_budget
+  root_target: context pipeline
+  surface: /context, /why
+  priority: P1/P2
+  status: ADAPT_PLANNED
+- donor_source: vil_rag
+  domain: semantic retrieval
+  decision: DEFER
+  target_capability: vac.semantic_retrieval, vac.memory_provider
+  root_target: context pipeline
+  surface: /context
+  priority: P2
+  status: DEFERRED
+- donor_source: vil_memory
+  domain: curated/episodic memory
+  decision: DEFER
+  target_capability: vac.curated_memory, vac.session_search, vac.episodic_recall
+  root_target: memory/context
+  surface: /memory, /sessions
+  priority: P2
+  status: DEFERRED
+- donor_source: vil_llm
+  domain: model routing
+  decision: DEFER
+  target_capability: vac.model_router
+  root_target: model routing
+  surface: /models, /status
+  priority: P2
+  status: DEFERRED
+- donor_source: vil_inference
+  domain: local inference
+  decision: DEFER
+  target_capability: vac.local_inference
+  root_target: model routing
+  surface: /models
+  priority: P2/P3
+  status: DEFERRED
+- donor_source: vil_swarm
+  domain: orchestration
+  decision: DEFER
+  target_capability: vac.agent_orchestration
+  root_target: agent loop
+  surface: /workflow
+  priority: P2/P3
+  status: DEFERRED
+- donor_source: vil_metrics
+  domain: metrics
+  decision: DEFER
+  target_capability: vac.metrics, vac.statusline
+  root_target: observability
+  surface: statusline
+  priority: P2
+  status: DEFERRED
+legacy_kind: donor_inventory
+plan11_hermes_memory_alignment:
+  status: implemented
+  stance: doc_only_overlay
+  canonical_capabilities:
+  - vac.init.memory-governance
+  - vac.init.safe-rationale
+  - vac.init.evidence-why-live
+  - vac.init.semantic-plan
+  - vac.init.runtime-gate-enforcement
+  forbidden_parallel_capabilities:
+  - vac.memory
+  - vac.curated_memory
+  - vac.memory_skill_synthesis
+  - vac.episodic_recall
+  - vac.semantic_retrieval
+  - vac.memory_provider
+  gate: scripts/check-donor-plan11-hermes-memory-alignment.sh
+  docs: docs/donor-migration/domain-plans/11-external-agent-concept-adoption.md

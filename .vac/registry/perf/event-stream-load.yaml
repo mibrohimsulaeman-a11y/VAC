@@ -1,0 +1,18 @@
+schema_version: 1
+kind: perf_evidence
+id: perf.event-stream-load
+status: NotEvaluated
+reason: cargo_or_runtime_missing
+metrics:
+  markdown_large_transcript: NotEvaluated
+  windowed_render_skip_ratio: NotEvaluated
+  height_cache_hit_rate: NotEvaluated
+  startup_ttff_ms: NotEvaluated
+  ttff_ms: NotEvaluated
+  interactive_ready_ms: NotEvaluated
+  shimmer_frame_cost_micros: NotEvaluated
+  shimmer_spans_per_frame: NotEvaluated
+  height_cache_evictions: NotEvaluated
+  prefix_rebuild_skipped: NotEvaluated
+  startup_executor: StartupGraphExecutor
+  palette_filter_latency_ms: NotEvaluated

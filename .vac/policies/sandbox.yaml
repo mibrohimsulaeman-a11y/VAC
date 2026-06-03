@@ -1,0 +1,23 @@
+schema_version: 1
+kind: policy
+id: vac.policy.sandbox
+title: Sandbox process execution policy
+default_decision: approval_required
+rules:
+  - id: sandbox.execute-process
+    match:
+      action: process_execute
+    decision: approval_required
+    reason: All process execution requires operator approval before running.
+  - id: sandbox.deny-secret-output
+    match:
+      action: process_execute
+      data_class: secret_like
+    decision: deny
+    reason: Process steps that produce secret-like output are denied at sandbox layer.
+  - id: sandbox.deny-credential-output
+    match:
+      action: process_execute
+      data_class: credential
+    decision: deny
+    reason: Process steps that emit credentials are denied at sandbox layer.

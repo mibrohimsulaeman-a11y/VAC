@@ -1,0 +1,41 @@
+schema_version: 1
+kind: provider_prune_ledger
+id: provider-prune.o5o6.zero-residual-static
+updated_at: 2026-06-02T00:00:00Z
+policy:
+  default_provider_chatgpt: false
+  default_provider_realtime: false
+  telemetry_default_on: false
+  feedback_default_on: false
+  jwks_provider_config_required: true
+status: static_pass
+feature_flags:
+  provider-chatgpt: default_off
+  provider-realtime: default_off
+  provider-cloud-tests: default_off
+  telemetry-upload: default_off
+  feedback-upload: default_off
+acceptance:
+  chatgpt_com_default_path: 0
+  backend_api_default_path: 0
+  chatgpt_account_id_default_path: 0
+  cyber_verify_url: 0
+  authmode_chatgpt_default_path: 0
+  local_chatgpt_auth_default_path: 0
+  cloud_realtime_default_path: 0
+  telemetry_default_on: false
+  stub_cloud_debug_crates: 0
+allowlisted_compatibility:
+  protocol_variants: provider_compatibility_wire_names_only
+  tests: may_reference_legacy_provider_names_under_cfg_test
+  docs: historical_audit_evidence_not_runtime_default_path
+provider_http:
+  source_of_truth: true
+  vac_api_status: compatibility_reexport_layer
+  vac_client_status: provider_feature_compatibility_transport
+  generic_transport_duplicate: false
+  default_cloud_tests: false
+known_static_residuals: []
+tv_validation_queue:
+  - cargo check --manifest-path vac-rs/Cargo.toml -p vac-provider-http
+  - cargo check --manifest-path vac-rs/Cargo.toml -p vac-surface-tui

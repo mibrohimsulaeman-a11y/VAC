@@ -1,0 +1,52 @@
+schema_version: 1
+kind: capability
+id: vac.init.manifest-contracts
+title: VAC-Init Typed Manifest Contracts
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane::vac_init_manifest_contract
+ownership:
+  crates:
+  - vac-core
+  modules:
+  - control_plane::vac_init_manifest_contract
+  targets:
+  - crate_name: vac-core
+    module: control_plane::vac_init_manifest_contract
+description: Dependency-free typed contracts for VAC-Init capability, policy, surface, and workflow manifests, including lifecycle status, structured validation commands, and fail-closed surface/workflow checks.
+depends_on:
+- vac.init.schema-envelope
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - bash scripts/check-vac-init-manifest-structs-contract.sh
+  palette: true
+  tui:
+    routes:
+    - /capabilities
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for: []
+states:
+- empty
+- loading
+- success
+- failure
+validation:
+  commands:
+  - id: vac.init.manifest-contracts.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-manifest-structs-contract.sh
+    risk: execute_process
+    approval: policy
+  gates:
+  - vac_init_manifest_structs_contract
+docs:
+- docs/vac-init/VAC_INIT_BATCH_02_05_IMPLEMENTATION.md
+- docs/validation/VAC_INIT_BATCH_02_05_GATE.md

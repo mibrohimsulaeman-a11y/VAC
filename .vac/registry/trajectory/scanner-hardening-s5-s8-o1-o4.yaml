@@ -1,0 +1,48 @@
+schema_version: 1
+kind: trajectory
+id: trajectory.scanner-hardening-s5-s8-o1-o4
+spans:
+- file: vac-rs/control-plane/src/control_plane/vac_init_live_scanner_policy.rs
+  start_line: 1
+  end_line: 1300
+  symbol: LiveRiskFinding
+  evidence_id: evidence.2026-05-30-scanner-hardening-s5-s8-o1-o4
+- file: vac-rs/cli/src/init_cli.rs
+  start_line: 1
+  end_line: 260
+  symbol: InitCommand
+  evidence_id: evidence.2026-05-30-scanner-hardening-s5-s8-o1-o4
+- file: docs/legal/LEGAL_RELEASE_BLOCKERS.md
+  start_line: 1
+  end_line: 80
+  symbol: legal_release_blockers
+  evidence_id: evidence.2026-05-30-scanner-hardening-s5-s8-o1-o4
+results_by_evidence:
+  evidence.2026-05-30-scanner-hardening-s5-s8-o1-o4:
+    evidence_id: evidence.2026-05-30-scanner-hardening-s5-s8-o1-o4
+    timestamp: '2026-05-30T00:00:00Z'
+    task: Scanner hardening S5-S8 plus O1/O4 release blockers
+    plan_id: plan.scanner-hardening.s5-s8-o1-o4
+    capability: vac.init.scanner-policy-hardening
+    rationale:
+      summary: Added ownership/quarantine annotations, scanner doctor report, rescan-ast lifecycle mode, legal/build blocker tracking, and safe provenance scrub without hardcoded readiness claims.
+      policy_refs:
+      - vac.no-hardcoded-readiness
+      - vac.safe-rationale
+      - vac.legal-attribution
+      evidence_refs:
+      - evidence.2026-05-30-scanner-hardening-s5-s8-o1-o4
+      memory_refs:
+        team_rules: []
+        semantic_refs: []
+      excluded:
+        raw_chain_of_thought: true
+    changeset:
+      operation: modify
+      diff_excerpt: Scanner S5-S8 and O1/O4 release blocker hardening.
+      lines_added: 0
+      lines_removed: 0
+    approval:
+      approved_by: operator
+      content_hash: 6480a05f6f3198143dd5173dac525eb2987dc841bad14eae9a63117895be2425
+    chain_depth: 1

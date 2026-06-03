@@ -1,0 +1,18 @@
+schema_version: 1
+kind: trajectory
+id: o5o6.tui-init-no-interactive
+status: SV-Done_TV-Pending
+steps:
+  - id: semantic-plan
+    status: done
+    summary: Keep `--interactive` as CLI manual mode only; TUI `/init` must not require it.
+  - id: source-patch
+    status: done
+    summary: >
+      TUI writes operator choices directly with `requires_cli_interactive_flag: false`.
+  - id: static-gate
+    status: done
+    summary: Added and ran no-interactive TUI contract gate.
+  - id: cargo
+    status: TV-Pending
+    summary: cargo/rustc unavailable in sandbox.

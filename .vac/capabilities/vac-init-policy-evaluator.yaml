@@ -1,0 +1,53 @@
+schema_version: 1
+kind: capability
+id: vac.init.policy-evaluator
+title: VAC-Init Fail-Closed Policy Evaluator
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane::vac_init_policy_evaluator
+ownership:
+  crates:
+  - vac-core
+  modules:
+  - control_plane::vac_init_policy_evaluator
+  targets:
+  - crate_name: vac-core
+    module: control_plane::vac_init_policy_evaluator
+description: Policy evaluator enforces no-policy deny and most-restrictive-wins merge across policy layers.
+depends_on:
+- vac.init.manifest-contracts
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - bash scripts/check-vac-init-policy-evaluator-contract.sh
+  palette: true
+  tui:
+    routes:
+    - /capabilities
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for:
+  - execute_process
+states:
+- empty
+- loading
+- success
+- failure
+validation:
+  gates:
+  - vac_init_policy_evaluator_contract
+  commands:
+  - id: vac.init.policy-evaluator.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-policy-evaluator-contract.sh
+    risk: execute_process
+    approval: policy
+docs:
+- docs/vac-init/VAC_INIT_BATCH_06_12_IMPLEMENTATION.md
+- docs/validation/VAC_INIT_POLICY_EVALUATOR_GATE.md

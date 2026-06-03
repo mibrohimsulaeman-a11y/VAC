@@ -1,0 +1,492 @@
+[workspace]
+members = [
+    "crates/providers/aws-auth",
+    "crates/providers/analytics",
+    "crates/providers/agent-identity",
+    "crates/foundation/ansi-escape",
+    "crates/foundation/async-utils",
+    "crates/runtime/shell/apply-patch",
+    "crates/foundation/arg0",
+    "crates/providers/feedback",
+    "crates/foundation/features",
+    "crates/foundation/install-context",
+    "crates/capabilities/code-mode",
+    "crates/capabilities/tools-domain",
+    "crates/capabilities/chat",
+    "crates/capabilities/release",
+    "crates/capabilities/build",
+    "crates/capabilities/sessions",
+    "crates/capabilities/docs",
+    "crates/capabilities/ownership",
+    "crates/capabilities/identity",
+    "crates/surfaces/cli",
+    "crates/capabilities/collaboration-mode-templates",
+    "crates/integrations/connectors",
+    "crates/control-plane/control-plane",
+    "crates/foundation/config",
+    "crates/providers/device-key",
+    "crates/runtime/shell/shell-command",
+    "crates/runtime/shell/shell-escalation",
+    "crates/integrations/skills",
+    "core",
+    "crates/capabilities/core-plugins",
+    "crates/capabilities/core-skills",
+    "crates/runtime/shell/hooks",
+    "crates/providers/secrets",
+    "crates/runtime/exec/exec",
+    "crates/foundation/file-system",
+    "crates/runtime/exec/exec-server",
+    "crates/runtime/exec/execpolicy",
+    "crates/capabilities/external-agent-migration",
+    "crates/capabilities/external-agent-sessions",
+    "crates/providers/keyring-store",
+    "crates/capabilities/file-search",
+    "crates/runtime/sandbox/linux-sandbox",
+    "crates/capabilities/local-runtime-owner",
+    "crates/providers/lmstudio",
+    "crates/providers/login",
+    "crates/integrations/vac-mcp",
+    "crates/capabilities/memories/read",
+    "crates/capabilities/memories/write",
+    "crates/providers/model-provider-info",
+    "crates/providers/models-manager",
+    "crates/integrations/network-proxy",
+    "crates/providers/ollama",
+    "crates/runtime/sandbox/process-hardening",
+    "crates/foundation/protocol",
+    "crates/foundation/rollout",
+    "crates/foundation/rollout-trace",
+    "crates/foundation/runtime-protocol",
+    "crates/integrations/rmcp-client",
+    "crates/capabilities/response-debug-context",
+    "crates/runtime/sandbox/sandboxing",
+    "crates/integrations/otel",
+    "crates/surfaces/tui",
+    "crates/capabilities/tools",
+    "crates/foundation/utils/absolute-path",
+    "crates/foundation/utils/cargo-bin",
+    "crates/foundation/git-utils",
+    "crates/foundation/utils/cache",
+    "crates/foundation/utils/image",
+    "crates/foundation/utils/json-to-toml",
+    "crates/foundation/utils/home-dir",
+    "crates/foundation/utils/pty",
+    "crates/foundation/utils/readiness",
+    "crates/foundation/utils/rustls-provider",
+    "crates/foundation/utils/string",
+    "crates/foundation/utils/cli",
+    "crates/foundation/utils/elapsed",
+    "crates/foundation/utils/sandbox-summary",
+    "crates/foundation/utils/sleep-inhibitor",
+    "crates/foundation/utils/approval-presets",
+    "crates/foundation/utils/oss",
+    "crates/foundation/utils/output-truncation",
+    "crates/foundation/utils/path-utils",
+    "crates/foundation/utils/plugins",
+    "crates/foundation/utils/fuzzy-match",
+    "crates/foundation/utils/stream-parser",
+    "crates/foundation/utils/template",
+    "crates/providers/vac-client",
+    "crates/providers/vac-api",
+    "crates/providers/provider-http",
+    "crates/foundation/state",
+    "crates/foundation/terminal-detection",
+    "crates/foundation/test-binary-support",
+    "crates/foundation/thread-store",
+    "crates/foundation/uds",
+    "crates/foundation/vac-experimental-api-macros",
+    "crates/integrations/plugin",
+    "crates/providers/model-provider",
+    "core/tests/common",
+    "crates/runtime/sandbox/windows-sandbox-rs",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.0.0"
+# Track the edition for all workspace crates in one place. Individual
+# crates can still override this value, but keeping it here means new
+# crates created with `cargo new -w ...` automatically inherit the 2024
+# edition.
+edition = "2024"
+license = "Apache-2.0"
+
+[workspace.dependencies]
+# Internal
+vac-analytics = { path = "crates/providers/analytics" }
+vac-agent-identity = { path = "crates/providers/agent-identity" }
+vac-ansi-escape = { path = "crates/foundation/ansi-escape" }
+vac-api = { path = "crates/providers/vac-api" }
+vac-aws-auth = { path = "crates/providers/aws-auth" }
+vac-apply-patch = { path = "crates/runtime/shell/apply-patch" }
+vac-arg0 = { path = "crates/foundation/arg0" }
+vac-async-utils = { path = "crates/foundation/async-utils" }
+vac-cli = { package = "vac-surface-cli", path = "crates/surfaces/cli" }
+vac-client = { path = "crates/providers/vac-client" }
+vac-collaboration-mode-templates = { path = "crates/capabilities/collaboration-mode-templates" }
+vac-code-mode = { path = "crates/capabilities/code-mode" }
+vac-capability-tools = { path = "crates/capabilities/tools-domain" }
+vac-capability-chat = { path = "crates/capabilities/chat" }
+vac-capability-release = { path = "crates/capabilities/release" }
+vac-capability-build = { path = "crates/capabilities/build" }
+vac-capability-sessions = { path = "crates/capabilities/sessions" }
+vac-capability-docs = { path = "crates/capabilities/docs" }
+vac-capability-ownership = { path = "crates/capabilities/ownership" }
+vac-capability-identity = { path = "crates/capabilities/identity" }
+vac-config = { path = "crates/foundation/config" }
+vac-connectors = { path = "crates/integrations/connectors" }
+vac-control-plane = { path = "crates/control-plane/control-plane" }
+vac-core = { path = "core" }
+vac-core-plugins = { path = "crates/capabilities/core-plugins" }
+vac-core-skills = { path = "crates/capabilities/core-skills" }
+vac-device-key = { path = "crates/providers/device-key" }
+vac-exec = { path = "crates/runtime/exec/exec" }
+vac-file-system = { path = "crates/foundation/file-system" }
+vac-exec-server = { path = "crates/runtime/exec/exec-server" }
+vac-execpolicy = { path = "crates/runtime/exec/execpolicy" }
+vac-external-agent-migration = { path = "crates/capabilities/external-agent-migration" }
+vac-external-agent-sessions = { path = "crates/capabilities/external-agent-sessions" }
+vac-experimental-api-macros = { path = "crates/foundation/vac-experimental-api-macros" }
+vac-features = { path = "crates/foundation/features" }
+vac-feedback = { path = "crates/providers/feedback" }
+vac-install-context = { path = "crates/foundation/install-context" }
+vac-file-search = { path = "crates/capabilities/file-search" }
+vac-git-utils = { path = "crates/foundation/git-utils" }
+vac-hooks = { path = "crates/runtime/shell/hooks" }
+vac-keyring-store = { path = "crates/providers/keyring-store" }
+vac-linux-sandbox = { path = "crates/runtime/sandbox/linux-sandbox" }
+vac-local-runtime-owner = { path = "crates/capabilities/local-runtime-owner" }
+vac-lmstudio = { path = "crates/providers/lmstudio" }
+vac-login = { path = "crates/providers/login" }
+vac-memories-read = { path = "crates/capabilities/memories/read" }
+vac-memories-write = { path = "crates/capabilities/memories/write" }
+vac-mcp = { path = "crates/integrations/vac-mcp" }
+vac-model-provider-info = { path = "crates/providers/model-provider-info" }
+vac-models-manager = { path = "crates/providers/models-manager" }
+vac-network-proxy = { path = "crates/integrations/network-proxy" }
+vac-ollama = { path = "crates/providers/ollama" }
+vac-otel = { path = "crates/integrations/otel" }
+vac-plugin = { path = "crates/integrations/plugin" }
+vac-model-provider = { path = "crates/providers/model-provider" }
+vac-process-hardening = { path = "crates/runtime/sandbox/process-hardening" }
+vac-protocol = { path = "crates/foundation/protocol" }
+vac-provider-http = { path = "crates/providers/provider-http" }
+vac-response-debug-context = { path = "crates/capabilities/response-debug-context" }
+vac-rmcp-client = { path = "crates/integrations/rmcp-client" }
+vac-rollout = { path = "crates/foundation/rollout" }
+vac-rollout-trace = { path = "crates/foundation/rollout-trace" }
+vac-runtime-protocol = { path = "crates/foundation/runtime-protocol" }
+vac-sandboxing = { path = "crates/runtime/sandbox/sandboxing" }
+vac-secrets = { path = "crates/providers/secrets" }
+vac-shell-command = { path = "crates/runtime/shell/shell-command" }
+vac-shell-escalation = { path = "crates/runtime/shell/shell-escalation" }
+vac-skills = { path = "crates/integrations/skills" }
+vac-state = { path = "crates/foundation/state" }
+vac-terminal-detection = { path = "crates/foundation/terminal-detection" }
+vac-test-binary-support = { path = "crates/foundation/test-binary-support" }
+vac-thread-store = { path = "crates/foundation/thread-store" }
+vac-tools = { path = "crates/capabilities/tools" }
+vac-tui = { package = "vac-surface-tui", path = "crates/surfaces/tui" }
+vac-uds = { path = "crates/foundation/uds" }
+vac-utils-absolute-path = { path = "crates/foundation/utils/absolute-path" }
+vac-utils-approval-presets = { path = "crates/foundation/utils/approval-presets" }
+vac-utils-cache = { path = "crates/foundation/utils/cache" }
+vac-utils-cargo-bin = { path = "crates/foundation/utils/cargo-bin" }
+vac-utils-cli = { path = "crates/foundation/utils/cli" }
+vac-utils-elapsed = { path = "crates/foundation/utils/elapsed" }
+vac-utils-fuzzy-match = { path = "crates/foundation/utils/fuzzy-match" }
+vac-utils-home-dir = { path = "crates/foundation/utils/home-dir" }
+vac-utils-image = { path = "crates/foundation/utils/image" }
+vac-utils-json-to-toml = { path = "crates/foundation/utils/json-to-toml" }
+vac-utils-oss = { path = "crates/foundation/utils/oss" }
+vac-utils-output-truncation = { path = "crates/foundation/utils/output-truncation" }
+vac-utils-path = { path = "crates/foundation/utils/path-utils" }
+vac-utils-plugins = { path = "crates/foundation/utils/plugins" }
+vac-utils-pty = { path = "crates/foundation/utils/pty" }
+vac-utils-readiness = { path = "crates/foundation/utils/readiness" }
+vac-utils-rustls-provider = { path = "crates/foundation/utils/rustls-provider" }
+vac-utils-sandbox-summary = { path = "crates/foundation/utils/sandbox-summary" }
+vac-utils-sleep-inhibitor = { path = "crates/foundation/utils/sleep-inhibitor" }
+vac-utils-stream-parser = { path = "crates/foundation/utils/stream-parser" }
+vac-utils-string = { path = "crates/foundation/utils/string" }
+vac-utils-template = { path = "crates/foundation/utils/template" }
+vac-windows-sandbox = { path = "crates/runtime/sandbox/windows-sandbox-rs" }
+core_test_support = { path = "core/tests/common" }
+
+# External
+age = "0.11.1"
+allocative = "0.3.3"
+ansi-to-tui = "7.0.0"
+anyhow = "1"
+arboard = { version = "3", features = ["wayland-data-control"] }
+arc-swap = "1.9.0"
+assert_cmd = "2"
+assert_matches = "1.5.0"
+async-channel = "2.3.1"
+async-io = "2.6.0"
+async-stream = "0.3.6"
+async-trait = "0.1.89"
+aws-config = "1"
+aws-credential-types = "1"
+aws-sigv4 = "1"
+aws-types = "1"
+axum = { version = "0.8", default-features = false }
+base64 = "0.22.1"
+bm25 = "2.3.2"
+bytes = "1.10.1"
+chardetng = "0.1.17"
+chrono = "0.4.43"
+clap = "4"
+clap_complete = "4"
+color-eyre = "0.6.3"
+constant_time_eq = "0.3.1"
+crossbeam-channel = "0.5.15"
+crypto_box = { version = "0.9.1", features = ["seal"] }
+crossterm = "0.28.1"
+csv = "1.3.1"
+ctor = "0.6.3"
+deno_core_icudata = "0.77.0"
+derive_more = "2"
+diffy = "0.4.2"
+dirs = "6"
+dns-lookup = "3.0.1"
+dotenvy = "0.15.7"
+dunce = "1.0.4"
+ed25519-dalek = { version = "2.2.0", features = ["pkcs8"] }
+encoding_rs = "0.8.35"
+env-flags = "0.1.1"
+env_logger = "0.11.9"
+eventsource-stream = "0.2.3"
+flate2 = "1.1.8"
+futures = { version = "0.3", default-features = false }
+gethostname = "1.1.0"
+gix = { version = "0.81.0", default-features = false, features = ["sha1"] }
+glob = "0.3"
+globset = "0.4"
+hmac = "0.12.1"
+http = "1.3.1"
+iana-time-zone = "0.1.64"
+icu_decimal = "2.1"
+icu_locale_core = "2.1"
+icu_provider = { version = "2.1", features = ["sync"] }
+ignore = "0.4.23"
+image = { version = "^0.25.9", default-features = false }
+include_dir = "0.7.4"
+indexmap = "2.12.0"
+insta = "1.46.3"
+inventory = "0.3.19"
+itertools = "0.14.0"
+jsonwebtoken = "9.3.1"
+keyring = { version = "3.6", default-features = false }
+landlock = "0.4.4"
+lazy_static = "1"
+libc = "0.2.182"
+log = "0.4"
+lru = "0.16.3"
+maplit = "1.0.2"
+mime_guess = "2.0.5"
+multimap = "0.10.0"
+notify = "8.2.0"
+nucleo = "0.5.0"
+once_cell = "1.20.2"
+openssl-sys = "*"
+opentelemetry = "0.31.0"
+opentelemetry-appender-tracing = "0.31.0"
+opentelemetry-otlp = "0.31.0"
+opentelemetry-semantic-conventions = "0.31.0"
+opentelemetry_sdk = "0.31.0"
+os_info = "3.12.0"
+owo-colors = "4.3.0"
+path-absolutize = "3.1.1"
+pathdiff = "0.2"
+p256 = "0.13.2"
+portable-pty = "0.9.0"
+predicates = "3"
+pretty_assertions = "1.4.1"
+pulldown-cmark = "0.10"
+quick-xml = "0.38.4"
+rand = "0.9"
+ratatui = "0.29.0"
+ratatui-macros = "0.6.0"
+rcgen = { version = "0.14.7", default-features = false, features = [
+    "aws_lc_rs",
+    "pem",
+] }
+regex = "1.12.3"
+regex-lite = "0.1.8"
+reqwest = { version = "0.12", features = ["cookies"] }
+rmcp = { version = "0.15.0", default-features = false }
+runfiles = "0.1.0"
+rustls = { version = "0.23", default-features = false, features = [
+    "ring",
+    "std",
+] }
+rustls-native-certs = "0.8.3"
+rustls-pki-types = "1.14.0"
+schemars = "0.8.22"
+seccompiler = "0.5.0"
+semver = "1.0"
+sentry = "0.46.0"
+serde = "1"
+serde_json = "1"
+serde_path_to_error = "0.1.20"
+serde_with = "3.17"
+serde_yaml = "0.9"
+serial_test = "3.2.0"
+sha1 = "0.10.6"
+sha2 = "0.10"
+shlex = "1.3.0"
+similar = "2.7.0"
+socket2 = "0.6.1"
+sqlx = { version = "0.8.6", default-features = false, features = [
+    "chrono",
+    "json",
+    "macros",
+    "migrate",
+    "runtime-tokio",
+    "sqlite",
+    "time",
+    "uuid",
+] }
+starlark = "0.13.0"
+strum = "0.27.2"
+strum_macros = "0.28.0"
+supports-color = "3.0.2"
+syn = { version = "2", features = ["full", "visit", "extra-traits"] }
+syntect = "5"
+sys-locale = "0.3.2"
+tar = { version = "=0.4.45", default-features = false }
+tempfile = "3.23.0"
+test-log = "0.2.19"
+textwrap = "0.16.2"
+thiserror = "2.0.17"
+time = "0.3.47"
+tiny_http = "0.12"
+tokio = "1"
+tokio-stream = "0.1.18"
+tokio-test = "0.4"
+tokio-tungstenite = { version = "0.28.0", features = [
+    "rustls-tls-native-roots",
+] }
+tokio-util = "0.7.18"
+toml = "0.9.5"
+toml_edit = "0.24.0"
+tracing = "0.1.44"
+tracing-appender = "0.2.3"
+tracing-opentelemetry = "0.32.0"
+tracing-subscriber = "0.3.22"
+tracing-test = "0.2.5"
+tonic = { version = "0.14.3", default-features = false, features = ["channel", "codegen"] }
+tonic-prost = "0.14.3"
+tree-sitter = "0.25.10"
+tree-sitter-bash = "0.25"
+ts-rs = "11"
+tungstenite = "0.28.0"
+uds_windows = "1.1.0"
+unicode-segmentation = "1.12.0"
+unicode-width = "0.2"
+url = "2"
+urlencoding = "2.1"
+uuid = "1"
+v8 = "=146.4.0"
+vt100 = "0.16.2"
+walkdir = "2.5.0"
+webbrowser = "1.0"
+which = "8"
+whoami = "1.6.1"
+wildmatch = "2.6.1"
+winapi-util = "0.1.11"
+zip = "2.4.2"
+zstd = "0.13"
+
+wiremock = "0.6"
+zeroize = "1.8.2"
+
+[workspace.lints]
+rust = {}
+
+[workspace.lints.clippy]
+await_holding_invalid_type = "deny"
+await_holding_lock = "deny"
+expect_used = "deny"
+identity_op = "deny"
+manual_clamp = "deny"
+manual_filter = "deny"
+manual_find = "deny"
+manual_flatten = "deny"
+manual_map = "deny"
+manual_memcpy = "deny"
+manual_non_exhaustive = "deny"
+manual_ok_or = "deny"
+manual_range_contains = "deny"
+manual_retain = "deny"
+manual_strip = "deny"
+manual_try_fold = "deny"
+manual_unwrap_or = "deny"
+needless_borrow = "deny"
+needless_borrowed_reference = "deny"
+needless_collect = "deny"
+needless_late_init = "deny"
+needless_option_as_deref = "deny"
+needless_question_mark = "deny"
+needless_update = "deny"
+redundant_clone = "deny"
+redundant_closure = "deny"
+redundant_closure_for_method_calls = "deny"
+redundant_static_lifetimes = "deny"
+trivially_copy_pass_by_ref = "deny"
+uninlined_format_args = "deny"
+unnecessary_filter_map = "deny"
+unnecessary_lazy_evaluations = "deny"
+unnecessary_sort_by = "deny"
+unnecessary_to_owned = "deny"
+unwrap_used = "deny"
+
+# cargo-shear cannot see the platform-specific openssl-sys usage, so we
+# silence the false positive here instead of deleting a real dependency.
+[workspace.metadata.cargo-shear]
+ignored = [
+    "icu_provider",
+    "openssl-sys",
+    "vac-utils-readiness",
+    "vac-utils-template",
+]
+
+[profile.dev]
+# Keep line tables/backtraces while avoiding expensive full variable debug info
+# across local dev builds.
+debug = 1
+# Disable per-workspace incremental cache: sccache already accelerates rebuilds
+# globally, and target/debug/incremental/ grows unbounded across edits (one fresh
+# directory per fingerprint hash, no automatic cleanup).
+incremental = false
+
+[profile.dev-small]
+inherits = "dev"
+opt-level = 0
+debug = 0
+strip = true
+incremental = false
+
+[profile.release]
+lto = "fat"
+split-debuginfo = "off"
+# Because we bundle some of these executables with the TypeScript CLI, we
+# remove everything to make the binary as small as possible.
+strip = "symbols"
+
+# See https://github.com/vastar/vac/issues/1411 for details.
+codegen-units = 1
+
+[profile.ci-test]
+debug = 1         # Reduce debug symbol size
+inherits = "test"
+opt-level = 0
+
+[patch.crates-io]
+# Uncomment to debug local changes.
+# ratatui = { path = "../../ratatui" }
+
+# Uncomment to debug local changes.
+# rmcp = { path = "../../rust-sdk/crates/rmcp" }
+

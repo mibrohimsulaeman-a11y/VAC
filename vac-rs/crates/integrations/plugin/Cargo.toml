@@ -1,0 +1,19 @@
+[package]
+edition.workspace = true
+license.workspace = true
+name = "vac-plugin"
+version.workspace = true
+
+[lib]
+doctest = false
+name = "vac_plugin"
+path = "src/lib.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+vac-config = { workspace = true }
+vac-utils-absolute-path = { workspace = true }
+vac-utils-plugins = { workspace = true }
+thiserror = { workspace = true }

@@ -1,0 +1,25 @@
+schema_version: 1
+kind: evidence
+id: evidence.2026-06-01-o5o6-current-auditfix
+created_at: '2026-06-01T00:00:00Z'
+plan_id: plan.o5o6.current-auditfix
+status: SV-Done_TV-Pending
+summary: >
+  Closed the latest source/static audit remainder for targeted giant-file split,
+  production bounded channel/panic surface, and legacy ChatGPT cloud fail-closed
+  gates. Cargo-backed validation remains pending because cargo/rustc are not
+  available in the sandbox.
+static_gates:
+  - scripts/check-vac-o5o6-current-auditfix-static.sh: PASS
+  - scripts/check-vac-o5o6-audit-remainder-static.sh: PASS
+  - scripts/check-vac-o5o6-bounded-hotpath-static.sh: PASS
+  - scripts/check-vac-o5-2-semantic-split-hash.sh: PASS
+  - scripts/check-vac-o5-2-godfile-staging-all.sh: PASS
+  - scripts/check-vac-o5o6-cloud-coupling-isolation-static.sh: PASS
+  - scripts/check-vac-o5o6-architecture-extraction-static.sh: PASS
+tv_pending:
+  reason: cargo_or_rustc_missing
+  commands:
+    - cargo check --manifest-path vac-rs/Cargo.toml -p vac-surface-tui
+    - cargo check --manifest-path vac-rs/Cargo.toml -p vac-core
+    - cargo check --manifest-path vac-rs/Cargo.toml -p vac-runtime-protocol

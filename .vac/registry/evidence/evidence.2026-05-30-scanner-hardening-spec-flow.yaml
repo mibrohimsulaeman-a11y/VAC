@@ -1,0 +1,100 @@
+schema_version: 1
+kind: evidence
+id: evidence.2026-05-30-scanner-hardening-spec-flow
+timestamp: '2026-05-30T00:00:00Z'
+chain:
+  previous: evidence.2026-05-30-vac-init-command
+  previous_hash: null
+  self_hash: 15c86734dc4141685a90922fb4b4eaffa4fe4e2287392c942af6d5ae9cc30b1e
+changeset:
+  plan_id: plan.scanner-hardening.spec-flow
+  capability: vac.init.scanner-hardening-spec-flow
+  files_modified:
+  - path: vac-rs/control-plane/src/control_plane/vac_init_live_scanner_policy.rs
+    operation: modify
+    diff_hash: 2015745de0184cc1299c6e2cde86ca3c2199e1dc1d757bf07de0b0eb3ff60edf
+    lines_added: 1063
+    lines_removed: 0
+  - path: vac-rs/cli/src/init_cli.rs
+    operation: modify
+    diff_hash: 8be401088713268defdf711ae8143e5c8862a823932b9f8f6d69a1f6f3470733
+    lines_added: 220
+    lines_removed: 0
+  - path: vac-rs/control-plane/src/control_plane/mod.rs
+    operation: modify
+    diff_hash: 9d2280339bef92bcba3fd608ea0b2b1d0182bc52b8691068ea21b3a532d65316
+    lines_added: 315
+    lines_removed: 0
+  - path: .vac/registry/plans/plan.scanner-hardening.spec-flow.yaml
+    operation: create
+    diff_hash: 6db00c89ed4c4790c6346349215faddd7bdf158d7d31f155c78e51731a5b0eeb
+    lines_added: 100
+    lines_removed: 0
+  - path: .vac/capabilities/scanner-hardening-spec-flow.yaml
+    operation: create
+    diff_hash: cc4c58f41932213c7c57d9bdf2a0c86f76ef9c1ccca28cd688a5430711bbd085
+    lines_added: 68
+    lines_removed: 0
+  - path: .vac/workflows/maintenance.scanner-hardening-spec-flow.yaml
+    operation: create
+    diff_hash: 70648afa150a8a10193db1ca038d51c8fac98766e05ce0addf9f511d06b21e78
+    lines_added: 69
+    lines_removed: 0
+  - path: docs/vac-init/VAC_INIT_SCANNER_HARDENING_SPEC_FLOW.md
+    operation: create
+    diff_hash: aa47fb272624dc06f8c50a7f37d135d6124e96875fc9fa6eb0cdf2432ce8a4c2
+    lines_added: 324
+    lines_removed: 0
+  - path: scripts/check-vac-init-scanner-hardening-spec-flow.sh
+    operation: create
+    diff_hash: 6c92a19d6c468a977d8ded96f33a6e994f3bc26f8aeee61e1364f16955609165
+    lines_added: 113
+    lines_removed: 0
+  - path: .vac/.init/risk_findings.yaml
+    operation: modify
+    diff_hash: 6f3f409869d78cdc97df8b409753361e3bb07b19be1358a0b8e3899159391b45
+    lines_added: 13
+    lines_removed: 0
+  - path: .vac/.init/risk_findings/index.yaml
+    operation: modify
+    diff_hash: 5063d389b1b31bd72f800370acfc177a46acacbfbdfcd9121d731dac8a553055
+    lines_added: 17
+    lines_removed: 0
+  - path: .vac/.init/risk_findings/full.yaml
+    operation: modify
+    diff_hash: 12b977705524f62e1cea5bf2e8154baee87d5a937e1337413058761a65c26e60
+    lines_added: 41269
+    lines_removed: 0
+  - path: .vac/.init/policy_inference_report.yaml
+    operation: modify
+    diff_hash: 73b1d51802441a7124eae14510e7fb20e646e272574332f2449b06473fc15463
+    lines_added: 71
+    lines_removed: 0
+validation:
+  commands_executed: []
+  gates_passed:
+  - scanner-hardening-spec-flow
+  - registry-strictness
+  - workflow-spec-compliance
+  - no-hardcoded-readiness
+  - artifact-hygiene
+  gates_failed: []
+approval:
+  approved_by: operator
+  approved_at: '2026-05-30T00:00:00Z'
+  content_hash: 6db00c89ed4c4790c6346349215faddd7bdf158d7d31f155c78e51731a5b0eeb
+  signature:
+    algorithm: none
+    value: null
+attribution:
+  agent_id: chatgpt-gpt-5.5-thinking-as-vac-model
+  model: GPT-5.5 Thinking
+  memory_snapshot:
+    working_facts: 3
+    team_rules_consulted:
+    - vac.fail-closed
+    - vac.scanner-hardening
+    semantic_refs:
+    - VAC_INIT_SCANNER_HARDENING_SPEC_FLOW.md
+    - VAC_Init_Control_Plane_Spec_v1_alpha_refined.docx
+  rationale_ref: .vac/registry/trajectory/scanner-hardening-spec-flow.yaml

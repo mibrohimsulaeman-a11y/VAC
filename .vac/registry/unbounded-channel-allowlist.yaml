@@ -1,0 +1,14 @@
+schema_version: 1
+kind: unbounded_channel_allowlist
+id: tui-unbounded-channel.o5o6.zero-residual
+updated_at: 2026-06-02T00:00:00Z
+status: statically_governed
+policy:
+  high_volume_unbounded: forbidden
+  low_volume_unbounded: allowlist_required
+acceptance:
+  tui_high_volume_unbounded_channels: 0
+  unbounded_allowlist_missing_reason: 0
+  lag_metrics_available: true
+  drop_metrics_available: true
+allowlist: []

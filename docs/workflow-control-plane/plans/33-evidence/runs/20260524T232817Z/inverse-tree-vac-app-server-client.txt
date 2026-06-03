@@ -1,0 +1,11 @@
+# inverse tree vac app server client
+cwd: /home/emp/Documents/VAC/vastar-agentic-cli/vac-rs
+command: cargo +1.93.0 tree -p vac-surface-cli -i vac-app-server-client --edges normal,build
+
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+vac-app-server-client v0.0.0 (/home/emp/Documents/VAC/vastar-agentic-cli/vac-rs/app-server-client)
+└── vac-tui v0.0.0 (/home/emp/Documents/VAC/vastar-agentic-cli/vac-rs/tui)
+    └── vac-cli v0.0.0 (/home/emp/Documents/VAC/vastar-agentic-cli/vac-rs/cli)
+
+exit_status: 0

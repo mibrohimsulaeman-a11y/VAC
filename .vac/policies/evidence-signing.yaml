@@ -1,0 +1,12 @@
+schema_version: 1
+kind: policy
+id: policy.evidence-signing
+owner: vac.control-plane.evidence
+status: ready
+evidence:
+  signing:
+    required: false
+    algorithm: ed25519
+    key_source: VAC_EVIDENCE_ED25519_SIGNING_KEY_BASE64
+    required_behavior: fail_closed_when_required_key_missing
+    optional_behavior: unsigned_with_governance_warning

@@ -1,0 +1,42 @@
+schema_version: 1
+kind: evidence
+id: evidence.2026-05-30-o5o6-epic-a-app-server-retirement
+title: O5/O6 Epic A app-server retirement evidence
+status: implemented_not_evaluated
+timestamp: '2026-05-30T14:30:00Z'
+claim: >
+  Default local TUI runtime no longer exposes a legacy app-server compatibility
+  feature or workspace crates. Provider cloud/API access is intentionally retained.
+artifacts:
+  report: docs/monolith-quality/O5O6_EPIC_A_APP_SERVER_RETIREMENT_REPORT.md
+  plan: .vac/registry/plans/plan.o5o6.epic-a-app-server-retirement.yaml
+  state: .vac/registry/o5-o6-monolith-quality-state.yaml
+  validation_log: docs/monolith-quality/logs/epic-a-app-server-retirement-validation.log
+static_validation:
+  - command: bash scripts/check-no-app-server-local-path-contract.sh
+    result: PASS
+  - command: bash scripts/check-vac-epic-a-app-server-retirement.sh
+    result: PASS
+  - command: bash scripts/check-vac-o5-1c-app-server-protocol-consumer-migration.sh
+    result: PASS
+  - command: bash scripts/check-vac-o5-o6-monolith-quality-slice.sh
+    result: PASS
+  - command: bash scripts/check-vac-o5-2-godfile-staging-all.sh
+    result: PASS
+  - command: bash scripts/check-vac-o5-o6-completion-state.sh
+    result: PASS
+  - command: bash scripts/check-vac-o6-2-safety-coverage.sh
+    result: PASS
+  - command: bash scripts/check-vac-o6-quality-triage.sh
+    result: PASS
+  - command: bash scripts/check-legal-release-blockers.sh
+    result: PASS
+  - command: bash scripts/check-tui-source-artifact-hygiene.sh
+    result: PASS
+  - command: VAC_UPLOAD_SHA256SUMS=/mnt/data/SHA256SUMS.txt VAC_UPLOAD_DIR=/mnt/data bash scripts/check-vac-o5o6-upload-sha256.sh
+    result: PASS
+tv_validation:
+  cargo_build: TV-Pending
+  cargo_clippy: TV-Pending
+  cargo_test: TV-Pending
+  cargo_tree: TV-Pending

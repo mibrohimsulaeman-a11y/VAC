@@ -1,0 +1,39 @@
+schema_version: 1
+kind: workflow
+id: maintenance.vac-init-semantic-plan
+title: VAC-Init Semantic Plan Validator readiness
+status: ready
+inputs: {}
+steps:
+- id: contract
+  uses: capability.vac.init.semantic-plan.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+ui:
+  surface: /workflow
+  inspect_surface: /capabilities
+  progress_panel: true
+  activity_log: true
+  approval_surface: false
+  evidence_surface: true
+policy:
+  default_risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for: []
+validation:
+  gates:
+  - contract
+  - vac_init_semantic_plan_contract
+  commands:
+  - id: maintenance.vac-init-semantic-plan.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-semantic-plan-contract.sh
+    risk: execute_process
+    approval: policy

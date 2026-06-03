@@ -1,0 +1,41 @@
+# VAC operator TUI ANSI snapshot
+scenario: agent working
+viewport: 120x36
+style_roles: plain, chrome, muted, accent, success, warning, danger, user, agent, status
+---
+[38;5;245m● ● ●  vac · interactive — agent working                                                                                [0m
+[38;5;245m────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;245m[chat] · runtime · review · workbench · mcp                                                                     tab 1/5 [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;111myou  14:22:06                                                                                                           [0m
+[38;5;111m  refactor vac_tui_runtime/handlers/input.rs — extract popup routing                                                    [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;250mvac  claude-sonnet-4.5 · turn 3 · 14:22:08 · metadata context 68K / 200K                                                [0m
+[38;5;117m  The controller file is ~83k bytes — monolithic. I'll read it first,                                                   [0m
+[38;5;117m  then extract popup routing into handlers/popup.rs per Wave 1.                                                         [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;45m— tool timeline (last 5; +1 earlier)                                                                                    [0m
+[38;5;42m● file_read    handlers/input.rs                passed 1.2s · 82,969 B                                                  [0m
+[38;5;42m● grep         "fn handle_popup" in handlers/   passed 0.3s · 8 matches                                                 [0m
+[38;5;117m● file_write   handlers/popup.rs                streaming streaming… ███████░░                                          [0m
+[38;5;240m○ file_edit    handlers/input.rs (-420 planned) queued queued                                                           [0m
+[38;5;240m○ cargo check  -p vac_tui_runtime               queued queued                                                           [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;250m⌁ thinking · preserving precedence with backend-event skip semantics ▌                                                  [0m
+[38;5;45mcontext ██████░░░░░░░░░░░░     68K / 200K   · esc to interrupt                                                          [0m
+[38;5;117mcomposer: agent working — next message queues (esc to interrupt)                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;245m┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐[0m
+[38;5;245m│ ▸  / commands   @ files   shift+tab plan   ctrl+j newline                                                            │[0m
+[38;5;245m└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘[0m
+[38;5;117mCONVERSATION | model claude-sonnet-4.5 | 68,240 tok | manual | valid 92% lsp E0 W3 | profile default · rulebook vil.core[0m

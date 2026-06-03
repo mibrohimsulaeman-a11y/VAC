@@ -1,0 +1,191 @@
+schema_version: 1
+kind: evidence
+id: evidence.2026-05-30-o5-o6-monolith-quality-slice1
+timestamp: '2026-05-30T00:00:00Z'
+chain:
+  previous: evidence.2026-05-30-scanner-hardening-s5-s8-o1-o4
+  previous_hash: null
+  self_hash: 7ffeb37c0e529decfcab9ea09260f4fa9a13335e064de398de168d243ec3d475
+changeset:
+  plan_id: plan.o5-o6.monolith-quality.slice1
+  capability: vac.o5-o6.monolith-quality
+  files_modified:
+  - path: scripts/check-vac-init-scanner-hardening-spec-flow.sh
+    operation: modify
+    diff_hash: e126c1407227496b44faea0337d2196746e33ec7b5ad0d7a9986171d7720d3a1
+    lines_added: 132
+    lines_removed: 0
+  - path: scripts/check-vac-o5-o6-monolith-quality-slice.sh
+    operation: modify
+    diff_hash: 3f6742b7278cf239ae357a4b569f07a106b7ba81d922637bf9c008826538c814
+    lines_added: 41
+    lines_removed: 0
+  - path: docs/monolith-quality/VAC_O5_O6_MONOLITH_QUALITY_IMPL_PLAN.md
+    operation: modify
+    diff_hash: 46343d7c1881bd63c88e4a3bfc533364077fcb730e870884576ed1605a3e405e
+    lines_added: 275
+    lines_removed: 0
+  - path: docs/monolith-quality/O5_1_PROTOCOL_DEDUP_SLICE.md
+    operation: modify
+    diff_hash: a1d0bd6085c379e5455eb1f02a62b024f3e39f6079aa36cae499286c69cafdc5
+    lines_added: 26
+    lines_removed: 0
+  - path: .vac/registry/o5-o6-monolith-quality-state.yaml
+    operation: modify
+    diff_hash: c322c6ef56d30584a2385a0a8528471039792a58016b785520c360aca82eb5d7
+    lines_added: 17
+    lines_removed: 0
+  - path: .vac/capabilities/o5-o6-monolith-quality.yaml
+    operation: modify
+    diff_hash: 1ff0c43555e29ada6c468bf0dc39dea270a4bc0133edef30b04e15b88e1bc307
+    lines_added: 62
+    lines_removed: 0
+  - path: .vac/workflows/maintenance.o5-o6-monolith-quality.yaml
+    operation: modify
+    diff_hash: 829072f973cabf8723944879146baa30293d547186bffe0fcd9979106a72908f
+    lines_added: 40
+    lines_removed: 0
+  - path: vac-rs/app-server-protocol/Cargo.toml
+    operation: modify
+    diff_hash: 903714769e14092a61c552ad64f182600ca89ecc79fb63b68c02a8412af12ef2
+    lines_added: 44
+    lines_removed: 0
+  - path: vac-rs/app-server-protocol/src/lib.rs
+    operation: modify
+    diff_hash: b1ae0f8d36590636be729a6432a38ecee8b8a69ca5ba6ee830f1fd6e0e24c72a
+    lines_added: 8
+    lines_removed: 0
+  - path: vac-rs/app-server-protocol/src/bin/export.rs
+    operation: modify
+    diff_hash: 52890ad0ecaad89a93776c5a37550ec5c36892f8cc1e2bb1997054588e320e5b
+    lines_added: 32
+    lines_removed: 0
+  - path: vac-rs/app-server-protocol/src/bin/write_schema_fixtures.rs
+    operation: modify
+    diff_hash: 47c2ec34b9bff686089013afd67af11b6a60e04fd1757a08a03b36932867e31a
+    lines_added: 42
+    lines_removed: 0
+  - path: docs/PROJECT_STATE_CURRENT.md
+    operation: modify
+    diff_hash: f9cea55bb3ab6f70faad0678893fcbef2cb445850f02d841e8a50120adaa84d4
+    lines_added: 222
+    lines_removed: 0
+  - path: docs/DOCS_AUDIT.md
+    operation: modify
+    diff_hash: 1fe7447f4b24ccd6ee4815a23e9469bcb13a213d65ae47524114078cc92594ab
+    lines_added: 102
+    lines_removed: 0
+  - path: docs/DOCS_INDEX_CURRENT.md
+    operation: modify
+    diff_hash: c16585a0d560774df6bb668c01954d02a6d49ee75cf7d5bd8b671b8364784960
+    lines_added: 430
+    lines_removed: 0
+  - path: .vac/registry/docs-state.yaml
+    operation: modify
+    diff_hash: d13b56037bd6eea110d0e5eb30019370748b4b8b61fe50c4a7dbb3c75fc7d6d8
+    lines_added: 82
+    lines_removed: 0
+  - path: .vac/registry/plans/plan.o5-o6.monolith-quality.slice1.yaml
+    operation: modify
+    diff_hash: 1512f595700540019c3871a3a3c6ee73a01686f458ded73a4fe40526b4ee97dc
+    lines_added: 83
+    lines_removed: 0
+  - path: vac-rs/app-server-protocol/src/experimental_api.rs
+    operation: delete
+    diff_hash: deleted
+    lines_added: 0
+    lines_removed: 0
+  - path: vac-rs/app-server-protocol/src/export.rs
+    operation: delete
+    diff_hash: deleted
+    lines_added: 0
+    lines_removed: 0
+  - path: vac-rs/app-server-protocol/src/jsonrpc_lite.rs
+    operation: delete
+    diff_hash: deleted
+    lines_added: 0
+    lines_removed: 0
+  - path: vac-rs/app-server-protocol/src/protocol/common.rs
+    operation: delete
+    diff_hash: deleted
+    lines_added: 0
+    lines_removed: 0
+  - path: vac-rs/app-server-protocol/src/protocol/common_tests.rs
+    operation: delete
+    diff_hash: deleted
+    lines_added: 0
+    lines_removed: 0
+  - path: vac-rs/app-server-protocol/src/protocol/event_mapping.rs
+    operation: delete
+    diff_hash: deleted
+    lines_added: 0
+    lines_removed: 0
+  - path: vac-rs/app-server-protocol/src/protocol/item_builders.rs
+    operation: delete
+    diff_hash: deleted
+    lines_added: 0
+    lines_removed: 0
+  - path: vac-rs/app-server-protocol/src/protocol/mappers.rs
+    operation: delete
+    diff_hash: deleted
+    lines_added: 0
+    lines_removed: 0
+  - path: vac-rs/app-server-protocol/src/protocol/mod.rs
+    operation: delete
+    diff_hash: deleted
+    lines_added: 0
+    lines_removed: 0
+  - path: vac-rs/app-server-protocol/src/protocol/serde_helpers.rs
+    operation: delete
+    diff_hash: deleted
+    lines_added: 0
+    lines_removed: 0
+  - path: vac-rs/app-server-protocol/src/protocol/thread_history.rs
+    operation: delete
+    diff_hash: deleted
+    lines_added: 0
+    lines_removed: 0
+  - path: vac-rs/app-server-protocol/src/protocol/v1.rs
+    operation: delete
+    diff_hash: deleted
+    lines_added: 0
+    lines_removed: 0
+  - path: vac-rs/app-server-protocol/src/protocol/v2.rs
+    operation: delete
+    diff_hash: deleted
+    lines_added: 0
+    lines_removed: 0
+  - path: vac-rs/app-server-protocol/src/schema_fixtures.rs
+    operation: delete
+    diff_hash: deleted
+    lines_added: 0
+    lines_removed: 0
+validation:
+  commands_executed: []
+  gates_passed:
+  - o5-o6-monolith-quality-slice
+  - scanner-hardening-spec-flow
+  - docs-state-refresh
+  - registry-strictness
+  - workflow-spec
+  - artifact-hygiene
+  gates_failed: []
+approval:
+  approved_by: operator
+  approved_at: '2026-05-30T00:00:00Z'
+  content_hash: 19effcb226c0a06e75737fac9289903efc992bb231ba853f57a99fe50a0d05ec
+  signature:
+    algorithm: none
+    value: null
+attribution:
+  agent_id: chatgpt-gpt-5.5-thinking-as-vac-model
+  model: GPT-5.5 Thinking
+  memory_snapshot:
+    working_facts: 4
+    team_rules_consulted:
+    - vac.no-hardcoded-readiness
+    - vac.not-evaluated-unrun-gates
+    semantic_refs:
+    - o5-monolith-refactor
+    - o6-quality-derisk
+  rationale_ref: .vac/registry/trajectory/o5-o6-monolith-quality-slice1.yaml

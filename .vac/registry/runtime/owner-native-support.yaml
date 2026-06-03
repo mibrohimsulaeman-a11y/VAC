@@ -1,0 +1,86 @@
+schema_version: 1
+kind: runtime_owner_support
+id: runtime.owner_native_support
+status: ready
+updated_at: '2026-06-01T00:00:00Z'
+title: Owner-native runtime support contract
+summary: >
+  Structural support manifest for the default interactive VAC runtime path. This
+  file is consumed by init doctor and static gates so runtime readiness is not
+  inferred from brittle source text scans.
+capability: vac.local_runtime_owner
+source_contract: vac-rs/crates/surfaces/tui/src/owner_native_runtime_support.rs
+parity_registry: vac-rs/crates/surfaces/tui/src/owner_native_operation_parity.rs
+critical_methods:
+  - name: start_thread_with_session_start_source
+    status: implemented
+    owner: ThreadManager::start_thread_with_options
+    release_blocking: true
+  - name: turn_start
+    status: implemented
+    owner: RuntimeWriteCommand::StartTurn / Op::UserTurn
+    release_blocking: true
+  - name: turn_steer
+    status: implemented
+    owner: RuntimeWriteCommand::SteerTurn / VACThread::steer_input
+    release_blocking: true
+  - name: turn_interrupt
+    status: implemented
+    owner: RuntimeWriteCommand::InterruptTurn / Op::Interrupt
+    release_blocking: true
+  - name: startup_interrupt
+    status: implemented
+    owner: RuntimeWriteCommand::InterruptTurn / Op::Interrupt
+    release_blocking: true
+  - name: thread_shell_command
+    status: implemented
+    owner: RuntimeWriteCommand::RunShellCommand / Op::RunUserShellCommand
+    release_blocking: true
+  - name: thread_list
+    status: implemented
+    owner: ThreadStore::list_threads
+    release_blocking: true
+  - name: thread_read
+    status: implemented
+    owner: ThreadStore::read_thread
+    release_blocking: true
+  - name: resume_thread
+    status: implemented
+    owner: ThreadStore::read_thread + ThreadManager::resume_thread_with_history
+    release_blocking: true
+  - name: branch_thread
+    status: implemented
+    owner: ThreadStore::read_thread + InitialHistory::Branched
+    release_blocking: true
+  - name: read_account
+    status: implemented
+    owner: local bootstrap/account facade
+    release_blocking: true
+plan_mode:
+  pre_gate: implemented
+  post_gate: implemented_static
+  active_plan: .vac/registry/runtime/active_plan.yaml
+command_gate:
+  pre_gate: implemented
+  evidence_completion_gate: implemented
+  evidence_target: .vac/registry/evidence
+non_critical_fail_closed:
+  - name: thread_rollback
+    status: non_default_fail_closed
+    reason: rollback DTO materialization remains TV-pending until cargo/live replay tests run
+  - name: thread_realtime_start
+    status: non_default_fail_closed
+    reason: realtime transport is outside the critical startup/default-turn path
+  - name: resolve_server_request
+    status: non_default_fail_closed
+    reason: legacy app-server server-request registry fallback remains intentionally unavailable
+  - name: reject_server_request
+    status: non_default_fail_closed
+    reason: legacy app-server server-request registry fallback remains intentionally unavailable
+truth:
+  sv_status: SV-Done
+  tv_status: TV-Pending
+  tv_pending:
+    - cargo test --manifest-path vac-rs/Cargo.toml -p vac-surface-tui runtime_owner_session
+    - live interactive vac default-turn smoke
+    - live interactive vac Plan Mode pre/post gated-turn smoke

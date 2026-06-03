@@ -1,0 +1,5 @@
+schema_version: 1
+kind: capability
+id: vac.test.fixture
+title: Test Fixture Capability
+status: ready

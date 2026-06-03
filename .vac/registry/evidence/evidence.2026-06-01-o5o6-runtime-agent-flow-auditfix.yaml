@@ -1,0 +1,116 @@
+schema_version: 1
+kind: evidence
+id: evidence.2026-06-01-o5o6-runtime-agent-flow-auditfix
+status: ready
+updated_at: '2026-06-01T00:00:00Z'
+title: O5/O6 runtime agent flow auditfix evidence
+chain:
+  previous: evidence.2026-06-01-o5o6-runtime-agent-flow-followup
+  previous_hash: null
+  self_hash: source-artifact-final-pending-sha256
+changeset:
+  plan_id: plan.o5o6.runtime-agent-flow-auditfix
+  capability: vac.local_runtime_owner
+  files_modified:
+    - path: vac-rs/tui/src/runtime_owner_session.rs
+      operation: modify
+      summary: >
+        Implemented Tier-2 owner-native thread list/read/resume/branch routing
+        through ThreadStore and ThreadManager, replaced read_account unsupported
+        with a local account facade, and added a static Plan Mode completion
+        gate after Op::UserTurn submission.
+    - path: vac-rs/cli/src/init_cli.rs
+      operation: modify
+      summary: >
+        Replaced brittle runtime-owner source text scans with structural checks
+        against .vac/registry/runtime/owner-native-support.yaml and the active
+        runtime semantic plan.
+    - path: vac-rs/cli/src/doctor/runtime_owner_gates.rs
+      operation: modify
+      summary: >
+        Added runtime-owner support manifest validation and critical method
+        unsupported-regression checks to the doctor runtime-owner gate.
+    - path: .vac/registry/runtime/owner-native-support.yaml
+      operation: create
+      summary: >
+        Added the structural owner-native support manifest that declares release
+        blocking methods, Plan Mode pre/post gate status, and command evidence
+        gate status.
+    - path: .vac/capabilities/local_runtime_owner.yaml
+      operation: modify
+      summary: >
+        Registered the runtime support manifest and the structural runtime agent
+        flow static gate in the local runtime owner capability manifest.
+    - path: scripts/check-vac-runtime-agent-flow-fix-static.sh
+      operation: modify
+      summary: >
+        Hardened the static gate for Tier-2 thread methods, Plan Mode completion
+        gate, support manifest validation, and critical unsupported regression
+        rejection.
+    - path: scripts/check-vac-init-registry-strictness-contract.sh
+      operation: modify
+      summary: >
+        Added runtime_owner_support to the registry strictness kind allowlist.
+validation:
+  commands_executed:
+    - scripts/check-vac-runtime-agent-flow-fix-static.sh
+    - scripts/check-vac-init-runtime-gate-callsite-integration.sh
+    - scripts/check-vac-runtime-engine-wiring-static.sh
+    - scripts/check-vac-init-why-contract.sh
+    - scripts/check-vac-init-evidence-chain-contract.sh
+    - scripts/check-legal-release-blockers.sh
+    - scripts/check-tui-source-artifact-hygiene.sh
+    - scripts/check-vac-o6-1-depanic-surface.sh
+    - scripts/check-vac-o6-2-safety-coverage.sh
+    - scripts/check-vac-o6-quality-triage.sh
+    - scripts/check-vac-o5-o6-completion-state.sh
+    - scripts/check-vac-o5-o6-monolith-quality-slice.sh
+    - scripts/check-vac-tui-visual-parity-static.sh
+    - scripts/check-tui-operator-snapshot-contract.sh
+    - scripts/check-vac-o5o6-all-audit-remainder.sh
+    - scripts/check-vac-init-registry-strictness-contract.sh
+    - scripts/check-vac-init-registry-validator-contract.sh
+  gates_passed:
+    - runtime_agent_flow_auditfix_static_gate
+    - vac_init_runtime_gate_callsite_integration
+    - runtime_engine_wiring_static
+    - vac_init_why_contract
+    - vac_init_evidence_chain_contract
+    - legal_release_blockers
+    - source_artifact_hygiene
+    - o6_1_depanic_surface
+    - o6_2_safety_coverage
+    - o6_quality_triage
+    - o5_o6_completion_state
+    - o5_o6_monolith_quality_slice
+    - tui_visual_parity_static
+    - tui_operator_snapshot_contract
+    - o5o6_all_audit_remainder
+    - vac_init_registry_strictness_contract
+    - vac_init_registry_validator_source_static
+  gates_not_evaluated:
+    - gate: cargo check/test/clippy
+      reason: rustc/cargo unavailable in this sandbox
+    - gate: live interactive vac smoke
+      reason: requires compiled binary and terminal runtime
+    - gate: live Plan Mode completion timing
+      reason: static completion hook is present, but after-stream/live runtime completion needs cargo/live verification
+  gates_failed: []
+truth:
+  sv_done: true
+  tv_status: TV-Pending
+  tv_reason: >
+    The auditfix is verified by source/static gates. Rust typechecking,
+    cargo-backed runtime-owner tests, live interactive default/Plan Mode turns,
+    and command/evidence positive-negative tests remain pending because this
+    sandbox does not provide rustc/cargo or a runnable compiled TUI binary.
+approval:
+  approved_by: operator
+  approved_at: '2026-06-01T00:00:00Z'
+  signature:
+    algorithm: none
+    value: null
+attribution:
+  agent_id: chatgpt-vac-sandbox
+  model: GPT-5.5 Thinking
+  rationale_ref: docs/monolith-quality/O5O6_RUNTIME_AGENT_FLOW_AUDITFIX_REPORT.md

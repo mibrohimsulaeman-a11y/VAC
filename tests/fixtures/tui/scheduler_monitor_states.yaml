@@ -1,0 +1,23 @@
+schema_version: 1
+kind: test_fixture
+id: fixture.tui.scheduler-monitor-states
+title: TUI/autopilot scheduler monitor states
+status: ready
+states:
+  empty:
+    expected: show_zero_tasks_without_blank_screen
+  loading:
+    expected: show_pending_doctor_status_refresh
+  success:
+    expected: show_registry_policy_ownership_evidence_memory_init_statuses
+  failure:
+    expected: show_failed_gate_and_last_error_without_destructive_shortcut
+policy:
+  destructive_actions_policy_gated: true
+  approval_bypass_allowed: false
+validation:
+  source: vac-rs/core/src/control_plane/vac_init_tui_real_data.rs
+  surfaces:
+    - vac.autopilot.scheduler-monitor-only
+    - vac.tui.capability-dashboard-runtime
+    - vac.tui.approval-popup-safety

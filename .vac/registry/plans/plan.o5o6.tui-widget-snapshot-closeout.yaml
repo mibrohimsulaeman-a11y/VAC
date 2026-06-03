@@ -1,0 +1,115 @@
+schema_version: 1
+kind: plan
+id: plan.o5o6.tui-widget-snapshot-closeout
+status: implemented_static
+updated_at: '2026-05-31T00:00:00Z'
+title: O5/O6 TUI widget snapshot closeout
+summary: >
+  Close the checkpoint-003 false-fail snapshot gate after the operator screens
+  moved from direct plain-text snapshots to ratatui widget-backed geometry.
+task:
+  description: >
+    Remove direct rustc-only snapshot assumptions, keep committed widget
+    snapshots source/static-verifiable in a no-toolchain sandbox, and preserve
+    honest TV-Pending status for cargo-backed widget tests and live screenshots.
+  capability: vac.tui.operator-visual-gate
+allowed_files:
+  - path: scripts/check-tui-operator-snapshot-contract.sh
+    operation: modify
+    ownership: vac.tui.operator-visual-gate
+    semantic_anchor:
+      kind: script
+      symbol: operator_snapshot_static_gate
+  - path: scripts/render-tui-operator-snapshots.sh
+    operation: modify
+    ownership: vac.tui.operator-visual-gate
+    semantic_anchor:
+      kind: script
+      symbol: operator_snapshot_render_harness
+  - path: vac-rs/tui/tests/operator_ui_snapshot_contract.rs
+    operation: modify
+    ownership: vac.tui.operator-visual-gate
+    semantic_anchor:
+      kind: test
+      symbol: operator_ui_snapshot_contract
+  - path: vac-rs/tui/src/operator_ui.rs
+    operation: modify
+    ownership: vac.tui.operator-visual-gate
+    semantic_anchor:
+      kind: function
+      symbol: render_operator_snapshot
+  - path: vac-rs/tui/src/operator_widget_render.rs
+    operation: modify
+    ownership: vac.tui.operator-visual-gate
+    semantic_anchor:
+      kind: function
+      symbol: render_snapshot_lines
+  - path: docs/validation/tui-operator-ui-snapshots/*.txt
+    operation: modify
+    ownership: vac.tui.operator-visual-gate
+    semantic_anchor:
+      kind: snapshot
+      symbol: operator_widget_snapshots
+  - path: scripts/check-vac-o5o6-all-audit-remainder.sh
+    operation: modify
+    ownership: vac.o5-o6.monolith-quality
+    semantic_anchor:
+      kind: script
+      symbol: all_audit_remainder_aggregate_gate
+  - path: scripts/check-vac-o5-o6-monolith-quality-slice.sh
+    operation: modify
+    ownership: vac.o5-o6.monolith-quality
+    semantic_anchor:
+      kind: script
+      symbol: monolith_quality_slice_gate
+  - path: docs/monolith-quality/O5O6_TUI_WIDGET_SNAPSHOT_CLOSEOUT_REPORT.md
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: report
+      symbol: tui_widget_snapshot_closeout
+validation:
+  commands:
+    - id: vac.tui.widget-snapshot-closeout.snapshot-static
+      runner: bash
+      args:
+        - scripts/check-tui-operator-snapshot-contract.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.tui.widget-snapshot-closeout.visual-static
+      runner: bash
+      args:
+        - scripts/check-vac-tui-visual-parity-static.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.tui.widget-snapshot-closeout.aggregate-static
+      runner: bash
+      args:
+        - scripts/check-vac-o5o6-all-audit-remainder.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.tui.widget-snapshot-closeout.registry-strictness
+      runner: bash
+      args:
+        - scripts/check-vac-init-registry-strictness-contract.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.tui.widget-snapshot-closeout.registry-validator
+      runner: bash
+      args:
+        - scripts/check-vac-init-registry-validator-contract.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+approval:
+  required: false
+truth:
+  sv_status: SV-Done
+  tv_status: TV-Pending
+  tv_pending:
+    - cargo test --manifest-path vac-rs/Cargo.toml -p vac-surface-tui operator_ui_snapshot_contract
+    - live TUI terminal screenshot/pixel parity gate

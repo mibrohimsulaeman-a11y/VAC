@@ -1,0 +1,52 @@
+schema_version: 1
+kind: capability
+id: vac.tui.operator-visual-gate
+title: TUI operator visual fidelity gate
+status: ready
+owner:
+  crate: vac-surface-tui
+  module: operator_ui
+ownership:
+  crates:
+  - vac-tui
+  modules:
+  - operator_ui
+  - operator_style
+  - operator_ui_styles
+description: Explicit visual-fidelity gate for screenshot-aligned operator-console snapshots, semantic ANSI styling, and live PTY proof readiness.
+depends_on:
+- vac.tui
+- vac.tui.operator-live-adapter
+- vac.tui.ansi-style
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+validation:
+  commands:
+  - id: vac.tui.operator-visual-gate.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-tui-pty-gate-contract.sh
+    risk: execute_process
+    approval: policy
+  - id: vac.tui.operator-visual-gate.validation.cmd002
+    runner: bash
+    args:
+    - scripts/check-tui-pty-gate.sh
+    risk: execute_process
+    approval: policy
+  gates:
+  - deterministic_snapshot_proof
+  - ansi_style_proof
+  - pty_proof_documented
+  - sandbox_skip_is_explicit
+  - no_false_live_screenshot_claim
+docs:
+- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md
+surfaces:
+  tui:
+    routes:
+    - /capabilities
+  palette: false

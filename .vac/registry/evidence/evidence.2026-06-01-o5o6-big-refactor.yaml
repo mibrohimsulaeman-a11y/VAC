@@ -1,0 +1,65 @@
+schema_version: 1
+kind: evidence
+id: evidence.2026-06-01-o5o6-big-refactor
+created_at: '2026-06-01T00:00:00Z'
+plan_id: plan.o5o6.big-refactor
+capability: vac.architecture
+summary: O5/O6 big refactor slice retired cloud-task/backend OpenAPI islands, physically extracted vac-control-plane and vac-provider-http source ownership, removed active ChatGPT account sign-in selection from CLI/TUI, moved connector helper to vac_core::connectors, and bounded the TUI frame request channel plus file watcher, agent mailbox, and session event channel.
+status: SV-Done
+truth:
+  cargo_status: TV-Pending
+  live_tui_status: TV-Pending
+  reason: Rust toolchain is unavailable in this sandbox; cargo check/test/clippy and live TUI smoke were not executed.
+static_gates:
+  - scripts/check-vac-o5o6-big-refactor-static.sh: PASS
+  - scripts/check-vac-o5o6-architecture-extraction-static.sh: PASS
+  - scripts/check-vac-o5o6-cloud-coupling-isolation-static.sh: PASS
+  - scripts/check-vac-o5o6-bounded-hotpath-static.sh: PASS
+  - scripts/check-vac-o5o6-cleanup-compile-surface-static.sh: PASS
+  - scripts/check-vac-tui-local-tool-cleanup-static.sh: PASS
+  - scripts/check-no-app-server-local-path-contract.sh: PASS
+scope_closure:
+  F_007_apply_patch_parent_escape: Source_Static_Test_Added_TV-Pending
+  F_006_tui_onboarding_auth_unwrap: Targeted_SV-Done_TV-Pending
+  F_021_chatgpt_cloud_task_prune: SV-Done_TV-Pending
+  F_022_backend_client_prune: SV-Done_TV-Pending
+  F_023_vac_api_split: Physical_ProviderHttp_SourceOwner_SV-Done_TV-Pending
+  F_024_chatgpt_account_login_prune: SV-Done_TV-Pending
+  F_030_control_plane_crate: Physical_SourceOwner_SV-Done_TV-Pending
+  F_031_de_codex_core_transport: Partial_NotComplete_TV-Pending
+  F_032_layered_folder_layout: Planned_NotMoved_TV-Pending
+  F_017_F_029_godfile_domain_refactor: Existing_Semantic_Split_Preserved_Deep_Module_Extraction_TV-Pending
+  F_009_unbounded_channels: Targeted_Hotpaths_Bounded_Remaining_Audit_TV-Pending
+  F_012_technical_debt_markers: Inventory_Tracked_SV-Done_Cleanup_TV-Pending
+changed_files:
+  - vac-rs/vac-api/src/lib.rs
+  - vac-rs/provider-http/src/{auth,endpoint,requests,sse,...}
+  - vac-rs/control-plane/src/local_runtime/*
+  - vac-rs/control-plane/src/control_plane/*
+  - vac-rs/apply-patch/src/lib.rs
+  - vac-rs/Cargo.toml
+  - vac-rs/Cargo.lock
+  - vac-rs/control-plane/Cargo.toml
+  - vac-rs/control-plane/src/lib.rs
+  - vac-rs/provider-http/Cargo.toml
+  - vac-rs/provider-http/src/lib.rs
+  - vac-rs/core/Cargo.toml
+  - vac-rs/core/src/lib.rs
+  - vac-rs/core/src/connectors.rs
+  - vac-rs/cli/Cargo.toml
+  - vac-rs/cli/src/apply_cli.rs
+  - vac-rs/cli/src/auth_cli.rs
+  - vac-rs/tui/Cargo.toml
+  - vac-rs/tui/src/onboarding/auth.rs
+  - vac-rs/tui/src/onboarding/onboarding_screen.rs
+  - vac-rs/tui/src/tui/frame_requester.rs
+  - vac-rs/memories/write/Cargo.toml
+  - vac-rs/memories/write/src/guard.rs
+  - scripts/check-vac-o5o6-big-refactor-static.sh
+  - scripts/check-vac-technical-debt-markers-static.sh
+  - vac-rs/core/src/cloud_account_disabled.rs
+  - vac-rs/core/src/arc_monitor.rs
+  - vac-rs/core/src/mcp_vastar_file.rs
+  - vac-rs/core/src/file_watcher.rs
+  - vac-rs/core/src/agent/mailbox.rs
+raw_chain_of_thought_excluded: true

@@ -1,0 +1,8 @@
+git status short	0	docs/workflow-control-plane/plans/33-evidence/runs/20260524T232817Z/git-status-short.txt
+disk guard	0	docs/workflow-control-plane/plans/33-evidence/runs/20260524T232817Z/disk-guard.txt
+tui source grep app server imports	0	docs/workflow-control-plane/plans/33-evidence/runs/20260524T232817Z/tui-source-grep-app-server-imports.txt
+tui manifest and source rg app server	0	docs/workflow-control-plane/plans/33-evidence/runs/20260524T232817Z/tui-manifest-and-source-rg-app-server.txt
+workspace app server consumer audit	0	docs/workflow-control-plane/plans/33-evidence/runs/20260524T232817Z/workspace-app-server-consumer-audit.txt
+inverse tree vac app server client	0	docs/workflow-control-plane/plans/33-evidence/runs/20260524T232817Z/inverse-tree-vac-app-server-client.txt
+inverse tree vac app server	0	docs/workflow-control-plane/plans/33-evidence/runs/20260524T232817Z/inverse-tree-vac-app-server.txt
+inverse tree vac app server transport	0	docs/workflow-control-plane/plans/33-evidence/runs/20260524T232817Z/inverse-tree-vac-app-server-transport.txt

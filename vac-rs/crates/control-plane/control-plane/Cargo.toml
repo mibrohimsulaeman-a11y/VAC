@@ -1,0 +1,42 @@
+[package]
+build = "build.rs"
+name = "vac-control-plane"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "vac_control_plane"
+path = "src/lib.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+base64 = { workspace = true }
+chrono = { workspace = true, features = ["serde"] }
+ed25519-dalek = { workspace = true }
+regex-lite = { workspace = true }
+schemars = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+serde_path_to_error = { workspace = true }
+serde_yaml = { workspace = true }
+sha1 = { workspace = true }
+syn = { workspace = true, features = ["full", "visit", "extra-traits"] }
+sqlx = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["fs", "macros", "process", "rt-multi-thread", "time"] }
+toml = { workspace = true }
+toml_edit = { workspace = true }
+tracing = { workspace = true, features = ["log"] }
+uuid = { workspace = true, features = ["serde", "v4", "v5"] }
+vac-protocol = { workspace = true }
+vac-utils-absolute-path = { workspace = true }
+vac-utils-pty = { workspace = true }
+
+[dev-dependencies]
+insta = { workspace = true, features = ["json"] }
+pretty_assertions = { workspace = true }
+tempfile = { workspace = true }

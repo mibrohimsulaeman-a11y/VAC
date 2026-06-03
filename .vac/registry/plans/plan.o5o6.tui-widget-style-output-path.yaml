@@ -1,0 +1,149 @@
+schema_version: 1
+kind: plan
+id: plan.o5o6.tui-widget-style-output-path
+status: implemented_static
+updated_at: '2026-05-31T00:00:00Z'
+title: O5/O6 TUI widget styled output path
+summary: >
+  Close the checkpoint-003 follow-up finding that ratatui widgets were painted
+  to an off-screen Buffer but then flattened to plain String output before
+  reaching live TUI history cells, dropping foreground/background/modifier styles.
+task:
+  description: >
+    Preserve ratatui Buffer cell style when converting widget renders into
+    existing history-surface Line values, route live operator screens through
+    styled visual-line helpers instead of string/spec reclassification, and keep
+    full terminal screenshot validation as TV-Pending until a cargo/runtime TUI
+    environment is available.
+  capability: vac.tui.operator-visual-gate
+allowed_files:
+  - path: vac-rs/tui/src/operator_widget_render.rs
+    operation: modify
+    ownership: vac.tui.operator-visual-gate
+    semantic_anchor:
+      kind: function
+      symbol: buffer_to_lines
+  - path: vac-rs/tui/src/operator_ui.rs
+    operation: modify
+    ownership: vac.tui.operator-visual-gate
+    semantic_anchor:
+      kind: functions
+      symbol: render_*_visual_lines
+  - path: vac-rs/tui/src/history_cell/split_003_approvaldecisionactor.rs
+    operation: modify
+    ownership: vac.tui.operator-visual-gate
+    semantic_anchor:
+      kind: callsite
+      symbol: first_launch_and_idle_visual_lines
+  - path: vac-rs/tui/src/capability_dashboard.rs
+    operation: modify
+    ownership: vac.tui.operator-visual-gate
+    semantic_anchor:
+      kind: callsite
+      symbol: capability_dashboard_visual_lines
+  - path: vac-rs/tui/src/chatwidget/split_015_set_thread_rename_block_message.rs
+    operation: modify
+    ownership: vac.tui.operator-visual-gate
+    semantic_anchor:
+      kind: callsite
+      symbol: add_runtime_jobs_output
+  - path: vac-rs/tui/src/chatwidget/semantic_split.rs
+    operation: modify
+    ownership: vac.tui.operator-visual-gate
+    semantic_anchor:
+      kind: generated_split
+      symbol: add_runtime_jobs_output
+  - path: scripts/check-vac-tui-visual-parity-static.sh
+    operation: modify
+    ownership: vac.tui.operator-visual-gate
+    semantic_anchor:
+      kind: script
+      symbol: styled_widget_output_path_gate
+  - path: scripts/check-tui-operator-snapshot-contract.sh
+    operation: modify
+    ownership: vac.tui.operator-visual-gate
+    semantic_anchor:
+      kind: script
+      symbol: styled_widget_snapshot_contract
+  - path: scripts/check-vac-o5-2-godfile-staging-all.sh
+    operation: modify
+    ownership: vac.o5-o6.monolith-quality
+    semantic_anchor:
+      kind: script
+      symbol: semantic_split_current_hashes
+  - path: vac-rs/tui/src/chatwidget/split_manifest.yaml
+    operation: modify
+    ownership: vac.o5-o6.monolith-quality
+    semantic_anchor:
+      kind: manifest
+      symbol: chatwidget_split_hashes
+  - path: vac-rs/tui/src/history_cell/split_manifest.yaml
+    operation: modify
+    ownership: vac.o5-o6.monolith-quality
+    semantic_anchor:
+      kind: manifest
+      symbol: history_cell_split_hashes
+  - path: .vac/registry/o6-panic-surface.yaml
+    operation: modify
+    ownership: vac.o6.quality-triage
+    semantic_anchor:
+      kind: registry_status
+      symbol: cfg_test_lines_removed
+  - path: .vac/registry/o6-quality-triage.yaml
+    operation: modify
+    ownership: vac.o6.quality-triage
+    semantic_anchor:
+      kind: registry_status
+      symbol: depanic
+  - path: docs/monolith-quality/O5O6_TUI_WIDGET_STYLE_OUTPUT_PATH_REPORT.md
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: report
+      symbol: tui_widget_style_output_path
+validation:
+  commands:
+    - id: vac.tui.widget-style-output.visual-static
+      runner: bash
+      args:
+        - scripts/check-vac-tui-visual-parity-static.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.tui.widget-style-output.snapshot-static
+      runner: bash
+      args:
+        - scripts/check-tui-operator-snapshot-contract.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.tui.widget-style-output.o5-split-hash
+      runner: bash
+      args:
+        - scripts/check-vac-o5-2-semantic-split-hash.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.tui.widget-style-output.o6-1
+      runner: bash
+      args:
+        - scripts/check-vac-o6-1-depanic-surface.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.tui.widget-style-output.aggregate
+      runner: bash
+      args:
+        - scripts/check-vac-o5o6-all-audit-remainder.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+approval:
+  required: false
+truth:
+  sv_status: SV-Done
+  tv_status: TV-Pending
+  tv_pending:
+    - cargo test --manifest-path vac-rs/Cargo.toml -p vac-surface-tui operator_ui_snapshot_contract
+    - cargo check --manifest-path vac-rs/Cargo.toml -p vac-surface-tui
+    - live TUI terminal screenshot/pixel parity gate

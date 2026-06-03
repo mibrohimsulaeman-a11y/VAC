@@ -1,0 +1,21 @@
+schema_version: 1
+kind: evidence
+id: evidence.2026-06-02-o5o6-zero-residual-runtime-protocol-split
+created_at: 2026-06-02T08:24:00Z
+plan: plan.o5o6.zero-residual-blueprint-completion
+summary: Fix runtime protocol shard boundary compile blockers found while resuming vac-surface-tui targeted cargo check.
+changes:
+  - moved GetAccountRateLimitsResponse derive attributes from v2_part_001.rs into v2_part_002.rs so no attributes are left without an item
+  - moved PluginAuthPolicy enum variants from v2_part_004.rs into v2_part_003.rs so the enum is not split across include shards
+verification:
+  performed:
+    - rustc --version
+    - cargo --version
+    - df -h . /tmp
+  pending:
+    - cargo check --manifest-path vac-rs/Cargo.toml -p vac-surface-tui
+    - cargo check --manifest-path vac-rs/Cargo.toml -p vac-surface-cli
+    - cargo check --manifest-path vac-rs/Cargo.toml -p vac-core
+risk:
+  level: medium
+  reason: split-shard edits are syntax-boundary repairs and require cargo rerun before release claims

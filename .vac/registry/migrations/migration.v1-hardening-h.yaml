@@ -1,0 +1,47 @@
+schema_version: 1
+kind: migration
+id: migration.v1-hardening-h
+from_version: 1
+to_version: 1
+created_at: '2026-05-29T00:00:00Z'
+author: operator
+changes:
+- action: change_kind
+  target: .vac/registry/product.yaml
+  field: kind
+  from: product
+  to: registry_status
+- action: change_kind
+  target: .vac/registry/status.yaml
+  field: kind
+  from: status
+  to: registry_status
+- action: change_kind
+  target: .vac/registry/donor-inventory.yaml
+  field: kind
+  from: donor_inventory
+  to: registry_status
+rollback:
+- action: change_kind
+  target: .vac/registry/product.yaml
+  field: kind
+  from: registry_status
+  to: product
+- action: change_kind
+  target: .vac/registry/status.yaml
+  field: kind
+  from: registry_status
+  to: status
+- action: change_kind
+  target: .vac/registry/donor-inventory.yaml
+  field: kind
+  from: registry_status
+  to: donor_inventory
+verification:
+  command:
+    id: vac.doctor.registry
+    runner: vac
+    args:
+    - doctor
+    - registry
+    - .

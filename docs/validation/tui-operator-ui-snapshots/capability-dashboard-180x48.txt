@@ -1,0 +1,26 @@
+# VAC operator TUI snapshot
+scenario: capability dashboard
+viewport: 180x48
+---
+● ● ●     vac · interactive   AGENT WORKING  /capabilities
+TUI Capability Dashboard
+Control plane registry view for manifest ownership, surfaces, policy, validation, and diagnostics.
+╭CAPABILITIES╮ ╭OWNED DOMAINS╮ ╭UNOWNED╮ ╭VALID╮
+│ 5          │ │ 42          │ │ 3     │ │ 80% │
+╰────────────╯ ╰─────────────╯ ╰───────╯ ╰──────╯
+╭/capabilities────────────╮ ╭filters────────────────────────────────────────────╮ ╭Diagnostics────────────────────────╮
+│ › /capabilities         │ │ all   ready   partial   planned   broken         │ │ error  YAML diagnostic            │
+│ WORKSPACE FEED          │ ╰──────────────────────────────────────────────────╯ │ .vac/capabilities/tui.yml:42:13   │
+│ registry .vac/capabilities│ ╭Control plane registry──────────────────────────╮ │ status almost_ready is invalid    │
+│ workflows .vac/workflows│ │ ID                 STATUS     OWNER             │ │ warning registry parse degraded   │
+│ surface tui + cli       │ │ vac.approvals      ready      vac-core/policy   │ ╰──────────────────────────────────╯
+│ ownership 42 owned      │ │ vac.tui.capabilities ready    vac-tui/lib       │ ╭Registry parse────────────────────╮
+│ unowned 3 domains       │ │ vac.workflow.browser partial  vac-workflow      │ │ degraded ███████████████░░       │
+│ policy strict gates     │ │ vac.root.convert   planned    vac-registry      │ ╰──────────────────────────────────╯
+│ /capabilities ready     │ │ vac.yaml.parser    broken     vac-core/config   │ ╭Policy gates──────────────────────╮
+╰─────────────────────────╯ │ POLICY             VALIDATION / DOCS             │ │ ready ████████████████████       │
+                            ╰──────────────────────────────────────────────────╯ ╰──────────────────────────────────╯
+                            ╭Ownership scan────────────╮ ╭Root feature conversion────╮
+                            │ 42 owned ███████████████ │ │ 80% valid ████████████░░ │
+                            ╰──────────────────────────╯ ╰───────────────────────────╯
+CONVERSATION │ model claude-sonnet-4.5 │ 68,240 tok │ manual │ valid 80% │ profile default · rulebook vil.core

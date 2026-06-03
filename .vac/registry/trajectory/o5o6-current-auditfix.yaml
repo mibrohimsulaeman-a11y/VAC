@@ -1,0 +1,23 @@
+schema_version: 1
+kind: trajectory
+id: trajectory.o5o6-current-auditfix
+status: SV-Done_TV-Pending
+steps:
+  - id: c05-runtime-protocol-v2-split
+    status: SV-Done
+    summary: runtime-protocol v2.rs is now a dispatcher with bounded v2_parts shards.
+  - id: c05-footerflash-domain-split
+    status: SV-Done
+    summary: chat composer footer flash shard is now dispatcher + bounded domain shards; tests extracted behind cfg(test).
+  - id: c07-production-channel-gate
+    status: SV-Done
+    summary: production core+tui unbounded channel surface is rejected by static gate.
+  - id: c08-production-unwrap-expect-gate
+    status: SV-Done
+    summary: production core+tui unwrap/expect surface is rejected by static gate.
+  - id: c09-chatgpt-cloud-fail-closed
+    status: SV-Done
+    summary: legacy ChatGPT account/backend curated cloud paths are explicit opt-in.
+  - id: c03-c04-physical-layer-relocation
+    status: TV-Pending
+    summary: full crates/<layer>/<name> move and core capability drain require cargo validation.

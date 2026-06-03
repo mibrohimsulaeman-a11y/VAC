@@ -1,0 +1,160 @@
+schema_version: 1
+kind: plan
+id: plan.o5o6.tui-performance-hotpath-closeout
+status: implemented_static
+updated_at: '2026-06-01T00:00:00Z'
+title: O5/O6 TUI performance hot-path closeout
+summary: Separate operator-console draw ticks from autopilot workflow execution, make runtime view refresh dirty-checked/read-only, memoize repeated markdown renders, and harden gates against performance regressions.
+task:
+  description: Fix the latest TUI performance audit findings without claiming cargo/live TV in this sandbox.
+  capability: vac.tui.operator-live-adapter
+allowed_files:
+  - path: vac-rs/tui/src/operator_console.rs
+    operation: modify
+    ownership: vac.tui
+    semantic_anchor:
+      kind: audit_finding
+      symbol: operator_console.draw_tick_read_only_dirty_refresh
+    rationale: Make pre_draw_tick poll persisted status signatures and redraw only when content changes; never execute scheduler from draw.
+  - path: vac-rs/tui/src/operator_ui.rs
+    operation: modify
+    ownership: vac.tui
+    semantic_anchor:
+      kind: audit_finding
+      symbol: autopilot_state_loader_read_only
+    rationale: Keep AutopilotSchedulerState::from_workspace read-only so render/model construction cannot spawn workflow execution.
+  - path: vac-rs/tui/src/markdown_render.rs
+    operation: modify
+    ownership: vac.tui
+    semantic_anchor:
+      kind: audit_finding
+      symbol: markdown_render_memo_cache
+    rationale: Memoize repeated markdown renders by source, width, and cwd to reduce transcript redraw/reparse cost.
+  - path: scripts/check-vac-control-plane-audit-findings-static.sh
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: audit_finding
+      symbol: performance_hotpath_static_gate
+    rationale: Reject regressions where TUI draw/render paths execute the autopilot scheduler or unconditional refresh loops return true.
+  - path: scripts/check-vac-o6-1-depanic-surface.sh
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: audit_finding
+      symbol: o6_1_depanic_surface.performance_hotpath_skip_repin
+    rationale: Keep aggregate skip-rescan expectations aligned with the reproduced O6.1 scanner output.
+  - path: .vac/capabilities/autopilot-scheduler.yaml
+    operation: modify
+    ownership: vac.autopilot.scheduler
+    semantic_anchor:
+      kind: audit_finding
+      symbol: autopilot_scheduler_capability_truth_refresh
+    rationale: Update stale monitor-only capability language to reflect workflow_runner-backed execution plus draw/read separation truth.
+  - path: .vac/registry/o6-panic-surface.yaml
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: audit_finding
+      symbol: o6_1_depanic_surface.performance_hotpath_repin
+    rationale: Align O6.1 reproducibility metadata after TUI performance cache code.
+  - path: .vac/registry/o6-quality-triage.yaml
+    operation: modify
+    ownership: vac.quality-gates
+    semantic_anchor:
+      kind: audit_finding
+      symbol: o6_quality_triage.performance_hotpath_repin
+    rationale: Keep O6 quality triage metadata aligned with scanner output.
+  - path: .vac/registry/runtime/active_plan.yaml
+    operation: modify
+    ownership: vac.runtime.plan
+    semantic_anchor:
+      kind: audit_finding
+      symbol: plan.o5o6.tui-performance-hotpath-closeout.active
+    rationale: Make this performance closeout the active runtime semantic plan.
+  - path: .vac/registry/plans/plan.o5o6.tui-performance-hotpath-closeout.yaml
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: audit_finding
+      symbol: plan.o5o6.tui-performance-hotpath-closeout
+    rationale: Record the bounded semantic plan for this performance slice.
+  - path: .vac/registry/evidence/evidence.2026-06-01-o5o6-tui-performance-hotpath-closeout.yaml
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: audit_finding
+      symbol: evidence.2026-06-01-o5o6-tui-performance-hotpath-closeout
+    rationale: Record static validation evidence and TV-pending truth for this slice.
+  - path: .vac/registry/trajectory/o5o6-tui-performance-hotpath-closeout.yaml
+    operation: create
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: audit_finding
+      symbol: trajectory.o5o6-tui-performance-hotpath-closeout
+    rationale: Preserve safe rationale trajectory for vac why.
+  - path: .vac/registry/trajectory/index.yaml
+    operation: modify
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: audit_finding
+      symbol: trajectory_index.tui_performance_hotpath_closeout
+    rationale: Add this evidence record to safe rationale lookup.
+  - path: .vac/registry/compile-debt-ledger.yaml
+    operation: modify
+    ownership: vac.evidence
+    semantic_anchor:
+      kind: audit_finding
+      symbol: compile_debt.tui_performance_hotpath_closeout
+    rationale: Mark cargo/live performance validation as TV-Pending because Rust toolchain and terminal profiler are unavailable in this sandbox.
+  - path: docs/monolith-quality/O5O6_TUI_PERFORMANCE_HOTPATH_CLOSEOUT_REPORT.md
+    operation: create
+    ownership: vac.docs
+    semantic_anchor:
+      kind: audit_finding
+      symbol: tui_performance_hotpath_closeout_report
+    rationale: Document root cause, source/static implementation, gates, and remaining TV performance checks.
+bounds:
+  max_patches: 24
+  max_new_files: 4
+  max_line_delta: 2200
+  timeout_seconds: 1800
+validation:
+  commands:
+    - id: vac.control-plane.audit-findings.static
+      runner: bash
+      args:
+        - scripts/check-vac-control-plane-audit-findings-static.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.o6.depanic.surface
+      runner: bash
+      args:
+        - scripts/check-vac-o6-1-depanic-surface.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.init.registry.strictness
+      runner: bash
+      args:
+        - scripts/check-vac-init-registry-strictness-contract.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.init.registry.validator
+      runner: bash
+      args:
+        - scripts/check-vac-init-registry-validator-contract.sh
+      risk: safe_read
+      approval: never
+      result: PASS
+    - id: vac.o5o6.audit.remainder
+      runner: bash
+      args:
+        - scripts/check-vac-o5o6-all-audit-remainder.sh
+      env:
+        VAC_O6_1_RESCAN: '0'
+      risk: safe_read
+      approval: never
+      result: PASS

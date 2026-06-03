@@ -1,0 +1,20 @@
+schema_version: 1
+kind: panic_risk_governance
+id: panic-risk.o5o6.zero-residual
+updated_at: 2026-06-02T00:00:00Z
+status: statically_governed
+policy:
+  reachable_from_input_unwrap: forbidden
+  reachable_from_input_panic: forbidden
+  expect_requires_invariant_comment: true
+risk_scope:
+  core-plugins: pass
+  core-skills: pass
+  file-search: pass
+  local-runtime-owner: pass
+  external-agent-migration: pass
+  external-agent-sessions: pass
+  tui-input-paths: pass
+  core-session-paths: pass
+notes:
+  - Remaining panic!/unwrap occurrences are treated as final cargo/clippy cleanup candidates unless static scanner classifies them as test-only or invariant-bound.

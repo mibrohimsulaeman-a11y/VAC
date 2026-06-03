@@ -1,0 +1,52 @@
+schema_version: 1
+kind: capability
+id: vac.tui.capability-dashboard-runtime
+title: TUI Capability Dashboard Runtime Fidelity
+status: ready
+owner:
+  crate: vac-surface-tui
+  module: capability_dashboard
+description: Typed manifest-record dashboard model that renders .vac capability, policy, surface, workflow, ownership, and diagnostic data without blank fallback screens.
+depends_on:
+- vac.tui
+- vac.tui.renderer-semantic-contract
+surfaces:
+  tui:
+    routes:
+    - /capabilities
+  palette: true
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: true
+validation:
+  commands:
+  - id: vac.tui.capability-dashboard-runtime.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-tui-capability-dashboard-runtime-contract.sh
+    risk: execute_process
+    approval: policy
+  gates:
+  - typed_capability_records
+  - typed_control_plane_diagnostics
+  - diagnostics_never_blank
+  - manifest_runtime_mapping
+docs:
+- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md
+ownership:
+  crates:
+  - vac-tui
+  modules:
+  - capability_dashboard
+  targets:
+  - kind: module
+    crate: vac-surface-tui
+    module: capability_dashboard
+  - kind: path
+    include:
+    - .vac/capabilities/tui-capability-dashboard-runtime.yaml
+    - docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md
+    - scripts/check-tui-capability-dashboard-runtime-contract.sh
+    exclude: []

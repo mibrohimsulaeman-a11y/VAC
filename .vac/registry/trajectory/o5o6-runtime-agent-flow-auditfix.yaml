@@ -1,0 +1,57 @@
+schema_version: 1
+kind: trajectory
+id: trajectory.o5o6-runtime-agent-flow-auditfix
+spans:
+  - file: vac-rs/tui/src/runtime_owner_session.rs
+    start_line: 1
+    end_line: 980
+    symbol: OwnerNativeSession.tier2_thread_store_and_plan_completion_gate
+    evidence_id: evidence.2026-06-01-o5o6-runtime-agent-flow-auditfix
+  - file: vac-rs/cli/src/init_cli.rs
+    start_line: 250
+    end_line: 390
+    symbol: build_init_doctor_report.owner_native_support_manifest
+    evidence_id: evidence.2026-06-01-o5o6-runtime-agent-flow-auditfix
+  - file: vac-rs/cli/src/doctor/runtime_owner_gates.rs
+    start_line: 1
+    end_line: 260
+    symbol: validate_owner_native_support_manifest
+    evidence_id: evidence.2026-06-01-o5o6-runtime-agent-flow-auditfix
+  - file: .vac/registry/runtime/owner-native-support.yaml
+    start_line: 1
+    end_line: 90
+    symbol: runtime.owner_native_support
+    evidence_id: evidence.2026-06-01-o5o6-runtime-agent-flow-auditfix
+  - file: .vac/registry/runtime/active_plan.yaml
+    start_line: 1
+    end_line: 210
+    symbol: plan.o5o6.runtime-agent-flow-auditfix.active
+    evidence_id: evidence.2026-06-01-o5o6-runtime-agent-flow-auditfix
+results_by_evidence:
+  evidence.2026-06-01-o5o6-runtime-agent-flow-auditfix:
+    evidence_id: evidence.2026-06-01-o5o6-runtime-agent-flow-auditfix
+    timestamp: '2026-06-01T00:00:00Z'
+    task: O5/O6 runtime agent flow auditfix hardening
+    plan_id: plan.o5o6.runtime-agent-flow-auditfix
+    capability: vac.local_runtime_owner
+    rationale:
+      summary: >
+        Closed the remaining audit findings by adding structural owner-native
+        support gating, Tier-2 thread store backed methods, Plan Mode completion
+        gate wiring, de-brittled init doctor readiness, and command/evidence gate
+        verification anchors.
+      policy_refs:
+        - vac.runtime-plan-mode-single-path
+        - vac.static-vs-toolchain-truth
+        - vac.no-hardcoded-readiness
+      evidence_refs:
+        - evidence.2026-06-01-o5o6-runtime-agent-flow-auditfix
+      excluded:
+        raw_chain_of_thought: true
+    changeset:
+      operation: modify
+      diff_excerpt: Owner-native support manifest, ThreadStore backed thread read/list/resume/branch, Plan Mode static completion gate, init doctor structural readiness.
+    approval:
+      approved_by: operator
+      content_hash: source-artifact-final-pending-sha256
+    chain_depth: 3

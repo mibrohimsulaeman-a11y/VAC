@@ -1,0 +1,13 @@
+schema_version: 1
+kind: registry_status
+id: doctor.release.pass
+release:
+  registry: pass
+  surfaces: pass
+  policy: pass
+  ownership: pass
+  workflow: pass
+  evidence: pass
+  build: pass
+  memory: pass
+  init: pass

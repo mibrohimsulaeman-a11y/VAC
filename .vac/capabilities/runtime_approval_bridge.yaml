@@ -1,0 +1,69 @@
+schema_version: 1
+kind: capability
+id: vac.runtime_approval_bridge
+title: Runtime Approval Bridge
+status: ready
+owner: vac-rs/local-runtime-owner/src/command_bus.rs
+ownership:
+  crates:
+  - vac-local-runtime-owner
+  - vac-core
+  - vac-tui
+  modules:
+  - command_bus
+  - local_runtime.approval
+  - app_server_session
+  targets:
+  - crate_name: vac-local-runtime-owner
+    module: command_bus
+  - crate_name: vac-core
+    module: local_runtime.approval
+  - crate_name: vac-tui
+    module: app_server_session
+description: Pre-gate bridge from local-runtime request dispatch toward operator approval surfaces.
+reason: 'Runtime approval semantics are owner-native on the default path through local-runtime-owner request dispatch and release-gate non-pass policy. Optional legacy approval transport remains non-default delete/defer evidence only.
+
+  '
+depends_on:
+- vac.approvals
+- vac.local_runtime_owner
+optional_depends_on:
+- vac.tui_session_runtime
+runtime_events:
+- runtime_approval_requested
+- runtime_approval_resolved
+surfaces:
+  palette: true
+states:
+  empty: No runtime approval request
+  loading: Runtime approval pending
+  success: Runtime approval resolved
+  failure: Runtime approval failed
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: true
+validation:
+  commands:
+  - id: vac.runtime-approval-bridge.validation.cmd001
+    runner: cargo
+    args:
+    - +1.93.0
+    - check
+    - -p
+    - vac-local-runtime-owner
+    risk: execute_process
+    approval: policy
+  gates: []
+compatibility_transport:
+- dependency: vac_app_server_client optional legacy approval transport
+  status: compatibility_transport
+  owner: vac-rs/tui/src/app_server_session.rs
+  quarantine_marker: 'VAC_RUNTIME_OWNER_COMPAT_DEFER: plan31-app-server-compat-quarantine'
+  deletion_condition: A future deletion slice removes the optional legacy approval transport after rollback evidence is retired.
+  replacement: vac-rs/local-runtime-owner/src/command_bus.rs request dispatch plus operator approval surfaces.
+  target_removal_plan: docs/workflow-control-plane/plans/31-inventory.md
+docs:
+- docs/workflow-control-plane/plans/31-inventory.md
+- docs/workflow-control-plane/plans/32-vac-runtime-owner-gates.md

@@ -1,0 +1,74 @@
+schema_version: 1
+kind: workflow
+id: maintenance.tui-status-output
+title: TUI status output hardening readiness
+status: ready
+owner:
+  crate: vac-surface-tui
+  module: status
+description: Readiness workflow for the /status hardening contract and Hardening 3 deep status output gate.
+triggers:
+- kind: manual
+  id: check_tui_status_output
+steps:
+- id: status_output_contract
+  uses: capability.vac.tui.status-output.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+- id: status_output_deep_hardening
+  uses: capability.vac.tui.status-output.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+- id: status_output_contract_tests
+  uses: capability.vac.tui.status-output.check
+  ui:
+    surface: /workflow
+    progress_panel: true
+    activity_log: true
+    approval_surface: false
+    evidence_surface: true
+policy:
+  mutates_files: false
+  network: false
+  default_risk: safe_read
+  redaction: false
+  approval_required_for: []
+ui:
+  surface: /workflow
+  inspect_surface: /capabilities
+  progress_panel: true
+  activity_log: true
+  approval_surface: false
+  evidence_surface: true
+validation:
+  gates:
+  - status_output_contract
+  - status_output_contract_tests
+  - status_output_deep_hardening
+  commands:
+  - id: maintenance.tui-status-output.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-tui-status-output-contract.sh
+    risk: execute_process
+    approval: policy
+  - id: maintenance.tui-status-output.validation.cmd002
+    runner: bash
+    args:
+    - scripts/check-tui-status-deep-hardening-contract.sh
+    risk: execute_process
+    approval: policy
+  - id: maintenance.tui-status-output.validation.cmd003
+    runner: bash
+    args:
+    - scripts/check-tui-status-output-rustc-contract.sh
+    risk: execute_process
+    approval: policy

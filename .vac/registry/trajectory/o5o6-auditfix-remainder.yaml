@@ -1,0 +1,28 @@
+schema_version: 1
+kind: trajectory
+id: trajectory.o5o6.auditfix-remainder
+timestamp: '2026-06-01T00:00:00Z'
+plan_id: plan.o5o6.auditfix-remainder
+capability: vac.architecture
+rationale:
+  summary: >
+    The re-audit showed the physical extraction succeeded but left R-03/R-04/R-05/R-06,
+    S-07, and S-12 open. This slice closes the safe source/static surfaces without
+    violating KEEP auth/provider policy or pretending cargo-backed validation ran.
+  policy_refs:
+    - vac.static-vs-toolchain-truth
+    - vac.local-tool-scope
+    - vac.architecture-layering
+  evidence_refs:
+    - evidence.2026-06-01-o5o6-auditfix-remainder
+  raw_chain_of_thought_excluded: true
+changeset:
+  operation: refactor
+  diff_excerpt: >
+    Bound production TUI/core queues, remove core .expect panic surface, shrink semantic
+    split godfiles to dispatchers, fail-close legacy ChatGPT remote plugin/skill cloud
+    paths, refresh debt marker inventory, and encode layered workspace target.
+approval:
+  approved_by: operator
+  content_hash: source-artifact-final-pending-sha256
+rollback: restore vac-o5o6-physical-extraction-final-source.zip before reapplying the auditfix remainder slice with cargo-backed feedback.

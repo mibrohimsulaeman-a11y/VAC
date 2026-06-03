@@ -1,0 +1,42 @@
+schema_version: 1
+kind: plan
+id: plan.o5o6.epic-a-app-server-retirement
+title: O5/O6 Epic A app-server retirement
+status: implemented_not_evaluated
+owner: vac-o5-o6
+scope:
+  include:
+    - vac-rs/Cargo.toml
+    - vac-rs/Cargo.lock
+    - vac-rs/tui/Cargo.toml
+    - vac-rs/tui/src/local_runtime_session.rs
+    - vac-rs/tui/src/runtime_owner_session.rs
+    - vac-rs/runtime-protocol/Cargo.toml
+    - vac-rs/runtime-protocol/src/bin/export.rs
+    - vac-rs/runtime-protocol/src/bin/write_schema_fixtures.rs
+    - scripts/check-no-app-server-local-path-contract.sh
+    - scripts/check-vac-epic-a-app-server-retirement.sh
+    - scripts/check-vac-o5-1c-app-server-protocol-consumer-migration.sh
+    - scripts/check-vac-o5-o6-monolith-quality-slice.sh
+  exclude:
+    - provider offline/default-local LLM changes
+    - cloud/provider login removal
+risk: medium
+rationale: >
+  Audit corrected the app-server verdict: default TUI runtime is in-process and
+  app-server compatibility is feasible to remove. Local means no separate
+  app-server process; provider access must remain.
+validation:
+  static_gates:
+    - scripts/check-no-app-server-local-path-contract.sh
+    - scripts/check-vac-epic-a-app-server-retirement.sh
+    - scripts/check-vac-o5-1c-app-server-protocol-consumer-migration.sh
+    - scripts/check-vac-o5-o6-monolith-quality-slice.sh
+  tv_gates:
+    - cargo build --offline --workspace --locked
+    - cargo clippy --offline --workspace -- -D warnings
+    - cargo test --offline --workspace
+    - cargo tree -p vac-surface-tui --edges normal,build
+status_truth:
+  sv: done
+  tv: pending

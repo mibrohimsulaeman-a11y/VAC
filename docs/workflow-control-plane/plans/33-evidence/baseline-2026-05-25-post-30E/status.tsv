@@ -1,0 +1,8 @@
+git status short	0	docs/workflow-control-plane/plans/33-evidence/baseline-2026-05-25-post-30E/git-status-short.txt
+disk guard	0	docs/workflow-control-plane/plans/33-evidence/baseline-2026-05-25-post-30E/disk-guard.txt
+tui source grep app server imports	0	docs/workflow-control-plane/plans/33-evidence/baseline-2026-05-25-post-30E/tui-source-grep-app-server-imports.txt
+tui manifest and source rg app server	0	docs/workflow-control-plane/plans/33-evidence/baseline-2026-05-25-post-30E/tui-manifest-and-source-rg-app-server.txt
+workspace app server consumer audit	0	docs/workflow-control-plane/plans/33-evidence/baseline-2026-05-25-post-30E/workspace-app-server-consumer-audit.txt
+inverse tree vac app server client	0	docs/workflow-control-plane/plans/33-evidence/baseline-2026-05-25-post-30E/inverse-tree-vac-app-server-client.txt
+inverse tree vac app server	0	docs/workflow-control-plane/plans/33-evidence/baseline-2026-05-25-post-30E/inverse-tree-vac-app-server.txt
+inverse tree vac app server transport	0	docs/workflow-control-plane/plans/33-evidence/baseline-2026-05-25-post-30E/inverse-tree-vac-app-server-transport.txt

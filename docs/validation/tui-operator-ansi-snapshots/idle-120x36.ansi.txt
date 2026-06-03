@@ -1,0 +1,41 @@
+# VAC operator TUI ANSI snapshot
+scenario: idle
+viewport: 120x36
+style_roles: plain, chrome, muted, accent, success, warning, danger, user, agent, status
+---
+[38;5;245m● ● ●  vac · interactive — idle                                                                                         [0m
+[38;5;245m────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;245m[chat] · runtime · review · workbench · mcp                                                                     tab 1/5 [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;42m[VIL-native]  ready  — VIL Engine connected · rulebook vil.core enforcing                                               [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;117mThe agent will stream thinking, tools, and approvals here.                                                              [0m
+[38;5;117mKeyboard-only:  [tab] focus   [/] commands   [@] files   [shift+tab] plan mode                                          [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;45mrecent tasks                                                                                                            [0m
+[38;5;117m────────────────────────────────────────────────────────────                                                            [0m
+[38;5;42m▸ add error handling to auth module          2h ago · 12 files · ✓ validated                                            [0m
+[38;5;42m▸ refactor vil_swarm tool executor           yesterday · 6 files · ✓ validated                                          [0m
+[38;5;214m▸ bump dependencies and re-run mutants       2d ago · 41 files · ▲ below gate                                           [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;245m┌─ update ──────────────────────────────────────────────────────────────────────────────────────────────────            [0m
+[38;5;117m│ VAC 0.4.3 available — patch release with mutation gate closure. Run /upgrade to apply.                   │            [0m
+[38;5;245m└──────────────────────────────────────────────────────────────────────────────────────────────────────────┘            [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;240m                                                                                                                        [0m
+[38;5;245m┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐[0m
+[38;5;245m│ ▸  / commands   @ files   shift+tab plan   ctrl+j newline                                                            │[0m
+[38;5;245m└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘[0m
+[38;5;117mINPUT | model claude-sonnet-4.5 | 0 tok | manual | valid 100% | lsp E0 W0 | profile default · rulebook vil.core         [0m

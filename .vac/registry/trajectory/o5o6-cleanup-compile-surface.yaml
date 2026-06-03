@@ -1,0 +1,21 @@
+schema_version: 1
+kind: trajectory
+id: trajectory.o5o6.cleanup-compile-surface
+timestamp: '2026-06-01T00:00:00Z'
+plan_id: plan.o5o6.cleanup-compile-surface
+capability: vac.local_runtime_owner
+rationale:
+  summary: The local-tool cleanup kept locked auth/provider surfaces but still carried stale workspace dependency path entries for deleted crates. This slice removes those missing paths and gates the compile surface without pruning KEEP policy crates.
+  policy_refs:
+    - vac.static-vs-toolchain-truth
+    - vac.local-tool-scope
+  evidence_refs:
+    - evidence.2026-06-01-o5o6-cleanup-compile-surface
+  raw_chain_of_thought_excluded: true
+changeset:
+  operation: cleanup
+  diff_excerpt: Removed stale missing workspace dependency paths and added rustc-free compile-surface gate for local cleanup stubs and manifests.
+approval:
+  approved_by: operator
+  content_hash: source-artifact-final-pending-sha256
+rollback: restore vac-o5o6-tui-local-tool-cleanup-final-source.zip before reapplying cleanup compile-surface hardening with cargo-backed feedback.

@@ -1,0 +1,143 @@
+schema_version: 1
+kind: capability
+id: vac.sessions
+title: Sessions
+status: ready
+owner:
+  crate: vac-capability-sessions
+  module: contract
+ownership:
+  crates:
+  - vac-capability-sessions
+  - vac-core
+  modules:
+  - session
+  targets:
+  - crate_name: vac-core
+    module: session_prefix
+  - crate_name: vac-core
+    module: session_rollout_init_error
+  - crate_name: vac-core
+    module: session_startup_prewarm
+  - crate_name: vac-core
+    module: thread_manager
+  - crate_name: vac-core
+    module: thread_rollout_truncation
+  - crate_name: vac-external-agent-sessions
+    module: detect
+  - crate_name: vac-external-agent-sessions
+    module: export
+  - crate_name: vac-external-agent-sessions
+    module: ledger
+  - crate_name: vac-external-agent-sessions
+    module: records
+  - crate_name: vac-protocol
+    module: account
+  - crate_name: vac-protocol
+    module: agent_path
+  - crate_name: vac-protocol
+    module: approvals
+  - crate_name: vac-protocol
+    module: auth
+  - crate_name: vac-protocol
+    module: config_types
+  - crate_name: vac-protocol
+    module: dynamic_tools
+  - crate_name: vac-protocol
+    module: error
+  - crate_name: vac-protocol
+    module: exec_output
+  - crate_name: vac-protocol
+    module: items
+  - crate_name: vac-protocol
+    module: mcp
+  - crate_name: vac-protocol
+    module: memory_citation
+  - crate_name: vac-protocol
+    module: message_history
+  - crate_name: vac-protocol
+    module: models
+  - crate_name: vac-protocol
+    module: network_policy
+  - crate_name: vac-protocol
+    module: num_format
+  - crate_name: vac-protocol
+    module: parse_command
+  - crate_name: vac-protocol
+    module: permissions
+  - crate_name: vac-protocol
+    module: plan_tool
+  - crate_name: vac-protocol
+    module: protocol
+  - crate_name: vac-protocol
+    module: request_permissions
+  - crate_name: vac-protocol
+    module: request_user_input
+  - crate_name: vac-protocol
+    module: shell_environment
+  - crate_name: vac-protocol
+    module: thread_id
+  - crate_name: vac-protocol
+    module: tool_name
+  - crate_name: vac-protocol
+    module: user_input
+  - crate_name: vac-protocol
+    module: vastar_models
+description: Interactive session lifecycle, resume, and thread state.
+reason: 'Session lifecycle surfaces, owner metadata, validation, and source-domain mapping are synchronized with the root capability catalog. Future session UX work is feature work, not a root-manifest readiness blocker.
+
+  '
+depends_on:
+- vac.chat
+surfaces:
+  slash:
+    commands:
+    - /branch
+    - /clear
+    - /compact
+    - /debug-config
+    - /exit
+    - /experimental
+    - /fast
+    - /keymap
+    - /new
+    - /quit
+    - /rename
+    - /resume
+    - /settings
+    - /status
+    - /statusline
+    - /theme
+    - /title
+    - /vim
+  cli:
+    enabled: true
+    commands:
+    - vac resume
+  palette: true
+states:
+- empty
+- loading
+- success
+- failure
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for:
+  - write_files
+  - execute_process
+validation:
+  commands:
+  - id: vac.sessions.validation.cmd001
+    runner: cargo
+    args:
+    - +1.93.0
+    - check
+    - -p
+    - vac-core
+    risk: execute_process
+    approval: policy
+docs:
+- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

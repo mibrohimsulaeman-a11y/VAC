@@ -1,0 +1,22 @@
+schema_version: 1
+kind: ownership_report
+id: report.ownership.fixture-hard-quarantine
+timestamp: '2026-05-29T00:00:00Z'
+workspace_root: /tmp/fixture
+summary:
+  total_files: 1
+  owned: 0
+  unowned: 1
+  coverage_percent: 0.0
+files:
+- path: src/unowned.rs
+  status: unowned
+  capability: null
+  claimed_by: []
+  last_evidence: null
+  risk_findings: []
+actions_required:
+- type: quarantine
+  file: src/unowned.rs
+  suggestion: assign owner
+  priority: critical

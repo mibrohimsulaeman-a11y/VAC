@@ -1,0 +1,45 @@
+# VAC operator TUI ANSI snapshot
+scenario: runtime jobs
+viewport: 140x40
+style_roles: plain, chrome, muted, accent, success, warning, danger, user, agent, status
+---
+[38;5;245m● ● ●  vac · interactive — runtime jobs                                                                                                     [0m
+[38;5;245m────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[38;5;245mchat · [runtime] · review · workbench · mcp                                                                                         tab 2/5 [0m
+[38;5;45mautopilot ● running   pid 48213   uptime 2h 14m   mode monitor-only   env host   ·   queue 3   ·   running 1                                [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;117m  state      kind       id       trigger                            age          next-run                                                   [0m
+[38;5;117m  ────────────────────────────────────────────────────────────────────────────────────────────────────────────                              [0m
+[38;5;42m● running    oneshot    7c0f1a   refactor handlers/input.rs         00:04:18     —                                                          [0m
+[38;5;240m○ queued     cron       b82d4e   0 */6 * * * · validate             00:00:42     in 3h 41m                                                  [0m
+[38;5;240m○ queued     filewatch  f19ac3   crates/vil_llm/**/*.rs             00:12:06     on write                                                   [0m
+[38;5;42m● ok         oneshot    2e8b71   bump dependencies                  01:22:41     —                                                          [0m
+[38;5;42m● ok         cron       a4d90e   @hourly · mutation gate            00:18:11     in 41m                                                     [0m
+[38;5;203;1m● failed     oneshot    9aa0c2   knowledge loader: reindex          02:01:55     —                                                          [0m
+[38;5;240m○ cancel     oneshot    0b7411   refactor vil_swarm tool            yesterday    —                                                          [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;245m┌─ inspect 7c0f1a ──────────────────────────────────────────────────────────────────────────────────────────────                            [0m
+[38;5;45m│ task graph [plan→read→write→edit→check→done] node 3/6 · 62%                                                  │                            [0m
+[38;5;117m│ tokens 68,240 / 200k ████░░░░░░░░ spend $0.142 retry 0/3                                                     │                            [0m
+[38;5;240m│ c cancel r retry i open in editor enter attach                                                               │                            [0m
+[38;5;214m│ policy: monitor-only scheduler; actions policy-gated; destructive tasks require approval gates               │                            [0m
+[38;5;245m└──────────────────────────────────────────────────────────────────────────────────────────────────────────────┘                            [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;240m                                                                                                                                            [0m
+[38;5;245m┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐[0m
+[38;5;245m│ ▸  runtime jobs monitor — c cancel · r retry · enter attach                                                                              │[0m
+[38;5;245m└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘[0m
+[38;5;117mWORKBENCH | model claude-sonnet-4.5 | 68,240 tok | manual | valid 92% | lsp E0 W3 | profile default · rulebook vil.core                     [0m

@@ -1,0 +1,2757 @@
+schema_version: 1
+kind: registry_status
+id: init.source_inventory.test
+title: 'VAC init source inventory by class: product_test'
+status: ready
+summary:
+  class: product_test
+  total_files: 459
+files:
+  - path: tests/fixtures/approvals/valid_approval.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/commands/structured_command.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/doctor/registry_duplicate_id_a.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/doctor/registry_duplicate_id_b.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/doctor/release_blocking.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/doctor/release_fail.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/doctor/release_pass.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/evidence/broken_chain.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/evidence/valid_chain.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/memory/invalid_secret_memory.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/memory/secret_rejected.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/memory/valid_team_memory.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/patches/outside_plan.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/plans/freeform_command_plan.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/plans/valid_semantic_plan.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/policy/fail_closed_execute_process.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/policy/fail_closed_policy.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/risk/command_spawn.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/schema/invalid_bad_id.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/schema/invalid_freeform_command.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/schema/invalid_missing_kind.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/schema/invalid_unknown_kind.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/schema/valid_capability.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/schema/valid_runtime_gate.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/security_regression/absolute_path_write.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/security_regression/approval_replay.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/security_regression/broken_evidence_chain.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/security_regression/changed_policy_hash.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/security_regression/expired_approval.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/security_regression/free_form_command.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/security_regression/path_traversal.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/security_regression/planned_capability_execution.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/security_regression/secret_memory_content.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/security_regression/shell_injection.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/security_regression/undeclared_new_file.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/security_regression/unowned_file_patch.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/state_machine/init_ready.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/state_machine/init_state.discovered.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/trajectory/safe_why.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/trajectory/valid_why_result.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/workspace/ownership_paths.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: tests/fixtures/workspace/ownership_report_hard_quarantine.yaml
+    class: product_test
+    language: yaml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+  - path: vac-rs/app-server-protocol/tests/schema_fixtures.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server-protocol
+  - path: vac-rs/app-server/src/bin/test_notify_capture.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+    module_hint: "bin::test_notify_capture"
+  - path: vac-rs/app-server/tests/all.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/common/Cargo.toml
+    class: product_test
+    language: toml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/common/analytics_server.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/common/auth_fixtures.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/common/config.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/common/lib.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/common/mcp_process.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/common/mock_model_server.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/common/models_cache.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/common/responses.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/common/rollout.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/auth.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/conversation_summary.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/fuzzy_file_search.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/mod.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/account.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/analytics.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/app_list.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/client_metadata.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/collaboration_mode_list.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/command_exec.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/compaction.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/config_rpc.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/connection_handling_websocket.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/connection_handling_websocket_unix.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/device_key.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/dynamic_tools.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/experimental_api.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/experimental_feature_list.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/external_agent_config.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/fs.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/hooks_list.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/initialize.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/marketplace_add.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/marketplace_remove.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/marketplace_upgrade.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/mcp_resource.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/mcp_server_elicitation.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/mcp_server_status.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/mcp_tool.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/memory_reset.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/mod.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/model_list.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/model_provider_capabilities_read.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/output_schema.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/plan_item.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/plugin_install.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/plugin_list.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/plugin_read.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/plugin_share.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/plugin_uninstall.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/rate_limits.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/realtime_conversation.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/remote_thread_store.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/request_permissions.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/request_user_input.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/review.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/safety_check_downgrade.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/skills_list.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/thread_archive.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/thread_branch.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/thread_inject_items.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/thread_list.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/thread_loaded_list.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/thread_memory_mode_set.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/thread_metadata_update.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/thread_name_websocket.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/thread_read.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/thread_resume.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/thread_rollback.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/thread_shell_command.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/thread_start.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/thread_status.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/thread_unarchive.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/thread_unsubscribe.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/turn_interrupt.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/turn_start.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/turn_start_zsh_branch.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/turn_steer.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/v2/windows_sandbox_setup.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/app-server/tests/suite/zsh
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: app-server
+  - path: vac-rs/apply-patch/tests/all.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/.gitattributes
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/001_add_file/expected/bar.md
+    class: product_test
+    language: markdown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/001_add_file/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/002_multiple_operations/expected/modify.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/002_multiple_operations/expected/nested/new.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/002_multiple_operations/input/delete.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/002_multiple_operations/input/modify.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/002_multiple_operations/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/003_multiple_chunks/expected/multi.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/003_multiple_chunks/input/multi.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/003_multiple_chunks/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/004_move_to_new_directory/expected/old/other.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/004_move_to_new_directory/expected/renamed/dir/name.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/004_move_to_new_directory/input/old/name.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/004_move_to_new_directory/input/old/other.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/004_move_to_new_directory/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/005_rejects_empty_patch/expected/foo.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/005_rejects_empty_patch/input/foo.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/005_rejects_empty_patch/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/006_rejects_missing_context/expected/modify.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/006_rejects_missing_context/input/modify.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/006_rejects_missing_context/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/007_rejects_missing_file_delete/expected/foo.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/007_rejects_missing_file_delete/input/foo.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/007_rejects_missing_file_delete/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/008_rejects_empty_update_hunk/expected/foo.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/008_rejects_empty_update_hunk/input/foo.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/008_rejects_empty_update_hunk/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/009_requires_existing_file_for_update/expected/foo.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/009_requires_existing_file_for_update/input/foo.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/009_requires_existing_file_for_update/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/010_move_overwrites_existing_destination/expected/old/other.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/010_move_overwrites_existing_destination/expected/renamed/dir/name.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/010_move_overwrites_existing_destination/input/old/name.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/010_move_overwrites_existing_destination/input/old/other.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/010_move_overwrites_existing_destination/input/renamed/dir/name.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/010_move_overwrites_existing_destination/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/011_add_overwrites_existing_file/expected/duplicate.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/011_add_overwrites_existing_file/input/duplicate.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/011_add_overwrites_existing_file/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/012_delete_directory_fails/expected/dir/foo.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/012_delete_directory_fails/input/dir/foo.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/012_delete_directory_fails/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/013_rejects_invalid_hunk_header/expected/foo.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/013_rejects_invalid_hunk_header/input/foo.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/013_rejects_invalid_hunk_header/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/014_update_file_appends_trailing_newline/expected/no_newline.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/014_update_file_appends_trailing_newline/input/no_newline.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/014_update_file_appends_trailing_newline/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/015_failure_after_partial_success_leaves_changes/expected/created.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/015_failure_after_partial_success_leaves_changes/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/016_pure_addition_update_chunk/expected/input.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/016_pure_addition_update_chunk/input/input.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/016_pure_addition_update_chunk/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/017_whitespace_padded_hunk_header/expected/foo.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/017_whitespace_padded_hunk_header/input/foo.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/017_whitespace_padded_hunk_header/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/018_whitespace_padded_patch_markers/expected/file.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/018_whitespace_padded_patch_markers/input/file.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/018_whitespace_padded_patch_markers/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/019_unicode_simple/expected/foo.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/019_unicode_simple/input/foo.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/019_unicode_simple/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/020_delete_file_success/expected/keep.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/020_delete_file_success/input/keep.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/020_delete_file_success/input/obsolete.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/020_delete_file_success/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/020_whitespace_padded_patch_marker_lines/expected/file.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/020_whitespace_padded_patch_marker_lines/input/file.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/020_whitespace_padded_patch_marker_lines/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/021_update_file_deletion_only/expected/lines.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/021_update_file_deletion_only/input/lines.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/021_update_file_deletion_only/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/022_update_file_end_of_file_marker/expected/tail.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/022_update_file_end_of_file_marker/input/tail.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/022_update_file_end_of_file_marker/patch.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/fixtures/scenarios/README.md
+    class: product_test
+    language: markdown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/suite/cli.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/suite/mod.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/suite/scenarios.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/apply-patch/tests/suite/tool.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: apply-patch
+  - path: vac-rs/backend-client/tests/fixtures/task_details_with_diff.json
+    class: product_test
+    language: json
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: backend-client
+  - path: vac-rs/backend-client/tests/fixtures/task_details_with_error.json
+    class: product_test
+    language: json
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: backend-client
+  - path: vac-rs/chatgpt/tests/all.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: chatgpt
+  - path: vac-rs/chatgpt/tests/suite/apply_command_e2e.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: chatgpt
+  - path: vac-rs/chatgpt/tests/suite/mod.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: chatgpt
+  - path: vac-rs/chatgpt/tests/task_turn_fixture.json
+    class: product_test
+    language: json
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: chatgpt
+  - path: vac-rs/cli/tests/runtime_owner_gates.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: cli
+  - path: vac-rs/core-plugins/src/test_support.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core-plugins
+    module_hint: test_support
+  - path: vac-rs/core/src/mcp_tool_exposure_test.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+    module_hint: mcp_tool_exposure_test
+  - path: vac-rs/core/src/plugins/test_support.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+    module_hint: "plugins::test_support"
+  - path: vac-rs/core/src/session/tests/guardian_tests.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+    module_hint: "session::tests::guardian_tests"
+  - path: vac-rs/core/src/test_support.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+    module_hint: test_support
+  - path: vac-rs/core/src/tools/handlers/test_sync.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+    module_hint: "tools::handlers::test_sync"
+  - path: vac-rs/core/tests/all.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/cli_responses_fixture.sse
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/common/Cargo.toml
+    class: product_test
+    language: toml
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/common/apps_test_server.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/common/context_snapshot.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/common/lib.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/common/process.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/common/responses.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/common/streaming_sse.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/common/test_vac.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/common/test_vac_exec.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/common/tracing.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/common/zsh_branch.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/fixtures/incomplete_sse.json
+    class: product_test
+    language: json
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/responses_headers.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/abort_tasks.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/agent_jobs.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/agent_websocket.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/agents_md.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/apply_patch_cli.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/approvals.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/branch_thread.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/cli_stream.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/client.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/client_websockets.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/code_mode.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/collaboration_instructions.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/compact.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/compact_remote.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/compact_resume_branch.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/deprecation_notice.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/exec.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/exec_policy.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/hierarchical_agents.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/hooks.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/hooks_mcp.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/image_rollout.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/items.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/json_result.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/live_cli.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/live_reload.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/mod.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/model_overrides.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/model_switching.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/model_visible_layout.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/models_cache_ttl.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/models_etag_responses.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/otel.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/override_updates.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/pending_input.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/permissions_messages.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/personality.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/personality_migration.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/plugins.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/prompt_caching.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/prompt_debug_tests.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/quota_exceeded.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/realtime_conversation.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/remote_env.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/remote_models.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/request_compression.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/request_permissions.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/request_permissions_tool.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/request_plugin_install.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/request_user_input.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/responses_api_proxy_headers.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/resume.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/resume_warning.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/review.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/rmcp_client.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/rollout_list_find.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/safety_check_downgrade.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/search_tool.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/shell_command.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/shell_serialization.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/shell_snapshot.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/skill_approval.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/skills.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact__manual_compact_with_history_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact__manual_compact_without_prev_user_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact__mid_turn_compaction_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact__pre_sampling_model_switch_compaction_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact__pre_turn_compaction_context_window_exceeded_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact__pre_turn_compaction_including_incoming_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact__pre_turn_compaction_strips_incoming_model_switch_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact_remote__remote_compact_resume_restates_realtime_end_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact_remote__remote_manual_compact_restates_realtime_start_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact_remote__remote_manual_compact_with_history_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact_remote__remote_manual_compact_without_prev_user_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact_remote__remote_mid_turn_compaction_does_not_restate_realtime_end_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact_remote__remote_mid_turn_compaction_multi_summary_reinjects_above_last_summary_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact_remote__remote_mid_turn_compaction_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact_remote__remote_mid_turn_compaction_summary_only_reinjects_context_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact_remote__remote_pre_turn_compaction_context_window_exceeded_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact_remote__remote_pre_turn_compaction_failure_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact_remote__remote_pre_turn_compaction_including_incoming_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact_remote__remote_pre_turn_compaction_restates_realtime_end_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact_remote__remote_pre_turn_compaction_restates_realtime_start_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact_remote__remote_pre_turn_compaction_strips_incoming_model_switch_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact_resume_branch__rollback_followup_turn_trims_context_updates.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__compact_resume_branch__rollback_past_compaction_shapes.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__model_visible_layout__model_visible_layout_cwd_change_does_not_refresh_agents.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__model_visible_layout__model_visible_layout_environment_context_includes_one_subagent.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__model_visible_layout__model_visible_layout_environment_context_includes_two_subagents.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__model_visible_layout__model_visible_layout_resume_override_matches_rollout_model.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__model_visible_layout__model_visible_layout_resume_with_personality_change.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__model_visible_layout__model_visible_layout_turn_overrides.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__pending_input__pending_input_queued_mail_after_commentary.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__pending_input__pending_input_queued_mail_after_reasoning.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__pending_input__pending_input_user_input_no_preempt_after_reasoning.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__realtime_conversation__conversation_startup_context_current_thread_selects_many_turns_by_budget.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__realtime_conversation__conversation_user_text_turn_is_capped_when_mirrored_to_realtime.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/snapshots/all__suite__realtime_conversation__conversation_user_text_turn_is_sent_to_realtime_when_active.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/spawn_agent_description.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/sqlite_state.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/stream_error_allows_next_turn.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/stream_no_completed.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/subagent_notifications.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/tool_harness.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/tool_parallelism.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/tools.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/truncation.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/turn_state.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/unified_exec.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/unstable_features_warning.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/user_notification.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/user_shell_cmd.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/vac_delegate.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/vastar_file_mcp.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/view_image.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/web_search.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/websocket_fallback.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/core/tests/suite/window_headers.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: core
+  - path: vac-rs/exec-server/tests/common/exec_server.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec-server
+  - path: vac-rs/exec-server/tests/common/mod.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec-server
+  - path: vac-rs/exec-server/tests/exec_process.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec-server
+  - path: vac-rs/exec-server/tests/file_system.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec-server
+  - path: vac-rs/exec-server/tests/http_client.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec-server
+  - path: vac-rs/exec-server/tests/http_request.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec-server
+  - path: vac-rs/exec-server/tests/initialize.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec-server
+  - path: vac-rs/exec-server/tests/process.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec-server
+  - path: vac-rs/exec-server/tests/websocket.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec-server
+  - path: vac-rs/exec/tests/all.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec
+  - path: vac-rs/exec/tests/fixtures/apply_patch_freeform_final.txt
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec
+  - path: vac-rs/exec/tests/fixtures/cli_responses_fixture.sse
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec
+  - path: vac-rs/exec/tests/suite/add_dir.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec
+  - path: vac-rs/exec/tests/suite/apply_patch.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec
+  - path: vac-rs/exec/tests/suite/auth_env.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec
+  - path: vac-rs/exec/tests/suite/ephemeral.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec
+  - path: vac-rs/exec/tests/suite/mcp_required_exit.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec
+  - path: vac-rs/exec/tests/suite/mod.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec
+  - path: vac-rs/exec/tests/suite/originator.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec
+  - path: vac-rs/exec/tests/suite/output_schema.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec
+  - path: vac-rs/exec/tests/suite/prompt_stdin.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec
+  - path: vac-rs/exec/tests/suite/resume.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec
+  - path: vac-rs/exec/tests/suite/sandbox.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec
+  - path: vac-rs/exec/tests/suite/server_error_exit.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: exec
+  - path: vac-rs/execpolicy/tests/basic.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: execpolicy
+  - path: vac-rs/linux-sandbox/tests/all.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: linux-sandbox
+  - path: vac-rs/linux-sandbox/tests/suite/landlock.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: linux-sandbox
+  - path: vac-rs/linux-sandbox/tests/suite/managed_proxy.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: linux-sandbox
+  - path: vac-rs/linux-sandbox/tests/suite/mod.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: linux-sandbox
+  - path: vac-rs/login/tests/all.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: login
+  - path: vac-rs/login/tests/suite/auth_refresh.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: login
+  - path: vac-rs/login/tests/suite/device_code_login.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: login
+  - path: vac-rs/login/tests/suite/login_server_e2e.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: login
+  - path: vac-rs/login/tests/suite/logout.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: login
+  - path: vac-rs/login/tests/suite/mod.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: login
+  - path: vac-rs/models-manager/src/test_support.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: models-manager
+    module_hint: test_support
+  - path: vac-rs/otel/tests/harness/mod.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: otel
+  - path: vac-rs/otel/tests/suite/manager_metrics.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: otel
+  - path: vac-rs/otel/tests/suite/mod.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: otel
+  - path: vac-rs/otel/tests/suite/otel_export_routing_policy.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: otel
+  - path: vac-rs/otel/tests/suite/otlp_http_loopback.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: otel
+  - path: vac-rs/otel/tests/suite/runtime_summary.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: otel
+  - path: vac-rs/otel/tests/suite/send.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: otel
+  - path: vac-rs/otel/tests/suite/snapshot.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: otel
+  - path: vac-rs/otel/tests/suite/timing.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: otel
+  - path: vac-rs/otel/tests/suite/validation.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: otel
+  - path: vac-rs/otel/tests/tests.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: otel
+  - path: vac-rs/rmcp-client/src/bin/test_stdio_server.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: rmcp-client
+    module_hint: "bin::test_stdio_server"
+  - path: vac-rs/rmcp-client/src/bin/test_streamable_http_server.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: rmcp-client
+    module_hint: "bin::test_streamable_http_server"
+  - path: vac-rs/rmcp-client/tests/process_group_cleanup.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: rmcp-client
+  - path: vac-rs/rmcp-client/tests/resources.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: rmcp-client
+  - path: vac-rs/rmcp-client/tests/streamable_http_recovery.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: rmcp-client
+  - path: vac-rs/rmcp-client/tests/streamable_http_remote.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: rmcp-client
+  - path: vac-rs/rmcp-client/tests/streamable_http_test_support.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: rmcp-client
+  - path: vac-rs/rollout-trace/src/reducer/test_support.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: rollout-trace
+    module_hint: "reducer::test_support"
+  - path: vac-rs/runtime-protocol/tests/schema_fixtures.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: runtime-protocol
+  - path: vac-rs/state/src/runtime/test_support.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: state
+    module_hint: "runtime::test_support"
+  - path: vac-rs/thread-store/src/local/test_support.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: thread-store
+    module_hint: "local::test_support"
+  - path: vac-rs/tui/src/app/test_support.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "app::test_support"
+  - path: vac-rs/tui/src/app/tests/model_catalog.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "app::tests::el_catalog"
+  - path: vac-rs/tui/src/app/tests/snapshots/vac_tui__app__tests__model_catalog__model_migration_prompt_shows_for_hidden_model.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+  - path: vac-rs/tui/src/chatwidget/tests/app_server.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::app_server"
+  - path: vac-rs/tui/src/chatwidget/tests/approval_requests.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::approval_requests"
+  - path: vac-rs/tui/src/chatwidget/tests/composer_submission.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::composer_submission"
+  - path: vac-rs/tui/src/chatwidget/tests/exec_flow.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::exec_flow"
+  - path: vac-rs/tui/src/chatwidget/tests/goal_menu.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::goal_menu"
+  - path: vac-rs/tui/src/chatwidget/tests/guardian.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::guardian"
+  - path: vac-rs/tui/src/chatwidget/tests/helpers.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::helpers"
+  - path: vac-rs/tui/src/chatwidget/tests/history_replay.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::history_replay"
+  - path: vac-rs/tui/src/chatwidget/tests/mcp_startup.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::mcp_startup"
+  - path: vac-rs/tui/src/chatwidget/tests/permissions.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::permissions"
+  - path: vac-rs/tui/src/chatwidget/tests/plan_mode.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::plan_e"
+  - path: vac-rs/tui/src/chatwidget/tests/popups_and_settings.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::popups_and_settings"
+  - path: vac-rs/tui/src/chatwidget/tests/review_mode.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::review_e"
+  - path: vac-rs/tui/src/chatwidget/tests/side.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::side"
+  - path: vac-rs/tui/src/chatwidget/tests/slash_commands.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::slash_commands"
+  - path: vac-rs/tui/src/chatwidget/tests/snapshots/vac_tui__chatwidget__tests__approval_requests__exec_approval_history_decision_aborted_long.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+  - path: vac-rs/tui/src/chatwidget/tests/snapshots/vac_tui__chatwidget__tests__approval_requests__exec_approval_history_decision_aborted_multiline.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+  - path: vac-rs/tui/src/chatwidget/tests/snapshots/vac_tui__chatwidget__tests__approval_requests__exec_approval_history_decision_approved_short.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+  - path: vac-rs/tui/src/chatwidget/tests/snapshots/vac_tui__chatwidget__tests__approval_requests__exec_approval_modal_exec.snap
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+  - path: vac-rs/tui/src/chatwidget/tests/status_and_layout.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::status_and_layout"
+  - path: vac-rs/tui/src/chatwidget/tests/status_command_tests.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::status_command_tests"
+  - path: vac-rs/tui/src/chatwidget/tests/status_surface_previews.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::status_surface_previews"
+  - path: vac-rs/tui/src/chatwidget/tests/terminal_title.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: "chatwidget::tests::terminal_title"
+  - path: vac-rs/tui/src/test_backend.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: test_backend
+  - path: vac-rs/tui/src/test_support.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+    module_hint: test_support
+  - path: vac-rs/tui/tests/all.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+  - path: vac-rs/tui/tests/fixtures/oss-story.jsonl
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+  - path: vac-rs/tui/tests/manager_dependency_regression.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+  - path: vac-rs/tui/tests/operator_ui_snapshot_contract.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+  - path: vac-rs/tui/tests/suite/mod.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+  - path: vac-rs/tui/tests/suite/model_availability_nux.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+  - path: vac-rs/tui/tests/suite/no_panic_on_startup.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+  - path: vac-rs/tui/tests/suite/resize_reflow.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+  - path: vac-rs/tui/tests/suite/status_indicator.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+  - path: vac-rs/tui/tests/suite/vt100_history.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+  - path: vac-rs/tui/tests/suite/vt100_live_commit.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+  - path: vac-rs/tui/tests/test_backend.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: tui
+  - path: vac-rs/vac-api/tests/clients.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: vac-api
+  - path: vac-rs/vac-api/tests/models_integration.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: vac-api
+  - path: vac-rs/vac-api/tests/realtime_websocket_e2e.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: vac-api
+  - path: vac-rs/vac-api/tests/sse_end_to_end.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: vac-api
+  - path: vac-rs/vac-client/tests/ca_env.rs
+    class: product_test
+    language: rust
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: vac-client
+  - path: vac-rs/vac-client/tests/fixtures/test-ca-trusted.pem
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: vac-client
+  - path: vac-rs/vac-client/tests/fixtures/test-ca.pem
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: vac-client
+  - path: vac-rs/vac-client/tests/fixtures/test-intermediate.pem
+    class: product_test
+    language: unknown
+    scan_eligible: true
+    reason: "test source is scanned but policy is review-only"
+    crate_hint: vac-client

@@ -1,0 +1,46 @@
+schema_version: 1
+kind: plan
+id: plan.o5o6.remaining-audit-gaps
+status: ready
+title: O5/O6 remaining audit gaps source implementation
+updated_at: '2026-05-30T12:30:00Z'
+owner: vac.control_plane
+scope:
+  - vac-rs/control-plane/src/control_plane/vac_init_approval_binding.rs
+  - vac-rs/control-plane/src/control_plane/vac_init_evidence_chain.rs
+  - vac-rs/control-plane/src/control_plane/vac_init_migration_runtime.rs
+  - vac-rs/control-plane/src/control_plane/vac_init_tui_real_data.rs
+  - vac-rs/core/Cargo.toml
+  - tests/fixtures/signatures/**
+  - tests/fixtures/migrations/**
+  - tests/fixtures/tui/**
+  - scripts/check-vac-init-*-contract.sh
+  - THIRD_PARTY_NOTICES.md
+acceptance:
+  sv_done:
+    - Ed25519 approval and evidence signature verification paths are source-present.
+    - Migration runtime supports rollback/dry-run/apply/depth validation and registry doctor verification.
+    - TUI scheduler monitor fixture covers empty/loading/success/failure and no-bypass policy.
+    - Legal notices explicitly track Codex Apache-2.0 and Ratatui MIT provenance.
+  tv_pending:
+    - cargo build --offline --workspace --locked
+    - cargo clippy --offline --workspace -- -D warnings
+    - cargo test --offline --workspace
+validation:
+  commands:
+    - id: vac.remaining.audit.gaps.static
+      runner: bash
+      args: [scripts/check-vac-init-remaining-audit-gaps-static.sh]
+      risk: low
+      approval: never
+    - id: vac.legal.release.blockers
+      runner: bash
+      args: [scripts/check-legal-release-blockers.sh]
+      risk: low
+      approval: never
+rollback:
+  source_artifact: vac-o5o6-gap-bc-depth-source.zip
+  notes: Restore prior artifact and drop this slice's source/gate/fixture/evidence additions.
+signature:
+  algorithm: none
+  value: null

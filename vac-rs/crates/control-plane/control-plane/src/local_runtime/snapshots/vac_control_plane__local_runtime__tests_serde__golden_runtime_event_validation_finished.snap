@@ -1,0 +1,12 @@
+---
+source: core/src/local_runtime/tests_serde.rs
+expression: "RuntimeEvent::ValidationFinished(ValidationFinished::new(fixed_task_id(),\n\"cargo test -p vac-core\", ValidationStatus::Passed,\nSome(\"all tests passed\".to_string()),))"
+---
+{
+  "ValidationFinished": {
+    "task_id": "22222222-2222-2222-2222-222222222222",
+    "command_display": "cargo test -p vac-core",
+    "status": "passed",
+    "summary": "all tests passed"
+  }
+}

@@ -1,0 +1,9 @@
+schema_version: 1
+kind: registry_status
+id: init.source_inventory.build_output
+title: 'VAC init source inventory by class: build_output'
+status: ready
+summary:
+  class: build_output
+  total_files: 0
+files:

@@ -1,0 +1,77 @@
+schema_version: 1
+kind: workflow
+id: maintenance.autopilot-scheduler-readiness
+title: Autopilot scheduler readiness
+status: ready
+inputs: {}
+ui:
+  surface: /runtime
+  inspect_surface: /runtime/jobs
+  progress_panel: true
+  activity_log: true
+  approval_surface: true
+  evidence_surface: true
+policy:
+  default_risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: true
+  approval_required_for:
+  - execute_process
+  - write_files
+  - destructive_task
+steps:
+- id: manifest_registered
+  uses: capability.registry.schema_check
+  ui:
+    surface: /capabilities
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+- id: monitor_panel_rendered
+  uses: capability.autopilot.scheduler.render
+  ui:
+    surface: /runtime
+    inspect_surface: /runtime/jobs
+    progress_panel: true
+    activity_log: true
+    approval_surface: true
+    evidence_surface: true
+- id: policy_gate_asserted
+  uses: capability.policy.approval_gate
+  ui:
+    surface: /approvals
+    progress_panel: true
+    activity_log: true
+    approval_surface: true
+    evidence_surface: true
+- id: report
+  uses: capability.activity.emit
+  ui:
+    surface: /workflow
+    inspect_surface: /runtime/jobs
+    progress_panel: true
+    activity_log: true
+    evidence_surface: true
+validation:
+  gates:
+  - manifest_registered
+  - monitor_panel_rendered
+  - policy_gate_asserted
+  - report
+  commands:
+  - id: maintenance.autopilot-scheduler-readiness.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-autopilot-scheduler-contract.sh
+    risk: execute_process
+    approval: policy
+  - id: maintenance.autopilot-scheduler-readiness.validation.cmd002
+    runner: bash
+    args:
+    - scripts/check-tui-operator-snapshot-contract.sh
+    risk: execute_process
+    approval: policy
+hardening_4_10:
+  monitor_only: true
+  safety: policy-gated controls; destructive tasks still require approval gates

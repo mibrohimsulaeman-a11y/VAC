@@ -1,0 +1,54 @@
+schema_version: 1
+kind: capability
+id: vac.init.approval-binding
+title: VAC-Init Approval Binding and Replay Protection
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane::vac_init_approval_binding
+ownership:
+  crates:
+  - vac-core
+  modules:
+  - control_plane::vac_init_approval_binding
+  targets:
+  - crate_name: vac-core
+    module: control_plane::vac_init_approval_binding
+description: Approval request contract validates plan/diff/policy hash binding, expiry, nonce format, and replay protection.
+depends_on:
+- vac.init.semantic-plan
+- vac.init.policy-evaluator
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - bash scripts/check-vac-init-approval-binding-contract.sh
+  palette: true
+  tui:
+    routes:
+    - /capabilities
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for:
+  - execute_process
+states:
+- empty
+- loading
+- success
+- failure
+validation:
+  gates:
+  - vac_init_approval_binding_contract
+  commands:
+  - id: vac.init.approval-binding.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-approval-binding-contract.sh
+    risk: execute_process
+    approval: policy
+docs:
+- docs/vac-init/VAC_INIT_BATCH_06_12_IMPLEMENTATION.md
+- docs/validation/VAC_INIT_APPROVAL_BINDING_GATE.md

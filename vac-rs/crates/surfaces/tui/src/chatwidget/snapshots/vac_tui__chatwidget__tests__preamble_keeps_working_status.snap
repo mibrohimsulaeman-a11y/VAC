@@ -1,0 +1,12 @@
+---
+source: tui/src/chatwidget/tests/exec_flow.rs
+assertion_line: 240
+expression: normalized_backend_snapshot(terminal.backend())
+---
+"                                                                                "
+"• Working (0s • esc to interrupt)                                               "
+"                                                                                "
+"                                                                                "
+"› Ask VAC to do anything                                                        "
+"                                                                                "
+"  gpt-5.5 auto · /tmp/project                                                   "

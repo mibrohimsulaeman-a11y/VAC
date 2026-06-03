@@ -1,0 +1,859 @@
+schema_version: 1
+kind: registry_status
+id: vac.plan_state
+title: VAC docs plan to codebase reconciliation state
+status: ready
+generated_at: '2026-05-30T00:00:00Z'
+summary:
+  workflow_control_plane_plans: 43
+  donor_domain_plans: 11
+  workflow_status_counts:
+    COMPLETE: 16
+    COMPLETE_DEFAULT_PATH: 5
+    COMPLETE_WITH_DEFERRED_PHYSICAL_DELETE: 2
+    HISTORICAL_SUPERSEDED_COMPLETE: 1
+    IMPLEMENTED: 19
+  donor_status_counts:
+    CONTRACT_IMPLEMENTED_DEFERRED_GUARDRAIL: 1
+    CONTRACT_IMPLEMENTED_DOC_ONLY_OVERLAY: 1
+    CONTRACT_IMPLEMENTED_READY_FOR_GATED_SLICES: 9
+workflow_control_plane_plans:
+- plan_id: '00'
+  file: docs/workflow-control-plane/plans/00-operating-contract.md
+  title: Plan 00 — Operating contract and architecture invariants
+  status: IMPLEMENTED
+  status_source:
+  - 'Status: **implemented / invariant baseline**.'
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/architecture_invariants.rs
+  - vac-rs/tui
+  - vac-rs/core
+  - vac-cli/bin/vac.js
+  evidence_docs: []
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: 00A
+  file: docs/workflow-control-plane/plans/00A-build-unblock.md
+  title: Plan 00A — Build unblock before control plane
+  status: IMPLEMENTED
+  status_source:
+  - 'Status: **implemented / historical unblock**.'
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/build_check.rs
+  evidence_docs: []
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: 00B
+  file: docs/workflow-control-plane/plans/00B-local-runtime-contract.md
+  title: Plan 00B — Local Runtime Contract implementation
+  status: COMPLETE
+  status_source:
+  - 'Status: **implemented / semantic contract baseline**.'
+  code_evidence:
+  - vac-rs/control-plane/src/local_runtime/mod.rs
+  - vac-rs/control-plane/src/local_runtime/session.rs
+  - docs/architecture/local-runtime-contract.md
+  evidence_docs: []
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: 00C
+  file: docs/workflow-control-plane/plans/00C-rewire-vac-exec.md
+  title: Plan 00C — Rewire `vac exec` to Local Runtime Contract
+  status: IMPLEMENTED
+  status_source:
+  - 'Status: **implemented / exec path baseline**.'
+  - '- exit status mapping.'
+  code_evidence:
+  - vac-rs/exec/src/runtime_adapter.rs
+  - vac-rs/control-plane/src/local_runtime/command.rs
+  evidence_docs: []
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: 00D
+  file: docs/workflow-control-plane/plans/00D-rewire-vac-tui.md
+  title: Plan 00D — Rewire root `vac` TUI to Local Runtime Contract
+  status: COMPLETE
+  status_source:
+  - 'Status: **implemented / TUI contract baseline**.'
+  - '- session status projection.'
+  - approval overlay, validation status, and task completion/failure messages
+  code_evidence:
+  - vac-rs/tui/src/local_runtime_session.rs
+  - vac-rs/tui/src/runtime_adapter/approval.rs
+  - /
+  evidence_docs: []
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: 00E
+  file: docs/workflow-control-plane/plans/00E-runtime-reachability-delete-gate.md
+  title: Plan 00E — Old runtime reachability and delete gate
+  status: COMPLETE_WITH_DEFERRED_PHYSICAL_DELETE
+  status_source:
+  - 'Status: **complete after Plan 33 default local product path retirement; physical workspace crate deletion remains explicitly deferred**.'
+  - '## Status'
+  code_evidence:
+  - docs/migration/00E_REACHABILITY_AUDIT.md
+  evidence_docs:
+  - docs/workflow-control-plane/plans/00E-evidence/2026-05-28-sandbox-delete-gate-supersession.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: 00F
+  file: docs/workflow-control-plane/plans/00F-tui-legacy-transport-retirement.md
+  title: Plan 00F - TUI legacy transport retirement
+  status: COMPLETE
+  status_source:
+  - 'Status: **completed for Phase 00 scope; runtime-owner replacement continues in Plans 24–33**.'
+  - 'The goal-status seam has also moved: `ThreadGoalStatus` now comes from'
+  - '`ThreadMemoryMode`, `McpAuthStatus`, and `PermissionGrantScope`. The adapter'
+  - '`StepStatus` at the event boundary instead of re-exporting the app-server'
+  code_evidence:
+  - vac-rs/tui/src/legacy_app_server_compat.rs
+  - vac-rs/tui
+  - vac-rs/tui/src/resume_picker.rs
+  - vac-rs/tui/src/onboarding/onboarding_screen.rs
+  - vac-rs/tui/src/app/config_persistence.rs
+  - vac-rs/tui/src/app/side.rs
+  - vac-rs/tui/src/app/input.rs
+  - vac-rs/tui/src/app/thread_goal_actions.rs
+  - vac-rs/tui/src/app/thread_routing.rs
+  - vac-rs/tui/src/app/event_dispatch.rs
+  evidence_docs: []
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '01'
+  file: docs/workflow-control-plane/plans/01-repo-layout-skeleton.md
+  title: Plan 01 — Create `.vac` control plane skeleton
+  status: IMPLEMENTED
+  status_source:
+  - 'Status: **implemented / historical baseline; normalize before re-execution**.'
+  - .vac/registry/status.yaml
+  - '## Implementation status'
+  - '**Status: Implemented — rechecked 2026-05-21.**'
+  code_evidence:
+  - .vac/registry/status.yaml
+  - .vac/capabilities
+  - .vac/workflows
+  evidence_docs: []
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '02'
+  file: docs/workflow-control-plane/plans/02-capability-schema.md
+  title: Plan 02 — Capability manifest schema
+  status: IMPLEMENTED
+  status_source:
+  - 'Status: **implemented with audit history; active contract is schema correctness**.'
+  - 'Outputs: schema/validation code, negative tests, ready-status evidence rules, and docs for required fields.'
+  - 'status: planned'
+  - 2. Validate ids, status enum, owner path, surface shape, states, and validation commands.
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/capability_manifest.rs
+  evidence_docs:
+  - docs/workflow-control-plane/plans/02-evidence/2026-05-28-sandbox-capability-schema-closeout.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '03'
+  file: docs/workflow-control-plane/plans/03-workflow-schema.md
+  title: Plan 03 — Workflow manifest schema
+  status: IMPLEMENTED
+  status_source:
+  - 'Status: **implemented with audit history; active contract is workflow manifest safety**.'
+  - '## Status'
+  - 'status: planned'
+  - 2. Validate workflow id, title, status, inputs, steps, ui projection, and validation.
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/workflow_manifest.rs
+  - /
+  evidence_docs:
+  - docs/workflow-control-plane/plans/03-evidence/2026-05-28-sandbox-workflow-schema-closeout.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '04'
+  file: docs/workflow-control-plane/plans/04-policy-schema.md
+  title: Plan 04 — Policy manifest schema
+  status: IMPLEMENTED
+  status_source:
+  - 'Status: **implemented with audit history; active contract is policy parse/enforcement shape**.'
+  - '## Status'
+  - 5. Expose policy metadata to TUI status/capability rows.
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/policy_manifest.rs
+  - /
+  evidence_docs:
+  - docs/workflow-control-plane/plans/04-evidence/2026-05-28-sandbox-unknown-policy-default-deny.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '05'
+  file: docs/workflow-control-plane/plans/05-surface-schema.md
+  title: Plan 05 — Surface manifest schema
+  status: IMPLEMENTED
+  status_source:
+  - 'Status: **implemented with completion history; active contract is surface metadata consistency**.'
+  - '- `statusline`'
+  - '- `status`'
+  - 3. Require visible status and route classification.
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/surface_manifest.rs
+  evidence_docs:
+  - docs/workflow-control-plane/plans/05-evidence/2026-05-28-sandbox-surface-schema-closeout.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '06'
+  file: docs/workflow-control-plane/plans/06-registry-loader.md
+  title: Plan 06 — Rust registry loader
+  status: IMPLEMENTED
+  status_source:
+  - 'Status: **implemented with production follow-up notes; active contract is typed registry loading**.'
+  - '| Original finding | Status | Evidence |'
+  - '### Production-grade follow-up status'
+  - '| Priority | Area | Status | Evidence |'
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/registry.rs
+  evidence_docs:
+  - docs/workflow-control-plane/plans/06-evidence/2026-05-28-sandbox-registry-loader-closeout.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '07'
+  file: docs/workflow-control-plane/plans/07-registry-diagnostics.md
+  title: Plan 07 — Registry diagnostics and error UX
+  status: IMPLEMENTED
+  status_source:
+  - 'Status: **implemented with audit history; active contract is user-visible registry errors**.'
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/registry_diagnostics.rs
+  evidence_docs:
+  - docs/workflow-control-plane/plans/07-evidence/2026-05-28-sandbox-registry-diagnostics-closeout.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: 08
+  file: docs/workflow-control-plane/plans/08-initial-root-manifests.md
+  title: Plan 08 — Initial root capability and workflow manifests
+  status: COMPLETE
+  status_source:
+  - 'Status: **implemented seed set; active contract is canonical root manifest coverage**.'
+  - 'Stop conditions: stop if seed manifests claim ready status without validation or conflict with current root feature catalog.'
+  - '## Completion status'
+  - '- [x] `.vac/registry/status.yaml` records the guarded root seed coverage contract in schema-compatible notes.'
+  code_evidence:
+  - .vac/capabilities
+  - .vac/workflows
+  - .vac/registry/status.yaml
+  - vac-rs/control-plane/src/control_plane/root_feature_catalog.rs
+  evidence_docs:
+  - docs/workflow-control-plane/plans/08-evidence/2026-05-28-sandbox-root-seed-closeout.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: 09
+  file: docs/workflow-control-plane/plans/09-capability-dashboard.md
+  title: Plan 09 — TUI capability dashboard
+  status: IMPLEMENTED
+  status_source:
+  - 'Status: **implemented with validation history; active contract is visible capability state**.'
+  - 'Target outcome: TUI capability dashboard presents registry-backed capability status, validation state, and diagnostics without hard-coded drift.'
+  - 3. Render id, title, status, owner, surfaces, policy, validation.
+  - '| # | Sev | Persp | Area | Finding | Status | Resolution |'
+  code_evidence:
+  - vac-rs/tui/src/capability_dashboard.rs
+  evidence_docs: []
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '10'
+  file: docs/workflow-control-plane/plans/10-workflow-browser.md
+  title: Plan 10 — TUI workflow browser
+  status: IMPLEMENTED
+  status_source:
+  - 'Status: **implemented with follow-up notes; active contract is registry-backed workflow browsing**.'
+  - 'Target outcome: TUI workflow browser lists workflow manifests, status, steps, policy requirements, and diagnostics from registry data.'
+  - 3. Render workflow id, title, status, inputs, steps, policy gates, validation.
+  - 7. Layout uses section headers, dividers, and a footer that calls out persistent-pane status.
+  code_evidence:
+  - vac-rs/tui/src/workflow_browser.rs
+  evidence_docs: []
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '11'
+  file: docs/workflow-control-plane/plans/11-slash-palette-convergence.md
+  title: Plan 11 — Slash, palette, CLI surface convergence
+  status: COMPLETE
+  status_source:
+  - 'Status: **complete for shared surface route readiness; active contract is one surface registry**.'
+  - '4. Add route status: ready, partial, planned, unavailable, cli-only.'
+  - '## Completion status'
+  - '- [x] Surface route catalog loads slash, palette, CLI, TUI, and statusline routes from manifests.'
+  code_evidence:
+  - vac-rs/tui/src/surface_route_catalog.rs
+  - vac-rs/control-plane/src/control_plane/surface_readiness.rs
+  - /
+  evidence_docs:
+  - docs/workflow-control-plane/plans/11-evidence/2026-05-28-sandbox-surface-route-readiness.md
+  - docs/workflow-control-plane/plans/11-evidence/2026-05-28-sandbox-surface-route-status-sync.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '12'
+  file: docs/workflow-control-plane/plans/12-safe-workflow-runner.md
+  title: Plan 12 — Minimal safe workflow runner
+  status: IMPLEMENTED
+  status_source:
+  - 'Status: **implemented baseline; active contract is minimal safe execution only**.'
+  - '- Donor migration workflow steps are now mapped to typed native handlers backed by `DonorStatusReport` and the canonical `vac.donor_migration` capability; the aggregate `capability.donor_migration.gate` alias is deprecated and no longer recognized.'
+  - '| 6 | P1 | SE | Runtime | `DonorMigration*` handler fall through | Resolved: granular donor handlers now consume `DonorStatusReport` and fail closed when unavailable or failing. |'
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/workflow_runner.rs
+  evidence_docs: []
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '13'
+  file: docs/workflow-control-plane/plans/13-workflow-progress-tui.md
+  title: Plan 13 — Workflow progress and lifecycle in TUI
+  status: IMPLEMENTED
+  status_source:
+  - 'Status: **implemented baseline; active contract is visible workflow lifecycle**.'
+  code_evidence:
+  - vac-rs/tui/src/workflow_progress.rs
+  evidence_docs: []
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '14'
+  file: docs/workflow-control-plane/plans/14-approval-policy-integration.md
+  title: Plan 14 — Approval and policy integration
+  status: COMPLETE
+  status_source:
+  - 'Status: **complete for default approval readiness; active contract is policy-backed approval safety**.'
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/approval_lifecycle.rs
+  - vac-rs/control-plane/src/control_plane/approval_readiness.rs
+  - vac-rs/control-plane/src/control_plane/approval_store.rs
+  - vac-rs/control-plane/src/control_plane/workflow_runner.rs
+  evidence_docs:
+  - docs/workflow-control-plane/plans/14-evidence/2026-05-28-sandbox-approval-readiness-closeout.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '15'
+  file: docs/workflow-control-plane/plans/15-maintenance-identity-check.md
+  title: Plan 15 — Identity check maintenance workflow
+  status: COMPLETE
+  status_source:
+  - 'Status: **complete for identity-check readiness and root status sync**.'
+  - '- Workflow/capability status is no longer split: `maintenance.identity-check`, `vac.identity.check`, and root surface status are all ready after Plan 19/11 status synchronization. Missing credentials or unavailable operator identity must still report blocked/skipped evidence rather than pass.'
+  - '### 2026-05-28 status sync closeout'
+  - '| 5 | P2 | Planner | Drift | Historical workflow/capability status split | ✅ resolved — workflow, capability, and surface route readiness are now synchronized to ready; unavailable live identity remains blocked/skipped evidence, not a non-ready capability label. |'
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/identity_check.rs
+  evidence_docs: []
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '16'
+  file: docs/workflow-control-plane/plans/16-maintenance-build-check.md
+  title: Plan 16 — Build check maintenance workflow
+  status: COMPLETE
+  status_source:
+  - 'Status: **complete for default targeted build readiness**.'
+  - 3. Capture exit status and concise diagnostics.
+  - '| 7 | P2 | SE | Doctor | ✅ resolved — build readiness is a report-backed doctor route, not an advisory-only label | Keep failure semantics tied to report status |'
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/build_check.rs
+  - vac-rs/control-plane/src/control_plane/build_readiness.rs
+  - /
+  evidence_docs:
+  - docs/workflow-control-plane/plans/16-evidence/2026-05-28-sandbox-build-readiness-closeout.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '17'
+  file: docs/workflow-control-plane/plans/17-maintenance-no-duplicate-tui.md
+  title: Plan 17 — No duplicate TUI maintenance workflow
+  status: IMPLEMENTED
+  status_source:
+  - 'Status: **implemented with audit fixes; active contract is duplicate TUI prevention**.'
+  - '## Resolution status (2026-05-21)'
+  - '| # | Status | Lokasi | UX dampak bagi user/operator |'
+  - '| 3 | P2 | Workflow `status: planned` padahal dipakai di `release-gate` | `.vac/workflows/maintenance.no-duplicate-tui.yaml` → `status: ready` |'
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/no_duplicate_tui.rs
+  - vac-rs
+  - docs/product
+  - docs/product/CAPABILITY_MAP.md
+  - docs/product/domain-prds/tui-action-recorder-replay.md
+  - /
+  evidence_docs:
+  - docs/workflow-control-plane/plans/17-evidence/2026-05-28-sandbox-index-closeout.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '18'
+  file: docs/workflow-control-plane/plans/18-release-gate.md
+  title: Plan 18 — Release gate workflow
+  status: IMPLEMENTED
+  status_source:
+  - 'Status: **implemented baseline with audit resolution; active contract is release-readiness evidence**.'
+  - '- Gate fails if any granular donor migration check reports missing/failing donor status evidence.'
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/vac_init_doctor_release.rs
+  evidence_docs:
+  - docs/workflow-control-plane/plans/18-evidence/2026-05-28-sandbox-index-closeout.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '19'
+  file: docs/workflow-control-plane/plans/19-root-feature-conversion.md
+  title: Plan 19 — Convert root features into control-plane manifests
+  status: COMPLETE
+  status_source:
+  - 'Status: **complete for root manifest/status synchronization** — typed catalog, conversion report, capability/workflow status sync, and explicit donor/release defers are recorded. Follow-up evidence continues under `19-evidence/`. Further work is normal capability evolution, not Plan 19 conversion debt.'
+  - 'Stop conditions: stop if manifest status claims ready without validation, donor-backed features lack owner/source metadata, or hidden features are silently ignored.'
+  - '## Status'
+  - '| feature_id | capability_id | expected_source_roots | expected_surfaces | expected_policy | expected_validation | expected_ownership | current_status | target_status |'
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/root_feature_conversion.rs
+  - vac-rs/control-plane/src/control_plane/root_feature_catalog.rs
+  - /
+  evidence_docs:
+  - docs/workflow-control-plane/plans/19-evidence/2026-05-28-sandbox-root-capability-ready-sync.md
+  - docs/workflow-control-plane/plans/19-evidence/2026-05-28-sandbox-root-status-sync.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '20'
+  file: docs/workflow-control-plane/plans/20-donor-gate.md
+  title: Plan 20 — Donor-backed capability gate
+  status: COMPLETE
+  status_source:
+  - 'Status: **complete for donor-backed capability safety gate**.'
+  - 2. Add manifest status for donor-backed capabilities.
+  - 3. Require donor source path, root target, TUI surface, policy, validation, cleanup status.
+  - '- `donor_source` is now parsed by the capability manifest validator and must include `source`, `root_target`, and `cleanup_status`.'
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/donor_domain_contract.rs
+  - scripts/check-donor-status.sh
+  evidence_docs:
+  - docs/workflow-control-plane/plans/20-evidence/2026-05-28-sandbox-donor-gate-ready.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '21'
+  file: docs/workflow-control-plane/plans/21-dead-code-and-ownership.md
+  title: Plan 21 — Dead code and ownership enforcement
+  status: COMPLETE
+  status_source:
+  - 'Status: **complete for ownership/dead-code enforcement gate**.'
+  - 5. Track donor cleanup status after every port.
+  - Every product domain has owner, surface, validation, or retirement status.
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/ownership_scan.rs
+  - vac-rs/control-plane/src/control_plane/vac_init_ownership_scanner.rs
+  - vac-rs/control-plane/src/control_plane/capability_manifest.rs
+  - vac-rs/cli/src/doctor_cli.rs
+  - vac-rs/tui/src/capability_dashboard.rs
+  evidence_docs:
+  - docs/workflow-control-plane/plans/21-evidence/2026-05-28-sandbox-ownership-gate-ready.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '22'
+  file: docs/workflow-control-plane/plans/22-enterprise-hygiene.md
+  title: Plan 22 — Enterprise hygiene and documentation alignment
+  status: IMPLEMENTED
+  status_source:
+  - 'Status: **implemented / documentation alignment baseline**.'
+  - '- Capability dashboard and docs agree on status.'
+  - '- **Closed gap:** release/build readiness is now status-synchronized through `.vac` manifests; full workspace build and real PTY evidence remain operator-gated release inputs instead of partial capability labels.'
+  - '## 2026-05-28 domain/status sync'
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/docs_maintenance.rs
+  - docs/PROJECT_STATE_CURRENT.md
+  - docs/legal/NOTICES.md
+  evidence_docs:
+  - docs/workflow-control-plane/plans/22-evidence/2026-05-28-sandbox-domain-status-sync.md
+  - docs/workflow-control-plane/plans/22-evidence/2026-05-28-sandbox-product-status-ready.md
+  - docs/workflow-control-plane/plans/22-evidence/2026-05-28-sandbox-registry-status-ready.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '23'
+  file: docs/workflow-control-plane/plans/23-pty-operator-gate.md
+  title: Plan 23 — PTY operator gate as workflow capability
+  status: COMPLETE
+  status_source:
+  - '## Current status'
+  - 'Status: **complete for release-policy semantics** — typed result semantics, `BLOCKED-OPERATOR` reporting, and release-gate non-pass behavior are enforced. Real TTY evidence remains an operator input for promotion, but missing/blocked evidence is a hard non-pass rather than an ambiguous implementation gap.'
+  - '- private/redacted diagnostic capture for PTY binary path, terminal size, screen-update checks, and Ctrl-C exit status,'
+  - '- Keep status non-ready until executor and evidence semantics exist.'
+  code_evidence:
+  - vac-rs/utils/pty/src/lib.rs
+  - vac-rs/cli/src/doctor/runtime_owner_gates.rs
+  evidence_docs:
+  - docs/workflow-control-plane/plans/23-evidence/2026-05-26-L19-real-operator-runbook.md
+  - docs/workflow-control-plane/plans/23-evidence/2026-05-27-L23OPS-operator-evidence-status.md
+  - docs/workflow-control-plane/plans/23-evidence/2026-05-28-sandbox-blocked-operator-release-policy.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '24'
+  file: docs/workflow-control-plane/plans/24-local-runtime-owner-replacement.md
+  title: Plan 24 — Local runtime owner replacement
+  status: COMPLETE
+  status_source:
+  - '## Current status'
+  - 'Status: **complete as the umbrella closeout for Plans 25–33 default local runtime owner replacement**.'
+  code_evidence:
+  - vac-rs/control-plane/src/local_runtime/mod.rs
+  - /
+  evidence_docs:
+  - docs/workflow-control-plane/plans/24-evidence/2026-05-28-sandbox-umbrella-closeout.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '25'
+  file: docs/workflow-control-plane/plans/25-local-runtime-semantic-contract-hardening.md
+  title: Plan 25 — Local runtime semantic contract hardening
+  status: IMPLEMENTED
+  status_source:
+  - '## Current status'
+  - 'Status: **implemented — semantic contract hardened (2026-05-24)**.'
+  - '| `session.rs` | `RuntimeSession`, `RuntimeSessionStatus`, `RuntimeEntrypoint`, `AutonomyMode`, session FSM helpers. | reusable semantic state | Good status vocabulary. It is not a startup handle and does not retain managers/resources. |'
+  - '| `task.rs` | `RuntimeTask`, task kind/status, task FSM helpers. | reusable semantic state | Good per-task status vocabulary. It is not an execution scheduler or cancellation token. |'
+  code_evidence:
+  - vac-rs/control-plane/src/local_runtime/validation.rs
+  - vac-rs/control-plane/src/local_runtime/task.rs
+  - /
+  evidence_docs:
+  - docs/workflow-control-plane/plans/25-evidence/2026-05-28-sandbox-semantic-contract-closeout.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '26'
+  file: docs/workflow-control-plane/plans/26-local-runtime-owner-skeleton.md
+  title: Plan 26 — Local runtime owner skeleton
+  status: IMPLEMENTED
+  status_source:
+  - '## Current status'
+  - 'Status: **implemented — owner skeleton crate added (2026-05-24)**.'
+  code_evidence:
+  - vac-rs/control-plane/src/local_runtime/session.rs
+  evidence_docs:
+  - docs/workflow-control-plane/plans/26-evidence/2026-05-28-sandbox-owner-skeleton-closeout.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '27'
+  file: docs/workflow-control-plane/plans/27-retained-resources-startup-replacement.md
+  title: Plan 27 — Retained resources and startup replacement
+  status: COMPLETE
+  status_source:
+  - '## Current status'
+  - 'Status: **complete for default owner-native startup and retained-resource ownership**.'
+  - '- account/status display remains stable,'
+  code_evidence:
+  - vac-rs/control-plane/src/local_runtime/session.rs
+  - vac-rs/tui/src/local_runtime_session.rs
+  - vac-rs/local-runtime-owner/
+  evidence_docs:
+  - docs/workflow-control-plane/plans/27-evidence/2026-05-28-sandbox-startup-fallback-sync.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '28'
+  file: docs/workflow-control-plane/plans/28-server-request-registry-replacement.md
+  title: Plan 28 — Server-request registry replacement
+  status: COMPLETE_DEFAULT_PATH
+  status_source:
+  - '## Current status'
+  - 'Status: **complete for the default owner-native server-request registry path**.'
+  code_evidence:
+  - vac-rs/control-plane/src/local_runtime/command.rs
+  - vac-rs/exec/src/runtime_adapter.rs
+  - vac-rs/tui/src/app_server_session.rs
+  evidence_docs:
+  - docs/workflow-control-plane/plans/28-evidence/2026-05-28-sandbox-registry-closeout.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '29'
+  file: docs/workflow-control-plane/plans/29-event-stream-replacement.md
+  title: Plan 29 — Event stream replacement
+  status: COMPLETE_DEFAULT_PATH
+  status_source:
+  - '## Current status'
+  - 'Status: **complete for the default owner-native event stream path** — 29A–29E are represented in `vac-rs/local-runtime-owner/src/event_stream.rs` and `vac-rs/local-runtime-owner/src/session.rs`. The local runtime owner now has an app-server-protocol-free owner event stream, protocol mapping matrix, lossless/best-effort delivery classification, backpressure/lag tests, projection reuse through `LocalRuntimeBridge`, and Plan 31/33 closeout classifies any remaining compatibility as non-default.'
+  code_evidence:
+  - vac-rs/control-plane/src/local_runtime/event.rs
+  - vac-rs/control-plane/src/local_runtime/projection.rs
+  - vac-rs/local-runtime-owner/src/event_stream.rs
+  - vac-rs/local-runtime-owner/src/session.rs
+  evidence_docs:
+  - docs/workflow-control-plane/plans/29-evidence/2026-05-28-sandbox-event-stream-closeout.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '30'
+  file: docs/workflow-control-plane/plans/30-prompt-and-active-controls-cutover.md
+  title: Plan 30 — Prompt submit and active controls cutover
+  status: COMPLETE_DEFAULT_PATH
+  status_source:
+  - '## Current status'
+  - 'Status: **complete for the default owner-native TUI product path** — Plan 30A–30G now have an owner-native operation parity registry in `vac-rs/tui/src/owner_native_operation_parity.rs`, the default TUI session path no longer carries release-blocking unimplemented operation gaps, and `BLOCKED-OPERATOR` is treated as non-pass release evidence rather than green evidence. Optional legacy app-server compatibility remains non-default quarantine/delete-defer material owned by Plan 33, not a Plan 30 runtime blocker.'
+  - 'Slice status evidence:'
+  code_evidence:
+  - vac-rs/tui/src/owner_native_operation_parity.rs
+  evidence_docs:
+  - docs/workflow-control-plane/plans/30-evidence/2026-05-25-30A-30E-completion.md
+  - docs/workflow-control-plane/plans/30-evidence/2026-05-25-30F-operator-ux-gate.md
+  - docs/workflow-control-plane/plans/30-evidence/2026-05-25-30G-skills-external-agent.md
+  - docs/workflow-control-plane/plans/30-evidence/2026-05-25-wave3a-plan30-closeout-reconciliation.md
+  - docs/workflow-control-plane/plans/30-evidence/2026-05-26-30G-blocker3-closure.md
+  - docs/workflow-control-plane/plans/30-evidence/2026-05-26-30G-external-agent-import-completion.md
+  - docs/workflow-control-plane/plans/30-evidence/2026-05-26-30G-plugin-provider.md
+  - docs/workflow-control-plane/plans/30-evidence/2026-05-26-30G-provider-blockers.md
+  - docs/workflow-control-plane/plans/30-evidence/2026-05-26-30G-residual-gap-audit.md
+  - docs/workflow-control-plane/plans/30-evidence/2026-05-28-sandbox-owner-native-parity-closeout.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '31'
+  file: docs/workflow-control-plane/plans/31-inventory.md
+  title: Plan 31 Inventory — App-server Protocol Retirement
+  status: COMPLETE_DEFAULT_PATH
+  status_source:
+  - '**Status: historical inventory; default-path implementation is closed.**'
+  code_evidence:
+  - vac-rs/runtime-protocol
+  - vac-rs/control-plane/src/local_runtime
+  evidence_docs:
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-26-app-server-protocol-dep-graph.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-authmode-relocation.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-compat-defer-marker.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-compatibility-inventory.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-dto-owner-mapping.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-owner-native-default-cutover.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-owner-native-runtime-protocol-complete.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-runtime-protocol-dto-closure.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-threaditem-relocation.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-28-sandbox-mapping-superseded.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '31'
+  file: docs/workflow-control-plane/plans/31-mapping.md
+  title: Plan 31 Mapping — App-server DTO Owner-Native Replacement
+  status: HISTORICAL_SUPERSEDED_COMPLETE
+  status_source:
+  - '**Status: superseded historical mapping blueprint. Active default DTO'
+  code_evidence:
+  - vac-rs/runtime-protocol
+  - vac-rs/control-plane/src/local_runtime
+  evidence_docs:
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-26-app-server-protocol-dep-graph.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-authmode-relocation.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-compat-defer-marker.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-compatibility-inventory.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-dto-owner-mapping.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-owner-native-default-cutover.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-owner-native-runtime-protocol-complete.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-runtime-protocol-dto-closure.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-threaditem-relocation.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-28-sandbox-mapping-superseded.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '31'
+  file: docs/workflow-control-plane/plans/31-protocol-compatibility-retirement.md
+  title: Plan 31 — Protocol compatibility retirement
+  status: COMPLETE_DEFAULT_PATH
+  status_source:
+  - '## Current status'
+  - 'Status: **complete for the default TUI DTO owner-native path** — 31A inventory, 31B mapping, 31C defer-marker, 31C owner-native default cutover, and the final owner-native runtime-protocol shim are recorded. Active TUI source no longer imports app-server protocol/client crates on the default path; legacy app-server session transport is isolated behind `legacy-app-server-compat` as non-default delete/defer evidence.'
+  code_evidence:
+  - vac-rs/runtime-protocol
+  - vac-rs/control-plane/src/local_runtime
+  - vac-rs/tui/src/session_protocol.rs
+  - /
+  evidence_docs:
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-26-app-server-protocol-dep-graph.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-authmode-relocation.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-compat-defer-marker.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-compatibility-inventory.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-dto-owner-mapping.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-owner-native-default-cutover.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-owner-native-runtime-protocol-complete.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-sandbox-runtime-protocol-dto-closure.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-27-threaditem-relocation.md
+  - docs/workflow-control-plane/plans/31-evidence/2026-05-28-sandbox-mapping-superseded.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '32'
+  file: docs/workflow-control-plane/plans/32-vac-runtime-owner-gates.md
+  title: Plan 32 — `.vac` runtime-owner gates
+  status: COMPLETE
+  status_source:
+  - '## Current status'
+  - 'Status: **complete for default runtime-owner hard gates** — scaffold subcommand landed; L25 threshold proposal recorded in `32-evidence/2026-05-26-threshold-proposal.md`. L-32YAML authored the three optional workflow/policy manifests recorded in `32-evidence/2026-05-27-optional-manifest-ops.md`. Plan 32F elevated `missing_field` to a hard error, and the 2026-05-27 sandbox threshold batch added warning/error surfaces for app-server dependency presence, PTY false-green prevention, MessageProcessor copy prevention, and unsupported-control default defers after Plan 30/31/33 default-path prerequisites closed.'
+  - Draft manifest content and validate against current schemas. Keep status non-ready until validation commands exist.
+  - '- Updated the runtime-owner-gates regression test to assert non-zero exit, `status: fail`, and `level: error` for a missing required field.'
+  code_evidence:
+  - vac-rs/cli/src/doctor/runtime_owner_gates.rs
+  - vac-rs/cli/tests/runtime_owner_gates.rs
+  evidence_docs:
+  - docs/workflow-control-plane/plans/32-evidence/2026-05-26-threshold-proposal.md
+  - docs/workflow-control-plane/plans/32-evidence/2026-05-27-optional-manifest-ops.md
+  - docs/workflow-control-plane/plans/32-evidence/2026-05-27-sandbox-runtime-owner-threshold-batch.md
+  - docs/workflow-control-plane/plans/32-evidence/2026-05-28-sandbox-hard-gate-promotion.md
+  - docs/workflow-control-plane/plans/32-evidence/2026-05-28-sandbox-threshold-doc-refresh.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '33'
+  file: docs/workflow-control-plane/plans/33-app-server-cargo-retirement-delete-defer-proof.md
+  title: Plan 33 — App-server Cargo retirement and delete/defer proof
+  status: COMPLETE_WITH_DEFERRED_PHYSICAL_DELETE
+  status_source:
+  - '## Current status'
+  - 'Status: **complete for default local product Cargo path / workspace crate deletion deferred**.'
+  - '- `docs/workflow-control-plane/plans/33-evidence/2026-05-26-baseline-refresh.md` — L6 baseline refresh snapshot after runtime ownership state changes; records current grep snapshot, `vac-tui` tree app-server status, `vac doctor registry ..` output, and delta vs prior baseline.'
+  - Record current grep/tree/status output. Confirm only intended files will be touched.
+  code_evidence:
+  - docs/workflow-control-plane/plans/33-evidence/closeout-evidence-index.md
+  - docs/workflow-control-plane/plans/33-evidence/2026-05-26-baseline-refresh.md
+  - docs/workflow-control-plane/plans/33-evidence/2026-05-26-mid-30G-snapshot.md
+  - docs/workflow-control-plane/plans/33-evidence/2026-05-27-sandbox-delete-defer-snapshot.md
+  - docs/workflow-control-plane/plans/33-evidence/2026-05-27-sandbox-consumer-classification.md
+  - docs/workflow-control-plane/plans/33-evidence/2026-05-27-sandbox-cargo-defer-marker.md
+  - docs/workflow-control-plane/plans/33-evidence/2026-05-27-sandbox-default-cargo-cutover.md
+  - docs/workflow-control-plane/plans/33-evidence/baseline-2026-05-25.md
+  - docs/workflow-control-plane/plans/33-evidence/baseline-2026-05-25-post-30E/summary.md
+  - vac-rs/tui/Cargo.toml
+  evidence_docs:
+  - docs/workflow-control-plane/plans/33-evidence/2026-05-24-plan00f-legacy-transport-reachability.md
+  - docs/workflow-control-plane/plans/33-evidence/2026-05-24-stage3-summary.md
+  - docs/workflow-control-plane/plans/33-evidence/2026-05-26-baseline-refresh.md
+  - docs/workflow-control-plane/plans/33-evidence/2026-05-26-mid-30G-snapshot.md
+  - docs/workflow-control-plane/plans/33-evidence/2026-05-27-sandbox-cargo-defer-marker.md
+  - docs/workflow-control-plane/plans/33-evidence/2026-05-27-sandbox-consumer-classification.md
+  - docs/workflow-control-plane/plans/33-evidence/2026-05-27-sandbox-default-cargo-cutover.md
+  - docs/workflow-control-plane/plans/33-evidence/2026-05-27-sandbox-default-path-retirement-complete.md
+  - docs/workflow-control-plane/plans/33-evidence/2026-05-27-sandbox-delete-defer-snapshot.md
+  - docs/workflow-control-plane/plans/33-evidence/2026-05-27-sandbox-direct-tui-dependency-removal.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+- plan_id: '34'
+  file: docs/workflow-control-plane/plans/34-zero-config-project-workspace.md
+  title: Plan 34 — Zero-config project workspace bootstrap
+  status: COMPLETE
+  status_source:
+  - '## Current status'
+  - 'Status: **complete for core zero-config workspace contract / rich confirmation + strict promotion UX landed** — sandbox inventory evidence is recorded in `34-evidence/2026-05-27-sandbox-zero-config-inventory.md`; classifier/doctor, soft bootstrap, CLI/TUI first-run warning, rich confirmation dialog model, and strict promotion preview/materialization are now implemented with targeted evidence.'
+  code_evidence:
+  - vac-rs/core/src/project_workspace.rs
+  - vac-rs/cli/src/doctor_cli.rs
+  evidence_docs:
+  - docs/workflow-control-plane/plans/34-evidence/2026-05-27-sandbox-bootstrap-core.md
+  - docs/workflow-control-plane/plans/34-evidence/2026-05-27-sandbox-cli-tui-cutover.md
+  - docs/workflow-control-plane/plans/34-evidence/2026-05-27-sandbox-rich-confirmation-strict-promotion.md
+  - docs/workflow-control-plane/plans/34-evidence/2026-05-27-sandbox-tui-confirmation-strict-promotion-closeout.md
+  - docs/workflow-control-plane/plans/34-evidence/2026-05-27-sandbox-zero-config-inventory.md
+  - docs/workflow-control-plane/plans/34-evidence/2026-05-28-sandbox-blocker-closeout-sync.md
+  validation_state: targeted_or_documented
+  remaining_caveat: full workspace build is not asserted by this reconciliation
+donor_domain_plans:
+- plan_id: '01'
+  file: docs/donor-migration/domain-plans/01-session-engine.md
+  title: Domain plan 01 — Session Engine
+  status: CONTRACT_IMPLEMENTED_READY_FOR_GATED_SLICES
+  stance: ready_for_gated_slices
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/donor_domain_contract.rs
+  - .vac/registry/donor-inventory.yaml
+  - scripts/check-donor-status.sh
+  validation_state: bash scripts/check-donor-status.sh contracts + drift + all
+  remaining_caveat: contract implemented does not mean donor source row is product-migrated
+- plan_id: '02'
+  file: docs/donor-migration/domain-plans/02-tool-contract.md
+  title: Domain plan 02 — Tool Contract
+  status: CONTRACT_IMPLEMENTED_READY_FOR_GATED_SLICES
+  stance: ready_for_gated_slices
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/donor_domain_contract.rs
+  - .vac/registry/donor-inventory.yaml
+  - scripts/check-donor-status.sh
+  validation_state: bash scripts/check-donor-status.sh contracts + drift + all
+  remaining_caveat: contract implemented does not mean donor source row is product-migrated
+- plan_id: '03'
+  file: docs/donor-migration/domain-plans/03-managed-connectors.md
+  title: Domain plan 03 — Managed Connectors
+  status: CONTRACT_IMPLEMENTED_READY_FOR_GATED_SLICES
+  stance: ready_for_gated_slices
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/donor_domain_contract.rs
+  - .vac/registry/donor-inventory.yaml
+  - scripts/check-donor-status.sh
+  validation_state: bash scripts/check-donor-status.sh contracts + drift + all
+  remaining_caveat: contract implemented does not mean donor source row is product-migrated
+- plan_id: '04'
+  file: docs/donor-migration/domain-plans/04-changeset-evidence.md
+  title: Domain plan 04 — Changeset and Evidence
+  status: CONTRACT_IMPLEMENTED_READY_FOR_GATED_SLICES
+  stance: ready_for_gated_slices
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/donor_domain_contract.rs
+  - .vac/registry/donor-inventory.yaml
+  - scripts/check-donor-status.sh
+  validation_state: bash scripts/check-donor-status.sh contracts + drift + all
+  remaining_caveat: contract implemented does not mean donor source row is product-migrated
+- plan_id: '05'
+  file: docs/donor-migration/domain-plans/05-trust-redaction.md
+  title: Domain plan 05 — Trust and Redaction
+  status: CONTRACT_IMPLEMENTED_READY_FOR_GATED_SLICES
+  stance: ready_for_gated_slices
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/donor_domain_contract.rs
+  - .vac/registry/donor-inventory.yaml
+  - scripts/check-donor-status.sh
+  validation_state: bash scripts/check-donor-status.sh contracts + drift + all
+  remaining_caveat: contract implemented does not mean donor source row is product-migrated
+- plan_id: '06'
+  file: docs/donor-migration/domain-plans/06-context-rag-memory.md
+  title: Domain plan 06 — Context, Memory, Search, and RAG
+  status: CONTRACT_IMPLEMENTED_READY_FOR_GATED_SLICES
+  stance: ready_for_gated_slices
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/donor_domain_contract.rs
+  - .vac/registry/donor-inventory.yaml
+  - scripts/check-donor-status.sh
+  validation_state: bash scripts/check-donor-status.sh contracts + drift + all
+  remaining_caveat: contract implemented does not mean donor source row is product-migrated
+- plan_id: '07'
+  file: docs/donor-migration/domain-plans/07-vil-native.md
+  title: Domain plan 07 — VIL Native
+  status: CONTRACT_IMPLEMENTED_READY_FOR_GATED_SLICES
+  stance: ready_for_gated_slices
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/donor_domain_contract.rs
+  - .vac/registry/donor-inventory.yaml
+  - scripts/check-donor-status.sh
+  validation_state: bash scripts/check-donor-status.sh contracts + drift + all
+  remaining_caveat: contract implemented does not mean donor source row is product-migrated
+- plan_id: 08
+  file: docs/donor-migration/domain-plans/08-trace-signal-trajectory.md
+  title: Domain plan 08 — Trace, Signal, and Trajectory
+  status: CONTRACT_IMPLEMENTED_READY_FOR_GATED_SLICES
+  stance: ready_for_gated_slices
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/donor_domain_contract.rs
+  - .vac/registry/donor-inventory.yaml
+  - scripts/check-donor-status.sh
+  validation_state: bash scripts/check-donor-status.sh contracts + drift + all
+  remaining_caveat: contract implemented does not mean donor source row is product-migrated
+- plan_id: 09
+  file: docs/donor-migration/domain-plans/09-agent-orchestration.md
+  title: Domain plan 09 — Agent Orchestration
+  status: CONTRACT_IMPLEMENTED_DEFERRED_GUARDRAIL
+  stance: deferred_guardrail
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/donor_domain_contract.rs
+  - .vac/registry/donor-inventory.yaml
+  - scripts/check-donor-status.sh
+  validation_state: bash scripts/check-donor-status.sh contracts + drift + all
+  remaining_caveat: contract implemented does not mean donor source row is product-migrated
+- plan_id: '10'
+  file: docs/donor-migration/domain-plans/10-tui-concept-extraction.md
+  title: Domain plan 10 — TUI Concept Extraction
+  status: CONTRACT_IMPLEMENTED_READY_FOR_GATED_SLICES
+  stance: ready_for_gated_slices
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/donor_domain_contract.rs
+  - .vac/registry/donor-inventory.yaml
+  - scripts/check-donor-status.sh
+  validation_state: bash scripts/check-donor-status.sh contracts + drift + all
+  remaining_caveat: contract implemented does not mean donor source row is product-migrated
+- plan_id: '11'
+  file: docs/donor-migration/domain-plans/11-external-agent-concept-adoption.md
+  title: Domain plan 11 — External Agent Concept Adoption
+  status: CONTRACT_IMPLEMENTED_DOC_ONLY_OVERLAY
+  stance: doc_only_overlay
+  code_evidence:
+  - vac-rs/control-plane/src/control_plane/donor_domain_contract.rs
+  - .vac/registry/donor-inventory.yaml
+  - scripts/check-donor-status.sh
+  - scripts/check-donor-plan11-hermes-memory-alignment.sh
+  validation_state: bash scripts/check-donor-status.sh contracts + drift + all
+  remaining_caveat: contract implemented does not mean donor source row is product-migrated

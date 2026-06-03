@@ -1,0 +1,52 @@
+schema_version: 1
+kind: registry_status
+id: vac.o6.runtime_panic_surface
+status: ready
+updated_at: '2026-05-31T00:00:00Z'
+method: exclude test paths including tests_*.rs, remove inline cfg(test), strip comments
+  and literals before token count
+runtime_files_scanned: 1345
+cfg_test_lines_removed: 79714
+total_runtime_panic_surface: 255
+counts:
+  unwrap: 35
+  expect: 82
+  panic_macro: 85
+  todo_macro: 0
+  unimplemented_macro: 1
+  unreachable_macro: 52
+top_files:
+- path: vac-rs/linux-sandbox/src/linux_run_main.rs
+  total: 30
+- path: vac-rs/tui/src/onboarding/auth.rs
+  total: 28
+- path: vac-rs/utils/pty/src/win/mod.rs
+  total: 12
+- path: vac-rs/apply-patch/src/parser.rs
+  total: 9
+- path: vac-rs/tui/src/lib.rs
+  total: 8
+- path: vac-rs/file-search/src/lib.rs
+  total: 7
+- path: vac-rs/linux-sandbox/src/launcher.rs
+  total: 6
+- path: vac-rs/windows-sandbox-rs/src/lib.rs
+  total: 6
+- path: vac-rs/control-plane/src/control_plane/surface_manifest.rs
+  total: 5
+- path: vac-rs/sandboxing/src/landlock.rs
+  total: 5
+- path: vac-rs/shell-command/src/command_safety/windows_safe_commands.rs
+  total: 5
+- path: vac-rs/tui/src/onboarding/auth/headless_chatgpt_login.rs
+  total: 5
+- path: vac-rs/utils/pty/src/win/conpty.rs
+  total: 5
+- path: vac-rs/core/src/context/permissions_instructions.rs
+  total: 4
+- path: vac-rs/core/src/goals.rs
+  total: 4
+claim_scope: static_tokenizer_measurement_not_refactor
+scanner_command: python3 scripts/measure-vac-o6-1-runtime-panic-surface.py --json
+scanner_output_sha256: efc4d7146a4e9117fc32c09bc1a572f229df8d7111d004e3cb63c7eedfb0ef0c
+reproducibility_gate: scripts/check-vac-o6-1-depanic-surface.sh

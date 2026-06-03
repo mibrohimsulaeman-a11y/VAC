@@ -1,0 +1,19 @@
+schema_version: 1
+kind: plan
+id: plan.fixture.semantic
+status: draft
+task:
+  capability: vac.test.fixture
+allowed_files:
+  - path: src/lib.rs
+    operation: modify
+    line_range:
+      start: 1
+      end: 20
+    ownership: vac.test.fixture
+    rationale: fixture bounded change
+bounds:
+  max_patches: 3
+  max_new_files: 1
+  max_line_delta: 40
+  timeout_seconds: 600

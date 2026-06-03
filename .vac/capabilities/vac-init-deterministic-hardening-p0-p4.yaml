@@ -1,0 +1,78 @@
+schema_version: 1
+kind: capability
+id: vac.init.deterministic-hardening-p0-p4
+title: VAC-Init Deterministic Hardening P0-P4
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane::vac_init_production_rc
+ownership:
+  crates:
+  - vac-core
+  - vac-cli
+  modules:
+  - control_plane::vac_init_production_rc
+  - control_plane::vac_init_live_stores
+  - doctor_cli
+  - init_cli
+  targets:
+  - kind: path
+    include:
+    - vac-rs/control-plane/src/control_plane/vac_init_production_rc.rs
+    - vac-rs/control-plane/src/control_plane/vac_init_live_stores.rs
+    - vac-rs/control-plane/src/control_plane/mod.rs
+    - vac-rs/core/src/apply_patch.rs
+    - vac-rs/core/src/tools/handlers/unified_exec.rs
+    - vac-rs/cli/src/doctor_cli.rs
+    - vac-rs/cli/src/init_cli.rs
+    - scripts/check-no-hardcoded-readiness-scoreboard.sh
+    - scripts/check-vac-workflow-spec-compliance.sh
+    - scripts/check-vac-doctor-release-real-reports.sh
+    - scripts/check-vac-init-runtime-gate-callsite-integration.sh
+    - scripts/check-vac-init-live-stores.sh
+    - docs/vac-init/VAC_INIT_DETERMINISTIC_HARDENING_P0_P4.md
+    - docs/validation/VAC_INIT_DETERMINISTIC_HARDENING_P0_P4_VALIDATION.md
+    exclude: []
+description: 'Deterministic P0-P4 hardening: remove hardcoded scoreboard, enforce typed workflows, real release report aggregation, runtime gate call-sites, and live atomic stores.'
+depends_on:
+- vac.init.production-rc
+- vac.init.runtime-gate-enforcement
+- vac.init.durable-stores
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - bash scripts/check-vac-init-deterministic-hardening-p0-p4.sh
+  palette: true
+  tui:
+    routes:
+    - /capabilities
+    - /runtime
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for: []
+states:
+- empty
+- loading
+- success
+- failure
+validation:
+  gates:
+  - no_hardcoded_scoreboard
+  - workflow_spec_compliance
+  - release_real_reports
+  - runtime_gate_callsites
+  - live_stores
+  commands:
+  - id: vac.init.deterministic-hardening-p0-p4.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-deterministic-hardening-p0-p4.sh
+    risk: execute_process
+    approval: policy
+docs:
+- docs/vac-init/VAC_INIT_DETERMINISTIC_HARDENING_P0_P4.md
+- docs/validation/VAC_INIT_DETERMINISTIC_HARDENING_P0_P4_VALIDATION.md

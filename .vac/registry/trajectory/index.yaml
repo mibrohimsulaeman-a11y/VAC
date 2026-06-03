@@ -1,0 +1,282 @@
+schema_version: 1
+kind: trajectory
+id: trajectory.index
+title: VAC safe rationale trajectory index
+spans:
+  - file: vac-rs/control-plane/src/control_plane/vac_init_cli_runtime.rs
+    start_line: 1
+    end_line: 220
+    symbol: CliRuntimeCommandKind
+    evidence_id: evidence.2026-05-29-cli-runtime
+    plan_id: plan.production-hardening-b
+    capability: vac.init.cli-runtime-foundation
+results_by_evidence:
+  evidence.2026-05-29-cli-runtime:
+    evidence_id: evidence.2026-05-29-cli-runtime
+    timestamp: 2026-05-29T10:30:00Z
+    task: Production Hardening B CLI runtime foundation
+    plan_id: plan.production-hardening-b
+    capability: vac.init.cli-runtime-foundation
+    rationale:
+      summary: Added runtime CLI contracts for init, plan validation, safe why lookup, and doctor taxonomy wiring.
+      policy_refs:
+        - policy.vac-init-cli-runtime
+      evidence_refs:
+        - evidence.2026-05-29-cli-runtime
+      team_memory_refs: []
+      semantic_refs: []
+      raw_chain_of_thought_excluded: true
+    changeset:
+      operation: modify
+      diff_excerpt: CLI wiring and strict runtime foundation contracts.
+      lines_added: 1
+      lines_removed: 0
+    approval:
+      approved_by: operator
+      content_hash: sha256-placeholder-approval
+    chain_depth: 1
+
+  evidence.2026-06-01-o5o6-runtime-agent-flow-fix:
+    evidence_id: evidence.2026-06-01-o5o6-runtime-agent-flow-fix
+    timestamp: 2026-06-01T00:00:00Z
+    task: O5/O6 runtime entrypoints and agent flow fix
+    plan_id: plan.o5o6.runtime-agent-flow-fix
+    capability: vac.local_runtime_owner
+    rationale:
+      summary: ThreadManager-backed interactive owner runtime with runtime Plan Mode semantic validation and doctor-ready semantics.
+      policy_refs:
+        - vac.runtime-plan-mode-single-path
+        - vac.static-vs-toolchain-truth
+      evidence_refs:
+        - evidence.2026-06-01-o5o6-runtime-agent-flow-fix
+      team_memory_refs: []
+      semantic_refs: []
+      raw_chain_of_thought_excluded: true
+    changeset:
+      operation: modify
+      diff_excerpt: OwnerNativeSession no longer critical-unsupported for startup/turn/shell, Plan Mode calls shared plan validate engine, doctor report is real.
+      lines_added: 1
+      lines_removed: 0
+    approval:
+      approved_by: operator
+      content_hash: source-artifact-final-pending-sha256
+    chain_depth: 1
+
+  evidence.2026-06-01-o5o6-runtime-agent-flow-followup:
+    evidence_id: evidence.2026-06-01-o5o6-runtime-agent-flow-followup
+    timestamp: 2026-06-01T00:00:00Z
+    task: O5/O6 runtime agent flow follow-up hardening
+    plan_id: plan.o5o6.runtime-agent-flow-followup
+    capability: vac.local_runtime_owner
+    rationale:
+      summary: Active Plan Mode semantic gate follow-up with non-no-op owner runtime guard and aggregate O6.1 skip-rescan hardening.
+      policy_refs:
+        - vac.runtime-plan-mode-single-path
+        - vac.static-vs-toolchain-truth
+      evidence_refs:
+        - evidence.2026-06-01-o5o6-runtime-agent-flow-followup
+      team_memory_refs: []
+      semantic_refs: []
+      raw_chain_of_thought_excluded: true
+    changeset:
+      operation: modify
+      diff_excerpt: Active runtime semantic plan, duplicate bootstrap field removal, owner runtime guard, O6.1 re-pin, aggregate gate optimization.
+      lines_added: 1
+      lines_removed: 0
+    approval:
+      approved_by: operator
+      content_hash: source-artifact-final-pending-sha256
+    chain_depth: 2
+
+  evidence.2026-06-01-o5o6-runtime-agent-flow-auditfix:
+    evidence_id: evidence.2026-06-01-o5o6-runtime-agent-flow-auditfix
+    timestamp: 2026-06-01T00:00:00Z
+    task: O5/O6 runtime agent flow auditfix hardening
+    plan_id: plan.o5o6.runtime-agent-flow-auditfix
+    capability: vac.local_runtime_owner
+    rationale:
+      summary: Structural owner-native gate, Tier-2 thread store paths, Plan Mode completion gate hook, de-brittled init doctor readiness, and command/evidence verification.
+      policy_refs:
+        - vac.runtime-plan-mode-single-path
+        - vac.static-vs-toolchain-truth
+      evidence_refs:
+        - evidence.2026-06-01-o5o6-runtime-agent-flow-auditfix
+      team_memory_refs: []
+      semantic_refs: []
+      raw_chain_of_thought_excluded: true
+    changeset:
+      operation: modify
+      diff_excerpt: Owner-native support manifest and ThreadStore-backed thread read/list/resume/branch plus Plan Mode static completion gate.
+      lines_added: 1
+      lines_removed: 0
+    approval:
+      approved_by: operator
+      content_hash: source-artifact-final-pending-sha256
+    chain_depth: 3
+
+
+
+  evidence.2026-06-01-o5o6-runtime-agent-flow-structural-hardening:
+    evidence_id: evidence.2026-06-01-o5o6-runtime-agent-flow-structural-hardening
+    timestamp: 2026-06-01T00:00:00Z
+    task: O5/O6 runtime agent flow structural hardening
+    plan_id: plan.o5o6.runtime-agent-flow-structural-hardening
+    capability: vac.local_runtime_owner
+    rationale:
+      summary: Code-owned owner-native runtime support contract, parity fail-closed alignment, deterministic registry validator, and O6.1 re-pin.
+      policy_refs:
+        - vac.runtime-plan-mode-single-path
+        - vac.static-vs-toolchain-truth
+        - vac.no-hardcoded-readiness
+      evidence_refs:
+        - evidence.2026-06-01-o5o6-runtime-agent-flow-structural-hardening
+      team_memory_refs: []
+      semantic_refs: []
+      raw_chain_of_thought_excluded: true
+    changeset:
+      operation: modify
+      diff_excerpt: Owner-native support contract, parity fail-closed status, runtime-owner doctor structural manifest checks, registry validator generated-risk skip.
+      lines_added: 1
+      lines_removed: 0
+    approval:
+      approved_by: operator
+      content_hash: source-artifact-final-pending-sha256
+    chain_depth: 4
+
+  evidence.2026-06-01-o5o6-control-plane-audit-findings:
+    evidence_id: evidence.2026-06-01-o5o6-control-plane-audit-findings
+    timestamp: 2026-06-01T00:00:00Z
+    task: O5/O6 control-plane audit findings closure
+    plan_id: plan.o5o6.control-plane-audit-findings
+    capability: vac.local_runtime_owner
+    rationale:
+      summary: Closed remaining audit findings with ast_exact scanner, autopilot scheduler runtime producer/executor, persistent runtime operator console actions, workflow-run execution, packaging gate, and source/static evidence truth.
+      policy_refs:
+        - vac.runtime-plan-mode-single-path
+        - vac.static-vs-toolchain-truth
+        - vac.no-hardcoded-readiness
+      evidence_refs:
+        - evidence.2026-06-01-o5o6-control-plane-audit-findings
+      team_memory_refs: []
+      semantic_refs: []
+      raw_chain_of_thought_excluded: true
+    changeset:
+      operation: modify
+      diff_excerpt: AST-exact source-static scanner, autopilot status producer/action executor, runtime operator console, workflow runner dispatch, packaging gate, O6/O5 repins, and docs/evidence.
+      lines_added: 1
+      lines_removed: 0
+    approval:
+      approved_by: operator
+      content_hash: source-artifact-final-pending-sha256
+    chain_depth: 5
+    rollback: restore vac-o5o6-runtime-agent-flow-structural-hardening-final-source.zip before reapplying this audit findings slice with cargo/live feedback.
+
+  evidence.2026-06-01-o5o6-autopilot-runtime-executor-closeout:
+    evidence_id: evidence.2026-06-01-o5o6-autopilot-runtime-executor-closeout
+    timestamp: 2026-06-01T00:00:00Z
+    task: O5/O6 autopilot runtime executor closeout
+    plan_id: plan.o5o6.autopilot-runtime-executor-closeout
+    capability: vac.autopilot.scheduler
+    rationale:
+      summary: Replaced status-only autopilot runtime with workflow_runner-backed scheduler tick, running/terminal status, run evidence, live console tab navigation, and live refresh hooks.
+      policy_refs:
+        - vac.static-vs-toolchain-truth
+        - vac.no-hardcoded-readiness
+      evidence_refs:
+        - evidence.2026-06-01-o5o6-autopilot-runtime-executor-closeout
+      team_memory_refs: []
+      semantic_refs: []
+      raw_chain_of_thought_excluded: true
+    changeset:
+      operation: modify
+      diff_excerpt: Autopilot scheduler executes workflow manifests, operator console navigates tabs and refreshes on draw ticks, gates reject facade regressions.
+      lines_added: 1
+      lines_removed: 0
+    approval:
+      approved_by: operator
+      content_hash: source-artifact-final-pending-sha256
+    chain_depth: 6
+    rollback: restore vac-o5o6-control-plane-audit-findings-final-source.zip before reapplying this closeout with cargo/live feedback.
+
+  evidence.2026-06-01-o5o6-autopilot-runtime-scheduler-guard:
+    evidence_id: evidence.2026-06-01-o5o6-autopilot-runtime-scheduler-guard
+    timestamp: 2026-06-01T00:00:00Z
+    task: O5/O6 autopilot runtime scheduler guard closeout
+    plan_id: plan.o5o6.autopilot-runtime-scheduler-guard
+    capability: vac.autopilot.scheduler
+    rationale:
+      summary: Added run-state schedule dedupe, approval-policy-bound workflow execution branch, and static gate assertions so live refresh no longer respawns terminal jobs every draw tick.
+      policy_refs:
+        - vac.static-vs-toolchain-truth
+        - vac.no-hardcoded-readiness
+      evidence_refs:
+        - evidence.2026-06-01-o5o6-autopilot-runtime-scheduler-guard
+      team_memory_refs: []
+      semantic_refs: []
+      raw_chain_of_thought_excluded: true
+    changeset:
+      operation: modify
+      diff_excerpt: Autopilot scheduler run-state guard, approval-policy branch, static gate hardening, O6.1 re-pin, and docs/evidence.
+      lines_added: 1
+      lines_removed: 0
+    approval:
+      approved_by: operator
+      content_hash: source-artifact-final-pending-sha256
+    chain_depth: 7
+    rollback: restore vac-o5o6-autopilot-runtime-executor-closeout-final-source.zip before reapplying this scheduler guard with cargo/live feedback.
+
+
+  evidence.2026-06-01-o5o6-tui-performance-hotpath-closeout:
+    evidence_id: evidence.2026-06-01-o5o6-tui-performance-hotpath-closeout
+    timestamp: 2026-06-01T00:00:00Z
+    task: O5/O6 TUI performance hot-path closeout
+    plan_id: plan.o5o6.tui-performance-hotpath-closeout
+    capability: vac.tui.operator-live-adapter
+    rationale:
+      summary: Separated operator-console draw ticks from autopilot scheduler execution, made runtime state loading read-only, and added markdown render memoization.
+      policy_refs:
+        - vac.static-vs-toolchain-truth
+        - vac.no-hardcoded-readiness
+      evidence_refs:
+        - evidence.2026-06-01-o5o6-tui-performance-hotpath-closeout
+      team_memory_refs: []
+      semantic_refs: []
+      raw_chain_of_thought_excluded: true
+    changeset:
+      operation: modify
+      diff_excerpt: Conditional dirty-file refresh for operator console, no scheduler execution in render/model paths, markdown memo cache, static gate hardening, O6.1 re-pin.
+      lines_added: 1
+      lines_removed: 0
+    approval:
+      approved_by: operator
+      content_hash: source-artifact-final-pending-sha256
+    chain_depth: 8
+    rollback: restore vac-o5o6-autopilot-runtime-scheduler-guard-final-source.zip before reapplying this performance hot-path slice.
+
+
+  evidence.2026-06-01-o5o6-tui-local-tool-cleanup:
+    evidence_id: evidence.2026-06-01-o5o6-tui-local-tool-cleanup
+    timestamp: 2026-06-01T00:00:00Z
+    task: O5/O6 TUI local coding tool cleanup
+    plan_id: plan.o5o6.tui-local-tool-cleanup
+    capability: vac.tui.operator-live-adapter
+    rationale:
+      summary: Removed non-local TUI/cloud/remote surfaces while preserving locked auth/provider/dashboard/external-agent/docs and MCP @mention helpers; added static cleanup and draw-read-only gates.
+      policy_refs:
+        - vac.static-vs-toolchain-truth
+        - vac.local-tool-scope
+      evidence_refs:
+        - evidence.2026-06-01-o5o6-tui-local-tool-cleanup
+      team_memory_refs: []
+      semantic_refs: []
+      raw_chain_of_thought_excluded: true
+    changeset:
+      operation: cleanup
+      diff_excerpt: Voice/realtime/IDE/multi-agent/cloud-directory/remote-thread-store cleanup plus DESTRUCTIVE danger color and static gates.
+      lines_added: 1
+      lines_removed: 0
+    approval:
+      approved_by: operator
+      content_hash: source-artifact-final-pending-sha256
+    chain_depth: 9
+    rollback: restore vac-o5o6-tui-performance-hotpath-final-source.zip before reapplying this cleanup.

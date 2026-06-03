@@ -1,0 +1,36 @@
+schema_version: 1
+kind: capability
+id: vac.o5o6.audit_closeout_remediation
+title: O5/O6 audit closeout remediation
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane
+reason: 'Source/static closeout for the latest audit: O5.2 hash gate, O6.1 scanner reproducibility, full donor source tree removal, and artifact hygiene hardening. Cargo remains TV-Pending.'
+depends_on:
+  - vac.o5o6.all_audit_remainder
+surfaces:
+  cli:
+    enabled: false
+  palette: false
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for: []
+validation:
+  commands:
+    - id: vac.o5o6.audit-closeout.validation.cmd001
+      runner: bash
+      args:
+        - scripts/check-vac-o5o6-all-audit-remainder.sh
+      risk: safe_read
+      approval: never
+ownership:
+  crates:
+    - vac-core
+  modules:
+    - control_plane
+docs:
+  - docs/monolith-quality/O5O6_AUDIT_CLOSEOUT_REMEDIATION_REPORT.md

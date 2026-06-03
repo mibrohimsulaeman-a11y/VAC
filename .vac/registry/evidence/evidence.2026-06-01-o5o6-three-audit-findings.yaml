@@ -1,0 +1,39 @@
+schema_version: 1
+kind: evidence
+id: evidence.2026-06-01-o5o6-three-audit-findings
+timestamp: 2026-06-01T23:45:00Z
+plan_id: plan.o5o6.three-audit-findings
+capability: vac.o5o6.monolith-quality
+status: SV-Done
+summary: Source/static closeout for three latest audit finding packs.
+changeset:
+  files_modified:
+    - vac-rs/cli/src/main.rs
+    - vac-rs/cli/src/plan_cli.rs
+    - vac-rs/cli/src/init_cli.rs
+    - vac-rs/tui/src/app/resize_reflow.rs
+    - vac-rs/tui/src/workflow_browser.rs
+    - vac-rs/tui/src/debug_config.rs
+    - vac-rs/control-plane/src/control_plane/vac_init_evidence_chain.rs
+    - vac-rs/control-plane/src/control_plane/vac_init_evidence_writer.rs
+    - vac-rs/control-plane/src/control_plane/vac_init_patch_guard.rs
+    - vac-rs/vac-client/src/lib.rs
+    - vac-rs/protocol/src/auth.rs
+  files_created:
+    - vac-rs/cli/src/approve_cli.rs
+    - vac-rs/cli/src/workflow_cli.rs
+    - vac-rs/tui/src/chatwidget/height_cache.rs
+    - vac-rs/tui/src/perf_bench_harness.rs
+    - scripts/check-vac-o5o6-three-audit-findings-static.sh
+validation:
+  gates_passed:
+    - scripts/check-vac-o5o6-three-audit-findings-static.sh
+    - scripts/check-vac-o5o6-current-auditfix-static.sh
+    - scripts/check-vac-tui-perf-ux-findings-static.sh
+    - scripts/check-vac-regen-control-plane-projection.sh
+    - scripts/check-vac-source-artifact-packaging-gate.sh
+  TV-Pending:
+    - cargo check
+    - cargo test
+    - cargo clippy
+    - live TUI smoke

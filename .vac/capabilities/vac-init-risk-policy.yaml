@@ -1,0 +1,53 @@
+schema_version: 1
+kind: capability
+id: vac.init.risk-policy
+title: VAC-Init Risk Scanner and Policy Inference
+status: ready
+owner:
+  crate: vac-core
+  module: control_plane::vac_init_risk_policy
+ownership:
+  crates:
+  - vac-core
+  modules:
+  - control_plane::vac_init_risk_policy
+  targets:
+  - crate_name: vac-core
+    module: control_plane::vac_init_risk_policy
+description: Risk scanner detects process/network/file/credential patterns and infers policy drafts without auto-allowing ambiguous findings.
+depends_on:
+- vac.init.ownership-scanner
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - bash scripts/check-vac-init-risk-policy-contract.sh
+  palette: true
+  tui:
+    routes:
+    - /capabilities
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+  approval_required_for:
+  - execute_process
+states:
+- empty
+- loading
+- success
+- failure
+validation:
+  gates:
+  - vac_init_risk_policy_contract
+  commands:
+  - id: vac.init.risk-policy.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-risk-policy-contract.sh
+    risk: execute_process
+    approval: policy
+docs:
+- docs/vac-init/VAC_INIT_BATCH_06_12_IMPLEMENTATION.md
+- docs/validation/VAC_INIT_RISK_POLICY_GATE.md
