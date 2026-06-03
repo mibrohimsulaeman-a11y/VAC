@@ -1,2 +1,8 @@
 vac-rs/app-server-protocol/schema/** linguist-generated
 vac-rs/hooks/schema/generated/** linguist-generated
+
+# `.inc` files in this workspace are Rust fragments included via the
+# `include!` macro (e.g. `*_tests.rs.inc`, `v2_part_*.rs.inc`). GitHub
+# Linguist defaults to classifying `.inc` as C++, which inflates the
+# language bar. Force-classify as Rust.
+*.inc linguist-language=Rust
