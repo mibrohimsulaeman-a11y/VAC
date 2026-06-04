@@ -378,8 +378,10 @@ pub struct Tui {
     alt_saved_viewport: Option<ratatui::layout::Rect>,
     #[cfg(unix)]
     suspend_context: SuspendContext,
-    // True when overlay alt-screen UI is active
+    // True when alternate-screen UI is active; shared with signal handling paths.
     alt_screen_active: Arc<AtomicBool>,
+    // Nested alternate-screen entries let the fullscreen TUI and temporary overlays coexist.
+    alt_screen_depth: usize,
     // True when terminal/tab is focused; updated internally from crossterm events
     terminal_focused: Arc<AtomicBool>,
     enhanced_keys_supported: bool,
@@ -417,6 +419,7 @@ impl Tui {
             #[cfg(unix)]
             suspend_context: SuspendContext::new(),
             alt_screen_active: Arc::new(AtomicBool::new(false)),
+            alt_screen_depth: 0,
             terminal_focused: Arc::new(AtomicBool::new(true)),
             enhanced_keys_supported,
             notification_backend: Some(detect_backend(NotificationMethod::default())),
@@ -476,11 +479,19 @@ impl Tui {
         // Pause crossterm events to avoid stdin conflicts with external program `f`.
         self.pause_events();
 
-        // Leave alt screen if active to avoid conflicts with external program `f`.
-        let was_alt_screen = self.is_alt_screen_active();
-        if was_alt_screen {
-            let _ = self.leave_alt_screen();
-        }
+        // Leave alt screen if active to avoid conflicts with external program `f`, preserving
+        // the logical nesting depth so fullscreen mode can be restored afterward.
+        let alt_screen_depth = if self.is_alt_screen_active() {
+            match self.force_leave_alt_screen() {
+                Ok(depth) => depth,
+                Err(err) => {
+                    tracing::warn!("failed to leave alternate screen before external program: {err}");
+                    0
+                }
+            }
+        } else {
+            0
+        };
 
         if let Err(err) = mode.restore() {
             tracing::warn!("failed to restore terminal modes before external program: {err}");
@@ -494,8 +505,10 @@ impl Tui {
         // After the external program `f` finishes, reset terminal state and flush any buffered keypresses.
         flush_terminal_input_buffer();
 
-        if was_alt_screen {
-            let _ = self.enter_alt_screen();
+        if alt_screen_depth > 0
+            && let Err(err) = self.restore_alt_screen_layers(alt_screen_depth)
+        {
+            tracing::warn!("failed to restore alternate screen after external program: {err}");
         }
 
         self.resume_events();
@@ -554,9 +567,18 @@ impl Tui {
         if !self.alt_screen_enabled {
             return Ok(());
         }
-        if self.alt_screen_active.load(Ordering::Relaxed) {
+
+        if self.alt_screen_depth > 0 {
+            self.alt_screen_depth = self.alt_screen_depth.saturating_add(1);
             return Ok(());
         }
+
+        self.activate_alt_screen()?;
+        self.alt_screen_depth = 1;
+        Ok(())
+    }
+
+    fn activate_alt_screen(&mut self) -> Result<()> {
         let _ = execute!(self.terminal.backend_mut(), EnterAlternateScreen);
         // Enable "alternate scroll" so terminals may translate wheel to arrows
         let _ = execute!(self.terminal.backend_mut(), EnableAlternateScroll);
@@ -579,9 +601,19 @@ impl Tui {
         if !self.alt_screen_enabled {
             return Ok(());
         }
-        if !self.alt_screen_active.load(Ordering::Relaxed) {
+        if self.alt_screen_depth == 0 {
             return Ok(());
         }
+
+        self.alt_screen_depth -= 1;
+        if self.alt_screen_depth > 0 {
+            return Ok(());
+        }
+
+        self.deactivate_alt_screen()
+    }
+
+    fn deactivate_alt_screen(&mut self) -> Result<()> {
         // Disable alternate scroll when leaving alt-screen
         let _ = execute!(self.terminal.backend_mut(), DisableAlternateScroll);
         let _ = execute!(self.terminal.backend_mut(), LeaveAlternateScreen);
@@ -589,6 +621,29 @@ impl Tui {
             self.terminal.set_viewport_area(saved);
         }
         self.alt_screen_active.store(false, Ordering::Relaxed);
+        Ok(())
+    }
+
+    fn force_leave_alt_screen(&mut self) -> Result<usize> {
+        if !self.alt_screen_enabled || self.alt_screen_depth == 0 {
+            return Ok(0);
+        }
+
+        let depth = self.alt_screen_depth;
+        self.alt_screen_depth = 0;
+        self.deactivate_alt_screen()?;
+        Ok(depth)
+    }
+
+    fn restore_alt_screen_layers(&mut self, depth: usize) -> Result<()> {
+        if !self.alt_screen_enabled || depth == 0 {
+            return Ok(());
+        }
+
+        if !self.alt_screen_active.load(Ordering::Relaxed) {
+            self.activate_alt_screen()?;
+        }
+        self.alt_screen_depth = depth;
         Ok(())
     }
 

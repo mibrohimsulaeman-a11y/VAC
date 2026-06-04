@@ -327,6 +327,9 @@ impl App {
                 // Clear the in-progress state in the bottom pane
                 self.chat_widget.on_diff_complete();
                 // Enter alternate screen using TUI helper and build pager lines
+                if self.overlay.is_some() {
+                    self.close_transcript_overlay(tui);
+                }
                 let _ = tui.enter_alt_screen();
                 let pager_lines: Vec<ratatui::text::Line<'static>> = if text.trim().is_empty() {
                     vec!["No changes detected.".italic().into()]
@@ -1738,70 +1741,75 @@ impl App {
             AppEvent::ManageSkillsClosed => {
                 self.chat_widget.handle_manage_skills_closed();
             }
-            AppEvent::FullScreenApprovalRequest(request) => match request {
-                ApprovalRequest::ApplyPatch { cwd, changes, .. } => {
-                    let _ = tui.enter_alt_screen();
-                    let diff_summary = DiffSummary::new(changes, cwd);
-                    self.overlay = Some(Overlay::new_static_with_renderables(
-                        vec![diff_summary.into()],
-                        "P A T C H".to_string(),
-                        self.keymap.pager.clone(),
-                    ));
+            AppEvent::FullScreenApprovalRequest(request) => {
+                if self.overlay.is_some() {
+                    self.close_transcript_overlay(tui);
                 }
-                ApprovalRequest::Exec { command, .. } => {
-                    let _ = tui.enter_alt_screen();
-                    let full_cmd = strip_bash_lc_and_escape(&command);
-                    let full_cmd_lines = highlight_bash_to_lines(&full_cmd);
-                    self.overlay = Some(Overlay::new_static_with_lines(
-                        full_cmd_lines,
-                        "E X E C".to_string(),
-                        self.keymap.pager.clone(),
-                    ));
-                }
-                ApprovalRequest::Permissions {
-                    permissions,
-                    reason,
-                    ..
-                } => {
-                    let _ = tui.enter_alt_screen();
-                    let mut lines = Vec::new();
-                    if let Some(reason) = reason {
-                        lines.push(Line::from(vec!["Reason: ".into(), reason.italic()]));
-                        lines.push(Line::from(""));
+                match request {
+                    ApprovalRequest::ApplyPatch { cwd, changes, .. } => {
+                        let _ = tui.enter_alt_screen();
+                        let diff_summary = DiffSummary::new(changes, cwd);
+                        self.overlay = Some(Overlay::new_static_with_renderables(
+                            vec![diff_summary.into()],
+                            "P A T C H".to_string(),
+                            self.keymap.pager.clone(),
+                        ));
                     }
-                    if let Some(rule_line) =
-                        crate::bottom_pane::format_requested_permissions_rule(&permissions)
-                    {
-                        lines.push(Line::from(vec![
-                            "Permission rule: ".into(),
-                            rule_line.cyan(),
-                        ]));
+                    ApprovalRequest::Exec { command, .. } => {
+                        let _ = tui.enter_alt_screen();
+                        let full_cmd = strip_bash_lc_and_escape(&command);
+                        let full_cmd_lines = highlight_bash_to_lines(&full_cmd);
+                        self.overlay = Some(Overlay::new_static_with_lines(
+                            full_cmd_lines,
+                            "E X E C".to_string(),
+                            self.keymap.pager.clone(),
+                        ));
                     }
-                    self.overlay = Some(Overlay::new_static_with_renderables(
-                        vec![Box::new(Paragraph::new(lines).wrap(Wrap { trim: false }))],
-                        "P E R M I S S I O N S".to_string(),
-                        self.keymap.pager.clone(),
-                    ));
+                    ApprovalRequest::Permissions {
+                        permissions,
+                        reason,
+                        ..
+                    } => {
+                        let _ = tui.enter_alt_screen();
+                        let mut lines = Vec::new();
+                        if let Some(reason) = reason {
+                            lines.push(Line::from(vec!["Reason: ".into(), reason.italic()]));
+                            lines.push(Line::from(""));
+                        }
+                        if let Some(rule_line) =
+                            crate::bottom_pane::format_requested_permissions_rule(&permissions)
+                        {
+                            lines.push(Line::from(vec![
+                                "Permission rule: ".into(),
+                                rule_line.cyan(),
+                            ]));
+                        }
+                        self.overlay = Some(Overlay::new_static_with_renderables(
+                            vec![Box::new(Paragraph::new(lines).wrap(Wrap { trim: false }))],
+                            "P E R M I S S I O N S".to_string(),
+                            self.keymap.pager.clone(),
+                        ));
+                    }
+                    ApprovalRequest::McpElicitation {
+                        server_name,
+                        message,
+                        ..
+                    } => {
+                        let _ = tui.enter_alt_screen();
+                        let paragraph = Paragraph::new(vec![
+                            Line::from(vec!["Server: ".into(), server_name.bold()]),
+                            Line::from(""),
+                            Line::from(message),
+                        ])
+                        .wrap(Wrap { trim: false });
+                        self.overlay = Some(Overlay::new_static_with_renderables(
+                            vec![Box::new(paragraph)],
+                            "E L I C I T A T I O N".to_string(),
+                            self.keymap.pager.clone(),
+                        ));
+                    }
                 }
-                ApprovalRequest::McpElicitation {
-                    server_name,
-                    message,
-                    ..
-                } => {
-                    let _ = tui.enter_alt_screen();
-                    let paragraph = Paragraph::new(vec![
-                        Line::from(vec!["Server: ".into(), server_name.bold()]),
-                        Line::from(""),
-                        Line::from(message),
-                    ])
-                    .wrap(Wrap { trim: false });
-                    self.overlay = Some(Overlay::new_static_with_renderables(
-                        vec![Box::new(paragraph)],
-                        "E L I C I T A T I O N".to_string(),
-                        self.keymap.pager.clone(),
-                    ));
-                }
-            },
+            }
             #[cfg(not(target_os = "linux"))]
             AppEvent::UpdateRecordingMeter { id, text } => {
                 // Update in place to preserve the element id for subsequent frames.

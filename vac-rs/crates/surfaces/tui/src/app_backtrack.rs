@@ -231,6 +231,9 @@ impl App {
 
     /// Open transcript overlay (enters alternate screen and shows full transcript).
     pub(crate) fn open_transcript_overlay(&mut self, tui: &mut tui::Tui) {
+        if self.overlay.is_some() {
+            self.close_transcript_overlay(tui);
+        }
         let _ = tui.enter_alt_screen();
         self.overlay = Some(Overlay::new_transcript(
             self.transcript_cells.clone(),
