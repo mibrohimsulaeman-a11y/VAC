@@ -18,9 +18,6 @@ require_grep() {
   fi
 }
 
-require_file docs/monolith-quality/O6_1_DEPANIC_TRIAGE.md
-require_file docs/monolith-quality/O6_2_UNSAFE_TRIAGE.md
-require_file docs/monolith-quality/O6_2_SAFETY_ANNOTATION_COVERAGE.md
 require_file .vac/registry/o6-quality-triage.yaml
 
 require_grep 'unwrap_runtime:' .vac/registry/o6-quality-triage.yaml

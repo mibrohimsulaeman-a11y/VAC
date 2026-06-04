@@ -29,7 +29,7 @@ steps:
     activity_log: true
     evidence_surface: true
 - id: monitor_panel_rendered
-  uses: capability.autopilot.scheduler.render
+  uses: capability.vac.autopilot.scheduler-monitor-only.check
   ui:
     surface: /runtime
     inspect_surface: /runtime/jobs
@@ -38,7 +38,7 @@ steps:
     approval_surface: true
     evidence_surface: true
 - id: policy_gate_asserted
-  uses: capability.policy.approval_gate
+  uses: capability.approval.request
   ui:
     surface: /approvals
     progress_panel: true

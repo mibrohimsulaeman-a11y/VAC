@@ -325,6 +325,8 @@ pub fn agent_identity_jwks_url(base_url: &str) -> String {
     let trimmed = base_url.trim_end_matches('/');
     if trimmed.contains("/provider-api") {
         format!("{trimmed}/wham/agent-identities/jwks")
+    } else if trimmed.contains("/api/vac") {
+        format!("{trimmed}/agent-identities/jwks")
     } else {
         format!("{trimmed}/provider-api/wham/agent-identities/jwks")
     }
@@ -716,6 +718,9 @@ J1bwkqKZTB5dHolX9A58e/xXnfZ5P8f3Z83+Izap3FwqQulk7b1WO1MQcHuVg2NN
 
     #[test]
     fn agent_identity_jwks_url_uses_backend_api_base_url() {
+        unsafe {
+            std::env::set_var("VAC_ENABLE_LEGACY_CHATGPT_AGENT_IDENTITY_JWKS", "true");
+        }
         assert_eq!(
             agent_identity_jwks_url("https://provider.vac.invalid/provider-api"),
             "https://provider.vac.invalid/provider-api/wham/agent-identities/jwks"
@@ -728,6 +733,9 @@ J1bwkqKZTB5dHolX9A58e/xXnfZ5P8f3Z83+Izap3FwqQulk7b1WO1MQcHuVg2NN
 
     #[test]
     fn agent_identity_jwks_url_uses_vac_api_base_url() {
+        unsafe {
+            std::env::set_var("VAC_ENABLE_LEGACY_CHATGPT_AGENT_IDENTITY_JWKS", "true");
+        }
         assert_eq!(
             agent_identity_jwks_url("http://localhost:8080/api/vac"),
             "http://localhost:8080/api/vac/agent-identities/jwks"

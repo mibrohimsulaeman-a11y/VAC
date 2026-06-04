@@ -3,9 +3,11 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 require_file() { [[ -f "$1" ]] || { echo "FAIL: missing required file: $1" >&2; exit 1; }; }
-require_file docs/PROJECT_STATE_CURRENT.md
-require_file docs/DOCS_INDEX_CURRENT.md
-require_file docs/DOCS_AUDIT.md
+require_file docs/workflow-control-plane/INDEX.md
+require_file docs/workflow-control-plane/IMPLEMENTATION_PLAN.md
+require_file docs/workflow-control-plane/plans/INDEX.md
+require_file docs/workflow-control-plane/schema/INDEX.md
+require_file docs/legal/NOTICES.md
 require_file .vac/registry/docs-state.yaml
 require_file .vac/registry/donor-inventory.yaml
 [[ ! -d docs/donor-migration ]] || { echo "FAIL: docs/donor-migration should be pruned" >&2; exit 1; }
@@ -20,6 +22,6 @@ PYDOC
 )"
 [[ "$actual_docs" == "$recorded_docs" ]] || { echo "FAIL: docs count drift actual=$actual_docs recorded=$recorded_docs" >&2; exit 1; }
 grep -q 'docs_pruned: true' .vac/registry/docs-state.yaml || { echo "FAIL: docs-state missing donor docs_pruned marker" >&2; exit 1; }
-grep -q 'docs/donor-migration/` has been pruned' docs/PROJECT_STATE_CURRENT.md || { echo "FAIL: project state missing donor pruning state" >&2; exit 1; }
+grep -q 'docs/workflow-control-plane/INDEX.md' .vac/registry/docs-state.yaml || { echo "FAIL: docs-state missing active docs index" >&2; exit 1; }
 printf 'docs state refresh: PASS (docs=%s; donor docs pruned)
 ' "$actual_docs"

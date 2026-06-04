@@ -35,7 +35,7 @@ routes:
     action: open_activity
     capability: vac.activity
     owner: vac-rs/tui
-    visible: true
+    visible: false
     status: planned
   - kind: cli
     command: vac activity

@@ -11,12 +11,16 @@ ownership:
   - vac-tui
   modules:
   - operator_ui
-description: Spec-driven runtime jobs executor and monitor for scheduled/autopilot workflows in the local terminal TUI.
+description: Spec-driven monitor-only runtime jobs surface for scheduled/autopilot workflows in the local terminal TUI.
 reason: 'The scheduler surface is backed by declarative `.vac` workflow manifests,
 
   a workflow_runner-backed executor, run-state dedupe, approval-policy binding for real registries,
 
   persistent status/run/action logs, and a TUI operator console whose draw path is read-only.
+
+  The visible runtime jobs panel remains monitor-only: it observes queue/run state and exposes
+
+  policy-gated actions, but render ticks never execute scheduled work.
 
   Runtime actions can cancel future runs, retry through workflow_runner, or inspect/attach to run logs
 
@@ -27,14 +31,14 @@ depends_on:
 - vac.tui
 - vac.workflow
 surfaces:
-  tui:
-    routes:
-    - /runtime
-    - /runtime/jobs
   slash:
     commands:
     - /runtime
   palette: true
+  tui:
+    routes:
+    - /runtime
+    - /runtime/jobs
 states:
 - empty
 - loading
@@ -75,5 +79,3 @@ validation:
   - workflow_registered
   - policy_gated_workflow_runner
   - render_path_read_only
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

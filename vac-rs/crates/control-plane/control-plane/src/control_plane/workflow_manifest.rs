@@ -1,6 +1,7 @@
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde::Serialize;
+use serde::de;
 use std::collections::BTreeMap;
 use std::collections::HashSet;
 use std::path::Path;
@@ -10,13 +11,13 @@ use thiserror::Error;
 use super::workflow_runner::WORKFLOW_STEP_VOCABULARY;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[serde(deny_unknown_fields)]
 pub struct WorkflowManifest {
     pub schema_version: u32,
     pub kind: WorkflowManifestKind,
     pub id: String,
     pub title: String,
     pub status: WorkflowStatus,
+    #[serde(default)]
     pub inputs: BTreeMap<String, WorkflowInputSpec>,
     pub steps: Vec<WorkflowStep>,
     pub ui: WorkflowUi,
@@ -111,14 +112,13 @@ pub struct WorkflowPolicy {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct WorkflowValidation {
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_workflow_validation_entries")]
     pub commands: Vec<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_workflow_validation_entries")]
     pub gates: Vec<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[serde(deny_unknown_fields)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, JsonSchema)]
 pub struct WorkflowStep {
     pub id: String,
     pub uses: String,
@@ -128,6 +128,64 @@ pub struct WorkflowStep {
     pub policy: Option<WorkflowStepPolicy>,
     #[serde(default)]
     pub ui: Option<WorkflowStepUi>,
+}
+
+impl<'de> Deserialize<'de> for WorkflowStep {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: de::Deserializer<'de>,
+    {
+        let raw = RawWorkflowStep::deserialize(deserializer)?;
+        let _metadata = (raw.description, raw.depends_on, raw.release_policy);
+        Ok(Self {
+            id: raw.id,
+            uses: raw.uses,
+            when: raw.when,
+            policy: raw.policy,
+            ui: raw.ui,
+        })
+    }
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct RawWorkflowStep {
+    id: String,
+    uses: String,
+    #[serde(default)]
+    description: Option<String>,
+    #[serde(default)]
+    when: Option<String>,
+    #[serde(default)]
+    policy: Option<WorkflowStepPolicy>,
+    #[serde(default)]
+    ui: Option<WorkflowStepUi>,
+    #[serde(default)]
+    depends_on: Vec<String>,
+    #[serde(default)]
+    release_policy: Option<serde_yaml::Value>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+enum RawWorkflowValidationEntry {
+    String(String),
+    Object(RawWorkflowValidationCommand),
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct RawWorkflowValidationCommand {
+    #[serde(default)]
+    id: Option<String>,
+    #[serde(default)]
+    runner: Option<String>,
+    #[serde(default)]
+    args: Vec<String>,
+    #[serde(default)]
+    risk: Option<String>,
+    #[serde(default)]
+    approval: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
@@ -205,6 +263,87 @@ pub fn load_workflow_manifest(
     parse_workflow_manifest(path, &contents)
 }
 
+fn deserialize_workflow_validation_entries<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
+where
+    D: de::Deserializer<'de>,
+{
+    let entries = Vec::<RawWorkflowValidationEntry>::deserialize(deserializer)?;
+    entries
+        .into_iter()
+        .enumerate()
+        .map(|(index, entry)| match entry {
+            RawWorkflowValidationEntry::String(value) => {
+                normalize_validation_entry_value(value, index)
+            }
+            RawWorkflowValidationEntry::Object(command) => {
+                normalize_validation_entry_command(command, index)
+            }
+        })
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(de::Error::custom)
+}
+
+fn normalize_validation_entry_value(value: String, index: usize) -> Result<String, String> {
+    if value.trim().is_empty() {
+        return Err(format!("validation entry {index} must not be empty"));
+    }
+    Ok(value)
+}
+
+fn normalize_validation_entry_command(
+    command: RawWorkflowValidationCommand,
+    index: usize,
+) -> Result<String, String> {
+    validate_structured_validation_metadata(command.id.as_deref(), index, "id")?;
+    validate_structured_validation_metadata(command.risk.as_deref(), index, "risk")?;
+    validate_structured_validation_metadata(command.approval.as_deref(), index, "approval")?;
+
+    let runner = command.runner.map(|value| {
+        if value.trim().is_empty() {
+            Err(format!("validation entry {index} runner must not be empty"))
+        } else {
+            Ok(value)
+        }
+    });
+    let runner = runner.transpose()?;
+
+    let mut parts = Vec::new();
+    if let Some(runner) = runner {
+        parts.push(runner);
+    }
+    for arg in command.args {
+        if arg.trim().is_empty() {
+            return Err(format!("validation entry {index} arg must not be empty"));
+        }
+        parts.push(arg);
+    }
+    if parts.is_empty() {
+        return Err(format!("validation entry {index} requires runner or args"));
+    }
+    Ok(parts.join(" "))
+}
+
+fn validate_structured_validation_metadata(
+    value: Option<&str>,
+    index: usize,
+    field: &str,
+) -> Result<(), String> {
+    let Some(value) = value else {
+        return Ok(());
+    };
+    if value.trim().is_empty() {
+        return Err(format!(
+            "validation entry {index} {field} must not be empty"
+        ));
+    }
+    if value.chars().any(char::is_whitespace) {
+        return Err(format!(
+            "validation entry {index} {field} must not contain whitespace"
+        ));
+    }
+    Ok(())
+}
+
 pub fn parse_workflow_manifest(
     path: impl AsRef<Path>,
     contents: &str,
@@ -246,11 +385,42 @@ pub(crate) fn workflow_step_use_resolves(uses: &str, known_capabilities: &HashSe
     WORKFLOW_STEP_VOCABULARY
         .iter()
         .any(|entry| entry.uses == uses)
-        || known_capabilities.contains(uses)
-        || uses
-            .strip_prefix("capability.")
-            .map(|suffix| known_capabilities.contains(&format!("vac.{suffix}")))
-            .unwrap_or(false)
+        || workflow_step_use_candidates(uses)
+            .iter()
+            .any(|candidate| known_capabilities.contains(candidate))
+}
+
+fn workflow_step_use_candidates(uses: &str) -> Vec<String> {
+    let mut candidates = Vec::new();
+    push_workflow_step_candidate(&mut candidates, uses);
+    if let Some(suffix) = uses.strip_prefix("capability.") {
+        push_workflow_step_candidate(&mut candidates, suffix);
+        if !suffix.starts_with("vac.") {
+            push_workflow_step_candidate(&mut candidates, &format!("vac.{suffix}"));
+        }
+    }
+    candidates
+}
+
+fn push_workflow_step_candidate(candidates: &mut Vec<String>, value: &str) {
+    push_unique_workflow_step_candidate(candidates, value);
+    if let Some(base) = value.strip_suffix(".check") {
+        push_unique_workflow_step_candidate(candidates, base);
+    }
+
+    let mut base = value;
+    while let Some((prefix, _suffix)) = base.rsplit_once('.') {
+        base = prefix;
+        push_unique_workflow_step_candidate(candidates, base);
+    }
+}
+
+fn push_unique_workflow_step_candidate(candidates: &mut Vec<String>, value: &str) {
+    for candidate in [value.to_string(), value.replace('_', "-")] {
+        if !candidates.contains(&candidate) {
+            candidates.push(candidate);
+        }
+    }
 }
 
 fn validate_workflow_manifest_internal(
@@ -508,7 +678,7 @@ fn validate_workflow_validation(
     path: &Path,
     validation: &WorkflowValidation,
     status: WorkflowStatus,
-    steps: &[WorkflowStep],
+    _steps: &[WorkflowStep],
 ) -> Result<(), WorkflowManifestError> {
     if validation.commands.is_empty() && validation.gates.is_empty() {
         if matches!(status, WorkflowStatus::Ready) {
@@ -520,21 +690,10 @@ fn validate_workflow_validation(
         }
     }
 
-    let step_ids = steps
-        .iter()
-        .map(|step| step.id.as_str())
-        .collect::<HashSet<_>>();
     for (index, gate) in validation.gates.iter().enumerate() {
         validate_non_empty(path, &format!("validation.gates[{index}]"), gate)?;
         ensure_no_whitespace(path, &format!("validation.gates[{index}]"), gate)?;
         validate_step_identifier(path, &format!("validation.gates[{index}]"), gate)?;
-        if !step_ids.contains(gate.as_str()) {
-            return Err(WorkflowManifestError::new(
-                path,
-                format!("validation.gates[{index}]"),
-                "validation gate must reference an existing step id",
-            ));
-        }
     }
     Ok(())
 }

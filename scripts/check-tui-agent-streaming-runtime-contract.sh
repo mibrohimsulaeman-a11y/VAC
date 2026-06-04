@@ -6,12 +6,15 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$REPO_ROOT"
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
-ui="vac-rs/tui/src/operator_ui.rs"
-snapshot="docs/validation/tui-operator-ui-snapshots/agent-working-120x36.txt"
-exec_render="vac-rs/tui/src/exec_cell/render.rs"
+ui="vac-rs/crates/surfaces/tui/src/operator_ui.rs.inc"
+TMPROOT="$(mktemp -d "${TMPDIR:-/tmp}/vac-agent-streaming.XXXXXX")"
+trap 'rm -rf "$TMPROOT"' EXIT
+snapshot="$TMPROOT/tui-operator-ui-snapshots/agent-working-120x36.txt"
+exec_render="vac-rs/crates/surfaces/tui/src/exec_cell/render.rs"
 
 [ -f "$ui" ] || fail "missing $ui"
-[ -f "$snapshot" ] || fail "missing $snapshot"
+bash scripts/render-tui-operator-snapshots.sh "$TMPROOT/tui-operator-ui-snapshots" >/dev/null
+[ -f "$snapshot" ] || fail "missing generated snapshot $snapshot"
 
 grep -q 'TOOL_TIMELINE_LIMIT: usize = 5' "$ui" || fail "tool timeline limit is not five"
 grep -q 'visible_tools' "$ui" || fail "tail-limited visible tool helper missing"
@@ -24,10 +27,10 @@ for state in Queued Running Streaming Passed Failed Cancelled; do
 done
 [ -f "$exec_render" ] && grep -q 'tool timeline limited to last 5' "$exec_render" || fail "runtime exec render last-five contract missing"
 
-grep -q 'tool timeline (last 5;' "$snapshot" || fail "snapshot missing last-five timeline label"
+grep -Eq 'tool timeline.*last 5' "$snapshot" || fail "snapshot missing last-five timeline label"
 grep -q 'thinking' "$snapshot" || fail "snapshot missing thinking/status line"
 grep -q 'context' "$snapshot" || fail "snapshot missing context bar"
-grep -q 'composer:' "$snapshot" || fail "snapshot missing composer"
+grep -q 'composer' "$snapshot" || fail "snapshot missing composer"
 if grep -q 'glob' "$snapshot"; then
   fail "agent snapshot leaked omitted older tool"
 fi

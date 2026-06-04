@@ -36,7 +36,11 @@ ownership:
   - crate_name: vac-core
     module: compact_remote
   - crate_name: vac-core
+    module: cloud_account_disabled
+  - crate_name: vac-core
     module: config
+  - crate_name: vac-core
+    module: config_impl
   - crate_name: vac-core
     module: config_lock
   - crate_name: vac-core
@@ -66,9 +70,9 @@ ownership:
   - crate_name: vac-core
     module: installation_id
   - crate_name: vac-core
-    module: landlock
+    module: injection
   - crate_name: vac-core
-    module: local_runtime
+    module: landlock
   - crate_name: vac-core
     module: mcp
   - crate_name: vac-core
@@ -86,13 +90,11 @@ ownership:
   - crate_name: vac-core
     module: mention_syntax
   - crate_name: vac-core
-    module: mentions
-  - crate_name: vac-core
     module: message_history
   - crate_name: vac-core
     module: network_policy_decision
   - crate_name: vac-core
-    module: network_proxy_loader
+    module: path_utils
   - crate_name: vac-core
     module: original_image_detail
   - crate_name: vac-core
@@ -154,7 +156,7 @@ ownership:
   - crate_name: vac-core
     module: util
   - crate_name: vac-core
-    module: utils
+    module: util_impl
   - crate_name: vac-core
     module: vac_delegate
   - crate_name: vac-core
@@ -252,8 +254,6 @@ validation:
     - +1.93.0
     - check
     - -p
-    - vac-cli
+    - vac-surface-cli
     risk: execute_process
     approval: policy
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

@@ -162,6 +162,7 @@ use std::sync::Arc;
 use std::time::Duration as StdDuration;
 use vac_protocol::mcp::CallToolResult as McpCallToolResult;
 
+#[path = "tests/guardian_tests.rs"]
 mod guardian_tests;
 
 fn permission_profile_for_sandbox_policy(sandbox_policy: &SandboxPolicy) -> PermissionProfile {

@@ -1,6 +1,8 @@
 schema_version: 1
 kind: evidence
 id: evidence.o5o6.audit_remediation.2026_05_30
+chain:
+  self_hash: d6e4ba97e40ca588467d247689be806e85422b0f2a0b76a8695da132ce2206d2
 title: O5/O6 audit remediation evidence
 status: ready
 updated_at: '2026-05-30T10:30:00Z'

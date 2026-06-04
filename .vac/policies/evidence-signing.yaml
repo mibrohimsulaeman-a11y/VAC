@@ -1,8 +1,17 @@
 schema_version: 1
 kind: policy
-id: policy.evidence-signing
+id: vac.evidence-signing
+title: Evidence signing policy
+default_decision: approval_required
 owner: vac.control-plane.evidence
 status: ready
+rules:
+  - id: require-approval-for-evidence-signing-key
+    match:
+      action: credential_read
+      data_class: credential
+    decision: approval_required
+    reason: Evidence signing key access must remain operator-governed even when signing is optional.
 evidence:
   signing:
     required: false

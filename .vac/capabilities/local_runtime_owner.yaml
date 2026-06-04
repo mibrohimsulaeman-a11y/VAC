@@ -94,8 +94,3 @@ validation:
     - scripts/check-vac-runtime-agent-flow-fix-static.sh
     risk: safe_read
     approval: never
-docs:
-- docs/workflow-control-plane/plans/24-local-runtime-owner-replacement.md
-- docs/workflow-control-plane/plans/26-local-runtime-owner-skeleton.md
-- docs/workflow-control-plane/plans/27-retained-resources-startup-replacement.md
-- docs/workflow-control-plane/plans/32-vac-runtime-owner-gates.md

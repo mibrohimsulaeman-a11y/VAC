@@ -23,12 +23,10 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-vac-init-ownership-scanner-contract.sh
-    - vac doctor ownership .
-    - vac init --scan
   palette: true
   tui:
     routes:
-    - /capabilities
+    - /init/ownership
 policy:
   risk: safe_read
   mutates_files: false
@@ -50,6 +48,3 @@ validation:
     approval: policy
   gates:
   - vac_init_ownership_scanner_contract
-docs:
-- docs/vac-init/VAC_INIT_BATCH_02_05_IMPLEMENTATION.md
-- docs/validation/VAC_INIT_OWNERSHIP_SCANNER_GATE.md

@@ -9,10 +9,12 @@ owner:
 ownership:
   crates:
   - vac-capability-chat
-  - vac-tui
+  - vac-surface-tui
   modules:
   - chatwidget
   targets:
+  - crate_name: vac-surface-tui
+    module: chatwidget
   - crate_name: vac-analytics
     module: client
   - crate_name: vac-analytics
@@ -166,6 +168,10 @@ reason: 'Chat root TUI/CLI surfaces, slash commands, owner metadata, and validat
 
   '
 surfaces:
+  cli:
+    enabled: true
+    commands:
+    - vac
   slash:
     commands:
     - /activity
@@ -177,11 +183,10 @@ surfaces:
     - /realtime
     - /side
     - /subagents
-  cli:
-    enabled: true
-    commands:
-    - vac
   palette: true
+  tui:
+    routes:
+    - /
 states:
 - empty
 - loading
@@ -203,9 +208,7 @@ validation:
     - +1.93.0
     - check
     - -p
-    - vac-tui
+    - vac-surface-tui
     - --tests
     risk: execute_process
     approval: policy
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

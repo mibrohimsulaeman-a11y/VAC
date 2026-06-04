@@ -20,6 +20,7 @@ use std::path::Path;
 
 use super::capability_manifest::CapabilityManifest;
 use super::capability_manifest::CapabilityOwnership;
+use super::capability_manifest::CapabilityOwnershipTargetKind;
 use super::capability_manifest::CapabilityStatus;
 use super::ownership_scan::OwnershipScanReport;
 use super::registry::ControlPlaneRegistry;
@@ -448,6 +449,9 @@ fn missing_claimed_crates(
     ownership_scan: &OwnershipScanReport,
     ownership: &CapabilityOwnership,
 ) -> Vec<String> {
+    if !ownership.targets.is_empty() {
+        return Vec::new();
+    }
     let inventory = ownership_scan.source_inventory();
     ownership
         .crates
@@ -578,7 +582,12 @@ fn capability_satisfies_expected_ownership(manifest: &CapabilityManifest, expect
         return true;
     }
     ownership.targets.iter().any(|target| {
-        target.crate_name == crate_name && module_dotted_prefix_match(&target.module, module)
+        matches!(target.kind, CapabilityOwnershipTargetKind::Module)
+            && target.crate_name.as_deref() == Some(crate_name)
+            && target
+                .module
+                .as_deref()
+                .is_some_and(|declared| module_dotted_prefix_match(declared, module))
     })
 }
 
@@ -927,7 +936,7 @@ owner:
   module: lib
 ownership:
   crates:
-    - vac-tui
+    - vac-surface-tui
   modules:
     - lib
 states:
@@ -938,8 +947,7 @@ policy:
   risk: safe_read
 validation:
   commands:
-    - cargo test -p vac-surface-tui
-    - vac doctor surfaces
+    - cargo +1.93.0 check -p vac-surface-tui --tests
 "#,
         );
 
@@ -1035,8 +1043,11 @@ validation:
                 retired: false,
                 deletion_plan: None,
                 targets: vec![CapabilityOwnershipTarget {
-                    crate_name: "vac-core".into(),
-                    module: "runtime.chat_session".into(),
+                    kind: CapabilityOwnershipTargetKind::Module,
+                    crate_name: Some("vac-core".into()),
+                    module: Some("runtime.chat_session".into()),
+                    include: Vec::new(),
+                    exclude: Vec::new(),
                     test_only: false,
                     retired: false,
                 }],

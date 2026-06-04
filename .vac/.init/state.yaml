@@ -1,8 +1,8 @@
 schema_version: 1
 kind: init_state
-id: vac.init.state
+id: init.state
 generated_at: '2026-06-01T22:58:00Z'
-status: ready
+current_state: ready
 source_inventory: .vac/.init/source_inventory.yaml
 scan_report: .vac/.init/scan_report.yaml
 risk_findings: .vac/.init/risk_findings/index.yaml

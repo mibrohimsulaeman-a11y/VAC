@@ -38,5 +38,3 @@ ui:
   activity_log: true
   approval_surface: false
   evidence_surface: true
-docs:
-- docs/validation/VAC_INIT_DOCTOR_RELEASE_GATE.md

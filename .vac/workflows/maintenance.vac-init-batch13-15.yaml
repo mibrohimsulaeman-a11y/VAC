@@ -38,5 +38,3 @@ ui:
   activity_log: true
   approval_surface: false
   evidence_surface: true
-docs:
-- docs/vac-init/VAC_INIT_BATCH_13_15_IMPLEMENTATION.md

@@ -1,13 +1,15 @@
 schema_version: 1
 kind: evidence
 id: evidence.o5_1c.consumer_migration.2026_05_30
+chain:
+  self_hash: 62b87be9ab0c465ea58435bb13e072718c26b6fc3bae084afd0e743ea1f0b1ea
 title: O5.1c app-server protocol consumer migration evidence
 status: ready
 updated_at: '2026-05-30T10:00:00Z'
 slice: O5.1c-app-server-protocol-consumer-migration
 date: 2026-05-30
 implementer: notion-ai-sandbox
-status: Implemented_SV-Done_TV-Pending
+implementation_status: Implemented_SV-Done_TV-Pending
 summary: >
   Migrated every consumer source import from vac_app_server_protocol to the
   canonical vac_runtime_protocol crate that sits behind the O5.1 compatibility

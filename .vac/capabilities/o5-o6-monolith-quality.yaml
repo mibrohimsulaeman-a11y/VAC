@@ -37,11 +37,6 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-vac-o5-o6-monolith-quality-slice.sh
-  palette: true
-  tui:
-    routes:
-    - /workflow
-    - /release
 states:
 - empty
 - loading
@@ -57,6 +52,3 @@ validation:
     - scripts/check-vac-o5-o6-monolith-quality-slice.sh
     risk: execute_process
     approval: policy
-docs:
-- docs/monolith-quality/VAC_O5_O6_MONOLITH_QUALITY_IMPL_PLAN.md
-- docs/monolith-quality/O5_1_PROTOCOL_DEDUP_SLICE.md

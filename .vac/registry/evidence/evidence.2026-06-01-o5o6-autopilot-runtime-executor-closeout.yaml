@@ -1,6 +1,8 @@
 schema_version: 1
 kind: evidence
 id: evidence.2026-06-01-o5o6-autopilot-runtime-executor-closeout
+chain:
+  self_hash: 244717b341b229fc520307771da270376f948029084959d7437ea035d18c5c52
 created_at: '2026-06-01T00:00:00Z'
 plan_id: plan.o5o6.autopilot-runtime-executor-closeout
 capability: vac.autopilot.scheduler

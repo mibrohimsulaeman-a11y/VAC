@@ -19,7 +19,8 @@ rules:
   - id: block-network-for-local-gates
     match:
       action: network_access
-      path: any
+      network:
+        host: "*"
     decision: deny
     reason: Runtime-owner replacement gates are local validation gates and must not depend on network access.
   - id: require-approval-for-process-gates

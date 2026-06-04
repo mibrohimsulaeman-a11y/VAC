@@ -31,7 +31,6 @@ required_files = [
     'tests/fixtures/fixture_matrix.yaml',
     '.vac/capabilities/vac-init-gap-bc-depth.yaml',
     '.vac/workflows/maintenance.vac-init-gap-bc-depth.yaml',
-    'docs/vac-init/VAC_INIT_GAP_BC_DEPTH_REMEDIATION.md',
 ]
 for path in required_files:
     require_file(path)

@@ -39,10 +39,8 @@ ownership:
     - vac-rs/cli/src/why_cli.rs
     - vac-rs/cli/src/doctor_cli.rs
     - vac-rs/cli/src/main.rs
-    - vac-rs/control-plane/src/control_plane/vac_init_cli_runtime.rs
+    - vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_cli_runtime.rs
     - scripts/check-vac-init-cli-runtime-foundation-contract.sh
-    - docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_B.md
-    - docs/validation/PRODUCTION_HARDENING_B1_B4_VALIDATION.md
     - .vac/.init/state.yaml
     - .vac/registry/trajectory/index.yaml
     exclude: []
@@ -58,17 +56,14 @@ surfaces:
     enabled: true
     commands:
     - vac init
+    - vac init --status
+    - vac init --scan
+    - vac plan
     - vac plan validate
     - vac why
-    - vac doctor init
     - vac doctor evidence
     - vac doctor memory
-    - vac doctor release
-  palette: true
-  tui:
-    routes:
-    - /capabilities
-    - /workflow
+    - vac doctor init
 policy:
   risk: safe_read
   mutates_files: true
@@ -94,6 +89,3 @@ validation:
     - scripts/check-vac-init-cli-runtime-foundation-contract.sh
     risk: execute_process
     approval: policy
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_B.md
-- docs/validation/PRODUCTION_HARDENING_B1_B4_VALIDATION.md

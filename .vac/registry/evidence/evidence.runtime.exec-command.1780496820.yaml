@@ -1,0 +1,39 @@
+schema_version: 1
+kind: evidence
+id: evidence.runtime.exec-command.1780496820
+timestamp: unix-1780496820Z
+chain:
+  previous: null
+  previous_hash: null
+  self_hash: 55a687214e3eaee4bb65769db5a06897532e5eba3add41e77de44c72b0b7b4b7
+changeset:
+  plan_id: plan.o5o6.tui-local-tool-cleanup.active
+  capability: vac.runtime.command
+  files_modified:
+    - path: runtime/exec-command
+      operation: modify
+      diff_hash: 55a687214e3eaee4bb65769db5a06897532e5eba3add41e77de44c72b0b7b4b7
+      lines_added: 0
+      lines_removed: 0
+validation:
+  commands_executed: []
+  gates_passed:
+    - evidence_completion_gate
+  gates_failed: []
+approval:
+  approved_by: operator
+  approved_at: unix-1780496820Z
+  content_hash: dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+  signature:
+    algorithm: unsigned
+    public_key_base64: null
+    value: null
+    signing_required: false
+attribution:
+  agent_id: vac-init-live-evidence-writer
+  model: deterministic
+  memory_snapshot:
+    working_facts: 0
+    team_rules_consulted: []
+    semantic_refs: []
+  rationale_ref: .vac/registry/trajectory/index.yaml

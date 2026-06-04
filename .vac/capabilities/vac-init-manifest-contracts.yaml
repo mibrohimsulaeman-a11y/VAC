@@ -25,7 +25,7 @@ surfaces:
   palette: true
   tui:
     routes:
-    - /capabilities
+    - /init/manifests
 policy:
   risk: safe_read
   mutates_files: false
@@ -47,6 +47,3 @@ validation:
     approval: policy
   gates:
   - vac_init_manifest_structs_contract
-docs:
-- docs/vac-init/VAC_INIT_BATCH_02_05_IMPLEMENTATION.md
-- docs/validation/VAC_INIT_BATCH_02_05_GATE.md

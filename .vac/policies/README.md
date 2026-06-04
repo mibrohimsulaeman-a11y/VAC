@@ -2,7 +2,7 @@
 
 Declarative policy manifests. The control plane evaluates each workflow step against the union of these manifests; the first matching rule wins, otherwise the manifest's `default_decision` applies.
 
-- **Schema source**: [`vac-rs/control-plane/src/control_plane/policy_manifest.rs`](../../vac-rs/control-plane/src/control_plane/policy_manifest.rs)
+- **Schema source**: [`vac-rs/crates/control-plane/control-plane/src/control_plane/policy_manifest.rs`](../../vac-rs/crates/control-plane/control-plane/src/control_plane/policy_manifest.rs)
 - **Schema doc**: [`docs/workflow-control-plane/schema/policy-manifest.schema.md`](../../docs/workflow-control-plane/schema/policy-manifest.schema.md) (index: [`docs/workflow-control-plane/schema/INDEX.md`](../../docs/workflow-control-plane/schema/INDEX.md))
 - **Doctor gate**: `vac doctor policy .`
 

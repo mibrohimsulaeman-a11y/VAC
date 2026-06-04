@@ -1,3 +1,4 @@
+#![cfg(feature = "provider-cloud-tests")]
 //! Subprocess coverage for custom CA behavior that must build a real reqwest client.
 //!
 //! These tests intentionally run through `provider_ca_probe` and

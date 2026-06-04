@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SUITE_SKIP: validated separately by docs/monolith-quality/logs/check-vac-init-scanner-hardening-spec-flow-audit-remediation.log
+# SUITE_SKIP: source-backed static contract; historical logs were pruned.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -35,12 +35,11 @@ require_absent() {
   fi
 }
 
-require_file vac-rs/control-plane/src/control_plane/vac_init_live_scanner_policy.rs
-require_file vac-rs/cli/src/init_cli.rs
+require_file vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_live_scanner_policy.rs
+require_file vac-rs/crates/surfaces/cli/src/init_cli.rs
 require_file .vac/registry/plans/plan.scanner-hardening.spec-flow.yaml
 require_file .vac/capabilities/scanner-hardening-spec-flow.yaml
 require_file .vac/workflows/maintenance.scanner-hardening-spec-flow.yaml
-require_file docs/vac-init/VAC_INIT_SCANNER_HARDENING_SPEC_FLOW.md
 require_file .vac/.init/source_inventory.yaml
 require_file .vac/.init/source_inventory/by-class/product.yaml
 require_file .vac/.init/source_inventory/by-class/test.yaml
@@ -55,21 +54,21 @@ require_file .vac/.init/risk_findings/by-scope/test.yaml
 require_file .vac/.init/policy_inference_report.yaml
 require_file .vac/.init/scanner_doctor_report.yaml
 
-require_grep 'build_vac_init_live_scanner_report_files' vac-rs/cli/src/init_cli.rs
-require_grep 'LiveSourceClass::DonorQuarantined' vac-rs/control-plane/src/control_plane/vac_init_live_scanner_policy.rs
-require_grep 'alternatives: Vec<String>' vac-rs/control-plane/src/control_plane/vac_init_live_scanner_policy.rs
+require_grep 'build_vac_init_live_scanner_report_files' vac-rs/crates/surfaces/cli/src/init_cli.rs
+require_grep 'LiveSourceClass::DonorQuarantined' vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_live_scanner_policy.rs
+require_grep 'alternatives: Vec<String>' vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_live_scanner_policy.rs
 require_grep 'id: finding.live-init.report' .vac/.init/risk_findings.yaml
 require_grep 'full: .vac/.init/risk_findings/full.yaml' .vac/.init/risk_findings.yaml
 require_absent '^findings:' .vac/.init/risk_findings.yaml
 require_grep 'ownership:' .vac/.init/risk_findings/full.yaml
 require_grep 'ownership_not_evaluated_findings:' .vac/.init/policy_inference_report.yaml
 require_grep 'ownership_status: NotEvaluated' .vac/.init/scanner_doctor_report.yaml
-require_grep 'scanner_doctor_report.yaml' vac-rs/cli/src/init_cli.rs
-require_grep 'RescanAst' vac-rs/control-plane/src/control_plane/vac_init_cli_runtime.rs
-require_grep 'rescan_ast' vac-rs/cli/src/init_cli.rs
+require_grep 'scanner_doctor_report.yaml' vac-rs/crates/surfaces/cli/src/init_cli.rs
+require_grep 'RescanAst' vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_cli_runtime.rs
+require_grep 'rescan_ast' vac-rs/crates/surfaces/cli/src/init_cli.rs
 
 if command -v "$RUSTC_BIN" >/dev/null 2>&1; then
-  "$RUSTC_BIN" --edition 2024 --test vac-rs/control-plane/src/control_plane/vac_init_live_scanner_policy.rs -o "$TMPROOT/vac_init_live_scanner_policy_test"
+  "$RUSTC_BIN" --edition 2024 --test vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_live_scanner_policy.rs -o "$TMPROOT/vac_init_live_scanner_policy_test"
   "$TMPROOT/vac_init_live_scanner_policy_test" --nocapture
 else
   echo "scanner rustc unit gate: NotEvaluated (rustc not found: $RUSTC_BIN)" >&2

@@ -1,6 +1,8 @@
 schema_version: 1
-kind: capability_readiness
+kind: registry_status
 id: capability-readiness.o5o6.zero-residual-static
+title: Capability readiness state
+status: ready
 updated_at: 2026-06-02T00:00:00Z
 policy:
   owner_exists: true
@@ -9,7 +11,7 @@ policy:
   panic_risk_pass: true
   server_coupling_status: none_or_feature_gated
   doctor_gate: pass
-status: static_pass
+readiness_status: static_pass
 capabilities:
   tools:
     owner_exists: true

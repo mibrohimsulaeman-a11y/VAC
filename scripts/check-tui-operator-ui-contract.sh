@@ -9,10 +9,10 @@ cd "$REPO_ROOT"
 fail() { echo "FAIL: $*" >&2; exit 1; }
 ok() { echo "OK:   $*"; }
 
-operator_ui="vac-rs/tui/src/operator_ui.rs"
-status_card="vac-rs/tui/src/status/card.rs"
-approval_overlay="vac-rs/tui/src/bottom_pane/approval_overlay.rs"
-exec_render="vac-rs/tui/src/exec_cell/render.rs"
+operator_ui="vac-rs/crates/surfaces/tui/src/operator_ui.rs.inc"
+status_card="vac-rs/crates/surfaces/tui/src/status/card.rs"
+approval_overlay="vac-rs/crates/surfaces/tui/src/bottom_pane/approval_overlay.rs"
+exec_render="vac-rs/crates/surfaces/tui/src/exec_cell/render.rs"
 
 [ -f "$operator_ui" ] || fail "missing $operator_ui"
 [ -f "$status_card" ] || fail "missing $status_card"
@@ -55,10 +55,10 @@ grep -q 'policy-gated approval queue' "$approval_overlay" || fail "policy-gated 
 bash scripts/check-autopilot-scheduler-contract.sh >/dev/null
 bash scripts/check-tui-operator-snapshot-contract.sh >/dev/null
 
-grep -q 'Runtime' vac-rs/tui/src/slash_command.rs || fail "/runtime slash command enum missing"
-grep -q 'add_runtime_jobs_output' vac-rs/tui/src/chatwidget.rs || fail "runtime jobs output wiring missing"
-grep -q 'SlashCommand::Runtime' vac-rs/tui/src/chatwidget/slash_dispatch.rs || fail "/runtime slash dispatch missing"
+grep -q 'Runtime' vac-rs/crates/surfaces/tui/src/slash_command.rs || fail "/runtime slash command enum missing"
+grep -q 'add_runtime_jobs_output' vac-rs/crates/surfaces/tui/src/chatwidget.rs || fail "runtime jobs output wiring missing"
+grep -q 'SlashCommand::Runtime' vac-rs/crates/surfaces/tui/src/chatwidget/slash_dispatch.rs || fail "/runtime slash dispatch missing"
 
-grep -q '"cli_only" | "cli-only"' vac-rs/control-plane/src/control_plane/surface_manifest.rs || fail "surface status cli-only alias missing"
+grep -q '"cli_only" | "cli-only"' vac-rs/crates/control-plane/control-plane/src/control_plane/surface_manifest.rs || fail "surface status cli-only alias missing"
 
 ok "operator TUI status/idle/streaming/approval/dashboard/autopilot contracts registered"

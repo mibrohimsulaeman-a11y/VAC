@@ -432,11 +432,20 @@ fn workflow_step_policy_requires_approval(
     reasons
 }
 
-pub(crate) fn resolve_workflow_approval_capability_id(uses: &str) -> Option<&'static str> {
-    WORKFLOW_STEP_VOCABULARY
+pub(crate) fn resolve_declarative_capability_check_id(uses: &str) -> Option<&str> {
+    uses.strip_prefix("capability.")
+        .and_then(|id| id.strip_suffix(".check"))
+}
+
+pub(crate) fn resolve_workflow_approval_capability_id(uses: &str) -> Option<String> {
+    if let Some(id) = WORKFLOW_STEP_VOCABULARY
         .iter()
         .find(|entry| entry.uses == uses)
-        .map(|entry| entry.canonical_capability_id)
+        .map(|entry| entry.canonical_capability_id.to_string())
+    {
+        return Some(id);
+    }
+    resolve_declarative_capability_check_id(uses).map(str::to_string)
 }
 
 pub fn evaluate_workflow_approval_policy(
@@ -631,4 +640,3 @@ pub enum WorkflowExecutionState {
         blocked_step_count: usize,
     },
 }
-

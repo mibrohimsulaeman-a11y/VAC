@@ -14,8 +14,6 @@ ownership:
   targets:
   - kind: path
     include:
-    - docs/monolith-quality/O6_1_DEPANIC_TRIAGE.md
-    - docs/monolith-quality/O6_2_UNSAFE_TRIAGE.md
     - .vac/registry/o6-quality-triage.yaml
     - .vac/registry/cargo-gates-status.yaml
     - scripts/check-vac-o6-quality-triage.sh
@@ -36,11 +34,6 @@ surfaces:
     commands:
     - bash scripts/check-vac-o6-quality-triage.sh
     - bash scripts/check-vac-cargo-gates-if-available.sh
-  palette: true
-  tui:
-    routes:
-    - /doctor
-    - /release
 states:
 - empty
 - loading
@@ -62,6 +55,3 @@ validation:
     - scripts/check-vac-cargo-gates-if-available.sh
     risk: execute_process
     approval: policy
-docs:
-- docs/monolith-quality/O6_1_DEPANIC_TRIAGE.md
-- docs/monolith-quality/O6_2_UNSAFE_TRIAGE.md

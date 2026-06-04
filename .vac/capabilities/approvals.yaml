@@ -4,17 +4,25 @@ id: vac.approvals
 title: Approvals
 status: ready
 owner:
-  crate: vac-core
+  crate: vac-control-plane
   module: control_plane.approval_lifecycle
 ownership:
   crates:
-  - vac-core
-  - vac-tui
+  - vac-control-plane
+  - vac-surface-tui
   modules:
   - control_plane.approval_lifecycle
   - control_plane.approval_store
   - bottom_pane.approval_overlay
   targets:
+  - crate_name: vac-control-plane
+    module: control_plane.approval_lifecycle
+  - crate_name: vac-control-plane
+    module: control_plane.approval_store
+  - crate_name: vac-surface-tui
+    module: bottom_pane.approval_overlay
+  - crate_name: vac-surface-cli
+    module: approve_cli
   - crate_name: vac-core
     module: command_canonicalization
 description: Approval lifecycle, durable approval store, approval overlay, and approval-request handling in the root TUI.
@@ -24,6 +32,10 @@ reason: 'Approval handling is ready for the default product path: workflow polic
 depends_on:
 - vac.chat
 surfaces:
+  cli:
+    enabled: true
+    commands:
+    - vac review
   slash:
     commands:
     - /approvals
@@ -32,11 +44,10 @@ surfaces:
     - /sandbox-add-read-dir
     - /setup-default-sandbox
     - /test-approval
-  cli:
-    enabled: true
-    commands:
-    - vac review
   palette: true
+  tui:
+    routes:
+    - /approvals
 states:
 - empty
 - loading
@@ -84,5 +95,3 @@ validation:
     - .
     risk: execute_process
     approval: policy
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

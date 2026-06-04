@@ -28,6 +28,8 @@ pub enum VacManifestKind {
     Migration,
     Trajectory,
     TestAssertion,
+    RuntimeOwnerSupport,
+    SemanticPlan,
     Product,
     Status,
     DonorInventory,
@@ -52,6 +54,8 @@ impl VacManifestKind {
         Self::Migration,
         Self::Trajectory,
         Self::TestAssertion,
+        Self::RuntimeOwnerSupport,
+        Self::SemanticPlan,
     ];
 
     pub const COMPATIBILITY: &'static [Self] = &[Self::Product, Self::Status, Self::DonorInventory];
@@ -74,6 +78,8 @@ impl VacManifestKind {
         Self::Migration,
         Self::Trajectory,
         Self::TestAssertion,
+        Self::RuntimeOwnerSupport,
+        Self::SemanticPlan,
         Self::Product,
         Self::Status,
         Self::DonorInventory,
@@ -98,6 +104,8 @@ impl VacManifestKind {
             Self::Migration => "migration",
             Self::Trajectory => "trajectory",
             Self::TestAssertion => "test_assertion",
+            Self::RuntimeOwnerSupport => "runtime_owner_support",
+            Self::SemanticPlan => "semantic_plan",
             Self::Product => "product",
             Self::Status => "status",
             Self::DonorInventory => "donor_inventory",
@@ -119,9 +127,10 @@ impl VacManifestKind {
             | Self::DonorInventory => ManifestKindDomain::Registry,
             Self::InitState => ManifestKindDomain::Init,
             Self::Evidence | Self::Trajectory => ManifestKindDomain::Audit,
-            Self::Plan | Self::ApprovalRequest => ManifestKindDomain::Agent,
+            Self::Plan | Self::ApprovalRequest | Self::SemanticPlan => ManifestKindDomain::Agent,
             Self::OwnershipReport | Self::RiskFinding => ManifestKindDomain::Scan,
             Self::MemoryRecord => ManifestKindDomain::Memory,
+            Self::RuntimeOwnerSupport => ManifestKindDomain::Runtime,
             Self::TestAssertion => ManifestKindDomain::Test,
         }
     }
@@ -154,6 +163,8 @@ impl VacManifestKind {
             Self::Migration => "Schema migration definition",
             Self::Trajectory => "Per-file safe rationale index for vac why",
             Self::TestAssertion => "Fixture expectation",
+            Self::RuntimeOwnerSupport => "Runtime owner capability support report",
+            Self::SemanticPlan => "Semantic implementation plan with typed anchors",
             Self::Product => "Current root product descriptor compatibility kind",
             Self::Status => "Current root registry status compatibility kind",
             Self::DonorInventory => "Current donor migration inventory compatibility kind",
@@ -191,6 +202,7 @@ pub enum ManifestKindDomain {
     Agent,
     Scan,
     Memory,
+    Runtime,
     Test,
 }
 
@@ -204,6 +216,7 @@ impl ManifestKindDomain {
             Self::Agent => "agent",
             Self::Scan => "scan",
             Self::Memory => "memory",
+            Self::Runtime => "runtime",
             Self::Test => "test",
         }
     }
@@ -263,6 +276,8 @@ pub const KIND_REGISTRY: &[KindRegistryEntry] = &[
     entry(VacManifestKind::Migration),
     entry(VacManifestKind::Trajectory),
     entry(VacManifestKind::TestAssertion),
+    entry(VacManifestKind::RuntimeOwnerSupport),
+    entry(VacManifestKind::SemanticPlan),
     entry(VacManifestKind::Product),
     entry(VacManifestKind::Status),
     entry(VacManifestKind::DonorInventory),
@@ -435,10 +450,12 @@ mod tests {
             "migration",
             "trajectory",
             "test_assertion",
+            "runtime_owner_support",
+            "semantic_plan",
         ] {
             assert!(values.contains(&expected), "missing kind {expected}");
         }
-        assert_eq!(values.len(), 17);
+        assert_eq!(values.len(), 19);
     }
 
     #[test]
@@ -459,7 +476,7 @@ mod tests {
             KindRegistry::parse("donor_inventory").unwrap(),
             VacManifestKind::DonorInventory
         );
-        assert_eq!(KIND_REGISTRY.len(), 20);
+        assert_eq!(KIND_REGISTRY.len(), 22);
     }
 
     #[test]

@@ -17,6 +17,7 @@ use super::ownership_scan::load_ownership_scan_report;
 use super::registry::find_vac_root;
 use super::registry::load_control_plane_registry_report;
 use super::registry_diagnostics::RegistryLoadReport;
+use super::surface_manifest::SurfaceRouteKind;
 use super::workflow_runner::evaluate_workflow_approval_policy;
 use super::workflow_runner::preview_workflow_manifest;
 use super::workflow_runner::resolve_workflow_step_handler;
@@ -466,10 +467,24 @@ fn check_tui_observability(registry: &RegistryLoadReport) -> ArchitectureInvaria
 
     let mut details = vec![format!("tui capability: {}", tui_capability.title)];
     let mut missing_routes = Vec::new();
-    if let Some(tui_surface) = tui_capability.surfaces.tui.as_ref() {
-        for route in ["/", "/capabilities", "/workflow", "/debug-config"] {
-            if !tui_surface.routes.iter().any(|value| value == route) {
-                missing_routes.push(route);
+    let tui_surface_routes = control_plane
+        .surfaces
+        .manifests
+        .iter()
+        .find(|entry| entry.manifest.id == "surface.tui")
+        .map(|entry| &entry.manifest.routes);
+    if let Some(routes) = tui_surface_routes {
+        for required_route in ["/", "/capabilities", "/workflow", "/debug-config"] {
+            match routes.iter().find(|route| {
+                route.kind == SurfaceRouteKind::Tui
+                    && route.path.as_deref() == Some(required_route)
+                    && route.visible
+            }) {
+                Some(route) => details.push(format!(
+                    "route {required_route}: capability={} status={:?}",
+                    route.capability, route.status
+                )),
+                None => missing_routes.push(required_route),
             }
         }
     } else {
@@ -498,7 +513,7 @@ fn check_tui_observability(registry: &RegistryLoadReport) -> ArchitectureInvaria
     } else {
         if !missing_routes.is_empty() {
             details.push(format!(
-                "missing TUI routes in vac.tui manifest: {}",
+                "missing visible TUI routes in surface.tui manifest: {}",
                 missing_routes.join(", ")
             ));
         }
@@ -788,7 +803,7 @@ fn check_legacy_transport_quarantine(
         );
     };
 
-    let tui_cargo_toml = repo_root.join("vac-rs/tui/Cargo.toml");
+    let tui_cargo_toml = repo_root.join("vac-rs/crates/surfaces/tui/Cargo.toml");
     let dependencies = match parse_tui_dependency_manifest(&tui_cargo_toml) {
         Ok(dependencies) => dependencies,
         Err(error) => {
@@ -889,7 +904,7 @@ fn check_legacy_transport_quarantine(
 }
 
 fn check_tui_direct_app_server_dependency(repo_root: &Path) -> ArchitectureInvariantCheck {
-    let tui_cargo_toml = repo_root.join("vac-rs/tui/Cargo.toml");
+    let tui_cargo_toml = repo_root.join("vac-rs/crates/surfaces/tui/Cargo.toml");
     let dependencies = match parse_tui_dependency_manifest(&tui_cargo_toml) {
         Ok(dependencies) => dependencies,
         Err(error) => {
@@ -984,9 +999,10 @@ mod tests {
         fs::create_dir_all(root.join(".vac/workflows")).expect("workflows dir");
         fs::create_dir_all(root.join(".vac/policies")).expect("policies dir");
         fs::create_dir_all(root.join(".vac/surfaces")).expect("surfaces dir");
-        fs::create_dir_all(root.join("vac-rs/tui")).expect("tui dir");
+        fs::create_dir_all(root.join("vac-rs/crates/surfaces/tui")).expect("tui dir");
         fs::create_dir_all(root.join("docs/workflow-control-plane/plans")).expect("plans dir");
         fs::create_dir_all(root.join("docs/workflow-control-plane/schema")).expect("schema dir");
+        fs::create_dir_all(root.join("docs/legal")).expect("legal dir");
         root
     }
 
@@ -1047,6 +1063,24 @@ compatibility_transport:
         }
 
         let capability_template = |id: &str, title: &str, owner_crate: &str, owner_module: &str| {
+            let tui_surface_routes = if id == "vac.tui" {
+                r#"  tui:
+    routes:
+      - /
+      - /capabilities
+      - /workflow
+      - /debug-config
+"#
+            } else {
+                ""
+            };
+            let approval_required_for = if id == "vac.release" {
+                r#"  approval_required_for:
+    - execute_process
+"#
+            } else {
+                "  approval_required_for: []\n"
+            };
             format!(
                 r#"
 schema_version: 1
@@ -1066,11 +1100,13 @@ ownership:
     - {owner_module}
 surfaces:
   palette: true
+{tui_surface_routes}
 policy:
   risk: safe_read
   mutates_files: false
   network: false
   redaction: false
+{approval_required_for}
 validation:
   commands:
     - cargo +1.93.0 check -p vac-surface-cli
@@ -1080,6 +1116,8 @@ validation:
                 title = title,
                 owner_crate = owner_crate,
                 owner_module = owner_module,
+                tui_surface_routes = tui_surface_routes,
+                approval_required_for = approval_required_for,
                 tui_compatibility = tui_compatibility
             )
         };
@@ -1223,7 +1261,7 @@ routes:
         .expect("palette surface manifest");
 
         fs::write(
-            root.join("vac-rs/tui/Cargo.toml"),
+            root.join("vac-rs/crates/surfaces/tui/Cargo.toml"),
             r#"
 [package]
 name = "vac-tui"
@@ -1239,12 +1277,12 @@ vac-app-server-protocol = { workspace = true }
 
         fs::write(
             root.join("README.md"),
-            "[Workflow control plane](docs/workflow-control-plane/INDEX.md)\n",
+            "[Workflow control plane](docs/workflow-control-plane/INDEX.md)\n[Legal notices](docs/legal/NOTICES.md)\n",
         )
         .expect("readme");
         fs::write(
             root.join("AGENTS.md"),
-            "[Workflow control plane](docs/workflow-control-plane/INDEX.md)\n",
+            "[Workflow control plane](docs/workflow-control-plane/INDEX.md)\n[Legal notices](docs/legal/NOTICES.md)\n",
         )
         .expect("agents");
         fs::write(
@@ -1277,6 +1315,7 @@ vac-app-server-protocol = { workspace = true }
             "# schema\n",
         )
         .expect("schema doc");
+        fs::write(root.join("docs/legal/NOTICES.md"), "# Notices\n").expect("notices");
     }
 
     #[test]
@@ -1332,7 +1371,7 @@ vac-app-server-protocol = { workspace = true }
         write_root_manifests(&root, true);
         // Overwrite the Cargo.toml with no legacy dependencies
         fs::write(
-            root.join("vac-rs/tui/Cargo.toml"),
+            root.join("vac-rs/crates/surfaces/tui/Cargo.toml"),
             r#"
 [package]
 name = "vac-tui"

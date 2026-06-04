@@ -22,7 +22,7 @@ use vac_core::control_plane::load_ownership_scan_report;
 use vac_core::control_plane::load_policy_doctor_report_for_path;
 
 pub(crate) fn new_capability_dashboard_output(config: &Config) -> PlainHistoryCell {
-    PlainHistoryCell::new(render_capability_dashboard_lines(config.cwd.as_path()))
+    PlainHistoryCell::new(render_capability_dashboard_lines_for_config(config))
 }
 
 pub(crate) fn new_capability_dashboard_view(config: &Config) -> crate::bottom_pane::SelectionViewParams {
@@ -80,12 +80,26 @@ fn render_capability_dashboard_lines(cwd: &Path) -> Vec<Line<'static>> {
     render_capability_dashboard_lines_with_report(cwd, &report)
 }
 
+fn render_capability_dashboard_lines_for_config(config: &Config) -> Vec<Line<'static>> {
+    let cwd = config.cwd.as_path();
+    let report = load_control_plane_registry_report(cwd);
+    render_capability_dashboard_lines_with_report_and_config(cwd, &report, Some(config))
+}
+
 fn render_capability_dashboard_lines_with_report(
     cwd: &Path,
     report: &RegistryLoadReport,
 ) -> Vec<Line<'static>> {
+    render_capability_dashboard_lines_with_report_and_config(cwd, report, None)
+}
+
+fn render_capability_dashboard_lines_with_report_and_config(
+    cwd: &Path,
+    report: &RegistryLoadReport,
+    config: Option<&Config>,
+) -> Vec<Line<'static>> {
     let ownership_report = load_ownership_scan_report(cwd);
-    let shell_state = build_operator_dashboard_state(report, &ownership_report);
+    let shell_state = build_operator_dashboard_state(report, &ownership_report, config);
     let mut lines = crate::operator_ui::render_capability_dashboard_visual_lines(&shell_state, 156);
     lines.push("".into());
     lines.push("/capabilities".magenta().into());
@@ -170,6 +184,7 @@ fn strings_to_lines(lines: Vec<String>) -> Vec<Line<'static>> {
 fn build_operator_dashboard_state(
     report: &RegistryLoadReport,
     ownership_report: &vac_core::control_plane::OwnershipScanReport,
+    config: Option<&Config>,
 ) -> crate::operator_ui::CapabilityDashboardState {
     let capability_count = report
         .registry()
@@ -250,6 +265,8 @@ fn build_operator_dashboard_state(
         .collect::<Vec<_>>();
 
     crate::operator_ui::CapabilityDashboardState {
+        chrome_title: "vac · interactive".to_string(),
+        chrome_mode: "registry /capabilities".to_string(),
         capability_count,
         owned_domains: ownership_report.owned_count(),
         unowned_domains: ownership_report
@@ -261,6 +278,29 @@ fn build_operator_dashboard_state(
         diagnostics,
         capability_records,
         diagnostic_records,
+        status_bar: capability_dashboard_status_bar(config, valid_percent),
+    }
+}
+
+fn capability_dashboard_status_bar(
+    config: Option<&Config>,
+    valid_percent: u8,
+) -> crate::operator_ui::OperatorStatusBarState {
+    let model = config
+        .and_then(|config| config.model.clone())
+        .unwrap_or_else(|| "runtime".to_string());
+    let status_bar = crate::operator_ui::OperatorStatusBarState::conversation(
+        model,
+        "0 tok",
+        format!("valid {valid_percent}%"),
+    );
+    if let Some(config) = config {
+        status_bar.with_profile_rulebook(
+            crate::history_cell::operator_profile_label(config),
+            crate::history_cell::operator_rulebook_label(config),
+        )
+    } else {
+        status_bar
     }
 }
 
@@ -582,6 +622,11 @@ status: partial
 owner:
   crate: vac-surface-tui
   module: chatwidget
+states:
+- empty
+- loading
+- success
+- failure
 surfaces:
   tui:
     routes: [/capabilities]
@@ -643,6 +688,11 @@ status: ready
 owner:
   crate: vac-surface-tui
   module: workflow_browser
+states:
+- empty
+- loading
+- success
+- failure
 surfaces:
   tui:
     routes: [/workflow]
@@ -804,6 +854,11 @@ ownership:
     - vac-core
   modules:
     - control_plane
+states:
+- empty
+- loading
+- success
+- failure
 surfaces:
   palette: true
 policy:
@@ -866,6 +921,11 @@ status: ready
 owner:
   crate: vac-core
   module: chatwidget
+states:
+- empty
+- loading
+- success
+- failure
 surfaces:
   palette: true
 policy:
@@ -926,6 +986,11 @@ ownership:
     - vac-core
   modules:
     - missing_chat
+states:
+- empty
+- loading
+- success
+- failure
 surfaces:
   palette: true
 policy:
@@ -984,6 +1049,11 @@ ownership:
     - vac-cli
   modules:
     - main
+states:
+- empty
+- loading
+- success
+- failure
 surfaces:
   palette: true
 policy:
@@ -1039,6 +1109,11 @@ status: ready
 owner:
   crate: vac-surface-tui
   module: workflow_browser
+states:
+- empty
+- loading
+- success
+- failure
 surfaces:
   tui:
     routes: [/capabilities]

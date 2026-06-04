@@ -17,14 +17,12 @@ require_file() {
   fi
 }
 
-require_file vac-rs/control-plane/src/control_plane/vac_init_fixture_security_regression.rs
+require_file vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_fixture_security_regression.rs
 require_file scripts/check-vac-init-fixtures-security-regression-contract.sh
-require_file docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_G_FIXTURES_SECURITY.md
-require_file docs/validation/PRODUCTION_HARDENING_G1_G3_VALIDATION.md
 require_file .vac/capabilities/fixtures-security-regression.yaml
 require_file .vac/workflows/maintenance.fixtures-security-regression.yaml
 
-"$RUSTC_BIN" --edition 2024 --test vac-rs/control-plane/src/control_plane/vac_init_fixture_security_regression.rs -o "$TMPROOT/vac_init_fixture_security_regression_test"
+"$RUSTC_BIN" --edition 2024 --test vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_fixture_security_regression.rs -o "$TMPROOT/vac_init_fixture_security_regression_test"
 "$TMPROOT/vac_init_fixture_security_regression_test" --nocapture
 
 PY_STDERR="$TMPROOT/python-stderr.log"
@@ -34,7 +32,7 @@ import yaml
 
 cap = yaml.safe_load(pathlib.Path('.vac/capabilities/fixtures-security-regression.yaml').read_text())
 wf = yaml.safe_load(pathlib.Path('.vac/workflows/maintenance.fixtures-security-regression.yaml').read_text())
-for field in ('owner', 'ownership', 'policy', 'surfaces', 'validation', 'docs'):
+for field in ('owner', 'ownership', 'policy', 'surfaces', 'validation'):
     assert cap.get(field), f'capability missing {field}'
 for command in cap['validation']['commands'] + wf['validation']['commands']:
     assert isinstance(command, dict), 'validation command must be structured'

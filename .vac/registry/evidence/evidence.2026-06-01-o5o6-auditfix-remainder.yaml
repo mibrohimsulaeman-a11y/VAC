@@ -1,6 +1,8 @@
 schema_version: 1
 kind: evidence
 id: evidence.2026-06-01-o5o6-auditfix-remainder
+chain:
+  self_hash: 795fe30d6af25e0cb7aad95a9848517c3267db26ef07b7532d6c4bab00d02129
 created_at: '2026-06-01T00:00:00Z'
 plan_id: plan.o5o6.auditfix-remainder
 capability: vac.architecture

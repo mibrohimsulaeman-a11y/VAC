@@ -40,6 +40,8 @@ use vac_exec_server::ExecutorFileSystem;
 use vac_features::Feature;
 use vac_protocol::models::AdditionalPermissionProfile;
 use vac_protocol::models::FileSystemPermissions;
+use vac_protocol::exec_output::ExecToolCallOutput;
+use vac_protocol::exec_output::StreamOutput;
 use vac_protocol::protocol::EventMsg;
 use vac_protocol::protocol::FileChange;
 use vac_protocol::protocol::PatchApplyUpdatedEvent;
@@ -384,17 +386,47 @@ impl ToolHandler for ApplyPatchHandler {
             vac_apply_patch::MaybeApplyPatchVerified::Body(changes) => {
                 let (file_paths, effective_additional_permissions, file_system_sandbox_policy) =
                     effective_patch_permissions(session.as_ref(), turn.as_ref(), &changes).await;
-                match apply_patch::apply_patch(turn.as_ref(), &file_system_sandbox_policy, changes)
+                let changes_protocol = convert_apply_patch_to_protocol(&changes);
+                match apply_patch::invoke_apply_patch(turn.as_ref(), &file_system_sandbox_policy, changes)
                     .await
                 {
                     InternalApplyPatchInvocation::Output(item) => {
-                        let content = item?;
+                        let emitter = ToolEmitter::apply_patch(changes_protocol.clone(), true);
+                        let event_ctx = ToolEventCtx::new(
+                            session.as_ref(),
+                            turn.as_ref(),
+                            &call_id,
+                            Some(&tracker),
+                        );
+                        emitter.begin(event_ctx).await;
+
+                        let (exit_code, output_text) = match &item {
+                            Ok(content) => (0, content.clone()),
+                            Err(FunctionCallError::RespondToModel(reason)) => (1, reason.clone()),
+                            Err(e) => (1, e.to_string()),
+                        };
+
+                        let exec_output = ExecToolCallOutput {
+                            exit_code,
+                            stdout: StreamOutput::new(if exit_code == 0 { output_text.clone() } else { String::new() }),
+                            stderr: StreamOutput::new(if exit_code == 0 { String::new() } else { output_text.clone() }),
+                            aggregated_output: StreamOutput::new(output_text.clone()),
+                            duration: std::time::Duration::from_millis(0),
+                            timed_out: false,
+                        };
+
+                        let event_ctx = ToolEventCtx::new(
+                            session.as_ref(),
+                            turn.as_ref(),
+                            &call_id,
+                            Some(&tracker),
+                        );
+                        let finish_res = emitter.finish(event_ctx, Ok(exec_output)).await;
+                        let content = finish_res?;
                         Ok(ApplyPatchToolOutput::from_text(content))
                     }
                     InternalApplyPatchInvocation::DelegateToRuntime(apply) => {
-                        let changes = convert_apply_patch_to_protocol(&apply.action);
-                        let emitter =
-                            ToolEmitter::apply_patch(changes.clone(), apply.auto_approved);
+                        let emitter = ToolEmitter::apply_patch(changes_protocol.clone(), apply.auto_approved);
                         let event_ctx = ToolEventCtx::new(
                             session.as_ref(),
                             turn.as_ref(),
@@ -406,7 +438,7 @@ impl ToolHandler for ApplyPatchHandler {
                         let req = ApplyPatchRequest {
                             action: apply.action,
                             file_paths,
-                            changes,
+                            changes: changes_protocol.clone(),
                             exec_approval_requirement: apply.exec_approval_requirement,
                             additional_permissions: effective_additional_permissions
                                 .additional_permissions,
@@ -492,16 +524,71 @@ pub(crate) async fn intercept_apply_patch(
                 .await;
             let (approval_keys, effective_additional_permissions, file_system_sandbox_policy) =
                 effective_patch_permissions(session.as_ref(), turn.as_ref(), &changes).await;
-            match apply_patch::apply_patch(turn.as_ref(), &file_system_sandbox_policy, changes)
+            let changes_protocol = convert_apply_patch_to_protocol(&changes);
+            match apply_patch::invoke_apply_patch(turn.as_ref(), &file_system_sandbox_policy, changes)
                 .await
             {
                 InternalApplyPatchInvocation::Output(item) => {
-                    let content = item?;
-                    Ok(Some(FunctionToolOutput::from_text(content, Some(true))))
+                    let emitter = ToolEmitter::apply_patch(changes_protocol.clone(), true);
+                    let event_ctx = ToolEventCtx::new(
+                        session.as_ref(),
+                        turn.as_ref(),
+                        call_id,
+                        tracker.as_ref().copied(),
+                    );
+                    emitter.begin(event_ctx).await;
+
+                    let (exit_code, output_text) = match &item {
+                        Ok(content) => (0, content.clone()),
+                        Err(FunctionCallError::RespondToModel(reason)) => (1, reason.clone()),
+                        Err(e) => (1, e.to_string()),
+                    };
+
+                    let exec_output = ExecToolCallOutput {
+                        exit_code,
+                        stdout: StreamOutput::new(if exit_code == 0 { output_text.clone() } else { String::new() }),
+                        stderr: StreamOutput::new(if exit_code == 0 { String::new() } else { output_text.clone() }),
+                        aggregated_output: StreamOutput::new(output_text.clone()),
+                        duration: std::time::Duration::from_millis(0),
+                        timed_out: false,
+                    };
+
+                    let event_ctx = ToolEventCtx::new(
+                        session.as_ref(),
+                        turn.as_ref(),
+                        call_id,
+                        tracker.as_ref().copied(),
+                    );
+                    let finish_res = emitter.finish(event_ctx, Ok(exec_output.clone())).await;
+
+                    match finish_res {
+                        Ok(finished_content) => {
+                            let final_content = if tool_name == "shell" || tool_name == "shell_command" {
+                                crate::tools::format_exec_output_for_model_freeform(
+                                    &exec_output,
+                                    turn.truncation_policy,
+                                )
+                            } else {
+                                finished_content
+                            };
+                            Ok(Some(FunctionToolOutput::from_text(final_content, Some(true))))
+                        }
+                        Err(FunctionCallError::RespondToModel(err_msg)) => {
+                            if tool_name == "shell" || tool_name == "shell_command" {
+                                let final_content = crate::tools::format_exec_output_for_model_freeform(
+                                    &exec_output,
+                                    turn.truncation_policy,
+                                );
+                                Err(FunctionCallError::RespondToModel(final_content))
+                            } else {
+                                Err(FunctionCallError::RespondToModel(err_msg))
+                            }
+                        }
+                        Err(other_err) => Err(other_err),
+                    }
                 }
                 InternalApplyPatchInvocation::DelegateToRuntime(apply) => {
-                    let changes = convert_apply_patch_to_protocol(&apply.action);
-                    let emitter = ToolEmitter::apply_patch(changes.clone(), apply.auto_approved);
+                    let emitter = ToolEmitter::apply_patch(changes_protocol.clone(), apply.auto_approved);
                     let event_ctx = ToolEventCtx::new(
                         session.as_ref(),
                         turn.as_ref(),
@@ -513,7 +600,7 @@ pub(crate) async fn intercept_apply_patch(
                     let req = ApplyPatchRequest {
                         action: apply.action,
                         file_paths: approval_keys,
-                        changes,
+                        changes: changes_protocol.clone(),
                         exec_approval_requirement: apply.exec_approval_requirement,
                         additional_permissions: effective_additional_permissions
                             .additional_permissions,
@@ -539,14 +626,55 @@ pub(crate) async fn intercept_apply_patch(
                         )
                         .await
                         .map(|result| result.output);
+
+                    let is_shell_tool = tool_name == "shell" || tool_name == "shell_command";
+                    let opt_exec_output = if is_shell_tool {
+                        out.as_ref().ok().cloned()
+                    } else {
+                        None
+                    };
+
                     let event_ctx = ToolEventCtx::new(
                         session.as_ref(),
                         turn.as_ref(),
                         call_id,
                         tracker.as_ref().copied(),
                     );
-                    let content = emitter.finish(event_ctx, out).await?;
-                    Ok(Some(FunctionToolOutput::from_text(content, Some(true))))
+                    let finish_res = emitter.finish(event_ctx, out).await;
+
+                    match finish_res {
+                        Ok(finished_content) => {
+                            let final_content = if is_shell_tool {
+                                if let Some(exec_output) = &opt_exec_output {
+                                    crate::tools::format_exec_output_for_model_freeform(
+                                        exec_output,
+                                        turn.truncation_policy,
+                                    )
+                                } else {
+                                    finished_content
+                                }
+                            } else {
+                                finished_content
+                            };
+                            Ok(Some(FunctionToolOutput::from_text(final_content, Some(true))))
+                        }
+                        Err(FunctionCallError::RespondToModel(err_msg)) => {
+                            if is_shell_tool {
+                                if let Some(exec_output) = &opt_exec_output {
+                                    let final_content = crate::tools::format_exec_output_for_model_freeform(
+                                        exec_output,
+                                        turn.truncation_policy,
+                                    );
+                                    Err(FunctionCallError::RespondToModel(final_content))
+                                } else {
+                                    Err(FunctionCallError::RespondToModel(err_msg))
+                                }
+                            } else {
+                                Err(FunctionCallError::RespondToModel(err_msg))
+                            }
+                        }
+                        Err(other_err) => Err(other_err),
+                    }
                 }
             }
         }

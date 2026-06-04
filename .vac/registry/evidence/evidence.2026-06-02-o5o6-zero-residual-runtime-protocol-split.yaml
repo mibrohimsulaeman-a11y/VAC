@@ -1,6 +1,8 @@
 schema_version: 1
 kind: evidence
 id: evidence.2026-06-02-o5o6-zero-residual-runtime-protocol-split
+chain:
+  self_hash: b816fc4628f5c103f7ee821fae5da899dbd3d5e4554952dd1e869b889ca7fb3a
 created_at: 2026-06-02T08:24:00Z
 plan: plan.o5o6.zero-residual-blueprint-completion
 summary: Fix runtime protocol shard boundary compile blockers found while resuming vac-surface-tui targeted cargo check.

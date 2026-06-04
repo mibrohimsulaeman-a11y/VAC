@@ -45,6 +45,10 @@ impl StartedNetworkProxy {
     pub fn proxy(&self) -> NetworkProxy {
         self.proxy.clone()
     }
+
+    pub async fn wait(self) -> anyhow::Result<()> {
+        self._handle.wait().await
+    }
 }
 
 #[derive(Clone)]

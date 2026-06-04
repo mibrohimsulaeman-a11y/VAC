@@ -1,12 +1,6 @@
 ---
-source: tui/src/chatwidget/tests.rs
+source: crates/surfaces/tui/src/chatwidget/tests/app_server.rs
+assertion_line: 459
 expression: combined
 ---
-• Waiting for 2 agents
-  └ Robie [explorer]
-    Ada [reviewer]
 
-
-• Finished waiting
-  └ Robie [explorer]: Completed - Done
-    Ada [reviewer]: Running

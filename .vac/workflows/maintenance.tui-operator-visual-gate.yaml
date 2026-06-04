@@ -18,21 +18,21 @@ policy:
   approval_required_for: []
 steps:
 - id: deterministic_snapshot_proof
-  uses: capability.tui.operator_visual_gate.snapshot
+  uses: capability.vac.tui.operator-visual-fidelity-matrix.check
   ui:
     surface: /visual-gate
     progress_panel: true
     activity_log: true
     evidence_surface: true
 - id: ansi_style_proof
-  uses: capability.tui.operator_visual_gate.ansi
+  uses: capability.vac.tui.operator-visual-fidelity-matrix.check
   ui:
     surface: /visual-gate
     progress_panel: true
     activity_log: true
     evidence_surface: true
 - id: pty_contract_documented
-  uses: capability.tui.operator_visual_gate.pty_contract
+  uses: capability.vac.tui.operator-visual-fidelity-matrix.check
   ui:
     surface: /visual-gate
     progress_panel: true

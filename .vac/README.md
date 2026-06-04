@@ -2,17 +2,17 @@
 
 Declarative root of the VAC product. YAML declares; Rust validates; the doctor inspects; policy gates; approval protects.
 
-Every manifest is typed, versioned (`schema_version: 1`), and validated by a loader in `vac-rs/control-plane/src/control_plane/`. Authoritative schema reference: [`docs/workflow-control-plane/schema/INDEX.md`](../docs/workflow-control-plane/schema/INDEX.md).
+Every manifest is typed, versioned (`schema_version: 1`), and validated by a loader in `vac-rs/crates/control-plane/control-plane/src/control_plane/`. Authoritative schema reference: [`docs/workflow-control-plane/schema/INDEX.md`](../docs/workflow-control-plane/schema/INDEX.md).
 
 ## Families
 
 | Family | Directory | Schema source (Rust) | Schema doc | Doctor gate |
 |---|---|---|---|---|
-| Capabilities | [`capabilities/`](capabilities/README.md) | `vac-rs/control-plane/src/control_plane/capability_manifest.rs` | [`capability-manifest.schema.md`](../docs/workflow-control-plane/schema/capability-manifest.schema.md) | `vac doctor registry .` |
-| Workflows | [`workflows/`](workflows/README.md) | `vac-rs/control-plane/src/control_plane/workflow_manifest.rs` | [`workflow-manifest.schema.md`](../docs/workflow-control-plane/schema/workflow-manifest.schema.md) | `vac doctor workflow .` |
-| Policies | [`policies/`](policies/README.md) | `vac-rs/control-plane/src/control_plane/policy_manifest.rs` | [`policy-manifest.schema.md`](../docs/workflow-control-plane/schema/policy-manifest.schema.md) | `vac doctor policy .` |
-| Surfaces | [`surfaces/`](surfaces/README.md) | `vac-rs/control-plane/src/control_plane/surface_manifest.rs` | [`surface-manifest.schema.md`](../docs/workflow-control-plane/schema/surface-manifest.schema.md) | `vac doctor surfaces .` |
-| Registry | [`registry/`](registry/README.md) | loaders under `vac-rs/control-plane/src/control_plane/` | [`registry.schema.md`](../docs/workflow-control-plane/schema/registry.schema.md) | `vac doctor registry .` |
+| Capabilities | [`capabilities/`](capabilities/README.md) | `vac-rs/crates/control-plane/control-plane/src/control_plane/capability_manifest.rs` | [`capability-manifest.schema.md`](../docs/workflow-control-plane/schema/capability-manifest.schema.md) | `vac doctor registry .` |
+| Workflows | [`workflows/`](workflows/README.md) | `vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_manifest.rs` | [`workflow-manifest.schema.md`](../docs/workflow-control-plane/schema/workflow-manifest.schema.md) | `vac doctor workflow .` |
+| Policies | [`policies/`](policies/README.md) | `vac-rs/crates/control-plane/control-plane/src/control_plane/policy_manifest.rs` | [`policy-manifest.schema.md`](../docs/workflow-control-plane/schema/policy-manifest.schema.md) | `vac doctor policy .` |
+| Surfaces | [`surfaces/`](surfaces/README.md) | `vac-rs/crates/control-plane/control-plane/src/control_plane/surface_manifest.rs` | [`surface-manifest.schema.md`](../docs/workflow-control-plane/schema/surface-manifest.schema.md) | `vac doctor surfaces .` |
+| Registry | [`registry/`](registry/README.md) | loaders under `vac-rs/crates/control-plane/control-plane/src/control_plane/` | [`registry.schema.md`](../docs/workflow-control-plane/schema/registry.schema.md) | `vac doctor registry .` |
 
 ## Naming conventions
 

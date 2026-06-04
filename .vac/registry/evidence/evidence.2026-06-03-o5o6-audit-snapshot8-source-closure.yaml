@@ -1,6 +1,8 @@
 schema_version: 1
-kind: evidence_record
+kind: evidence
 id: evidence.2026-06-03-o5o6-audit-snapshot8-source-closure
+chain:
+  self_hash: 115d271132539b602e83e11e30cf3f9066f1340aa6962827d874b9088126e7de
 created_at: 2026-06-03T00:00:00Z
 status: SV-Done_TV-Blocked
 source_artifact_intent: vac-o5o6-audit-snapshot8-source-closed-toolchain-blocked

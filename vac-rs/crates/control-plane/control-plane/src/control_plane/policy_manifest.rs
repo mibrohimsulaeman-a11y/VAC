@@ -202,6 +202,12 @@ struct RawPolicyManifest {
     title: Option<String>,
     default_decision: Option<String>,
     rules: Option<Vec<RawPolicyRule>>,
+    #[serde(default)]
+    owner: Option<String>,
+    #[serde(default)]
+    status: Option<String>,
+    #[serde(default)]
+    evidence: Option<serde_yaml::Value>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -303,6 +309,7 @@ impl PolicyManifest {
         let title = normalize_non_empty_string(raw.title, path, "title")?;
         let default_decision = parse_decision(raw.default_decision, path, "default_decision")?;
         let rules = parse_rules(raw.rules, path)?;
+        let _metadata = (raw.owner, raw.status, raw.evidence);
 
         let manifest = Self {
             schema_version,

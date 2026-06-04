@@ -4,13 +4,16 @@ id: vac.identity.check
 title: Identity Check
 status: ready
 owner:
-  crate: vac-core
-  module: control_plane
+  crate: vac-control-plane
+  module: control_plane.identity_check
 ownership:
   crates:
-  - vac-core
+  - vac-control-plane
   modules:
-  - control_plane
+  - control_plane.identity_check
+  targets:
+  - crate_name: vac-control-plane
+    module: control_plane.identity_check
 description: Product identity and legacy term scanning for the root product.
 reason: 'Identity-check workflow validation, palette exposure, ownership metadata, and root catalog source-domain mapping are synchronized after Plan 19/21 closeout.
 
@@ -19,6 +22,9 @@ depends_on:
 - vac.workflow
 surfaces:
   palette: true
+  tui:
+    routes:
+    - /capabilities/vac.identity-check
 states:
 - empty
 - loading
@@ -37,8 +43,6 @@ validation:
     - +1.93.0
     - check
     - -p
-    - vac-cli
+    - vac-surface-cli
     risk: execute_process
     approval: policy
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

@@ -14,7 +14,11 @@ surfaces:
   tui:
     routes:
     - /agent-streaming
-  palette: false
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -33,8 +37,6 @@ validation:
   - turn_metadata
   - context_usage_bar
   - tool_timeline_last_five
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md
 ownership:
   crates:
   - vac-tui
@@ -47,6 +49,5 @@ ownership:
   - kind: path
     include:
     - .vac/capabilities/tui-agent-streaming-runtime.yaml
-    - docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md
     - scripts/check-tui-agent-streaming-runtime-contract.sh
     exclude: []

@@ -1,16 +1,25 @@
 ---
-source: tui/src/chatwidget/tests.rs
+source: crates/surfaces/tui/src/chatwidget/tests/exec_flow.rs
 expression: contents
 ---
 
 
-  Would you like to run the following command?
+  approval required
+
+  action kind  BASH  the agent wants to run a shell command
+  cwd          /tmp/project
+  context      runtime host · network inherit · writes policy-gated
+  risk         process execution · operator approval required
+  policy       vil.core policy gate requires explicit approval
+  batch        batch 1/1 — policy-gated approval queue
 
   $ python - <<'PY'
   print('hello')
   PY
 
-› 1. Yes, proceed (y)
-  2. No, and tell VAC what to do differently (esc)
+  hotkeys  y approve once   a approve+remember   n reject   r reject with reason
+
+› 1. approve once (y)
+  2. reject with reason (esc)
 
   Press enter to confirm or esc to cancel

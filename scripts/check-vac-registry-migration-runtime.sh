@@ -9,18 +9,18 @@ trap 'rm -rf "$TMPROOT"' EXIT
 
 require_file() { [[ -f "$1" ]] || { echo "FAIL: missing $1" >&2; exit 1; }; }
 
-require_file vac-rs/control-plane/src/control_plane/vac_init_migration_runtime.rs
-require_file vac-rs/cli/src/registry_cli.rs
+require_file vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_migration_runtime.rs
+require_file vac-rs/crates/surfaces/cli/src/registry_cli.rs
 require_file .vac/registry/migrations/migration.v1-hardening-h.yaml
 
-"$RUSTC_BIN" --edition 2024 --test vac-rs/control-plane/src/control_plane/vac_init_migration_runtime.rs -o "$TMPROOT/vac_init_migration_runtime_test"
+"$RUSTC_BIN" --edition 2024 --test vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_migration_runtime.rs -o "$TMPROOT/vac_init_migration_runtime_test"
 "$TMPROOT/vac_init_migration_runtime_test" --nocapture
 
-grep -q 'RegistryCommand' vac-rs/cli/src/registry_cli.rs
-grep -q 'Migrate' vac-rs/cli/src/registry_cli.rs
-grep -q -- '--dry-run' vac-rs/cli/src/registry_cli.rs
-grep -q -- '--apply' vac-rs/cli/src/registry_cli.rs
-grep -q 'Migrations(MigrationDoctorCommand)' vac-rs/cli/src/doctor_cli.rs
+grep -q 'RegistryCommand' vac-rs/crates/surfaces/cli/src/registry_cli.rs
+grep -q 'Migrate' vac-rs/crates/surfaces/cli/src/registry_cli.rs
+grep -q -- '--dry-run' vac-rs/crates/surfaces/cli/src/registry_cli.rs
+grep -q -- '--apply' vac-rs/crates/surfaces/cli/src/registry_cli.rs
+grep -q 'Migrations(MigrationDoctorCommand)' vac-rs/crates/surfaces/cli/src/doctor_cli.rs
 grep -q 'kind: registry_status' .vac/registry/product.yaml
 grep -q 'legacy_kind: product' .vac/registry/product.yaml
 grep -q 'kind: registry_status' .vac/registry/status.yaml

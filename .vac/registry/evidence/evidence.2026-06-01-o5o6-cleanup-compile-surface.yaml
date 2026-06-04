@@ -1,6 +1,8 @@
 schema_version: 1
 kind: evidence
 id: evidence.2026-06-01-o5o6-cleanup-compile-surface
+chain:
+  self_hash: e07f83958c3755833fb54e12c2ea088078681c94199a594c6926368a7dd1c07c
 created_at: '2026-06-01T00:00:00Z'
 plan_id: plan.o5o6.cleanup-compile-surface
 capability: vac.local_runtime_owner

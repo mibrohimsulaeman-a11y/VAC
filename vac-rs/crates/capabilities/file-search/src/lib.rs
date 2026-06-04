@@ -547,11 +547,8 @@ fn matcher_worker(
                     let limit = inner.limit.min(snapshot.matched_item_count() as usize);
                     let pattern = snapshot.pattern().column_pattern(0);
                     let matches: Vec<_> = snapshot
-                        .matches()
-                        .iter()
-                        .take(limit)
-                        .filter_map(|match_| {
-                            let item = snapshot.get_item(match_.idx)?;
+                        .matched_items(0..limit as u32)
+                        .filter_map(|item| {
                             let full_path = item.data.as_ref();
                             let (root_idx, relative_path) = get_file_path(Path::new(full_path), &inner.search_directories)?;
                             let indices = if let Some(indices_matcher) = indices_matcher.as_mut() {
@@ -570,7 +567,7 @@ fn matcher_worker(
                                 MatchType::File
                             };
                             Some(FileMatch {
-                                score: match_.score,
+                                score: 0,
                                 path: PathBuf::from(relative_path),
                                 match_type,
                                 root: inner.search_directories[root_idx].clone(),

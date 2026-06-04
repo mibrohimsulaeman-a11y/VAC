@@ -1,6 +1,8 @@
 schema_version: 1
 kind: evidence
 id: evidence.2026-05-30-o5o6-epic-a-app-server-retirement
+chain:
+  self_hash: 209be17240e191790f12402b5e252d10191326afa770100ebdb2434bc09837cd
 title: O5/O6 Epic A app-server retirement evidence
 status: implemented_not_evaluated
 timestamp: '2026-05-30T14:30:00Z'

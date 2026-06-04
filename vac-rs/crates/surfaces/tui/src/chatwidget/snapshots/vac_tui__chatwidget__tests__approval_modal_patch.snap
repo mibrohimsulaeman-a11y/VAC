@@ -1,13 +1,20 @@
 ---
-source: tui/src/chatwidget/tests/exec_flow.rs
+source: crates/surfaces/tui/src/chatwidget/tests/exec_flow.rs
+assertion_line: 1234
 expression: contents
 ---
-  Would you like to make the following edits?
 
-  Reason: The model wants to apply changes
 
-› 1. Yes, proceed (y)
-  2. Yes, and don't ask again for these files (a)
-  3. No, and tell VAC what to do differently (esc)
+  approval required
+
+  action kind  FILE_EDIT the agent wants to modify files
+  cwd          /tmp/project
+  risk         write mutation · review diff before applying
+  policy       The model wants to apply changes
+  hotkeys  y approve once   a approve+remember   n reject   r reject with reas
+
+› 1. approve once (y)
+  2. approve+remember · file edits (a)
+  3. reject with reason (esc)
 
   Press enter to confirm or esc to cancel

@@ -150,10 +150,15 @@ pub fn is_supported_step_use(uses: &str) -> bool {
 }
 
 pub fn resolve_workflow_step_handler(uses: &str) -> Option<WorkflowStepHandler> {
-    WORKFLOW_STEP_VOCABULARY
+    if let Some(handler) = WORKFLOW_STEP_VOCABULARY
         .iter()
         .find(|entry| entry.uses == uses)
         .map(|entry| entry.handler)
+    {
+        return Some(handler);
+    }
+    resolve_declarative_capability_check_id(uses)
+        .map(|_| WorkflowStepHandler::DeclarativeCapabilityCheck)
 }
 
 pub fn resolve_workflow_step(
@@ -400,6 +405,12 @@ fn load_workflow_run_entries(registry: &ControlPlaneRegistry) -> Vec<WorkflowRun
         .workflows
         .manifests
         .iter()
+        .filter(|entry| {
+            !matches!(
+                entry.manifest.status,
+                super::workflow_manifest::WorkflowStatus::Disabled
+            )
+        })
         .map(|entry| {
             let approval_policy = evaluate_workflow_approval_policy(&entry.manifest, registry);
             let workflow_has_root_seed_coverage =
@@ -612,4 +623,3 @@ pub fn format_workflow_dry_run_event(event: &WorkflowDryRunEvent) -> String {
         } => format!("finished supported={supported_step_count} blocked={blocked_step_count}"),
     }
 }
-

@@ -1,0 +1,16 @@
+---
+source: crates/surfaces/tui/src/history_cell/split_006_finalmessageseparator.rs.inc
+assertion_line: 833
+expression: rendered
+---
+/mcp
+
+🔌  MCP Tools
+
+  • plugin_docs
+    • Status: enabled
+    • Auth: Unsupported
+    • Command: docs-server --stdio
+    • Tools: lookup
+    • Resources: Docs (file:///docs)
+    • Resource templates: Doc Template (file:///docs/{id})

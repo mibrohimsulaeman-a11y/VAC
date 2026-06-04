@@ -119,7 +119,7 @@ vac-ansi-escape = { path = "crates/foundation/ansi-escape" }
 vac-api = { path = "crates/providers/vac-api" }
 vac-aws-auth = { path = "crates/providers/aws-auth" }
 vac-apply-patch = { path = "crates/runtime/shell/apply-patch" }
-vac-arg0 = { path = "crates/foundation/arg0" }
+vac-arg0 = { path = "crates/foundation/arg0", features = ["arg0-helpers"] }
 vac-async-utils = { path = "crates/foundation/async-utils" }
 vac-cli = { package = "vac-surface-cli", path = "crates/surfaces/cli" }
 vac-client = { path = "crates/providers/vac-client" }
@@ -163,7 +163,7 @@ vac-memories-write = { path = "crates/capabilities/memories/write" }
 vac-mcp = { path = "crates/integrations/vac-mcp" }
 vac-model-provider-info = { path = "crates/providers/model-provider-info" }
 vac-models-manager = { path = "crates/providers/models-manager" }
-vac-network-proxy = { path = "crates/integrations/network-proxy" }
+vac-network-proxy = { path = "crates/integrations/network-proxy", features = ["runtime-proxy"] }
 vac-ollama = { path = "crates/providers/ollama" }
 vac-otel = { path = "crates/integrations/otel" }
 vac-plugin = { path = "crates/integrations/plugin" }
@@ -316,7 +316,7 @@ regex = "1.12.3"
 regex-lite = "0.1.8"
 reqwest = { version = "0.12", features = ["cookies"] }
 rmcp = { version = "0.15.0", default-features = false }
-runfiles = "0.1.0"
+runfiles = "0.2.0"
 rustls = { version = "0.23", default-features = false, features = [
     "ring",
     "std",
@@ -389,7 +389,7 @@ url = "2"
 urlencoding = "2.1"
 uuid = "1"
 v8 = "=146.4.0"
-vt100 = "0.16.2"
+vt100 = "0.15.2"
 walkdir = "2.5.0"
 webbrowser = "1.0"
 which = "8"

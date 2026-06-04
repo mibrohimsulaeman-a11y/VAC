@@ -1,8 +1,6 @@
 use tracing::info;
 use vac_core::config::Config;
 use vac_login::AuthManager;
-use vac_protocol::protocol::RateLimitSnapshot;
-use vac_protocol::protocol::RateLimitWindow;
 
 pub(crate) async fn rate_limits_ok(auth_manager: &AuthManager, config: &Config) -> bool {
     rate_limits_check(auth_manager, config)
@@ -28,7 +26,11 @@ async fn rate_limits_check(auth_manager: &AuthManager, config: &Config) -> Optio
     Some(true)
 }
 
-fn snapshot_allows_startup(snapshot: &RateLimitSnapshot, min_remaining_percent: i64) -> bool {
+#[cfg(test)]
+fn snapshot_allows_startup(
+    snapshot: &vac_protocol::protocol::RateLimitSnapshot,
+    min_remaining_percent: i64,
+) -> bool {
     if snapshot.rate_limit_reached_type.is_some() {
         return false;
     }
@@ -38,7 +40,11 @@ fn snapshot_allows_startup(snapshot: &RateLimitSnapshot, min_remaining_percent: 
         && window_allows_startup(snapshot.secondary.as_ref(), max_used_percent)
 }
 
-fn window_allows_startup(window: Option<&RateLimitWindow>, max_used_percent: f64) -> bool {
+#[cfg(test)]
+fn window_allows_startup(
+    window: Option<&vac_protocol::protocol::RateLimitWindow>,
+    max_used_percent: f64,
+) -> bool {
     match window {
         Some(window) => window.used_percent <= max_used_percent,
         None => true,

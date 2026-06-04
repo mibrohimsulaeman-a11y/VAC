@@ -1688,6 +1688,8 @@ mod tests {
             thread_label: None,
             id: "1".to_string(),
             command: vec!["echo".into(), "ok".into()],
+            cwd: vac_utils_absolute_path::AbsolutePathBuf::from_absolute_path("/workspace")
+                .expect("absolute test cwd"),
             reason: None,
             available_decisions: vec![
                 CommandExecutionApprovalDecision::Accept,

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Validate operator-console snapshot contracts without requiring a transient
-# sandbox rustc. Cargo-backed widget snapshot tests remain TV-Pending when the
-# toolchain is unavailable; this gate keeps source/static truth strict.
+# Validate operator-console snapshot contracts. When cargo is available this
+# also executes the ratatui-backed widget snapshot test; source-only fallback is
+# retained for environments that cannot build the renderer.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -29,23 +29,26 @@ reject_tree_contains() {
   fi
 }
 
-SNAPSHOT_DIR="docs/validation/tui-operator-ui-snapshots"
-operator="vac-rs/tui/src/operator_ui.rs"
-widget="vac-rs/tui/src/operator_widget_render.rs"
-test_file="vac-rs/tui/tests/operator_ui_snapshot_contract.rs"
+TMPROOT="$(mktemp -d "${TMPDIR:-/tmp}/vac-operator-snapshots.XXXXXX")"
+trap 'rm -rf "$TMPROOT"' EXIT
+SNAPSHOT_DIR="$TMPROOT/tui-operator-ui-snapshots"
+operator="vac-rs/crates/surfaces/tui/src/operator_ui.rs.inc"
+widget="vac-rs/crates/surfaces/tui/src/operator_widget_render.rs"
+test_file="vac-rs/crates/surfaces/tui/tests/operator_ui_snapshot_contract.rs"
 render_script="scripts/render-tui-operator-snapshots.sh"
 
 require_file "$operator"
 require_file "$widget"
 require_file "$test_file"
 require_file "$render_script"
-[ -d "$SNAPSHOT_DIR" ] || fail "missing snapshot dir $SNAPSHOT_DIR"
+bash "$render_script" "$SNAPSHOT_DIR" >/dev/null
+[ -d "$SNAPSHOT_DIR" ] || fail "missing generated snapshot dir $SNAPSHOT_DIR"
 
 require_contains "$operator" "crate::operator_widget_render::render_snapshot_lines"
 require_contains "$widget" "IdleViewState::live"
 require_contains "$widget" "Buffer::empty"
 require_contains "$widget" "cell.style()"
-require_contains "$widget" "Span::styled(current_text"
+require_contains "$widget" "current_text.push_str"
 require_contains "$widget" "buffer_conversion_preserves_cell_style_and_gauge_fill"
 require_contains "$widget" "BorderType::Rounded"
 require_contains "$widget" "Tabs::new"
@@ -80,6 +83,7 @@ require_contains "$SNAPSHOT_DIR/runtime-jobs-120x36.txt" "autopilot ● running"
 require_contains "$SNAPSHOT_DIR/runtime-jobs-120x36.txt" "node progress"
 require_contains "$SNAPSHOT_DIR/capability-dashboard-180x48.txt" "TUI Capability Dashboard"
 require_contains "$SNAPSHOT_DIR/capability-dashboard-180x48.txt" "Diagnostics"
+require_contains "$SNAPSHOT_DIR/capability-dashboard-180x48.txt" "no YAML/control-plane errors detected"
 require_contains "$SNAPSHOT_DIR/capability-dashboard-180x48.txt" "VALIDATION / DOCS"
 require_contains "$SNAPSHOT_DIR/capability-dashboard-180x48.txt" "Policy gates"
 
@@ -90,9 +94,13 @@ reject_tree_contains "$SNAPSHOT_DIR" "metrics  ["
 reject_tree_contains "$SNAPSHOT_DIR" "layout  left:"
 reject_tree_contains "$SNAPSHOT_DIR" "right / Diagnostics"
 reject_tree_contains "$SNAPSHOT_DIR" "Diagnostics fallback"
+reject_tree_contains "$SNAPSHOT_DIR" ".vac/capabilities/tui.yml:42:13"
+reject_tree_contains "$SNAPSHOT_DIR" "almost_ready"
+reject_tree_contains "$SNAPSHOT_DIR" "vac.yaml.parser"
 
 if command -v cargo >/dev/null 2>&1; then
-  echo "cargo-backed widget snapshot test: TV-Pending (run: cargo test --manifest-path vac-rs/Cargo.toml -p vac-surface-tui operator_ui_snapshot_contract)"
+  cargo test --manifest-path vac-rs/Cargo.toml -p vac-surface-tui --test operator_ui_snapshot_contract -- --nocapture
+  echo "cargo-backed widget snapshot test: PASS"
 elif command -v rustc >/dev/null 2>&1; then
   echo "cargo-backed widget snapshot test: TV-Pending (rustc exists, but direct rustc harness is intentionally disabled because renderer depends on ratatui)"
 else

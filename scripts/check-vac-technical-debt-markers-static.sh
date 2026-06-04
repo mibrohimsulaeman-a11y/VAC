@@ -19,7 +19,7 @@ if not expected_count or not expected_hash:
     raise SystemExit('technical debt registry missing count/hash')
 pat=re.compile(r'\b(TODO|FIXME|HACK|XXX)\b')
 entries=[]
-for root in [Path('vac-rs/core/src'), Path('vac-rs/tui/src')]:
+for root in [Path('vac-rs/core/src'), Path('vac-rs/crates/surfaces/tui/src')]:
     for p in sorted(root.rglob('*.rs')):
         rel=p.as_posix()
         if '/tests/' in rel or rel.endswith('_tests.rs'):

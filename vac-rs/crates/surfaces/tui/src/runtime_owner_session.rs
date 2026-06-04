@@ -25,23 +25,25 @@ mod owner_native {
     use crate::session_protocol::AuthMode;
     use crate::session_protocol::ClientRequest;
     use crate::session_protocol::ConfigWarningNotification;
+    use crate::session_protocol::ErrorNotification;
     use crate::session_protocol::ExternalAgentConfigDetectParams;
     use crate::session_protocol::ExternalAgentConfigDetectResponse;
     use crate::session_protocol::ExternalAgentConfigImportResponse;
     use crate::session_protocol::ExternalAgentConfigMigrationItem;
-    use crate::session_protocol::ErrorNotification;
     use crate::session_protocol::GetAccountRateLimitsResponse;
     use crate::session_protocol::GetAccountResponse;
     use crate::session_protocol::JSONRPCErrorError;
     use crate::session_protocol::RateLimitSnapshot;
     use crate::session_protocol::RequestId;
     use crate::session_protocol::ReviewStartResponse;
+    use crate::session_protocol::SkillErrorInfo;
+    use crate::session_protocol::SkillMetadata;
+    use crate::session_protocol::SkillsListEntry;
     use crate::session_protocol::SkillsListParams;
     use crate::session_protocol::SkillsListResponse;
-    use crate::session_protocol::TurnStatus;
     use crate::session_protocol::Thread;
-    use crate::session_protocol::ThreadGoalClearResponse;
     use crate::session_protocol::ThreadGoal;
+    use crate::session_protocol::ThreadGoalClearResponse;
     use crate::session_protocol::ThreadGoalGetResponse;
     use crate::session_protocol::ThreadGoalSetResponse;
     use crate::session_protocol::ThreadGoalStatus;
@@ -52,25 +54,28 @@ mod owner_native {
     use crate::session_protocol::ThreadLoadedListParams;
     use crate::session_protocol::ThreadLoadedListResponse;
     use crate::session_protocol::ThreadMemoryMode;
-    use crate::session_protocol::ThreadStatus;
     use crate::session_protocol::ThreadRealtimeAudioChunk;
     use crate::session_protocol::ThreadRealtimeStartTransport;
     use crate::session_protocol::ThreadRollbackResponse;
     use crate::session_protocol::ThreadStartSource;
+    use crate::session_protocol::ThreadStatus;
     use crate::session_protocol::Turn;
-    use crate::session_protocol::build_turns_from_rollout_items;
-    use crate::session_protocol::thread_source_kinds_to_session_sources;
     use crate::session_protocol::TurnCompletedNotification;
     use crate::session_protocol::TurnError;
-    use crate::session_protocol::TurnStartedNotification;
     use crate::session_protocol::TurnStartResponse;
+    use crate::session_protocol::TurnStartedNotification;
+    use crate::session_protocol::TurnStatus;
     use crate::session_protocol::TurnSteerResponse;
     use crate::session_protocol::UserInput;
     use crate::session_protocol::WarningNotification;
+    use crate::session_protocol::build_turns_from_rollout_items;
+    use crate::session_protocol::thread_source_kinds_to_session_sources;
     use crate::session_state::SessionNetworkProxyRuntime;
     use crate::session_state::ThreadSessionState;
     use crate::status::StatusAccountDisplay;
     use crate::status::plan_type_display_name;
+    use serde::Serialize;
+    use tracing::warn;
     use vac_arg0::Arg0DispatchPaths;
     use vac_config::LoaderOverrides;
     use vac_core::ThreadManager;
@@ -85,10 +90,10 @@ mod owner_native {
     use vac_protocol::ThreadId;
     use vac_protocol::account::PlanType;
     use vac_protocol::approvals::GuardianAssessmentEvent;
+    use vac_protocol::config_types::ModeKind;
     use vac_protocol::models::ActivePermissionProfile;
     use vac_protocol::models::PermissionProfile;
     use vac_protocol::models::ResponseItem;
-    use vac_protocol::config_types::ModeKind;
     use vac_protocol::protocol::InitialHistory;
     use vac_protocol::protocol::Op;
     use vac_protocol::protocol::ResumedHistory;
@@ -102,7 +107,6 @@ mod owner_native {
     use vac_thread_store::ThreadSortKey as StoreThreadSortKey;
     use vac_thread_store::ThreadStore;
     use vac_utils_absolute_path::AbsolutePathBuf;
-    use tracing::warn;
 
     pub(crate) const DEFAULT_IN_PROCESS_CHANNEL_CAPACITY: usize = 4_096;
 
@@ -164,6 +168,7 @@ mod owner_native {
         config: Arc<Config>,
         thread_store: Arc<dyn ThreadStore>,
         thread_manager: Arc<ThreadManager>,
+        environment_manager: Arc<EnvironmentManager>,
         event_tx: mpsc::Sender<TuiSessionEvent>,
         event_rx: Arc<tokio::sync::Mutex<mpsc::Receiver<TuiSessionEvent>>>,
     }
@@ -194,11 +199,9 @@ mod owner_native {
         pub async fn start(args: InProcessClientStartArgs) -> io::Result<Self> {
             let capacity = args.channel_capacity.max(1);
             let (event_tx, rx) = mpsc::channel(capacity);
-            let auth_manager = AuthManager::shared_from_config(
-                args.config.as_ref(),
-                args.enable_vac_api_key_env,
-            )
-            .await;
+            let auth_manager =
+                AuthManager::shared_from_config(args.config.as_ref(), args.enable_vac_api_key_env)
+                    .await;
             let thread_store = thread_store_from_config(args.config.as_ref());
             let thread_manager = Arc::new(ThreadManager::new(
                 args.config.as_ref(),
@@ -213,6 +216,7 @@ mod owner_native {
                 config: args.config,
                 thread_store,
                 thread_manager,
+                environment_manager: args.environment_manager,
                 event_tx,
                 event_rx: Arc::new(tokio::sync::Mutex::new(rx)),
             })
@@ -220,6 +224,10 @@ mod owner_native {
 
         pub(crate) fn thread_manager(&self) -> Arc<ThreadManager> {
             Arc::clone(&self.thread_manager)
+        }
+
+        pub(crate) fn environment_manager(&self) -> Arc<EnvironmentManager> {
+            Arc::clone(&self.environment_manager)
         }
 
         pub(crate) fn thread_store(&self) -> Arc<dyn ThreadStore> {
@@ -242,7 +250,7 @@ mod owner_native {
             self.event_rx.lock().await.recv().await
         }
 
-        async fn shutdown(self) -> io::Result<()> {
+        pub(crate) async fn shutdown(self) -> io::Result<()> {
             Ok(())
         }
     }
@@ -259,6 +267,12 @@ mod owner_native {
         fn thread_manager(&self) -> Arc<ThreadManager> {
             match self {
                 Self::InProcess(client) => client.thread_manager(),
+            }
+        }
+
+        fn environment_manager(&self) -> Arc<EnvironmentManager> {
+            match self {
+                Self::InProcess(client) => client.environment_manager(),
             }
         }
 
@@ -342,6 +356,10 @@ mod owner_native {
             self.client.event_sender()
         }
 
+        fn environment_manager(&self) -> Arc<EnvironmentManager> {
+            self.client.environment_manager()
+        }
+
         fn assert_owner_runtime_supported(&self) -> Result<()> {
             // Guard rail for the interactive runtime: release-blocking methods
             // must be represented by the single code-owned support contract and
@@ -366,7 +384,9 @@ mod owner_native {
             Ok(())
         }
 
-        fn session_state_from_configured(configured: vac_protocol::protocol::SessionConfiguredEvent) -> ThreadSessionState {
+        fn session_state_from_configured(
+            configured: vac_protocol::protocol::SessionConfiguredEvent,
+        ) -> ThreadSessionState {
             ThreadSessionState {
                 thread_id: configured.session_id,
                 branched_from_id: configured.branched_from_id,
@@ -384,10 +404,12 @@ mod owner_native {
                 reasoning_effort: configured.reasoning_effort,
                 history_log_id: configured.history_log_id,
                 history_entry_count: configured.history_entry_count as u64,
-                network_proxy: configured.network_proxy.map(|proxy| SessionNetworkProxyRuntime {
-                    http_addr: proxy.http_addr,
-                    socks_addr: proxy.socks_addr,
-                }),
+                network_proxy: configured
+                    .network_proxy
+                    .map(|proxy| SessionNetworkProxyRuntime {
+                        http_addr: proxy.http_addr,
+                        socks_addr: proxy.socks_addr,
+                    }),
                 rollout_path: configured.rollout_path,
             }
         }
@@ -399,7 +421,13 @@ mod owner_native {
                 .unwrap_or_default()
         }
 
-        fn turn_snapshot(turn_id: String, status: TurnStatus, started_at: Option<i64>, completed_at: Option<i64>, duration_ms: Option<i64>) -> Turn {
+        fn turn_snapshot(
+            turn_id: String,
+            status: TurnStatus,
+            started_at: Option<i64>,
+            completed_at: Option<i64>,
+            duration_ms: Option<i64>,
+        ) -> Turn {
             Turn {
                 id: turn_id,
                 items: Vec::new(),
@@ -432,8 +460,8 @@ mod owner_native {
                         }
                     };
                     let notification = match event.msg {
-                        vac_protocol::protocol::EventMsg::TurnStarted(started) => Some(
-                            crate::session_protocol::ServerNotification::TurnStarted(
+                        vac_protocol::protocol::EventMsg::TurnStarted(started) => {
+                            Some(crate::session_protocol::ServerNotification::TurnStarted(
                                 TurnStartedNotification {
                                     thread_id: thread_id.to_string(),
                                     turn: Self::turn_snapshot(
@@ -444,10 +472,10 @@ mod owner_native {
                                         None,
                                     ),
                                 },
-                            ),
-                        ),
-                        vac_protocol::protocol::EventMsg::TurnComplete(completed) => Some(
-                            crate::session_protocol::ServerNotification::TurnCompleted(
+                            ))
+                        }
+                        vac_protocol::protocol::EventMsg::TurnComplete(completed) => {
+                            Some(crate::session_protocol::ServerNotification::TurnCompleted(
                                 TurnCompletedNotification {
                                     thread_id: thread_id.to_string(),
                                     turn: Self::turn_snapshot(
@@ -458,28 +486,32 @@ mod owner_native {
                                         completed.duration_ms,
                                     ),
                                 },
-                            ),
-                        ),
-                        vac_protocol::protocol::EventMsg::TurnAborted(aborted) => aborted.turn_id.map(|turn_id| {
-                            crate::session_protocol::ServerNotification::TurnCompleted(
-                                TurnCompletedNotification {
-                                    thread_id: thread_id.to_string(),
-                                    turn: Self::turn_snapshot(
-                                        turn_id,
-                                        TurnStatus::Interrupted,
-                                        None,
-                                        aborted.completed_at,
-                                        aborted.duration_ms,
-                                    ),
+                            ))
+                        }
+                        vac_protocol::protocol::EventMsg::TurnAborted(aborted) => {
+                            aborted.turn_id.map(|turn_id| {
+                                crate::session_protocol::ServerNotification::TurnCompleted(
+                                    TurnCompletedNotification {
+                                        thread_id: thread_id.to_string(),
+                                        turn: Self::turn_snapshot(
+                                            turn_id,
+                                            TurnStatus::Interrupted,
+                                            None,
+                                            aborted.completed_at,
+                                            aborted.duration_ms,
+                                        ),
+                                    },
+                                )
+                            })
+                        }
+                        vac_protocol::protocol::EventMsg::Warning(warning) => {
+                            Some(crate::session_protocol::ServerNotification::Warning(
+                                WarningNotification {
+                                    thread_id: Some(thread_id.to_string()),
+                                    message: warning.message,
                                 },
-                            )
-                        }),
-                        vac_protocol::protocol::EventMsg::Warning(warning) => Some(
-                            crate::session_protocol::ServerNotification::Warning(WarningNotification {
-                                thread_id: Some(thread_id.to_string()),
-                                message: warning.message,
-                            }),
-                        ),
+                            ))
+                        }
                         vac_protocol::protocol::EventMsg::Error(error) => Some(
                             crate::session_protocol::ServerNotification::Error(ErrorNotification {
                                 error: TurnError {
@@ -496,7 +528,10 @@ mod owner_native {
                             // Keep the first production bridge deliberately small and lossless for
                             // turn lifecycle. Rich item/approval events are handled by the existing
                             // typed local-runtime-owner DTO mapping once those paths are promoted.
-                            tracing::trace!(?other, "owner-native runtime event omitted by lifecycle bridge");
+                            tracing::trace!(
+                                ?other,
+                                "owner-native runtime event omitted by lifecycle bridge"
+                            );
                             None
                         }
                     };
@@ -556,7 +591,9 @@ mod owner_native {
             })
         }
 
-        fn runtime_git_info(info: vac_protocol::protocol::GitInfo) -> crate::session_protocol::GitInfo {
+        fn runtime_git_info(
+            info: vac_protocol::protocol::GitInfo,
+        ) -> crate::session_protocol::GitInfo {
             crate::session_protocol::GitInfo {
                 sha: info.commit_hash.map(|sha| sha.0),
                 branch: info.branch,
@@ -567,7 +604,9 @@ mod owner_native {
         fn store_list_params(params: ThreadListParams) -> StoreListThreadsParams {
             let cwd_filters = match params.cwd {
                 Some(ThreadListCwdFilter::One(path)) => Some(vec![PathBuf::from(path)]),
-                Some(ThreadListCwdFilter::Many(paths)) => Some(paths.into_iter().map(PathBuf::from).collect()),
+                Some(ThreadListCwdFilter::Many(paths)) => {
+                    Some(paths.into_iter().map(PathBuf::from).collect())
+                }
                 None => None,
             };
             StoreListThreadsParams {
@@ -587,7 +626,11 @@ mod owner_native {
             }
         }
 
-        async fn stored_thread(&self, thread_id: ThreadId, include_turns: bool) -> Result<StoredThread> {
+        async fn stored_thread(
+            &self,
+            thread_id: ThreadId,
+            include_turns: bool,
+        ) -> Result<StoredThread> {
             self.thread_store()
                 .read_thread(StoreReadThreadParams {
                     thread_id,
@@ -595,7 +638,11 @@ mod owner_native {
                     include_history: include_turns,
                 })
                 .await
-                .map_err(|err| color_eyre::eyre::eyre!("owner-native thread store read failed for {thread_id}: {err}"))
+                .map_err(|err| {
+                    color_eyre::eyre::eyre!(
+                        "owner-native thread store read failed for {thread_id}: {err}"
+                    )
+                })
         }
 
         async fn start_from_stored_history(
@@ -684,13 +731,54 @@ mod owner_native {
     }
 
     #[derive(Clone)]
+    pub(crate) struct TuiOwnerRuntimeResources {
+        config: Arc<Config>,
+        thread_manager: Arc<ThreadManager>,
+        environment_manager: Arc<EnvironmentManager>,
+    }
+
+    impl TuiOwnerRuntimeResources {
+        fn new(
+            config: Arc<Config>,
+            thread_manager: Arc<ThreadManager>,
+            environment_manager: Arc<EnvironmentManager>,
+        ) -> Self {
+            Self {
+                config,
+                thread_manager,
+                environment_manager,
+            }
+        }
+    }
+
+    #[derive(Clone)]
     pub(crate) struct TuiSessionRequestHandle {
         inner: AppServerRequestHandle,
+        owner_runtime: Option<TuiOwnerRuntimeResources>,
     }
 
     impl TuiSessionRequestHandle {
         pub(crate) fn new(inner: AppServerRequestHandle) -> Self {
-            Self { inner }
+            Self {
+                inner,
+                owner_runtime: None,
+            }
+        }
+
+        pub(crate) fn with_owner_runtime(
+            inner: AppServerRequestHandle,
+            config: Arc<Config>,
+            thread_manager: Arc<ThreadManager>,
+            environment_manager: Arc<EnvironmentManager>,
+        ) -> Self {
+            Self {
+                inner,
+                owner_runtime: Some(TuiOwnerRuntimeResources::new(
+                    config,
+                    thread_manager,
+                    environment_manager,
+                )),
+            }
         }
 
         pub(crate) fn is_in_process(&self) -> bool {
@@ -704,8 +792,50 @@ mod owner_native {
         where
             T: DeserializeOwned,
         {
-            Err(unsupported_typed(owner_request_method_name(&request)))
+            match request {
+                ClientRequest::SkillsList { params, .. } => {
+                    let response = self.skills_list(params).await?;
+                    typed_response("skills/list", response)
+                }
+                other => Err(unsupported_typed(owner_request_method_name(&other))),
+            }
         }
+
+        async fn skills_list(
+            &self,
+            params: SkillsListParams,
+        ) -> std::result::Result<SkillsListResponse, TypedRequestError> {
+            let Some(resources) = &self.owner_runtime else {
+                return Err(unsupported_typed("skills/list"));
+            };
+            execute_owner_skills_list(
+                Arc::clone(&resources.config),
+                Arc::clone(&resources.thread_manager),
+                Arc::clone(&resources.environment_manager),
+                params,
+            )
+            .await
+            .map_err(|err| typed_transport_error("skills/list", err))
+        }
+    }
+
+    fn typed_response<T, S>(
+        method: &'static str,
+        response: S,
+    ) -> std::result::Result<T, TypedRequestError>
+    where
+        T: DeserializeOwned,
+        S: Serialize,
+    {
+        let value =
+            serde_json::to_value(response).map_err(|source| TypedRequestError::Deserialize {
+                method: method.to_string(),
+                source,
+            })?;
+        serde_json::from_value(value).map_err(|source| TypedRequestError::Deserialize {
+            method: method.to_string(),
+            source,
+        })
     }
 
     fn unsupported_typed(method: impl Into<String>) -> TypedRequestError {
@@ -718,7 +848,10 @@ mod owner_native {
         }
     }
 
-    fn typed_transport_error(method: &'static str, err: impl std::fmt::Display) -> TypedRequestError {
+    fn typed_transport_error(
+        method: &'static str,
+        err: impl std::fmt::Display,
+    ) -> TypedRequestError {
         TypedRequestError::Transport {
             method: method.to_string(),
             source: io::Error::new(ErrorKind::Other, err.to_string()),
@@ -727,6 +860,71 @@ mod owner_native {
 
     fn owner_request_method_name(request: &ClientRequest) -> String {
         format!("{:?}", std::mem::discriminant(request))
+    }
+
+    async fn execute_owner_skills_list(
+        config: Arc<Config>,
+        thread_manager: Arc<ThreadManager>,
+        environment_manager: Arc<EnvironmentManager>,
+        params: SkillsListParams,
+    ) -> Result<SkillsListResponse> {
+        let per_cwd_extra_user_roots = params.per_cwd_extra_user_roots.map(|entries| {
+            entries
+                .into_iter()
+                .map(
+                    |entry| vac_local_runtime_owner::RuntimeSkillsListExtraRootsForCwd {
+                        cwd: entry.cwd,
+                        extra_user_roots: entry.extra_user_roots,
+                    },
+                )
+                .collect()
+        });
+        let response = vac_local_runtime_owner::RuntimeCommandBus::new()
+            .execute_read(vac_local_runtime_owner::RuntimeReadCommand::ListSkills(
+                Box::new(vac_local_runtime_owner::RuntimeSkillsListCommand {
+                    thread_manager,
+                    environment_manager,
+                    config,
+                    cwds: params.cwds,
+                    force_reload: params.force_reload,
+                    per_cwd_extra_user_roots,
+                }),
+            ))
+            .await?;
+        let vac_local_runtime_owner::RuntimeReadResponse::SkillsList(response) = response else {
+            unreachable!("RuntimeReadCommand::ListSkills must return SkillsList response")
+        };
+        let mut data = Vec::with_capacity(response.data.len());
+        for entry in response.data {
+            let skills: Vec<SkillMetadata> =
+                serde_json::from_value(serde_json::to_value(entry.skills).map_err(|err| {
+                    color_eyre::eyre::eyre!(
+                        "owner-native skills/list skill metadata encode failed: {err}"
+                    )
+                })?)
+                .map_err(|err| {
+                    color_eyre::eyre::eyre!(
+                        "owner-native skills/list skill metadata decode failed: {err}"
+                    )
+                })?;
+            let errors: Vec<SkillErrorInfo> =
+                serde_json::from_value(serde_json::to_value(entry.errors).map_err(|err| {
+                    color_eyre::eyre::eyre!(
+                        "owner-native skills/list error metadata encode failed: {err}"
+                    )
+                })?)
+                .map_err(|err| {
+                    color_eyre::eyre::eyre!(
+                        "owner-native skills/list error metadata decode failed: {err}"
+                    )
+                })?;
+            data.push(SkillsListEntry {
+                cwd: entry.cwd,
+                skills,
+                errors,
+            });
+        }
+        Ok(SkillsListResponse { data })
     }
 
     fn find_vac_root(start: &PathBuf) -> Option<PathBuf> {
@@ -779,21 +977,30 @@ mod owner_native {
         type StartedThread = AppServerStartedThread;
 
         fn request_handle(&self) -> Self::RequestHandle {
-            TuiSessionRequestHandle::new(self.client.request_handle())
+            TuiSessionRequestHandle::with_owner_runtime(
+                self.client.request_handle(),
+                self.config(),
+                self.thread_manager(),
+                self.environment_manager(),
+            )
         }
 
         async fn external_agent_config_detect(
             &mut self,
             _params: ExternalAgentConfigDetectParams,
         ) -> Result<ExternalAgentConfigDetectResponse> {
-            warn!("owner-native external-agent config detection currently returns an empty migration set");
+            warn!(
+                "owner-native external-agent config detection currently returns an empty migration set"
+            );
             Ok(ExternalAgentConfigDetectResponse { items: Vec::new() })
         }
         async fn external_agent_config_import(
             &mut self,
             _migration_items: Vec<ExternalAgentConfigMigrationItem>,
         ) -> Result<ExternalAgentConfigImportResponse> {
-            warn!("owner-native external-agent config import is a no-op until migration UI is promoted");
+            warn!(
+                "owner-native external-agent config import is a no-op until migration UI is promoted"
+            );
             Ok(ExternalAgentConfigImportResponse {})
         }
         async fn thread_list(&mut self, params: ThreadListParams) -> Result<ThreadListResponse> {
@@ -810,7 +1017,9 @@ mod owner_native {
                 data: page
                     .items
                     .into_iter()
-                    .map(|thread| Self::stored_thread_to_runtime_thread(thread, /*include_turns*/ false))
+                    .map(|thread| {
+                        Self::stored_thread_to_runtime_thread(thread, /*include_turns*/ false)
+                    })
                     .collect(),
                 next_cursor: page.next_cursor,
                 backwards_cursor,
@@ -876,7 +1085,9 @@ mod owner_native {
             config: Config,
             thread_id: ThreadId,
         ) -> Result<Self::StartedThread> {
-            let stored = self.stored_thread(thread_id, /*include_turns*/ true).await?;
+            let stored = self
+                .stored_thread(thread_id, /*include_turns*/ true)
+                .await?;
             let history = stored
                 .history
                 .as_ref()
@@ -899,7 +1110,9 @@ mod owner_native {
             config: Config,
             thread_id: ThreadId,
         ) -> Result<Self::StartedThread> {
-            let stored = self.stored_thread(thread_id, /*include_turns*/ true).await?;
+            let stored = self
+                .stored_thread(thread_id, /*include_turns*/ true)
+                .await?;
             let history = stored
                 .history
                 .as_ref()
@@ -1014,8 +1227,15 @@ mod owner_native {
                 review_thread_id: thread_id.to_string(),
             })
         }
-        async fn skills_list(&mut self, _params: SkillsListParams) -> Result<SkillsListResponse> {
-            Ok(SkillsListResponse { data: Vec::new() })
+        async fn skills_list(&mut self, params: SkillsListParams) -> Result<SkillsListResponse> {
+            execute_owner_skills_list(
+                self.config(),
+                self.thread_manager(),
+                self.environment_manager(),
+                params,
+            )
+            .await
+            .map_err(|err| color_eyre::eyre::eyre!("owner-native skills/list failed: {err}"))
         }
         async fn reload_user_config(&mut self) -> Result<()> {
             Ok(())
@@ -1047,7 +1267,9 @@ mod owner_native {
         ) -> Result<()> {
             let command = command.trim().to_string();
             if command.is_empty() {
-                return Err(color_eyre::eyre::eyre!("owner-native shell command is empty"));
+                return Err(color_eyre::eyre::eyre!(
+                    "owner-native shell command is empty"
+                ));
             }
             let thread = self.thread_manager().get_thread(thread_id).await?;
             thread.submit(Op::RunUserShellCommand { command }).await?;
@@ -1092,7 +1314,7 @@ mod owner_native {
             let submit_id = thread
                 .submit(Op::UserTurn {
                     items,
-                    cwd,
+                    cwd: cwd.clone(),
                     approval_policy,
                     approvals_reviewer: Some(approvals_reviewer),
                     sandbox_policy,
@@ -1102,7 +1324,7 @@ mod owner_native {
                     summary,
                     service_tier,
                     final_output_json_schema: output_schema,
-                    collaboration_mode,
+                    collaboration_mode: collaboration_mode.clone(),
                     personality,
                     environments: None,
                 })

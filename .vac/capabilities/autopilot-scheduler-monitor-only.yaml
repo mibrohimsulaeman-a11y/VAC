@@ -12,12 +12,12 @@ depends_on:
 surfaces:
   tui:
     routes:
-    - /runtime
-    - /runtime/jobs
-  slash:
-    commands:
-    - /runtime
-  palette: true
+    - /runtime/monitor-only
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -42,8 +42,6 @@ validation:
   - monitor_only_label
   - policy_gated_actions
   - no_destructive_execution_without_approval
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md
 ownership:
   crates:
   - vac-tui
@@ -56,6 +54,5 @@ ownership:
   - kind: path
     include:
     - .vac/capabilities/autopilot-scheduler-monitor-only.yaml
-    - docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md
     - scripts/check-autopilot-scheduler-monitor-only-contract.sh
     exclude: []

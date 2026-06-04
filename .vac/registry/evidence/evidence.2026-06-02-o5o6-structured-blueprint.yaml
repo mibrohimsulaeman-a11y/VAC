@@ -1,6 +1,8 @@
 schema_version: 1
 kind: evidence
 id: evidence.2026-06-02-o5o6-structured-blueprint
+chain:
+  self_hash: a4503c979e96589db5aebdd09a52918ed8294e8dbcc0b01a3f18c5700cb5a9cf
 timestamp: '2026-06-02T00:00:00Z'
 summary: Source/static evidence for executing all batches in the O5/O6 structured implementation blueprint.
 source_artifact_baseline: vac-o5o6-tui-init-no-interactive-final-source.zip

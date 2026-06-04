@@ -1,6 +1,8 @@
 schema_version: 1
 kind: evidence
 id: evidence.2026-06-01-o5o6-tui-performance-hotpath-closeout
+chain:
+  self_hash: c4da0d9f0f0f15e46714931b3cd7b780444f5c91e996ef2e880358f2a4866c17
 status: complete
 created_at: '2026-06-01T00:00:00Z'
 plan_id: plan.o5o6.tui-performance-hotpath-closeout

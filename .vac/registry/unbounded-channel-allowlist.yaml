@@ -1,5 +1,5 @@
 schema_version: 1
-kind: unbounded_channel_allowlist
+kind: registry_status
 id: tui-unbounded-channel.o5o6.zero-residual
 updated_at: 2026-06-02T00:00:00Z
 status: statically_governed

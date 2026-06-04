@@ -1,0 +1,9 @@
+---
+source: crates/surfaces/tui/src/history_cell/split_006_finalmessageseparator.rs.inc
+assertion_line: 573
+expression: rendered
+---
+ⓘ This chat was flagged for possible cybersecurity risk
+  If this seems wrong, try rephrasing your request. To get authorized for
+  security work, join the Trusted Access for Cyber program.
+  legacy-chatgpt-cyber-verify-disabled

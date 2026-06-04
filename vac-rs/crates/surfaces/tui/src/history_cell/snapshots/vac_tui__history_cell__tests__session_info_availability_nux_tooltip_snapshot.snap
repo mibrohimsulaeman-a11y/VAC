@@ -1,0 +1,36 @@
+---
+source: crates/surfaces/tui/src/history_cell/split_006_finalmessageseparator.rs.inc
+assertion_line: 514
+expression: rendered
+---
+● ● ●     vac · interactive   first launch 
+
+
+hydrating startup snapshot ─
+╭Vastar Agentic CLI──────────────────────────────────────────────────────────────────────╮╭Runtime─────────────────────────────────────────────────────────────────────────────────╮
+│●  version        0.0.0                        control-plane hardening active           ││●  runtime        host                         in-process owner-native                  │
+│●  provider       Vastar                       runtime selected                         ││●  isolation      policy                       execution gates active                   │
+│●  model          gpt-5                        runtime selected                         ││●  autopilot      runtime                      scheduler state loaded if present        │
+│●  fallback       configured                   loaded from provider stack               ││●  mcp            runtime                      configured connectors only               │
+│●  profile        runtime                      tool policy loaded                       ││●  sessions       runtime                      history loaded if present                │
+│●  rulebook       vil.core                     control-plane contract active            ││●  vil detect     workspace                    inventory resolved by registry           │
+│                                                                                        ││                                                                                        │
+│                                                                                        ││                                                                                        │
+│                                                                                        ││                                                                                        │
+│                                                                                        ││                                                                                        │
+│                                                                                        ││                                                                                        │
+│                                                                                        ││                                                                                        │
+│                                                                                        ││                                                                                        │
+│                                                                                        ││                                                                                        │
+│                                                                                        ││                                                                                        │
+│                                                                                        ││                                                                                        │
+│                                                                                        ││                                                                                        │
+╰────────────────────────────────────────────────────────────────────────────────────────╯╰────────────────────────────────────────────────────────────────────────────────────────╯
+ready
+ VIL-native    type / for commands, /help to explore, or start typing a task.
+recent   no recent task loaded
+
+
+ INPUT  │ model claude-sonnet-4.5 │ 0 tok │ manual │ valid 100% │ profile runtime · rulebook runtime
+
+  Tip: Model just became available

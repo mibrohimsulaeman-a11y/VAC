@@ -97,7 +97,7 @@ pub fn arg0_dispatch() -> Option<Arg0PathEntryGuard> {
         vac_linux_sandbox::run_main();
     }
     #[cfg(feature = "arg0-helpers")]
-    if _exe_name == APPLY_PATCH_ARG0 || exe_name == MISSPELLED_APPLY_PATCH_ARG0 {
+    if _exe_name == APPLY_PATCH_ARG0 || _exe_name == MISSPELLED_APPLY_PATCH_ARG0 {
         vac_apply_patch::main();
     }
 

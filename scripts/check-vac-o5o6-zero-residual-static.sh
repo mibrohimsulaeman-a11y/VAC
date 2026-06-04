@@ -16,7 +16,6 @@ require_file .vac/registry/provider-prune-ledger.yaml
 require_file .vac/registry/core-decomposition-ledger.yaml
 require_file .vac/registry/spec-conformance-ledger.yaml
 require_file .vac/registry/perf/tui-benchmark-results.yaml
-require_file docs/monolith-quality/O5O6_ZERO_RESIDUAL_CLOSEOUT.md
 require_file .vac/registry/provider-identity.yaml
 require_file .vac/registry/giant-file-split-ledger.yaml
 
@@ -45,7 +44,6 @@ for domain in identity ownership docs tools-domain sessions build release chat; 
 done
 require_grep 'name = "vac-capability-identity"' vac-rs/crates/capabilities/identity/Cargo.toml
 require_grep 'name = "vac-capability-ownership"' vac-rs/crates/capabilities/ownership/Cargo.toml
-require_grep 'name = "vac-capability-docs"' vac-rs/crates/capabilities/docs/Cargo.toml
 require_grep 'name = "vac-capability-tools"' vac-rs/crates/capabilities/tools-domain/Cargo.toml
 require_grep 'name = "vac-capability-sessions"' vac-rs/crates/capabilities/sessions/Cargo.toml
 require_grep 'name = "vac-capability-build"' vac-rs/crates/capabilities/build/Cargo.toml

@@ -2,7 +2,7 @@
 
 Declarative capability manifests for the VAC control plane. A capability names a feature domain that the product exposes through one or more surfaces and gates with a policy.
 
-- **Schema source**: [`vac-rs/control-plane/src/control_plane/capability_manifest.rs`](../../vac-rs/control-plane/src/control_plane/capability_manifest.rs)
+- **Schema source**: [`vac-rs/crates/control-plane/control-plane/src/control_plane/capability_manifest.rs`](../../vac-rs/crates/control-plane/control-plane/src/control_plane/capability_manifest.rs)
 - **Schema doc**: [`docs/workflow-control-plane/schema/capability-manifest.schema.md`](../../docs/workflow-control-plane/schema/capability-manifest.schema.md) (index: [`docs/workflow-control-plane/schema/INDEX.md`](../../docs/workflow-control-plane/schema/INDEX.md))
 - **Doctor gate**: `vac doctor registry .`
 

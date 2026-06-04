@@ -43,10 +43,12 @@ validation:
   - pty_proof_documented
   - sandbox_skip_is_explicit
   - no_false_live_screenshot_claim
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md
 surfaces:
   tui:
     routes:
-    - /capabilities
-  palette: false
+    - /visual-gate
+states:
+- empty
+- loading
+- success
+- failure

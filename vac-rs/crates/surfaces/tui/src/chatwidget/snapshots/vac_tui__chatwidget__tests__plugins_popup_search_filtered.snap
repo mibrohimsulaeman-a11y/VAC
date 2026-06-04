@@ -1,6 +1,6 @@
 ---
-source: tui/src/chatwidget/tests/popups_and_settings.rs
-assertion_line: 767
+source: crates/surfaces/tui/src/chatwidget/tests/popups_and_settings.rs.inc
+assertion_line: 1076
 expression: popup
 ---
   Plugins
@@ -11,5 +11,7 @@ expression: popup
 
   sla
 › [-] Slack      Available   Press Enter to install or view plugin details.
+
+
 
   space enable/disable · ←/→ select marketplace · enter view details · esc close

@@ -26,28 +26,26 @@ require_grep() {
   fi
 }
 
-require_file vac-rs/control-plane/src/control_plane/vac_init_runtime_enforcement.rs
-require_file vac-rs/control-plane/src/control_plane/vac_init_semantic_plan.rs
-require_file vac-rs/control-plane/src/control_plane/vac_init_patch_guard.rs
-require_file vac-rs/control-plane/src/control_plane/vac_init_command_gate.rs
-require_file vac-rs/control-plane/src/control_plane/vac_init_evidence_chain.rs
+require_file vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_runtime_enforcement.rs
+require_file vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_semantic_plan.rs
+require_file vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_patch_guard.rs
+require_file vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_command_gate.rs
+require_file vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_evidence_chain.rs
 require_file .vac/capabilities/vac-init-runtime-gate-enforcement.yaml
 require_file .vac/workflows/maintenance.vac-init-runtime-gate-enforcement.yaml
-require_file docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_C_RUNTIME_GATES.md
-require_file docs/validation/PRODUCTION_HARDENING_C1_C4_VALIDATION.md
 
-require_grep 'pub enum RuntimeGateKind' vac-rs/control-plane/src/control_plane/vac_init_runtime_enforcement.rs
-require_grep 'PrePlanGateContext' vac-rs/control-plane/src/control_plane/vac_init_runtime_enforcement.rs
-require_grep 'PrePatchGateContext' vac-rs/control-plane/src/control_plane/vac_init_runtime_enforcement.rs
-require_grep 'PreCommandGateContext' vac-rs/control-plane/src/control_plane/vac_init_runtime_enforcement.rs
-require_grep 'EvidenceCompletionGateContext' vac-rs/control-plane/src/control_plane/vac_init_runtime_enforcement.rs
-require_grep 'RuntimeEnforcementCoverage' vac-rs/control-plane/src/control_plane/vac_init_runtime_enforcement.rs
-require_grep 'evaluate_pre_plan_gate' vac-rs/control-plane/src/control_plane/mod.rs
-require_grep 'evaluate_pre_patch_gate' vac-rs/control-plane/src/control_plane/mod.rs
-require_grep 'evaluate_pre_command_gate' vac-rs/control-plane/src/control_plane/mod.rs
-require_grep 'evaluate_evidence_completion_gate' vac-rs/control-plane/src/control_plane/mod.rs
+require_grep 'pub enum RuntimeGateKind' vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_runtime_enforcement.rs
+require_grep 'PrePlanGateContext' vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_runtime_enforcement.rs
+require_grep 'PrePatchGateContext' vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_runtime_enforcement.rs
+require_grep 'PreCommandGateContext' vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_runtime_enforcement.rs
+require_grep 'EvidenceCompletionGateContext' vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_runtime_enforcement.rs
+require_grep 'RuntimeEnforcementCoverage' vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_runtime_enforcement.rs
+require_grep 'evaluate_pre_plan_gate' vac-rs/crates/control-plane/control-plane/src/control_plane/mod.rs
+require_grep 'evaluate_pre_patch_gate' vac-rs/crates/control-plane/control-plane/src/control_plane/mod.rs
+require_grep 'evaluate_pre_command_gate' vac-rs/crates/control-plane/control-plane/src/control_plane/mod.rs
+require_grep 'evaluate_evidence_completion_gate' vac-rs/crates/control-plane/control-plane/src/control_plane/mod.rs
 
-"$RUSTC_BIN" --edition 2024 --test vac-rs/control-plane/src/control_plane/vac_init_runtime_enforcement.rs -o "$TMPROOT/vac_init_runtime_enforcement_test"
+"$RUSTC_BIN" --edition 2024 --test vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_runtime_enforcement.rs -o "$TMPROOT/vac_init_runtime_enforcement_test"
 "$TMPROOT/vac_init_runtime_enforcement_test" --nocapture
 
 PY_STDERR="$TMPROOT/python-stderr.log"
@@ -65,7 +63,7 @@ surface = yaml.safe_load(surface_path.read_text())
 
 assert capability['kind'] == 'capability'
 assert capability['status'] == 'ready'
-for field in ('owner', 'ownership', 'policy', 'surfaces', 'validation', 'docs'):
+for field in ('owner', 'ownership', 'policy', 'surfaces', 'validation'):
     assert capability.get(field), f'capability missing {field}'
 
 commands = capability['validation']['commands'] + workflow['validation']['commands']

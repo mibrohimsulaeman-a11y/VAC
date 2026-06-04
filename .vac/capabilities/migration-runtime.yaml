@@ -17,12 +17,10 @@ ownership:
     module: control_plane::vac_init_migration_runtime
   - kind: path
     include:
-    - vac-rs/control-plane/src/control_plane/vac_init_migration_runtime.rs
+    - vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_migration_runtime.rs
     - scripts/check-vac-init-migration-runtime-contract.sh
     - .vac/capabilities/migration-runtime.yaml
     - .vac/workflows/maintenance.migration-runtime.yaml
-    - docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_H_MIGRATION_RUNTIME.md
-    - docs/validation/PRODUCTION_HARDENING_H1_H2_VALIDATION.md
     exclude: []
 description: Production hardening contract for VAC-Init Migration Runtime and Compatibility Cleanup.
 depends_on:
@@ -32,12 +30,7 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-vac-init-migration-runtime-contract.sh
-    - vac doctor release .
-  palette: true
-  tui:
-    routes:
-    - /capabilities
-    - /runtime
+    - vac registry migrate
 policy:
   risk: safe_read
   mutates_files: false
@@ -65,7 +58,3 @@ validation:
     - scripts/check-vac-registry-migration-runtime.sh
     risk: execute_process
     approval: policy
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_H_MIGRATION_RUNTIME.md
-- docs/validation/PRODUCTION_HARDENING_H1_H2_VALIDATION.md
-- docs/validation/P5_P9_VALIDATION.md

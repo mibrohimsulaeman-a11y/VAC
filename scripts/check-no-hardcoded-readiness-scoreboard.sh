@@ -13,7 +13,7 @@ reject_pattern() {
   local label="$2"
   local out="$TMPROOT/scoreboard-grep.txt"
   if grep -RIn --exclude-dir=target --exclude-dir=.git --exclude-dir=node_modules \
-      --include='*.rs' "$pattern" vac-rs/control-plane/src/control_plane vac-rs/cli/src >"$out"; then
+      --include='*.rs' "$pattern" vac-rs/crates/control-plane/control-plane/src/control_plane vac-rs/crates/surfaces/cli/src >"$out"; then
     echo "FAIL: hardcoded readiness pattern remains: $label" >&2
     cat "$out" >&2
     fail=1
@@ -30,7 +30,7 @@ reject_pattern 'DoctorCheckReport::new(DoctorKind::Ownership, DoctorStatus::Pass
 reject_pattern 'DoctorCheckReport::new(DoctorKind::Workflow, DoctorStatus::Pass, Vec::new())' 'hardcoded workflow pass'
 
 if grep -RIn --exclude-dir=target --exclude-dir=.git --include='doctor_cli.rs' \
-    'hard_quarantine_count: 0\|unowned_file_count: 0' vac-rs/cli/src >"$TMPROOT/release-context.txt"; then
+    'hard_quarantine_count: 0\|unowned_file_count: 0' vac-rs/crates/surfaces/cli/src >"$TMPROOT/release-context.txt"; then
   echo "FAIL: release context still hardcodes ownership counts" >&2
   cat "$TMPROOT/release-context.txt" >&2
   fail=1

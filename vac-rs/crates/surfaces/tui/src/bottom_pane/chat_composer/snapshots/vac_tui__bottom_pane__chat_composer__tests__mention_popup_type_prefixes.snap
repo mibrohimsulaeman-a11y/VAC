@@ -1,0 +1,14 @@
+---
+source: crates/surfaces/tui/src/bottom_pane/chat_composer/footer_flash_parts/../split_002_footerflash_tests.rs.inc
+assertion_line: 202
+expression: terminal.backend()
+---
+"                                                                        "
+"› $goog                                                                 "
+"                                                                        "
+"                                                                        "
+"  Google Calendar  [Plugin] Connect Google Calendar for scheduling, ava…"
+"  Google Calendar  [Skill] Find availability and plan event changes     "
+"  Google Calendar  [App] Look up events and availability                "
+"                                                                        "
+"  Press enter to insert or esc to close                                 "

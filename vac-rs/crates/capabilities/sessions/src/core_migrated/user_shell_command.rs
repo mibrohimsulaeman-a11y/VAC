@@ -16,7 +16,7 @@ fn user_shell_command_fragment(
 }
 
 #[cfg(test)]
-pub fn format_user_shell_command_record(
+fn format_user_shell_command_record(
     command: &str,
     exec_output: &ExecToolCallOutput,
     turn_context: &TurnContext,
@@ -24,7 +24,7 @@ pub fn format_user_shell_command_record(
     user_shell_command_fragment(command, exec_output, turn_context).render()
 }
 
-pub fn user_shell_command_record_item(
+pub(crate) fn user_shell_command_record_item(
     command: &str,
     exec_output: &ExecToolCallOutput,
     turn_context: &TurnContext,

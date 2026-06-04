@@ -10,7 +10,8 @@ use vac_utils_cargo_bin::repo_root;
 #[test]
 fn test_apply_patch_scenarios() -> anyhow::Result<()> {
     let scenarios_dir = repo_root()?
-        .join("vac-rs")
+        .join("runtime")
+        .join("shell")
         .join("apply-patch")
         .join("tests")
         .join("fixtures")

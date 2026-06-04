@@ -17,12 +17,10 @@ ownership:
     module: control_plane::vac_init_runtime_enforcement
   - kind: path
     include:
-    - vac-rs/control-plane/src/control_plane/vac_init_runtime_enforcement.rs
+    - vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_runtime_enforcement.rs
     - scripts/check-vac-init-runtime-gate-enforcement-contract.sh
     - .vac/capabilities/vac-init-runtime-gate-enforcement.yaml
     - .vac/workflows/maintenance.vac-init-runtime-gate-enforcement.yaml
-    - docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_C_RUNTIME_GATES.md
-    - docs/validation/PRODUCTION_HARDENING_C1_C4_VALIDATION.md
     exclude: []
 description: Code-backed runtime enforcement contract for pre-plan, pre-patch, pre-command, and evidence completion gates.
 depends_on:
@@ -37,12 +35,6 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-vac-init-runtime-gate-enforcement-contract.sh
-    - vac doctor release .
-  palette: true
-  tui:
-    routes:
-    - /capabilities
-    - /runtime
 policy:
   risk: safe_read
   mutates_files: false
@@ -67,6 +59,3 @@ validation:
     - scripts/check-vac-init-runtime-gate-enforcement-contract.sh
     risk: execute_process
     approval: policy
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_C_RUNTIME_GATES.md
-- docs/validation/PRODUCTION_HARDENING_C1_C4_VALIDATION.md

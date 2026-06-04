@@ -71,9 +71,6 @@ pub fn default_bg() -> Option<(u8, u8, u8)> {
 #[cfg(all(unix, not(test)))]
 mod imp {
     use super::DefaultColors;
-    use crossterm::style::Color as CrosstermColor;
-    use crossterm::style::query_background_color;
-    use crossterm::style::query_foreground_color;
     use std::sync::Mutex;
     use std::sync::OnceLock;
 
@@ -113,26 +110,7 @@ mod imp {
     }
 
     pub(super) fn requery_default_colors() {
-        if let Ok(mut cache) = default_colors_cache().lock() {
-            // Don't try to refresh if the cache is already attempted and failed.
-            if cache.attempted && cache.value.is_none() {
-                return;
-            }
-
-            // Focus events arrive after crossterm's event stream is active. Requery through
-            // crossterm here so unrelated input stays in crossterm's skipped-event queue instead
-            // of being consumed by the bounded startup probe's direct tty reads.
-            let fg = query_foreground_color()
-                .ok()
-                .flatten()
-                .and_then(color_to_tuple);
-            let bg = query_background_color()
-                .ok()
-                .flatten()
-                .and_then(color_to_tuple);
-            cache.value = fg.zip(bg).map(|(fg, bg)| DefaultColors { fg, bg });
-            cache.attempted = true;
-        }
+        // Standard crossterm does not support querying colors at runtime.
     }
 
     /// Queries terminal default colors through the bounded startup probe path.
@@ -148,13 +126,6 @@ mod imp {
                 fg: colors.fg,
                 bg: colors.bg,
             })
-    }
-
-    fn color_to_tuple(color: CrosstermColor) -> Option<(u8, u8, u8)> {
-        match color {
-            CrosstermColor::Rgb { r, g, b } => Some((r, g, b)),
-            _ => None,
-        }
     }
 }
 

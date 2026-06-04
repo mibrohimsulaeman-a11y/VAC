@@ -1,6 +1,8 @@
 schema_version: 1
 kind: evidence
 id: evidence.2026-06-02-o5o6-actual-code-closure
+chain:
+  self_hash: 06b5916a1af7b4cf6e28cd6b6b4ae8d6de53933f5dca97e7e95e6e5be6331558
 summary: actual-code closure implementation for latest O5/O6 continuation blueprint
 status: SV-Done-static
 validation:

@@ -2,7 +2,7 @@
 
 Declarative surface manifests mapping capabilities to operator interaction points. Surfaces guarantee that every capability is reachable from at least one visible TUI route, slash command, palette action, CLI command, or status line.
 
-- **Schema source**: [`vac-rs/control-plane/src/control_plane/surface_manifest.rs`](../../vac-rs/control-plane/src/control_plane/surface_manifest.rs)
+- **Schema source**: [`vac-rs/crates/control-plane/control-plane/src/control_plane/surface_manifest.rs`](../../vac-rs/crates/control-plane/control-plane/src/control_plane/surface_manifest.rs)
 - **Schema doc**: [`docs/workflow-control-plane/schema/surface-manifest.schema.md`](../../docs/workflow-control-plane/schema/surface-manifest.schema.md) (index: [`docs/workflow-control-plane/schema/INDEX.md`](../../docs/workflow-control-plane/schema/INDEX.md))
 - **Doctor gate**: `vac doctor surfaces .`
 

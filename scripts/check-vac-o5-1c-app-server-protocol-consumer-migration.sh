@@ -34,7 +34,7 @@ else
   echo "FAIL gate4: runtime-protocol schema bins missing"; fail=1
 fi
 
-if grep -q 'vac-app-server' vac-rs/Cargo.toml vac-rs/tui/Cargo.toml 2>/dev/null; then
+if grep -q 'vac-app-server' vac-rs/Cargo.toml vac-rs/crates/surfaces/tui/Cargo.toml 2>/dev/null; then
   echo "FAIL gate5: workspace/TUI manifests still mention vac-app-server"; fail=1
 else
   echo "PASS gate5: workspace/TUI manifests have no vac-app-server dependency"

@@ -1,18 +1,20 @@
 ---
-source: tui/src/status/tests.rs
+source: crates/surfaces/tui/src/status/tests.rs
+assertion_line: 1334
 expression: sanitized
 ---
 /status
 
-╭───────────────────────────────────────────────────────────────────────╮
-│  >_ Vastar VAC (v0.0.0)                                               │
-│                                                                       │
-│                                                                       │
-│  Model:            gpt-5.1-vac (reasoning none, summaries auto)       │
-│  Directory: [[workspace]]                                             │
-│  Permissions:      Custom (workspace with network access, on-request) │
-│  Agents.md:        <none>                                             │
-│                                                                       │
-│  Token usage:      2K total  (1.4K input + 600 output)                │
-│  Context window:   100% left (2.2K used / 272K)                       │
-╰───────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────────────────────╮
+│  >_ Vastar VAC (v0.0.0)                                                      │
+│                                                                              │
+│  Model:             gpt-5.1-vac (reasoning none, summaries auto)             │
+│  Model provider:    Vastar (vastar, responses)                               │
+│  Model providers:   4 registered; active=*vastar; amazon-bedrock:Amazon Bedr │
+│  Directory: [[workspace]]                                                    │
+│  Permissions:       Custom (workspace with network access, on-request)       │
+│  Agents.md:         <none>                                                   │
+│                                                                              │
+│  Token usage:       2K total  (1.4K input + 600 output)                      │
+│  Context window:    100% left (2.2K used / 272K)                             │
+╰──────────────────────────────────────────────────────────────────────────────╯

@@ -9,8 +9,6 @@ require_grep() { grep -qE "$1" "$2" || fail "missing pattern in $2: $1"; }
 SRC="vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_migration_runtime.rs"
 require_file "$SRC"
 require_file scripts/check-vac-init-migration-runtime-contract.sh
-require_file docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_H_MIGRATION_RUNTIME.md
-require_file docs/validation/PRODUCTION_HARDENING_H1_H2_VALIDATION.md
 require_file .vac/capabilities/migration-runtime.yaml
 require_file .vac/workflows/maintenance.migration-runtime.yaml
 require_file .vac/registry/migrations/migration.v1-hardening-h.yaml

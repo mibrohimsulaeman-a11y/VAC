@@ -1,5 +1,3 @@
-#![allow(clippy::unwrap_used, clippy::expect_used)]
-
 use anyhow::Context;
 use anyhow::Result;
 use core_test_support::responses::ev_apply_patch_function_call;

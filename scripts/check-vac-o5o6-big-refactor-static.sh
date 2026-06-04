@@ -84,14 +84,15 @@ require_grep 'try_send' vac-rs/crates/surfaces/tui/src/tui/frame_requester.rs
 require_file .vac/registry/architecture-layer-map.yaml
 require_grep 'vac-control-plane' .vac/registry/architecture-layer-map.yaml
 require_grep 'vac-provider-http' .vac/registry/architecture-layer-map.yaml
-require_file docs/architecture/VAC_CONTROL_PLANE_REFACTOR_REPORT.md
-require_file docs/monolith-quality/O5O6_BIG_REFACTOR_STATIC_REPORT.md
-require_file docs/monolith-quality/O5O6_STANDARD_CARGO_HYGIENE_GATE.md
-require_file docs/monolith-quality/O5O6_TECHNICAL_DEBT_MARKER_TRACKING.md
+require_absent docs/architecture/VAC_CONTROL_PLANE_REFACTOR_REPORT.md
+require_absent docs/monolith-quality/O5O6_BIG_REFACTOR_STATIC_REPORT.md
+require_absent docs/monolith-quality/O5O6_STANDARD_CARGO_HYGIENE_GATE.md
+require_absent docs/monolith-quality/O5O6_TECHNICAL_DEBT_MARKER_TRACKING.md
 require_file .vac/registry/technical-debt-markers.yaml
 require_file .vac/registry/plans/plan.o5o6.big-refactor.yaml
 require_file .vac/registry/evidence/evidence.2026-06-01-o5o6-big-refactor.yaml
 require_file .vac/registry/trajectory/o5o6-big-refactor.yaml
+require_grep 'docs_pruned: true' .vac/registry/docs-state.yaml
 require_grep 'big_refactor_2026_06_01:' .vac/registry/o5-o6-completion-state.yaml
 require_grep 'big_refactor_2026_06_01:' .vac/registry/o5-o6-monolith-quality-state.yaml
 require_grep 'TV-Pending' .vac/registry/evidence/evidence.2026-06-01-o5o6-big-refactor.yaml

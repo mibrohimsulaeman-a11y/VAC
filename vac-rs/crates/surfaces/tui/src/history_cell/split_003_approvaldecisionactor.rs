@@ -252,6 +252,7 @@ pub(crate) fn new_session_info(
     auth_plan: Option<PlanType>,
     show_fast_status: bool,
 ) -> SessionInfoCell {
+    let status_bar = operator_status_bar_for_config(config, session.model.clone());
     // Header box rendered as history (so it appears at the very top)
     let header = SessionHeaderHistoryCell::new(
         session.model.clone(),
@@ -262,6 +263,7 @@ pub(crate) fn new_session_info(
     )
     .with_provider(session_provider_label(config, session))
     .with_session(short_session_label(session.thread_id))
+    .with_operator_context(status_bar.profile.clone(), status_bar.rulebook.clone())
     .with_yolo_mode(has_yolo_permissions(
         session.approval_policy,
         &session.permission_profile,
@@ -269,7 +271,8 @@ pub(crate) fn new_session_info(
     let mut parts: Vec<Box<dyn HistoryCell>> = vec![Box::new(header)];
 
     if is_first_event {
-        let idle_state = crate::operator_ui::IdleViewState::live(session.model.clone());
+        let idle_state =
+            crate::operator_ui::IdleViewState::live(session.model.clone()).with_status_bar(status_bar);
         let help_lines = crate::operator_ui::render_idle_visual_lines(&idle_state, 112);
         parts.push(Box::new(PlainHistoryCell { lines: help_lines }));
     } else {
@@ -291,6 +294,33 @@ pub(crate) fn new_session_info(
     }
 
     SessionInfoCell(CompositeHistoryCell { parts })
+}
+
+pub(crate) fn operator_profile_label(config: &Config) -> String {
+    if let Some(profile) = config
+        .active_profile
+        .as_deref()
+        .map(str::trim)
+        .filter(|profile| !profile.is_empty())
+    {
+        return format!("profile {profile}");
+    }
+    if let Some(active_permission_profile) = config.permissions.active_permission_profile() {
+        return format!("profile {}", active_permission_profile.id);
+    }
+    "profile runtime".to_string()
+}
+
+pub(crate) fn operator_rulebook_label(config: &Config) -> String {
+    format!("rulebook {}", config.permissions.approval_policy.value())
+}
+
+pub(crate) fn operator_status_bar_for_config(
+    config: &Config,
+    model: impl Into<String>,
+) -> crate::operator_ui::OperatorStatusBarState {
+    crate::operator_ui::OperatorStatusBarState::input(model)
+        .with_profile_rulebook(operator_profile_label(config), operator_rulebook_label(config))
 }
 
 fn session_provider_label(config: &Config, session: &ThreadSessionState) -> String {
@@ -366,6 +396,8 @@ pub(crate) struct SessionHeaderHistoryCell {
     yolo_mode: bool,
     provider: Option<String>,
     session_label: Option<String>,
+    profile_label: Option<String>,
+    rulebook_label: Option<String>,
 }
 
 impl SessionHeaderHistoryCell {
@@ -404,6 +436,8 @@ impl SessionHeaderHistoryCell {
             yolo_mode: false,
             provider: None,
             session_label: None,
+            profile_label: None,
+            rulebook_label: None,
         }
     }
 
@@ -419,6 +453,16 @@ impl SessionHeaderHistoryCell {
 
     pub(crate) fn with_session(mut self, session_label: String) -> Self {
         self.session_label = Some(session_label);
+        self
+    }
+
+    pub(crate) fn with_operator_context(
+        mut self,
+        profile_label: String,
+        rulebook_label: String,
+    ) -> Self {
+        self.profile_label = Some(profile_label);
+        self.rulebook_label = Some(rulebook_label);
         self
     }
 
@@ -480,6 +524,24 @@ impl HistoryCell for SessionHeaderHistoryCell {
             cwd,
             session,
         );
+        if let Some(profile_label) = self.profile_label.clone() {
+            apply_startup_snapshot_row_value(
+                &mut snapshot,
+                "profile",
+                strip_status_label_prefix(&profile_label, "profile"),
+                "resolved from active config",
+            );
+            snapshot.status_bar.profile = profile_label;
+        }
+        if let Some(rulebook_label) = self.rulebook_label.clone() {
+            apply_startup_snapshot_row_value(
+                &mut snapshot,
+                "rulebook",
+                strip_status_label_prefix(&rulebook_label, "rulebook"),
+                "resolved from policy config",
+            );
+            snapshot.status_bar.rulebook = rulebook_label;
+        }
         if self.yolo_mode {
             snapshot
                 .rows_left
@@ -515,3 +577,23 @@ impl HistoryCell for SessionHeaderHistoryCell {
     }
 }
 
+fn apply_startup_snapshot_row_value(
+    snapshot: &mut crate::operator_ui::StartupSnapshot,
+    key: &str,
+    value: String,
+    detail: &str,
+) {
+    if let Some(row) = snapshot.rows_left.iter_mut().find(|row| row.key == key) {
+        row.value = value;
+        row.detail = detail.to_string();
+    }
+}
+
+fn strip_status_label_prefix(value: &str, prefix: &str) -> String {
+    value
+        .strip_prefix(prefix)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .unwrap_or(value)
+        .to_string()
+}

@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fmt;
 use std::path::Path;
 use std::path::PathBuf;
@@ -19,6 +20,7 @@ use super::root_feature_conversion::ConversionState;
 use super::root_feature_conversion::build_root_feature_conversion_report;
 use super::surface_manifest::SurfaceRouteKind;
 use super::workflow_manifest::WorkflowStatus;
+use super::workflow_manifest::workflow_step_use_resolves;
 use super::workflow_runner::preview_workflow_manifest;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -507,6 +509,7 @@ fn root_seed_coverage_diagnostics(registry: &ControlPlaneRegistry) -> Vec<Regist
         diagnostics.extend(validate_ready_workflow_runner_support(
             &entry.path,
             &entry.manifest,
+            registry,
         ));
     }
 
@@ -581,7 +584,7 @@ fn surface_capability_drift_diagnostics(
                     if first_owner != route_owner {
                         diagnostics.push(
                             RegistryDiagnostic::new(
-                                RegistryDiagnosticSeverity::Error,
+                                RegistryDiagnosticSeverity::Warning,
                                 &surface.path,
                                 Some(format!("routes[{route_index}].owner")),
                                 format!(
@@ -610,7 +613,7 @@ fn surface_capability_drift_diagnostics(
             {
                 diagnostics.push(
                     RegistryDiagnostic::new(
-                        RegistryDiagnosticSeverity::Error,
+                        RegistryDiagnosticSeverity::Warning,
                         &surface.path,
                         Some(format!("routes[{route_index}].capability")),
                         format!(
@@ -649,7 +652,7 @@ fn surface_capability_drift_diagnostics(
             if !surface_registry_declares_route(registry, &capability.manifest.id, kind, &target) {
                 diagnostics.push(
                     RegistryDiagnostic::new(
-                        RegistryDiagnosticSeverity::Error,
+                        RegistryDiagnosticSeverity::Warning,
                         &capability.path,
                         Some("surfaces"),
                         format!(
@@ -674,7 +677,7 @@ fn surface_capability_drift_diagnostics(
             if !has_palette_route {
                 diagnostics.push(
                     RegistryDiagnostic::new(
-                        RegistryDiagnosticSeverity::Error,
+                        RegistryDiagnosticSeverity::Warning,
                         &capability.path,
                         Some("surfaces.palette"),
                         format!(
@@ -828,18 +831,19 @@ fn root_feature_conversion_diagnostics(registry: &ControlPlaneRegistry) -> Vec<R
     for entry in conversion_report.entries() {
         match entry.state {
             ConversionState::Overclaimed => {
+                let drift = root_feature_conversion_drift_summary(entry);
                 diagnostics.push(
                     RegistryDiagnostic::new(
                         RegistryDiagnosticSeverity::Blocked,
                         capability_manifest_path(registry, &entry.capability_id),
                         Some(format!("root_feature_conversion.{}.ownership", entry.feature)),
                         format!(
-                            "root feature `{}` overclaims missing source modules [{}]",
+                            "root feature `{}` has root conversion drift: {}",
                             entry.capability_id,
-                            entry.overclaimed_modules.join(", ")
+                            drift,
                         ),
                     )
-                    .with_hint("update capability ownership modules or add the missing source module before marking conversion complete"),
+                    .with_hint("update root capability ownership, surfaces, policy, validation, or root catalog expectations before marking conversion complete"),
                 );
             }
             ConversionState::Hidden => {
@@ -915,6 +919,50 @@ fn root_feature_conversion_diagnostics(registry: &ControlPlaneRegistry) -> Vec<R
     diagnostics
 }
 
+fn root_feature_conversion_drift_summary(
+    entry: &super::root_feature_conversion::RootFeatureConversionEntry,
+) -> String {
+    let mut parts = Vec::new();
+    push_drift_part(
+        &mut parts,
+        "missing_source_modules",
+        &entry.overclaimed_modules,
+    );
+    push_drift_part(&mut parts, "missing_crates", &entry.overclaimed_crates);
+    push_drift_part(
+        &mut parts,
+        "missing_source_roots",
+        &entry.missing_expected_source_roots,
+    );
+    push_drift_part(
+        &mut parts,
+        "missing_surfaces",
+        &entry.missing_expected_surfaces,
+    );
+    push_drift_part(&mut parts, "missing_policy", &entry.missing_expected_policy);
+    push_drift_part(
+        &mut parts,
+        "missing_validation",
+        &entry.missing_expected_validation,
+    );
+    push_drift_part(
+        &mut parts,
+        "missing_ownership",
+        &entry.missing_expected_ownership,
+    );
+    if parts.is_empty() {
+        "no detailed drift recorded".to_string()
+    } else {
+        parts.join("; ")
+    }
+}
+
+fn push_drift_part(parts: &mut Vec<String>, label: &str, values: &[String]) {
+    if !values.is_empty() {
+        parts.push(format!("{label}=[{}]", values.join(", ")));
+    }
+}
+
 fn source_domain_field_path(source_domain: &str) -> String {
     format!(
         "root_feature_conversion.source.{}",
@@ -932,6 +980,7 @@ fn source_domain_fallback_path(registry: &ControlPlaneRegistry, source_domain: &
 fn validate_ready_workflow_runner_support(
     path: &Path,
     manifest: &super::workflow_manifest::WorkflowManifest,
+    registry: &ControlPlaneRegistry,
 ) -> Vec<RegistryDiagnostic> {
     if !matches!(manifest.status, WorkflowStatus::Ready) {
         return Vec::new();
@@ -942,12 +991,22 @@ fn validate_ready_workflow_runner_support(
         return Vec::new();
     }
 
+    let known_capabilities = registry
+        .capabilities
+        .manifests
+        .iter()
+        .map(|entry| entry.manifest.id.clone())
+        .collect::<HashSet<_>>();
     let blocked_steps = preview
         .blocked_steps
         .iter()
+        .filter(|step| !workflow_step_use_resolves(&step.uses, &known_capabilities))
         .map(|step| format!("{}={}", step.id, step.uses))
-        .collect::<Vec<_>>()
-        .join(", ");
+        .collect::<Vec<_>>();
+    if blocked_steps.is_empty() {
+        return Vec::new();
+    }
+    let blocked_steps = blocked_steps.join(", ");
 
     vec![
         RegistryDiagnostic::new(

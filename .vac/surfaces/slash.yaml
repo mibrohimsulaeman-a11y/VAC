@@ -3,354 +3,355 @@ kind: surface
 id: surface.slash
 title: Slash commands
 capabilities:
-- vac.autopilot.scheduler
 - vac.approvals
+- vac.autopilot.scheduler
 - vac.chat
 - vac.identity
 - vac.sessions
 - vac.tools
+- vac.tui.status-output
 - vac.workflow
 routes:
 - kind: slash
   command: /approvals
   capability: vac.approvals
-  owner: vac-tui/bottom_pane.approval_overlay
+  owner: vac-control-plane/control_plane.approval_lifecycle
   visible: true
   status: ready
 - kind: slash
   command: /permissions
   capability: vac.approvals
-  owner: vac-tui/bottom_pane.approval_overlay
+  owner: vac-control-plane/control_plane.approval_lifecycle
   visible: true
   status: ready
 - kind: slash
   command: /review
   capability: vac.approvals
-  owner: vac-tui/bottom_pane.approval_overlay
+  owner: vac-control-plane/control_plane.approval_lifecycle
   visible: true
   status: ready
 - kind: slash
   command: /sandbox-add-read-dir
   capability: vac.approvals
-  owner: vac-tui/bottom_pane.approval_overlay
+  owner: vac-control-plane/control_plane.approval_lifecycle
   visible: true
   status: ready
 - kind: slash
   command: /setup-default-sandbox
   capability: vac.approvals
-  owner: vac-tui/bottom_pane.approval_overlay
+  owner: vac-control-plane/control_plane.approval_lifecycle
   visible: true
   status: ready
 - kind: slash
   command: /test-approval
   capability: vac.approvals
-  owner: vac-tui/bottom_pane.approval_overlay
+  owner: vac-control-plane/control_plane.approval_lifecycle
   visible: true
   status: ready
 - kind: slash
   command: /activity
   capability: vac.chat
-  owner: vac-tui/chatwidget
+  owner: vac-capability-chat/contract
   visible: true
   status: ready
 - kind: slash
   command: /agent
   capability: vac.chat
-  owner: vac-tui/chatwidget
+  owner: vac-capability-chat/contract
   visible: true
   status: ready
 - kind: slash
   command: /collab
   capability: vac.chat
-  owner: vac-tui/chatwidget
+  owner: vac-capability-chat/contract
   visible: true
   status: ready
 - kind: slash
   command: /copy
   capability: vac.chat
-  owner: vac-tui/chatwidget
+  owner: vac-capability-chat/contract
   visible: true
   status: ready
 - kind: slash
   command: /feedback
   capability: vac.chat
-  owner: vac-tui/chatwidget
+  owner: vac-capability-chat/contract
   visible: true
   status: ready
 - kind: slash
   command: /init
   capability: vac.chat
-  owner: vac-tui/chatwidget
+  owner: vac-capability-chat/contract
   visible: true
   status: ready
 - kind: slash
   command: /realtime
   capability: vac.chat
-  owner: vac-tui/chatwidget
+  owner: vac-capability-chat/contract
   visible: true
   status: ready
 - kind: slash
   command: /side
   capability: vac.chat
-  owner: vac-tui/chatwidget
+  owner: vac-capability-chat/contract
   visible: true
   status: ready
 - kind: slash
   command: /subagents
   capability: vac.chat
-  owner: vac-tui/chatwidget
+  owner: vac-capability-chat/contract
   visible: true
   status: ready
 - kind: slash
   command: /debug-m-drop
   capability: vac.identity
-  owner: vac-cli/auth_cli
+  owner: vac-capability-identity/contract
   visible: true
   status: ready
 - kind: slash
   command: /debug-m-update
   capability: vac.identity
-  owner: vac-cli/auth_cli
+  owner: vac-capability-identity/contract
   visible: true
   status: ready
 - kind: slash
   command: /logout
   capability: vac.identity
-  owner: vac-cli/auth_cli
+  owner: vac-capability-identity/contract
   visible: true
   status: ready
 - kind: slash
   command: /memories
   capability: vac.identity
-  owner: vac-cli/auth_cli
+  owner: vac-capability-identity/contract
   visible: true
   status: ready
 - kind: slash
   command: /model
   capability: vac.identity
-  owner: vac-cli/auth_cli
+  owner: vac-capability-identity/contract
   visible: true
   status: ready
 - kind: slash
   command: /personality
   capability: vac.identity
-  owner: vac-cli/auth_cli
+  owner: vac-capability-identity/contract
   visible: true
   status: ready
 - kind: slash
   command: /branch
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: slash
   command: /clear
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: slash
   command: /compact
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: slash
   command: /debug-config
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: slash
   command: /exit
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: slash
   command: /experimental
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: slash
   command: /fast
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: slash
   command: /keymap
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: slash
   command: /new
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: slash
   command: /quit
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: slash
   command: /rename
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: slash
   command: /resume
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: slash
   command: /settings
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: slash
   command: /status
-  capability: vac.sessions
-  owner: vac-core/session
+  capability: vac.tui.status-output
+  owner: vac-surface-tui/status
   visible: true
   status: ready
 - kind: slash
   command: /statusline
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: slash
   command: /theme
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: slash
   command: /title
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: slash
   command: /vim
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: slash
   command: /apps
   capability: vac.tools
-  owner: vac-core/tools
+  owner: vac-capability-tools/contract
   visible: true
   status: ready
 - kind: slash
   command: /clean
   capability: vac.tools
-  owner: vac-core/tools
+  owner: vac-capability-tools/contract
   visible: true
   status: ready
 - kind: slash
   command: /diff
   capability: vac.tools
-  owner: vac-core/tools
+  owner: vac-capability-tools/contract
   visible: true
   status: ready
 - kind: slash
   command: /ide
   capability: vac.tools
-  owner: vac-core/tools
+  owner: vac-capability-tools/contract
   visible: true
   status: ready
 - kind: slash
   command: /mcp
   capability: vac.tools
-  owner: vac-core/tools
+  owner: vac-capability-tools/contract
   visible: true
   status: ready
 - kind: slash
   command: /mention
   capability: vac.tools
-  owner: vac-core/tools
+  owner: vac-capability-tools/contract
   visible: true
   status: ready
 - kind: slash
   command: /plugins
   capability: vac.tools
-  owner: vac-core/tools
+  owner: vac-capability-tools/contract
   visible: true
   status: ready
 - kind: slash
   command: /ps
   capability: vac.tools
-  owner: vac-core/tools
+  owner: vac-capability-tools/contract
   visible: true
   status: ready
 - kind: slash
   command: /rollout
   capability: vac.tools
-  owner: vac-core/tools
+  owner: vac-capability-tools/contract
   visible: true
   status: ready
 - kind: slash
   command: /stop
   capability: vac.tools
-  owner: vac-core/tools
+  owner: vac-capability-tools/contract
   visible: true
   status: ready
 - kind: slash
   command: /autoreview
   capability: vac.workflow
-  owner: vac-core/control_plane
+  owner: vac-control-plane/control_plane
   visible: true
   status: ready
 - kind: slash
   command: /capabilities
   capability: vac.workflow
-  owner: vac-core/control_plane
+  owner: vac-control-plane/control_plane
   visible: true
   status: ready
 - kind: slash
   command: /goal
   capability: vac.workflow
-  owner: vac-core/control_plane
+  owner: vac-control-plane/control_plane
   visible: true
   status: ready
 - kind: slash
   command: /hooks
   capability: vac.workflow
-  owner: vac-core/control_plane
+  owner: vac-control-plane/control_plane
   visible: true
   status: ready
 - kind: slash
   command: /plan
   capability: vac.workflow
-  owner: vac-core/control_plane
+  owner: vac-control-plane/control_plane
   visible: true
   status: ready
 - kind: slash
   command: /skills
   capability: vac.workflow
-  owner: vac-core/control_plane
+  owner: vac-control-plane/control_plane
   visible: true
   status: ready
 - kind: slash
   command: /workflow
   capability: vac.workflow
-  owner: vac-core/control_plane
+  owner: vac-control-plane/control_plane
   visible: true
   status: ready
 
 - kind: slash
   command: /runtime
   capability: vac.autopilot.scheduler
-  owner: vac-tui/operator_ui
+  owner: vac-surface-tui/operator_ui
   visible: true
   status: ready

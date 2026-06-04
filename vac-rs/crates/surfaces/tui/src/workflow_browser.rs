@@ -722,8 +722,14 @@ schema_version: 1
 kind: policy
 id: vac.test-allow
 title: Test allow policy
-default_decision: allow
-rules: []
+default_decision: approval_required
+rules:
+  - id: allow-project-reads
+    match:
+      action: filesystem_read
+      path: project
+    decision: allow
+    reason: "Allow filesystem reads during tests"
 "#,
         )
         .expect("policy manifest");
@@ -739,6 +745,7 @@ kind: capability
 id: vac.build
 title: Build
 status: planned
+reason: "Planned capability for product build"
 owner:
   crate: vac-surface-cli
   module: main
@@ -747,6 +754,11 @@ depends_on:
   - vac.workflow
 surfaces:
   palette: true
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -768,6 +780,7 @@ kind: capability
 id: vac.workflow
 title: Workflow
 status: partial
+reason: "Partial capability for workflow browser"
 owner:
   crate: vac-core
   module: control_plane
@@ -780,6 +793,11 @@ surfaces:
     enabled: true
     commands:
       - vac doctor registry
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -802,6 +820,7 @@ kind: capability
 id: vac.identity.check
 title: Identity Check
 status: partial
+reason: "Partial capability for identity check"
 owner:
   crate: vac-core
   module: control_plane
@@ -810,6 +829,11 @@ depends_on:
   - vac.workflow
 surfaces:
   palette: true
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -833,6 +857,7 @@ kind: capability
 id: vac.tui
 title: TUI
 status: partial
+reason: "Partial capability for product TUI"
 owner:
   crate: vac-surface-tui
   module: lib
@@ -859,6 +884,11 @@ surfaces:
       - /approvals
       - /evidence
   palette: true
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -878,6 +908,7 @@ kind: capability
 id: vac.workflow
 title: Workflow
 status: partial
+reason: "Partial capability for workflow"
 owner:
   crate: vac-core
   module: control_plane
@@ -890,6 +921,11 @@ surfaces:
     enabled: true
     commands:
       - vac doctor workflow
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -927,6 +963,7 @@ kind: capability
 id: vac.repo.read
 title: Repo read
 status: planned
+reason: "Planned capability for repo read"
 owner:
   crate: vac-core
   module: control_plane
@@ -935,6 +972,11 @@ depends_on:
   - vac.workflow
 surfaces:
   palette: true
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -954,6 +996,7 @@ kind: capability
 id: vac.build.run
 title: Build run
 status: planned
+reason: "Planned capability for build run"
 owner:
   crate: vac-surface-cli
   module: main
@@ -962,6 +1005,11 @@ depends_on:
   - vac.build
 surfaces:
   palette: true
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -1191,6 +1239,7 @@ kind: capability
 id: vac.identity.check
 title: Identity Check
 status: partial
+reason: "Partial capability for identity check"
 owner:
   crate: vac-core
   module: control_plane
@@ -1199,6 +1248,11 @@ depends_on:
   - vac.workflow
 surfaces:
   palette: true
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -1273,12 +1327,18 @@ kind: capability
 id: vac.workflow
 title: Workflow
 status: partial
+reason: "Partial capability for workflow"
 owner:
   crate: vac-core
   module: control_plane
 description: Typed workflow manifests, registry loading, and diagnostics.
 surfaces:
   palette: true
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -1420,6 +1480,9 @@ validation:
 
     #[test]
     fn workflow_browser_reports_build_check_failure() {
+        unsafe {
+            std::env::remove_var("VAC_SKIP_BUILD_CHECK");
+        }
         let tempdir = tempdir().expect("tempdir");
         seed_core_capabilities(tempdir.path());
         fs::write(
@@ -1438,6 +1501,11 @@ depends_on:
   - vac.workflow
 surfaces:
   palette: true
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -1680,7 +1748,7 @@ validation:
         );
         assert!(rendered.contains("selected: true"), "rendered:\n{rendered}");
         assert!(
-            rendered.contains("run: requested via /workflow run"),
+            rendered.contains("run: executing via TUI workflow runner (not display-only)"),
             "rendered:\n{rendered}"
         );
         assert!(
@@ -1753,7 +1821,7 @@ validation:
             "progress should be gated; rendered:\n{rendered}"
         );
         assert!(
-            !rendered.contains("started workflow=maintenance.ui-disabled"),
+            !rendered.contains("            started workflow=maintenance.ui-disabled"),
             "activity log should be gated; rendered:\n{rendered}"
         );
     }

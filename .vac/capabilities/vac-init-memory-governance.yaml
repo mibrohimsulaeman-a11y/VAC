@@ -22,10 +22,6 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-vac-init-memory-governance-contract.sh
-  palette: true
-  tui:
-    routes:
-    - /capabilities
 policy:
   risk: safe_read
   mutates_files: false
@@ -48,6 +44,3 @@ validation:
     - scripts/check-vac-init-memory-governance-contract.sh
     risk: execute_process
     approval: policy
-docs:
-- docs/vac-init/VAC_INIT_BATCH_13_15_IMPLEMENTATION.md
-- docs/validation/VAC_INIT_MEMORY_GOVERNANCE_GATE.md

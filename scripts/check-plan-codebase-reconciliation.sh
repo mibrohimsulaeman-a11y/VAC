@@ -12,9 +12,9 @@ require_file() {
   fi
 }
 
-require_file docs/PLAN_CODEBASE_RECONCILIATION.md
-require_file docs/PROJECT_STATE_CURRENT.md
-require_file docs/DOCS_INDEX_CURRENT.md
+require_file docs/workflow-control-plane/INDEX.md
+require_file docs/workflow-control-plane/IMPLEMENTATION_PLAN.md
+require_file docs/workflow-control-plane/plans/INDEX.md
 require_file .vac/registry/plan-state.yaml
 
 python3 - <<'PY'
@@ -32,27 +32,14 @@ assert len(donor) == 11, len(donor)
 
 missing = []
 for row in workflow + donor:
-    file = Path(row['file'])
-    if not file.exists():
-        missing.append(f'missing plan file: {file}')
-        continue
-    text = file.read_text(errors='ignore')
-    if '<!-- VAC-PLAN-STATE:BEGIN -->' not in text or '<!-- VAC-PLAN-STATE:END -->' not in text:
-        missing.append(f'missing reconciliation block: {file}')
     if not row.get('status'):
-        missing.append(f'missing status for {file}')
-    for evidence in row.get('code_evidence') or []:
-        if not Path(evidence).exists():
-            missing.append(f'missing code evidence for {file}: {evidence}')
+        missing.append(f"missing status for archived plan row: {row.get('plan_id')}")
+    if 'file' not in row:
+        missing.append(f"archived plan row missing file for {row.get('plan_id')}")
 
-report = Path('docs/PLAN_CODEBASE_RECONCILIATION.md').read_text(errors='ignore')
-for needle in ['Workflow control-plane plans', 'Donor domain plans', 'CONTRACT_IMPLEMENTED_DOC_ONLY_OVERLAY']:
-    if needle not in report:
-        missing.append(f'report missing {needle}')
-
-project_state = Path('docs/PROJECT_STATE_CURRENT.md').read_text(errors='ignore')
-if 'Plan-codebase reconciliation — 2026-05-30' not in project_state:
-    missing.append('PROJECT_STATE_CURRENT missing reconciliation section')
+plan_index = Path('docs/workflow-control-plane/plans/INDEX.md').read_text(errors='ignore')
+if 'Retired generated projections' not in plan_index:
+    missing.append('plans index must record that detailed historical plans were pruned')
 
 if missing:
     for item in missing:

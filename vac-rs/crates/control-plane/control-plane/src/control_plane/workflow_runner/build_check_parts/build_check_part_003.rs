@@ -212,8 +212,7 @@ impl WorkflowExecutionMachine {
             self.workflow_id.clone(),
             resolution.id.clone(),
             resolve_workflow_approval_capability_id(&resolution.uses)
-                .unwrap_or(resolution.uses.as_str())
-                .to_string(),
+                .unwrap_or_else(|| resolution.uses.clone()),
             action,
             risk,
             reasons,
@@ -284,7 +283,8 @@ impl WorkflowExecutionMachine {
             | WorkflowStepHandler::ApprovalRequest
             | WorkflowStepHandler::RegistrySchemaCheck
             | WorkflowStepHandler::CapabilityDashboardCheck
-            | WorkflowStepHandler::WorkflowBrowserCheck => None,
+            | WorkflowStepHandler::WorkflowBrowserCheck
+            | WorkflowStepHandler::DeclarativeCapabilityCheck => None,
         }
     }
 
@@ -325,6 +325,16 @@ impl WorkflowExecutionMachine {
                 .map(PathBuf::from)
                 .or_else(|| self.build_check_repo_root.clone())
                 .unwrap_or_else(|| std::env::current_dir().unwrap_or_else(|_| PathBuf::from(".")));
+
+            if !repo_root.join("vac-rs/Cargo.toml").exists() {
+                self.fail_current_step(
+                    index,
+                    resolution,
+                    "build check report unavailable; executor requires explicit approval-gated evidence".to_string(),
+                );
+                return false;
+            }
+
             let mut request = build_check::BuildCheckRequest::for_repo_root(repo_root);
             if let Some(cargo_program) = self.build_check_cargo_program.as_ref() {
                 request = request.with_cargo_program(cargo_program.clone());
@@ -633,7 +643,43 @@ impl WorkflowExecutionMachine {
                 self.execute_tui_pty_gate(index, resolution);
             }
             Some(WorkflowStepHandler::ApprovalRequest) => {
-                self.succeed_current_step(index, resolution);
+                // capability.approval.request is an intrinsic approval gate.
+                // It always pauses the workflow for operator decision regardless
+                // of whether an external approval policy is configured.
+                self.waiting_approval_step_count += 1;
+                self.current_step_lifecycle = Some(WorkflowStepLifecycle::WaitingApproval);
+                self.state_trace.push(WorkflowExecutionState::Step {
+                    index,
+                    step_count: self.step_count,
+                    resolution: resolution.clone(),
+                    lifecycle: WorkflowStepLifecycle::WaitingApproval,
+                    started_step_count: self.started_step_count,
+                    completed_step_count: self.completed_step_count,
+                    waiting_approval_step_count: self.waiting_approval_step_count,
+                    blocked_step_count: self.blocked_step_count,
+                });
+                let approval_request_id = match self.request_approval_for_step(
+                    &resolution,
+                    vec!["operator approval required".to_string()],
+                ) {
+                    Ok(approval_request_id) => approval_request_id,
+                    Err(err) => {
+                        self.waiting_approval_step_count =
+                            self.waiting_approval_step_count.saturating_sub(1);
+                        self.fail_current_step(
+                            index,
+                            resolution,
+                            format!("approval persistence failed: {err}"),
+                        );
+                        return true;
+                    }
+                };
+                self.events
+                    .push(WorkflowExecutionEvent::StepWaitingApproval {
+                        index,
+                        resolution,
+                        approval_request_id,
+                    });
             }
             Some(WorkflowStepHandler::RegistrySchemaCheck) => {
                 match self.root_seed_registry_report.as_ref() {
@@ -701,6 +747,9 @@ impl WorkflowExecutionMachine {
                 }
             }
             Some(WorkflowStepHandler::ActivityEmit) => {
+                self.succeed_current_step(index, resolution);
+            }
+            Some(WorkflowStepHandler::DeclarativeCapabilityCheck) => {
                 self.succeed_current_step(index, resolution);
             }
             Some(WorkflowStepHandler::DonorMigrationInventoryCheck)
@@ -1764,4 +1813,3 @@ impl WorkflowExecutionMachine {
         }
     }
 }
-

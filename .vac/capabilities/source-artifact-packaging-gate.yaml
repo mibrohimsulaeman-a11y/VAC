@@ -16,16 +16,20 @@ ownership:
     include:
     - scripts/check-vac-source-artifact-packaging-gate.sh
     - .vac/capabilities/source-artifact-packaging-gate.yaml
-    - docs/monolith-quality/O5O6_CONTROL_PLANE_AUDIT_FINDINGS_REPORT.md
     exclude: []
 description: Enforces commit-like source artifact packaging hygiene so sandbox ZIPs exclude build/cache state and carry legal/evidence metadata.
 depends_on:
 - vac.tui.source-artifact-hygiene
 surfaces:
   cli:
+    enabled: true
     commands:
-    - scripts/check-vac-source-artifact-packaging-gate.sh
-  palette: false
+    - bash scripts/check-vac-source-artifact-packaging-gate.sh
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -45,5 +49,3 @@ validation:
   - no_node_modules
   - zip_integrity_when_supplied
   - legal_release_files_present
-docs:
-- docs/monolith-quality/O5O6_CONTROL_PLANE_AUDIT_FINDINGS_REPORT.md

@@ -1,5 +1,5 @@
 schema_version: 1
-kind: perf_benchmark_results
+kind: registry_status
 id: perf.tui-benchmark-results
 status: static_contract_ready
 tv_pending: []

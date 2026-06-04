@@ -1,6 +1,8 @@
 schema_version: 1
 kind: evidence
 id: evidence.2026-06-02-o5o6-continuation-blueprint
+chain:
+  self_hash: 413b4214f906f6f83db98cf85ffee6a114511178644a806372b5d6098d693c9a
 timestamp: 2026-06-02T00:00:00Z
 status: SV-Done
 summary: source/static implementation of continuation blueprint batches A-G

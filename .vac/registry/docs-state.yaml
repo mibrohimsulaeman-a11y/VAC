@@ -3,30 +3,15 @@ kind: registry_status
 id: vac.docs_state
 title: VAC docs state
 status: ready
-generated_at: '2026-06-01T22:58:00Z'
+generated_at: '2026-06-04T00:00:00+07:00'
 docs:
-  markdown_files: 443
-  index: docs/DOCS_INDEX_CURRENT.md
-  state: docs/PROJECT_STATE_CURRENT.md
-  audit: docs/DOCS_AUDIT.md
+  markdown_files: 5
+  index: docs/workflow-control-plane/INDEX.md
+  state: docs/workflow-control-plane/IMPLEMENTATION_PLAN.md
+  audit: .vac/registry/capability-readiness-audit.md
   by_top_level:
-    DOCS_AUDIT.md: 1
-    DOCS_INDEX_CURRENT.md: 1
-    PLAN_CODEBASE_RECONCILIATION.md: 1
-    PROJECT_STATE_CURRENT.md: 1
-    architecture: 24
-    dogfood: 1
-    executor-prompts: 7
-    legal: 3
-    migration: 9
-    monolith-quality: 41
-    product: 27
-    scheduled-audits: 103
-    scheduled-plans: 5
-    tui: 16
-    vac-init: 22
-    validation: 41
-    workflow-control-plane: 134
+    legal: 1
+    workflow-control-plane: 4
 manifests:
   capabilities: 72
   workflows: 67
@@ -41,6 +26,6 @@ donor:
   docs_pruned: true
   inventory: .vac/registry/donor-inventory.yaml
   living_docs_path_absent: docs/donor-migration
-  reason: Donor migration docs are legacy process artifacts; source of truth moved to registry/code-backed contracts.
+  reason: Legacy docs were pruned; active docs are limited to workflow-control-plane and legal notice indexes.
 validation:
   script: scripts/check-docs-state-refresh.sh

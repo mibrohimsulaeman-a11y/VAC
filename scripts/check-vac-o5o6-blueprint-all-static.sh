@@ -72,6 +72,7 @@ require_grep "pending_final_benchmark" "scripts/bench-vac-tui-performance.sh"
 require_file "vac-rs/crates/surfaces/tui/src/capability_dashboard.rs"
 require_grep "new_capability_dashboard_view" "vac-rs/crates/surfaces/tui/src/capability_dashboard.rs"
 require_grep "SelectionViewParams" "vac-rs/crates/surfaces/tui/src/capability_dashboard.rs"
+require_grep "new_capability_dashboard_output" "vac-rs/crates/surfaces/tui/src/chatwidget/chatwidget_group_015_impl.rs"
 require_grep "show_selection_view\(crate::capability_dashboard::new_capability_dashboard_view" "vac-rs/crates/surfaces/tui/src/chatwidget/chatwidget_group_015_impl.rs"
 require_grep "new_runtime_operator_console_view" "vac-rs/crates/surfaces/tui/src/chatwidget/chatwidget_group_015_impl.rs"
 

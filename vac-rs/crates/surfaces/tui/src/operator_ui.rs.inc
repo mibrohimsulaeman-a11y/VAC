@@ -85,6 +85,73 @@ impl StartupSnapshotRow {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct OperatorStatusBarState {
+    pub(crate) mode: String,
+    pub(crate) model: String,
+    pub(crate) token_usage: String,
+    pub(crate) automation: String,
+    pub(crate) validation: String,
+    pub(crate) profile: String,
+    pub(crate) rulebook: String,
+}
+
+impl OperatorStatusBarState {
+    pub(crate) fn input(model: impl Into<String>) -> Self {
+        Self {
+            mode: "INPUT".to_string(),
+            model: model.into(),
+            token_usage: "0 tok".to_string(),
+            automation: "manual".to_string(),
+            validation: "validity tracked by runtime gates".to_string(),
+            profile: "profile runtime".to_string(),
+            rulebook: "rulebook runtime".to_string(),
+        }
+    }
+
+    pub(crate) fn conversation(
+        model: impl Into<String>,
+        token_usage: impl Into<String>,
+        validation: impl Into<String>,
+    ) -> Self {
+        Self {
+            mode: "CONVERSATION".to_string(),
+            model: model.into(),
+            token_usage: token_usage.into(),
+            automation: "manual".to_string(),
+            validation: validation.into(),
+            profile: "profile runtime".to_string(),
+            rulebook: "rulebook runtime".to_string(),
+        }
+    }
+
+    pub(crate) fn workbench(
+        model: impl Into<String>,
+        token_usage: impl Into<String>,
+        validation: impl Into<String>,
+    ) -> Self {
+        Self {
+            mode: "WORKBENCH".to_string(),
+            model: model.into(),
+            token_usage: token_usage.into(),
+            automation: "manual".to_string(),
+            validation: validation.into(),
+            profile: "profile runtime".to_string(),
+            rulebook: "rulebook runtime".to_string(),
+        }
+    }
+
+    pub(crate) fn with_profile_rulebook(
+        mut self,
+        profile: impl Into<String>,
+        rulebook: impl Into<String>,
+    ) -> Self {
+        self.profile = profile.into();
+        self.rulebook = rulebook.into();
+        self
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct StartupSnapshot {
     pub(crate) version: String,
     pub(crate) mode: String,
@@ -93,6 +160,7 @@ pub(crate) struct StartupSnapshot {
     pub(crate) rows_left: Vec<StartupSnapshotRow>,
     pub(crate) rows_right: Vec<StartupSnapshotRow>,
     pub(crate) recent_task: Option<String>,
+    pub(crate) status_bar: OperatorStatusBarState,
 }
 
 impl StartupSnapshot {
@@ -111,13 +179,14 @@ impl StartupSnapshot {
             mode: "interactive".to_string(),
             cwd: cwd.into(),
             session: session.into(),
+            status_bar: OperatorStatusBarState::input(model.clone()),
             rows_left: vec![
                 StartupSnapshotRow::new("version", version, "control-plane hardening active"),
                 StartupSnapshotRow::new("provider", provider, "runtime selected"),
                 StartupSnapshotRow::new("model", model, "runtime selected"),
                 StartupSnapshotRow::new("fallback", "configured", "loaded from provider stack"),
                 StartupSnapshotRow::new("profile", "runtime", "tool policy loaded"),
-                StartupSnapshotRow::new("rulebook", "vil.core", "control-plane contract active"),
+                StartupSnapshotRow::new("rulebook", "runtime", "control-plane contract active"),
             ],
             rows_right: vec![
                 StartupSnapshotRow::new("runtime", "host", "in-process owner-native"),
@@ -165,6 +234,7 @@ pub(crate) struct IdleViewState {
     pub(crate) model: String,
     pub(crate) token_usage: String,
     pub(crate) validation: String,
+    pub(crate) status_bar: OperatorStatusBarState,
 }
 
 impl IdleViewState {
@@ -172,21 +242,33 @@ impl IdleViewState {
         Self::live(model)
     }
 
-
     pub(crate) fn live(model: impl Into<String>) -> Self {
+        let model = model.into();
+        let status_bar = OperatorStatusBarState::input(model.clone());
         Self {
             engine_status: "VIL Engine connected".to_string(),
-            rulebook_status: "rulebook vil.core enforcing".to_string(),
+            rulebook_status: "rulebook runtime enforcing".to_string(),
             recent_tasks: vec![RecentTaskLine::new(
                 "no persisted recent task loaded",
                 ".vac/registry/trajectory is the runtime source of truth",
             )],
             update_notice: None,
             bottom_mode: "INPUT".to_string(),
-            model: model.into(),
+            model,
             token_usage: "0 tok".to_string(),
             validation: "validity tracked by runtime gates".to_string(),
+            status_bar,
         }
+    }
+
+    pub(crate) fn with_status_bar(mut self, status_bar: OperatorStatusBarState) -> Self {
+        self.bottom_mode = status_bar.mode.clone();
+        self.model = status_bar.model.clone();
+        self.token_usage = status_bar.token_usage.clone();
+        self.validation = status_bar.validation.clone();
+        self.rulebook_status = format!("{} enforcing", status_bar.rulebook);
+        self.status_bar = status_bar;
+        self
     }
 }
 
@@ -227,6 +309,7 @@ pub(crate) struct AgentStreamingState {
     pub(crate) context_used: u64,
     pub(crate) context_limit: u64,
     pub(crate) composer_hint: String,
+    pub(crate) status_bar: OperatorStatusBarState,
 }
 
 pub(crate) fn render_operator_snapshot_text(
@@ -324,6 +407,7 @@ pub(crate) struct ApprovalPopupState {
     pub(crate) policy_reason: String,
     pub(crate) batch_progress: String,
     pub(crate) destructive: bool,
+    pub(crate) status_bar: OperatorStatusBarState,
 }
 
 impl ApprovalPopupState {
@@ -339,6 +423,11 @@ impl ApprovalPopupState {
             policy_reason: "vil.core → shell.destructive requires explicit approval".to_string(),
             batch_progress: "batch 1/2 — next: file_edit handlers/input.rs".to_string(),
             destructive: risk == ApprovalRisk::Destructive,
+            status_bar: OperatorStatusBarState::conversation(
+                "runtime",
+                "0 tok",
+                "approval pending",
+            ),
         }
     }
 
@@ -423,6 +512,7 @@ pub(crate) struct AutopilotSchedulerState {
     pub(crate) spend: String,
     pub(crate) retry: String,
     pub(crate) actions: Vec<AutopilotActionSpec>,
+    pub(crate) status_bar: OperatorStatusBarState,
 }
 
 impl AutopilotSchedulerState {
@@ -497,7 +587,7 @@ impl AutopilotSchedulerState {
                     "cancel",
                     "oneshot",
                     "0b7411",
-                    "refactor vil_swarm tool",
+                    "refactor workflow runner",
                     "yesterday",
                     "—",
                 ),
@@ -509,6 +599,12 @@ impl AutopilotSchedulerState {
             spend: "$0.142".to_string(),
             retry: "0/3".to_string(),
             actions: Self::default_monitor_actions(),
+            status_bar: OperatorStatusBarState::workbench(
+                "claude-sonnet-4.5",
+                "68,240 tok",
+                "valid 92%",
+            )
+            .with_profile_rulebook("profile default", "rulebook vil.core"),
         }
     }
 
@@ -531,6 +627,16 @@ impl AutopilotSchedulerState {
             .first()
             .map(|job| job.id.clone())
             .unwrap_or_else(|| "none".to_string());
+        let tokens = yaml_scalar_by_key(&source, "tokens").unwrap_or_else(|| "0 / 0".to_string());
+        let validation =
+            yaml_scalar_by_key(&source, "validation").unwrap_or_else(|| format!("runtime {status}"));
+        let model = yaml_scalar_by_key(&source, "model").unwrap_or_else(|| "runtime".to_string());
+        let profile = yaml_scalar_by_key(&source, "profile")
+            .map(|value| format!("profile {value}"))
+            .unwrap_or_else(|| "profile runtime".to_string());
+        let rulebook = yaml_scalar_by_key(&source, "rulebook")
+            .map(|value| format!("rulebook {value}"))
+            .unwrap_or_else(|| "rulebook runtime".to_string());
         Self {
             status,
             pid,
@@ -545,10 +651,12 @@ impl AutopilotSchedulerState {
                 .unwrap_or_else(|| "[idle]".to_string()),
             node_progress: yaml_scalar_by_key(&source, "node_progress")
                 .unwrap_or_else(|| "node 0/0 · 0%".to_string()),
-            tokens: yaml_scalar_by_key(&source, "tokens").unwrap_or_else(|| "0 / 0".to_string()),
+            tokens: tokens.clone(),
             spend: yaml_scalar_by_key(&source, "spend").unwrap_or_else(|| "$0.000".to_string()),
             retry: yaml_scalar_by_key(&source, "retry").unwrap_or_else(|| "0/0".to_string()),
             actions: Self::default_monitor_actions(),
+            status_bar: OperatorStatusBarState::workbench(model, tokens, validation)
+                .with_profile_rulebook(profile, rulebook),
         }
     }
 }
@@ -715,6 +823,8 @@ impl ControlPlaneDiagnostic {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct CapabilityDashboardState {
+    pub(crate) chrome_title: String,
+    pub(crate) chrome_mode: String,
     pub(crate) capability_count: usize,
     pub(crate) owned_domains: usize,
     pub(crate) unowned_domains: usize,
@@ -724,6 +834,7 @@ pub(crate) struct CapabilityDashboardState {
     pub(crate) diagnostics: Vec<String>,
     pub(crate) capability_records: Vec<CapabilityDashboardRecord>,
     pub(crate) diagnostic_records: Vec<ControlPlaneDiagnostic>,
+    pub(crate) status_bar: OperatorStatusBarState,
 }
 
 impl CapabilityDashboardState {
@@ -760,6 +871,8 @@ impl CapabilityDashboardState {
             .map(ControlPlaneDiagnostic::render_line)
             .collect();
         Self {
+            chrome_title: "vac · interactive".to_string(),
+            chrome_mode: "registry /capabilities".to_string(),
             capability_count,
             owned_domains,
             unowned_domains,
@@ -769,6 +882,11 @@ impl CapabilityDashboardState {
             diagnostics,
             capability_records,
             diagnostic_records,
+            status_bar: OperatorStatusBarState::conversation(
+                "runtime",
+                "0 tok",
+                format!("valid {valid_percent}%"),
+            ),
         }
     }
 }
@@ -1034,10 +1152,7 @@ pub(crate) fn render_autopilot_scheduler_line_specs(
 }
 
 pub(crate) fn render_capability_dashboard_shell(state: &CapabilityDashboardState) -> Vec<String> {
-    crate::operator_widget_render::render_capability_dashboard_lines(state, 156)
-        .into_iter()
-        .map(crate::operator_widget_render::line_to_string)
-        .collect()
+    render_capability_dashboard_body_lines(state, 240)
 }
 
 pub(crate) fn render_capability_dashboard_shell_specs(
@@ -1072,7 +1187,7 @@ pub(crate) fn render_operator_snapshot(
 impl AgentStreamingState {
     pub(crate) fn sample() -> Self {
         Self {
-            user_prompt: "refactor vac_tui_runtime/handlers/input.rs — extract popup routing"
+            user_prompt: "refactor vac-rs/crates/surfaces/tui/src/app.rs — extract popup routing"
                 .to_string(),
             user_time: "14:22:06".to_string(),
             agent_model: "claude-sonnet-4.5".to_string(),
@@ -1082,7 +1197,7 @@ impl AgentStreamingState {
             tools: vec![
                 ToolTimelineEntry::new(
                     "glob",
-                    "vac-rs/tui/src/**/*.rs",
+                    "vac-rs/crates/surfaces/tui/src/**/*.rs",
                     ToolTimelineState::Passed,
                     "0.1s · 88 files",
                 ),
@@ -1112,7 +1227,7 @@ impl AgentStreamingState {
                 ),
                 ToolTimelineEntry::new(
                     "cargo check",
-                    "-p vac_tui_runtime",
+                    "-p vac-surface-tui",
                     ToolTimelineState::Queued,
                     "queued",
                 ),
@@ -1121,6 +1236,12 @@ impl AgentStreamingState {
             context_used: 68_240,
             context_limit: 200_000,
             composer_hint: "agent working — next message queues (esc to interrupt)".to_string(),
+            status_bar: OperatorStatusBarState::conversation(
+                "claude-sonnet-4.5",
+                "68,240 tok",
+                "valid 92%",
+            )
+            .with_profile_rulebook("profile default", "rulebook vil.core"),
         }
     }
 }
@@ -1130,65 +1251,38 @@ impl CapabilityDashboardState {
         Self::from_manifest_records(
             vec![
                 CapabilityDashboardRecord::new(
-                    "vac.approvals",
+                    "vac.tui",
                     CapabilityManifestStatus::Ready,
-                    "vac-core/policy",
-                    "tui, cli, runner",
-                    "requires_confirmation, write_guard",
-                    "cargo test policy",
+                    "vac-surface-tui",
+                    "/, /capabilities, /workflow",
+                    "operator_read, approval_surface",
+                    "snapshot + runtime contracts",
                 ),
                 CapabilityDashboardRecord::new(
-                    "vac.tui.capabilities",
+                    "vac.workflow",
                     CapabilityManifestStatus::Ready,
-                    "vac-tui/lib",
-                    "/capabilities, palette",
-                    "read_only_manifest",
-                    "snapshot ok",
-                ),
-                CapabilityDashboardRecord::new(
-                    "vac.workflow.browser",
-                    CapabilityManifestStatus::Partial,
-                    "vac-workflow",
+                    "vac-control-plane",
                     "/workflow, cli",
                     "dry_run_safe, approval_trace",
-                    "lifecycle labels pending",
+                    "workflow doctor supported",
                 ),
                 CapabilityDashboardRecord::new(
-                    "vac.root.convert",
-                    CapabilityManifestStatus::Planned,
-                    "vac-registry",
-                    "cli-only",
-                    "migration_guard",
-                    "owner map needed",
-                ),
-                CapabilityDashboardRecord::new(
-                    "vac.yaml.parser",
-                    CapabilityManifestStatus::Broken,
-                    "vac-core/config",
-                    "tui, cli",
-                    "fail_closed",
-                    "line 42 invalid enum",
+                    "vac.init.control-plane",
+                    CapabilityManifestStatus::Ready,
+                    "vac-control-plane",
+                    "cli, tui registry views",
+                    "fail_closed, manifest_owned",
+                    "doctor registry/surface/docs",
                 ),
             ],
+            Vec::new(),
             vec![
-                ControlPlaneDiagnostic::new(
-                    DiagnosticSeverity::Error,
-                    ".vac/capabilities/tui.yml:42:13",
-                    "status almost_ready is not one of ready, partial, planned, broken, cli-only",
-                ),
-                ControlPlaneDiagnostic::new(
-                    DiagnosticSeverity::Warning,
-                    "registry",
-                    "Registry parse degraded; policy gates and surface routes remain ready",
-                ),
-            ],
-            vec![
-                ".vac/capabilities/ manifest scan loaded 18 files · 0 blank screens".to_string(),
+                ".vac/capabilities/ manifest scan loaded from root registry".to_string(),
                 ".vac/policies/ strict approval gates wired".to_string(),
-                "vac_tui_runtime surface route summary ready".to_string(),
+                "vac-surface-tui surface route summary ready".to_string(),
             ],
-            42,
             3,
+            0,
         )
     }
 }
@@ -1659,7 +1753,7 @@ fn render_capability_dashboard_body_lines(
     width: usize,
 ) -> Vec<String> {
     let left_width = (width / 5).clamp(24, 34);
-    let right_width = (width / 5).clamp(28, 38);
+    let right_width = (width / 5).clamp(28, 48);
     let center_width = width
         .saturating_sub(left_width)
         .saturating_sub(right_width)
@@ -2082,6 +2176,12 @@ mod tests {
             context_used: 68_240,
             context_limit: 200_000,
             composer_hint: "agent working".to_string(),
+            status_bar: OperatorStatusBarState::conversation(
+                "claude-sonnet-4.5",
+                "68,240 tok",
+                "valid 92%",
+            )
+            .with_profile_rulebook("profile default", "rulebook vil.core"),
         };
 
         let rendered = render_agent_streaming_lines(&state).join("\n");
@@ -2155,6 +2255,8 @@ mod tests {
     #[test]
     fn capability_dashboard_never_renders_blank_diagnostics() {
         let rendered = render_capability_dashboard_shell(&CapabilityDashboardState {
+            chrome_title: "vac · interactive".to_string(),
+            chrome_mode: "registry /capabilities".to_string(),
             capability_count: 1,
             owned_domains: 1,
             unowned_domains: 0,
@@ -2164,6 +2266,7 @@ mod tests {
             diagnostics: Vec::new(),
             capability_records: Vec::new(),
             diagnostic_records: Vec::new(),
+            status_bar: OperatorStatusBarState::conversation("runtime", "0 tok", "valid 100%"),
         })
         .join("\n");
         assert!(rendered.contains("Diagnostics"));
@@ -2261,7 +2364,9 @@ mod tests {
         .join("\n");
         assert!(capabilities.contains("TUI Capability Dashboard"));
         assert!(capabilities.contains("Diagnostics"));
-        assert!(capabilities.contains("YAML diagnostic"));
+        assert!(capabilities.contains("no YAML/control-plane errors detected"));
+        assert!(!capabilities.contains(".vac/capabilities/tui.yml:42:13"));
+        assert!(!capabilities.contains("almost_ready"));
     }
 
     #[test]

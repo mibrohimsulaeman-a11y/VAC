@@ -18,14 +18,12 @@ depends_on:
 surfaces:
   tui:
     routes:
-    - /
-    - /capabilities
-    - /runtime
-  slash:
-    commands:
-    - /capabilities
-    - /runtime
-  palette: true
+    - /style-tokens
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -50,5 +48,3 @@ validation:
   - ansi_snapshot_generated
   - strip_ansi_layout_preserved
   - live_adapter_wired
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

@@ -1,6 +1,8 @@
 schema_version: 1
-kind: evidence_record
+kind: evidence
 id: evidence.2026-06-03-o5o6-static-gate-portability-toolchain-blocked
+chain:
+  self_hash: 2b6681beb804acb0ccfd579f0ccf77aa29eb90a3659f0c3c6782b0004a685406
 created_at: '2026-06-03T00:00:00Z'
 status: SV-Done_TV-Blocked
 summary: Static-gate portability fixes applied after baseline extraction; runtime validation blocked by missing Rust toolchain and native VAC binary.

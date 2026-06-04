@@ -1,5 +1,3 @@
-#![allow(clippy::expect_used)]
-
 use anyhow::Context as _;
 use anyhow::ensure;
 use std::collections::HashMap;

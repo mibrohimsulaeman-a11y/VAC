@@ -1,6 +1,6 @@
 ---
-source: tui/src/chatwidget/tests/popups_and_settings.rs
-assertion_line: 411
+source: crates/surfaces/tui/src/chatwidget/tests/popups_and_settings.rs.inc
+assertion_line: 571
 expression: confirmation
 ---
   Plugins
@@ -9,5 +9,7 @@ expression: confirmation
 
 › 1. Remove marketplace  Remove this marketplace from the available plugin list.
   2. Back to plugins     Keep this marketplace installed.
+
+
 
   enter select · esc close

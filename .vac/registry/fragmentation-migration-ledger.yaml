@@ -1,5 +1,5 @@
 schema_version: 1
-kind: fragmentation_migration_ledger
+kind: registry_status
 id: fragmentation.o5o6.actual-code-closure
 updated_at: 2026-06-02T00:00:00Z
 convention:

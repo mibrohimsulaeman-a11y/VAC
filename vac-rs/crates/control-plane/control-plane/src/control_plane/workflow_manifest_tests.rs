@@ -136,10 +136,10 @@ fn rejects_non_capability_step_ref() {
 }
 
 #[test]
-fn rejects_validation_gate_that_does_not_reference_step_id() {
+fn accepts_validation_gate_that_is_not_a_step_id() {
     let yaml = sample_manifest_yaml().replace("- parse_intent", "- ghost_step");
-    let err = parse_workflow_manifest(SAMPLE_PATH, &yaml).expect_err("ghost gate");
-    assert!(err.message().contains("existing step id"));
+    let manifest = parse_workflow_manifest(SAMPLE_PATH, &yaml).expect("external gate");
+    assert_eq!(manifest.validation.gates, vec!["ghost_step".to_string()]);
 }
 
 // --- Plan 03 additions --------------------------------------------------------
@@ -228,6 +228,48 @@ fn validates_exact_declared_capability_id_when_known() {
 
     validate_workflow_manifest_against_known_capabilities(SAMPLE_PATH, &manifest, &known)
         .expect("exact declared capability id should be accepted");
+}
+
+#[test]
+fn validates_capability_check_suffix_against_declared_capability_id() {
+    let yaml = sample_manifest_yaml()
+        .replace(
+            "uses: capability.intent.parse",
+            "uses: capability.vac.intent.parse.check",
+        )
+        .replace(
+            "uses: capability.repo.orient",
+            "uses: capability.vac.repo.orient.check",
+        );
+    let manifest = parse_workflow_manifest(SAMPLE_PATH, &yaml).expect("parse check suffix");
+    let known = HashSet::from([
+        "vac.intent.parse".to_string(),
+        "vac.repo.orient".to_string(),
+    ]);
+
+    validate_workflow_manifest_against_known_capabilities(SAMPLE_PATH, &manifest, &known)
+        .expect("capability check suffix should resolve to the declared capability id");
+}
+
+#[test]
+fn validates_action_suffix_and_underscore_against_declared_capability_id() {
+    let yaml = sample_manifest_yaml()
+        .replace(
+            "uses: capability.intent.parse",
+            "uses: capability.tui.operator_live_adapter.snapshot",
+        )
+        .replace(
+            "uses: capability.repo.orient",
+            "uses: capability.docs.validate_control_plane_projection",
+        );
+    let manifest = parse_workflow_manifest(SAMPLE_PATH, &yaml).expect("parse action suffix");
+    let known = HashSet::from([
+        "vac.tui.operator-live-adapter".to_string(),
+        "vac.docs".to_string(),
+    ]);
+
+    validate_workflow_manifest_against_known_capabilities(SAMPLE_PATH, &manifest, &known)
+        .expect("action suffixes should resolve to declared capability ids");
 }
 
 #[test]

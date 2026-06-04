@@ -70,8 +70,8 @@ mod tests {
         assert_eq!(
             tools,
             vec![
-                ToolName::namespaced("mcp__vac_apps__calendar", "_create_event"),
                 ToolName::plain("mcp__server__lookup"),
+                ToolName::namespaced("mcp__vac_apps__calendar", "_create_event"),
             ]
         );
     }

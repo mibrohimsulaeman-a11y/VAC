@@ -27,6 +27,10 @@ pub(super) fn test_project_path() -> PathBuf {
     PathBuf::from(test_path_display("/tmp/project"))
 }
 
+pub(super) fn test_project_cwd() -> AbsolutePathBuf {
+    test_project_path().abs()
+}
+
 pub(super) fn truncated_path_variants(path: &str) -> Vec<String> {
     let chars: Vec<char> = path.chars().collect();
     (1..chars.len())

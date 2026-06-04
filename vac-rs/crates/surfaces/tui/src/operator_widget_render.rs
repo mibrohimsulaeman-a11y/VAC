@@ -19,7 +19,8 @@ use ratatui::widgets::{
 use crate::operator_ui::{
     AgentStreamingState, ApprovalPopupState, AutopilotSchedulerState, CapabilityDashboardRecord,
     CapabilityDashboardState, CapabilityManifestStatus, ControlPlaneDiagnostic, DiagnosticSeverity,
-    IdleViewState, OperatorViewport, SnapshotScenario, StartupSnapshot, ToolTimelineState,
+    IdleViewState, OperatorStatusBarState, OperatorViewport, SnapshotScenario, StartupSnapshot,
+    ToolTimelineState,
 };
 
 const BG: Color = Color::Rgb(7, 13, 20);
@@ -51,7 +52,7 @@ pub(crate) fn render_snapshot_lines(
     scenario: SnapshotScenario,
     viewport: OperatorViewport,
 ) -> Vec<String> {
-    match scenario {
+    let mut lines = match scenario {
         SnapshotScenario::FirstLaunch => {
             let snapshot = StartupSnapshot::from_session(
                 "0.4.2-beta",
@@ -63,21 +64,21 @@ pub(crate) fn render_snapshot_lines(
             render_startup_lines(&snapshot, viewport.width as u16)
                 .into_iter()
                 .map(line_to_string)
-                .collect()
+                .collect::<Vec<String>>()
         }
         SnapshotScenario::Idle => {
             let state = IdleViewState::live("claude-sonnet-4.5");
             render_idle_lines(&state, viewport.width as u16)
                 .into_iter()
                 .map(line_to_string)
-                .collect()
+                .collect::<Vec<String>>()
         }
         SnapshotScenario::AgentWorking => {
             let state = AgentStreamingState::sample();
             render_agent_streaming_lines(&state, viewport.width as u16)
                 .into_iter()
                 .map(line_to_string)
-                .collect()
+                .collect::<Vec<String>>()
         }
         SnapshotScenario::ApprovalPopup => {
             let state = ApprovalPopupState::destructive_bash(
@@ -87,23 +88,25 @@ pub(crate) fn render_snapshot_lines(
             render_approval_lines(&state, viewport.width as u16)
                 .into_iter()
                 .map(line_to_string)
-                .collect()
+                .collect::<Vec<String>>()
         }
         SnapshotScenario::RuntimeJobs => {
             let state = AutopilotSchedulerState::monitor_only_sample();
             render_runtime_jobs_lines(&state, viewport.width as u16)
                 .into_iter()
                 .map(line_to_string)
-                .collect()
+                .collect::<Vec<String>>()
         }
         SnapshotScenario::CapabilityDashboard => {
             let state = CapabilityDashboardState::sample_dashboard();
             render_capability_dashboard_lines(&state, viewport.width as u16)
                 .into_iter()
                 .map(line_to_string)
-                .collect()
+                .collect::<Vec<String>>()
         }
-    }
+    };
+    lines.truncate(viewport.height);
+    lines
 }
 
 pub(crate) fn render_startup_lines(snapshot: &StartupSnapshot, width: u16) -> Vec<Line<'static>> {
@@ -125,7 +128,7 @@ pub(crate) fn render_agent_streaming_lines(
     width: u16,
 ) -> Vec<Line<'static>> {
     let width = width.clamp(72, 180);
-    let height = 28;
+    let height = 31;
     render_to_lines(width, height, |area, buf| {
         render_agent_streaming(state, area, buf)
     })
@@ -183,32 +186,66 @@ fn render_startup(snapshot: &StartupSnapshot, area: Rect, buf: &mut Buffer) {
         .direction(Direction::Vertical)
         .constraints([
             Constraint::Length(3),
+            Constraint::Length(4),
             Constraint::Length(1),
-            Constraint::Min(16),
-            Constraint::Length(5),
+            Constraint::Length(8),
+            Constraint::Length(4),
+            Constraint::Length(4),
             Constraint::Length(2),
         ])
         .split(area);
     render_chrome_header("vac · interactive", "first launch", chunks[0], buf);
+    Paragraph::new(vec![
+        Line::from(vec![
+            Span::styled(
+                "  V A C  ",
+                Style::default().fg(CYAN).add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                "Vastar Agentic CLI",
+                Style::default().fg(FG).add_modifier(Modifier::BOLD),
+            ),
+            Span::raw(format!("  {}", snapshot.version)),
+        ]),
+        Line::from(vec![
+            Span::raw("         "),
+            Span::styled(
+                "VIL-native operator console · advanced beta · control-plane hardening active",
+                Style::default().fg(MUTED),
+            ),
+        ]),
+        Line::from(vec![
+            Span::raw("         "),
+            Span::styled(
+                format!("cwd {} · session {}", snapshot.cwd, snapshot.session),
+                Style::default().fg(MUTED),
+            ),
+        ]),
+    ])
+    .style(Style::default().bg(BG))
+    .render(chunks[1], buf);
     Paragraph::new(Line::from(vec![
         Span::styled("hydrating startup snapshot", Style::default().fg(MUTED)),
-        Span::raw(" ─"),
+        Span::raw(" ─────────────────────────────────────────────────"),
     ]))
     .style(Style::default().fg(MUTED).bg(BG))
-    .render(chunks[1], buf);
+    .render(chunks[2], buf);
 
     let body_cols = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
-        .split(chunks[2]);
-    render_status_grid("Vastar Agentic CLI", &snapshot.rows_left, body_cols[0], buf);
+        .split(chunks[3]);
+    render_status_grid("VAC", &snapshot.rows_left, body_cols[0], buf);
     render_status_grid("Runtime", &snapshot.rows_right, body_cols[1], buf);
 
     let ready_lines = vec![
-        Line::from(vec![Span::styled(
-            "ready",
-            Style::default().fg(CYAN).add_modifier(Modifier::BOLD),
-        )]),
+        Line::from(vec![
+            Span::styled(
+                "ready",
+                Style::default().fg(CYAN).add_modifier(Modifier::BOLD),
+            ),
+            Span::raw(" ─────────────────────────────────────────────────"),
+        ]),
         Line::from(vec![
             pill("VIL-native", BLUE_BG, CYAN),
             Span::raw("   type / for commands, /help to explore, or start typing a task."),
@@ -227,16 +264,15 @@ fn render_startup(snapshot: &StartupSnapshot, area: Rect, buf: &mut Buffer) {
     ];
     Paragraph::new(ready_lines)
         .style(Style::default().fg(FG).bg(BG))
-        .render(chunks[3], buf);
-    render_status_bar(
-        "INPUT",
-        "claude-sonnet-4.5",
-        "0 tok",
-        "manual",
-        "valid 100%",
-        chunks[4],
-        buf,
-    );
+        .render(chunks[4], buf);
+    Paragraph::new(Line::from(vec![
+        Span::styled("▸ ", Style::default().fg(CYAN)),
+        Span::raw("/help · /model · /resume · /runtime · shift+tab plan mode"),
+    ]))
+    .block(rounded_block("composer"))
+    .style(Style::default().fg(MUTED).bg(BG))
+    .render(chunks[5], buf);
+    render_status_bar(&snapshot.status_bar, chunks[6], buf);
 }
 
 fn render_idle(state: &IdleViewState, area: Rect, buf: &mut Buffer) {
@@ -313,15 +349,7 @@ fn render_idle(state: &IdleViewState, area: Rect, buf: &mut Buffer) {
     .block(rounded_block("composer"))
     .style(Style::default().bg(BG))
     .render(chunks[3], buf);
-    render_status_bar(
-        &state.bottom_mode,
-        &state.model,
-        &state.token_usage,
-        "manual",
-        &state.validation,
-        chunks[4],
-        buf,
-    );
+    render_status_bar(&state.status_bar, chunks[4], buf);
 }
 
 fn render_agent_streaming(state: &AgentStreamingState, area: Rect, buf: &mut Buffer) {
@@ -331,6 +359,7 @@ fn render_agent_streaming(state: &AgentStreamingState, area: Rect, buf: &mut Buf
             Constraint::Length(3),
             Constraint::Length(5),
             Constraint::Length(9),
+            Constraint::Length(4),
             Constraint::Length(4),
             Constraint::Length(4),
             Constraint::Length(2),
@@ -385,17 +414,25 @@ fn render_agent_streaming(state: &AgentStreamingState, area: Rect, buf: &mut Buf
     .header(
         Row::new(vec!["", "tool", "target", "state", "detail"]).style(Style::default().fg(MUTED)),
     )
-    .block(rounded_block("tool timeline"))
+    .block(rounded_block(if state.tools.len() > 5 {
+        "tool timeline · last 5"
+    } else {
+        "tool timeline"
+    }))
     .style(Style::default().bg(BG))
     .render(chunks[2], buf);
 
-    Paragraph::new(vec![
-        Line::from(vec![
-            Span::styled("⌁ thinking", Style::default().fg(YELLOW)),
-            Span::raw(format!(" · {} ▌", state.thinking)),
-        ]),
-        Line::from(state.agent_message.clone()),
-    ])
+    let mut agent_lines = vec![Line::from(vec![
+        Span::styled("⌁ thinking", Style::default().fg(YELLOW)),
+        Span::raw(format!(" · {} ▌", state.thinking)),
+    ])];
+    agent_lines.extend(
+        state
+            .agent_message
+            .lines()
+            .map(|line| Line::from(line.to_string())),
+    );
+    Paragraph::new(agent_lines)
     .style(Style::default().fg(MUTED).bg(BG))
     .wrap(Wrap { trim: false })
     .render(chunks[3], buf);
@@ -411,15 +448,14 @@ fn render_agent_streaming(state: &AgentStreamingState, area: Rect, buf: &mut Buf
         ))
         .ratio(ratio)
         .render(chunks[4], buf);
-    render_status_bar(
-        "CONVERSATION",
-        &state.agent_model,
-        &format!("{} tok", compact_number(state.context_used)),
-        "manual",
-        "valid 92%",
-        chunks[5],
-        buf,
-    );
+    Paragraph::new(Line::from(vec![
+        Span::styled("▸ ", Style::default().fg(CYAN)),
+        Span::raw(state.composer_hint.clone()),
+    ]))
+    .block(rounded_block("composer"))
+    .style(Style::default().fg(MUTED).bg(BG))
+    .render(chunks[5], buf);
+    render_status_bar(&state.status_bar, chunks[6], buf);
 }
 
 fn render_approval(state: &ApprovalPopupState, area: Rect, buf: &mut Buffer) {
@@ -486,15 +522,7 @@ fn render_approval(state: &ApprovalPopupState, area: Rect, buf: &mut Buffer) {
     .block(rounded_block(&state.batch_progress))
     .style(Style::default().fg(MUTED).bg(BG))
     .render(chunks[2], buf);
-    render_status_bar(
-        "CONVERSATION",
-        "claude-sonnet-4.5",
-        "71,820 tok",
-        "manual",
-        "valid 92%",
-        chunks[3],
-        buf,
-    );
+    render_status_bar(&state.status_bar, chunks[3], buf);
 }
 
 fn render_runtime_jobs(state: &AutopilotSchedulerState, area: Rect, buf: &mut Buffer) {
@@ -504,7 +532,7 @@ fn render_runtime_jobs(state: &AutopilotSchedulerState, area: Rect, buf: &mut Bu
             Constraint::Length(3),
             Constraint::Length(3),
             Constraint::Min(12),
-            Constraint::Length(6),
+            Constraint::Length(7),
             Constraint::Length(2),
         ])
         .split(area);
@@ -520,42 +548,58 @@ fn render_runtime_jobs(state: &AutopilotSchedulerState, area: Rect, buf: &mut Bu
         )
         .divider(" · ")
         .render(chunks[1], buf);
-    let rows = state.jobs.iter().map(|job| {
-        let st = job_state_style(&job.state);
-        Row::new(vec![
-            Cell::from("●").style(st),
-            Cell::from(job.state.clone()).style(st),
-            Cell::from(job.kind.clone()).style(Style::default().fg(FG)),
-            Cell::from(job.id.clone()).style(Style::default().fg(CYAN)),
-            Cell::from(job.trigger.clone()).style(Style::default().fg(FG)),
-            Cell::from(job.age.clone()).style(Style::default().fg(MUTED)),
-            Cell::from(job.next_run.clone()).style(Style::default().fg(MUTED)),
+    if state.jobs.is_empty() {
+        Paragraph::new(vec![
+            Line::from(""),
+            Line::from(Span::styled(
+                "   Runtime idle · No scheduled jobs",
+                Style::default().fg(MUTED),
+            )),
         ])
-    });
-    Table::new(
-        rows,
-        [
-            Constraint::Length(2),
-            Constraint::Length(10),
-            Constraint::Length(10),
-            Constraint::Length(9),
-            Constraint::Percentage(42),
-            Constraint::Length(12),
-            Constraint::Percentage(18),
-        ],
-    )
-    .header(
-        Row::new(vec![
-            "", "state", "kind", "id", "trigger", "age", "next-run",
-        ])
-        .style(Style::default().fg(MUTED)),
-    )
-    .block(rounded_block(&format!(
-        "autopilot ● {}   pid {}   uptime {}   mode {}   queue {}   running {}",
-        state.status, state.pid, state.uptime, state.mode, state.queued, state.running
-    )))
-    .style(Style::default().bg(BG))
-    .render(chunks[2], buf);
+        .block(rounded_block(&format!(
+            "autopilot ● {}   pid {}   uptime {}   mode {}   queue {}   running {}",
+            state.status, state.pid, state.uptime, state.mode, state.queued, state.running
+        )))
+        .style(Style::default().bg(BG))
+        .render(chunks[2], buf);
+    } else {
+        let rows = state.jobs.iter().map(|job| {
+            let st = job_state_style(&job.state);
+            Row::new(vec![
+                Cell::from("●").style(st),
+                Cell::from(job.state.clone()).style(st),
+                Cell::from(job.kind.clone()).style(Style::default().fg(FG)),
+                Cell::from(job.id.clone()).style(Style::default().fg(CYAN)),
+                Cell::from(job.trigger.clone()).style(Style::default().fg(FG)),
+                Cell::from(job.age.clone()).style(Style::default().fg(MUTED)),
+                Cell::from(job.next_run.clone()).style(Style::default().fg(MUTED)),
+            ])
+        });
+        Table::new(
+            rows,
+            [
+                Constraint::Length(2),
+                Constraint::Length(10),
+                Constraint::Length(10),
+                Constraint::Length(9),
+                Constraint::Percentage(42),
+                Constraint::Length(12),
+                Constraint::Percentage(18),
+            ],
+        )
+        .header(
+            Row::new(vec![
+                "", "state", "kind", "id", "trigger", "age", "next-run",
+            ])
+            .style(Style::default().fg(MUTED)),
+        )
+        .block(rounded_block(&format!(
+            "autopilot ● {}   pid {}   uptime {}   mode {}   queue {}   running {}",
+            state.status, state.pid, state.uptime, state.mode, state.queued, state.running
+        )))
+        .style(Style::default().bg(BG))
+        .render(chunks[2], buf);
+    }
 
     let inspect_cols = Layout::default()
         .direction(Direction::Horizontal)
@@ -578,9 +622,11 @@ fn render_runtime_jobs(state: &AutopilotSchedulerState, area: Rect, buf: &mut Bu
                 .collect::<Vec<_>>()
                 .join("   "),
         ),
+        Line::from("policy: monitor-only scheduler; actions policy-gated; destructive tasks require approval gates"),
     ])
     .block(rounded_block(&format!("inspect {}", state.selected_job)))
     .style(Style::default().fg(FG).bg(BG))
+    .wrap(Wrap { trim: false })
     .render(inspect_cols[0], buf);
     Gauge::default()
         .block(rounded_block("node progress"))
@@ -588,15 +634,7 @@ fn render_runtime_jobs(state: &AutopilotSchedulerState, area: Rect, buf: &mut Bu
         .label(state.node_progress.clone())
         .ratio(percent_from_text(&state.node_progress).unwrap_or(0.0))
         .render(inspect_cols[1], buf);
-    render_status_bar(
-        "WORKBENCH",
-        "claude-sonnet-4.5",
-        "68,240 tok",
-        "manual",
-        "valid 92%",
-        chunks[4],
-        buf,
-    );
+    render_status_bar(&state.status_bar, chunks[4], buf);
 }
 
 fn render_capability_dashboard(state: &CapabilityDashboardState, area: Rect, buf: &mut Buffer) {
@@ -609,12 +647,7 @@ fn render_capability_dashboard(state: &CapabilityDashboardState, area: Rect, buf
             Constraint::Length(2),
         ])
         .split(area);
-    render_chrome_header(
-        "vac · interactive",
-        "AGENT WORKING  /capabilities",
-        screen[0],
-        buf,
-    );
+    render_chrome_header(&state.chrome_title, &state.chrome_mode, screen[0], buf);
 
     let top = Layout::default()
         .direction(Direction::Horizontal)
@@ -656,19 +689,11 @@ fn render_capability_dashboard(state: &CapabilityDashboardState, area: Rect, buf
     render_dashboard_left(state, body[0], buf);
     render_dashboard_center(state, body[1], buf);
     render_dashboard_right(state, body[2], buf);
-    render_status_bar(
-        "CONVERSATION",
-        "claude-sonnet-4.5",
-        "68,240 tok",
-        "manual",
-        &format!("valid {}%", state.valid_percent),
-        screen[3],
-        buf,
-    );
+    render_status_bar(&state.status_bar, screen[3], buf);
 }
 
 fn render_dashboard_left(state: &CapabilityDashboardState, area: Rect, buf: &mut Buffer) {
-    let lines = vec![
+    let mut lines = vec![
         Line::from(vec![Span::styled(
             "› /capabilities",
             Style::default().fg(CYAN).add_modifier(Modifier::BOLD),
@@ -686,7 +711,10 @@ fn render_dashboard_left(state: &CapabilityDashboardState, area: Rect, buf: &mut
             Span::raw("workflows    "),
             Span::styled(".vac/workflows", Style::default().fg(CYAN)),
         ]),
-        Line::from("surface      tui + cli + palette"),
+        Line::from(vec![
+            Span::raw("surface      "),
+            Span::styled(surface_summary(state), Style::default().fg(FG)),
+        ]),
         Line::from(""),
         Line::from(vec![
             Span::raw("ownership    "),
@@ -704,13 +732,11 @@ fn render_dashboard_left(state: &CapabilityDashboardState, area: Rect, buf: &mut
         ]),
         Line::from(vec![
             Span::raw("policy       "),
-            Span::styled("strict gates", Style::default().fg(GREEN)),
+            Span::styled(policy_summary(state), Style::default().fg(GREEN)),
         ]),
         Line::from(""),
-        Line::from("/             ready / vac.tui"),
-        Line::from("/capabilities ready / registry"),
-        Line::from("/workflow      ready / runner"),
     ];
+    lines.extend(route_summary_lines(state));
     Paragraph::new(lines)
         .block(rounded_block("/capabilities"))
         .style(Style::default().fg(FG).bg(BG))
@@ -758,12 +784,12 @@ fn render_dashboard_center(state: &CapabilityDashboardState, area: Rect, buf: &m
     Table::new(
         rows,
         [
-            Constraint::Percentage(22),
-            Constraint::Length(10),
-            Constraint::Percentage(18),
-            Constraint::Percentage(18),
-            Constraint::Percentage(18),
-            Constraint::Percentage(24),
+            Constraint::Percentage(15),
+            Constraint::Percentage(10),
+            Constraint::Percentage(15),
+            Constraint::Percentage(15),
+            Constraint::Percentage(15),
+            Constraint::Percentage(30),
         ],
     )
     .header(
@@ -777,7 +803,7 @@ fn render_dashboard_center(state: &CapabilityDashboardState, area: Rect, buf: &m
         ])
         .style(Style::default().fg(MUTED)),
     )
-    .block(rounded_block("Control plane registry"))
+    .block(rounded_block("Capability registry"))
     .style(Style::default().bg(BG))
     .render(chunks[1], buf);
 
@@ -816,50 +842,61 @@ fn render_dashboard_right(state: &CapabilityDashboardState, area: Rect, buf: &mu
     let diag_lines = diagnostics
         .iter()
         .take(4)
-        .map(|diagnostic| {
+        .flat_map(|diagnostic| {
             let style = diagnostic_style(diagnostic.severity);
-            Line::from(vec![
-                Span::styled(diagnostic.severity.as_str(), style),
-                Span::raw("  "),
-                Span::styled(
-                    &diagnostic.source,
-                    Style::default().fg(FG).add_modifier(Modifier::BOLD),
-                ),
-                Span::raw("\n"),
-                Span::styled(diagnostic.message.clone(), Style::default().fg(MUTED)),
-            ])
+            [
+                Line::from(vec![
+                    Span::styled(diagnostic.severity.as_str(), style),
+                    Span::raw("  "),
+                    Span::styled(
+                        diagnostic.source.clone(),
+                        Style::default().fg(FG).add_modifier(Modifier::BOLD),
+                    ),
+                ]),
+                Line::from(Span::styled(
+                    diagnostic.message.clone(),
+                    Style::default().fg(MUTED),
+                )),
+            ]
         })
         .collect::<Vec<_>>();
-    Paragraph::new(if diag_lines.is_empty() {
-        vec![Line::from(vec![Span::styled(
-            "no structured diagnostics",
-            Style::default().fg(GREEN),
-        )])]
+    let (diag_title, diag_body) = if diag_lines.is_empty() {
+        (
+            "Diagnostics · Registry parse".to_string(),
+            vec![Line::from(Span::styled(
+                "no YAML/control-plane errors detected",
+                Style::default().fg(GREEN),
+            ))],
+        )
     } else {
-        diag_lines
-    })
-    .block(rounded_block("Diagnostics"))
-    .style(Style::default().fg(FG).bg(BG))
-    .wrap(Wrap { trim: false })
-    .render(chunks[0], buf);
+        ("Diagnostics · YAML diagnostic".to_string(), diag_lines)
+    };
+    Paragraph::new(diag_body)
+        .block(rounded_block(&diag_title))
+        .style(Style::default().fg(FG).bg(BG))
+        .wrap(Wrap { trim: false })
+        .render(chunks[0], buf);
 
+    let registry_health = registry_health(state);
     Gauge::default()
         .block(rounded_block("Registry parse"))
-        .gauge_style(Style::default().fg(YELLOW).bg(YELLOW_BG))
-        .label("degraded")
-        .ratio(0.85)
+        .gauge_style(registry_health.style)
+        .label(registry_health.label)
+        .ratio(registry_health.ratio)
         .render(chunks[1], buf);
+    let policy_health = policy_health(state);
     Gauge::default()
         .block(rounded_block("Policy gates"))
-        .gauge_style(Style::default().fg(GREEN).bg(GREEN_BG))
-        .label("ready")
-        .ratio(1.0)
+        .gauge_style(policy_health.style)
+        .label(policy_health.label)
+        .ratio(policy_health.ratio)
         .render(chunks[2], buf);
+    let surface_health = surface_health(state);
     Gauge::default()
         .block(rounded_block("Surface routes"))
-        .gauge_style(Style::default().fg(GREEN).bg(GREEN_BG))
-        .label("ready")
-        .ratio(0.92)
+        .gauge_style(surface_health.style)
+        .label(surface_health.label)
+        .ratio(surface_health.ratio)
         .render(chunks[3], buf);
 }
 
@@ -886,27 +923,25 @@ fn render_status_grid(
     area: Rect,
     buf: &mut Buffer,
 ) {
-    let row_iter = rows.iter().map(|row| {
-        Row::new(vec![
-            Cell::from("●").style(Style::default().fg(GREEN)),
-            Cell::from(row.key.clone()).style(Style::default().fg(MUTED)),
-            Cell::from(row.value.clone())
-                .style(Style::default().fg(FG).add_modifier(Modifier::BOLD)),
-            Cell::from(row.detail.clone()).style(Style::default().fg(MUTED)),
-        ])
-    });
-    Table::new(
-        row_iter,
-        [
-            Constraint::Length(2),
-            Constraint::Length(14),
-            Constraint::Percentage(32),
-            Constraint::Percentage(52),
-        ],
-    )
-    .block(rounded_block(title))
-    .style(Style::default().bg(BG))
-    .render(area, buf);
+    let mut lines = Vec::with_capacity(rows.len() + 1);
+    lines.push(Line::from(vec![Span::styled(
+        title.to_string(),
+        Style::default().fg(MUTED).add_modifier(Modifier::BOLD),
+    )]));
+    for row in rows {
+        lines.push(Line::from(vec![
+            Span::styled("● ", Style::default().fg(GREEN)),
+            Span::styled(format!("{:<10}", row.key), Style::default().fg(MUTED)),
+            Span::styled(
+                row.value.clone(),
+                Style::default().fg(FG).add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(format!(" · {}", row.detail), Style::default().fg(MUTED)),
+        ]));
+    }
+    Paragraph::new(lines)
+        .style(Style::default().bg(BG))
+        .render(area, buf);
 }
 
 fn render_stat_card(label: &str, value: String, area: Rect, buf: &mut Buffer) {
@@ -922,18 +957,67 @@ fn render_stat_card(label: &str, value: String, area: Rect, buf: &mut Buffer) {
     .render(area, buf);
 }
 
-fn render_status_bar(
-    mode: &str,
-    model: &str,
-    tokens: &str,
-    automation: &str,
-    validity: &str,
-    area: Rect,
-    buf: &mut Buffer,
-) {
-    let line = Line::from(vec![
+#[derive(Clone, Copy)]
+enum StatusSuffix {
+    Full,
+    RulebookOnly,
+    None,
+}
+
+fn status_bar_plain_len(
+    state: &OperatorStatusBarState,
+    validation: &str,
+    suffix: StatusSuffix,
+) -> usize {
+    let suffix_text = match suffix {
+        StatusSuffix::Full => format!(" │ {} · {}", state.profile, state.rulebook),
+        StatusSuffix::RulebookOnly => format!(" │ {}", state.rulebook),
+        StatusSuffix::None => String::new(),
+    };
+    format!(
+        " {}  │ model {} │ {} │ {} │ {}{}",
+        state.mode, state.model, state.token_usage, state.automation, validation, suffix_text
+    )
+    .chars()
+    .count()
+}
+
+fn compact_validation_label(validation: &str) -> String {
+    if validation.chars().count() <= 18 {
+        return validation.to_string();
+    }
+    let lower = validation.to_ascii_lowercase();
+    if lower.contains("valid") {
+        "valid runtime".to_string()
+    } else if lower.contains("approval") {
+        "approval gate".to_string()
+    } else {
+        "runtime gate".to_string()
+    }
+}
+
+fn status_suffix_for_width(
+    state: &OperatorStatusBarState,
+    validation: &str,
+    width: usize,
+) -> StatusSuffix {
+    if status_bar_plain_len(state, validation, StatusSuffix::Full) <= width {
+        StatusSuffix::Full
+    } else if status_bar_plain_len(state, validation, StatusSuffix::RulebookOnly) <= width {
+        StatusSuffix::RulebookOnly
+    } else {
+        StatusSuffix::None
+    }
+}
+
+fn status_bar_line(
+    state: &OperatorStatusBarState,
+    validation: String,
+    suffix: StatusSuffix,
+) -> Line<'static> {
+    let mut spans = vec![
         Span::styled(
-            format!(" {mode} "),
+            format!(" {} ", state.mode),
             Style::default()
                 .fg(Color::Black)
                 .bg(CYAN)
@@ -941,28 +1025,41 @@ fn render_status_bar(
         ),
         Span::raw(" │ model "),
         Span::styled(
-            model.to_string(),
+            state.model.clone(),
             Style::default().fg(CYAN).add_modifier(Modifier::BOLD),
         ),
-        Span::raw(format!(" │ {tokens} │ {automation} │ ")),
-        Span::styled(validity.to_string(), Style::default().fg(GREEN)),
-        Span::raw(format!(" │ {} · {}", runtime_profile_label(), runtime_rulebook_label())),
-    ]);
+        Span::raw(format!(
+            " │ {} │ {} │ ",
+            state.token_usage, state.automation
+        )),
+        Span::styled(validation, Style::default().fg(GREEN)),
+    ];
+    match suffix {
+        StatusSuffix::Full => {
+            spans.push(Span::raw(format!(
+                " │ {} · {}",
+                state.profile, state.rulebook
+            )));
+        }
+        StatusSuffix::RulebookOnly => {
+            spans.push(Span::raw(format!(" │ {}", state.rulebook)));
+        }
+        StatusSuffix::None => {}
+    }
+    Line::from(spans)
+}
+
+fn render_status_bar(state: &OperatorStatusBarState, area: Rect, buf: &mut Buffer) {
+    let width = area.width as usize;
+    let mut validation = state.validation.clone();
+    if status_bar_plain_len(state, &validation, StatusSuffix::Full) > width {
+        validation = compact_validation_label(&state.validation);
+    }
+    let suffix = status_suffix_for_width(state, &validation, width);
+    let line = status_bar_line(state, validation, suffix);
     Paragraph::new(line)
         .style(Style::default().fg(MUTED).bg(BG))
         .render(area, buf);
-}
-
-fn runtime_profile_label() -> String {
-    std::env::var("VAC_PROFILE")
-        .map(|value| format!("profile {value}"))
-        .unwrap_or_else(|_| "profile runtime".to_string())
-}
-
-fn runtime_rulebook_label() -> String {
-    std::env::var("VAC_RULEBOOK")
-        .map(|value| format!("rulebook {value}"))
-        .unwrap_or_else(|_| "rulebook runtime".to_string())
 }
 
 fn rounded_block(title: &str) -> Block<'static> {
@@ -1080,6 +1177,141 @@ fn dashboard_diagnostics(state: &CapabilityDashboardState) -> Vec<ControlPlaneDi
         .collect()
 }
 
+struct DashboardHealth {
+    label: String,
+    ratio: f64,
+    style: Style,
+}
+
+fn registry_health(state: &CapabilityDashboardState) -> DashboardHealth {
+    let diagnostics = dashboard_diagnostics(state);
+    if diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.severity == DiagnosticSeverity::Error)
+    {
+        return DashboardHealth {
+            label: "errors".to_string(),
+            ratio: 0.25,
+            style: Style::default().fg(RED).bg(RED_BG),
+        };
+    }
+    if diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.severity == DiagnosticSeverity::Warning)
+    {
+        return DashboardHealth {
+            label: "degraded".to_string(),
+            ratio: 0.75,
+            style: Style::default().fg(YELLOW).bg(YELLOW_BG),
+        };
+    }
+    DashboardHealth {
+        label: "ready".to_string(),
+        ratio: 1.0,
+        style: Style::default().fg(GREEN).bg(GREEN_BG),
+    }
+}
+
+fn policy_health(state: &CapabilityDashboardState) -> DashboardHealth {
+    let records = dashboard_records(state);
+    let total = records.len().max(1);
+    let policy_backed = records
+        .iter()
+        .filter(|record| {
+            let policy = record.policy.trim();
+            !policy.is_empty() && policy != "unknown"
+        })
+        .count();
+    let ratio = policy_backed as f64 / total as f64;
+    DashboardHealth {
+        label: format!("{policy_backed}/{total} mapped"),
+        ratio,
+        style: if ratio >= 0.8 {
+            Style::default().fg(GREEN).bg(GREEN_BG)
+        } else {
+            Style::default().fg(YELLOW).bg(YELLOW_BG)
+        },
+    }
+}
+
+fn surface_health(state: &CapabilityDashboardState) -> DashboardHealth {
+    let records = dashboard_records(state);
+    let total = records.len().max(1);
+    let surfaced = records
+        .iter()
+        .filter(|record| {
+            let surfaces = record.surfaces.trim();
+            !surfaces.is_empty() && surfaces != "unknown"
+        })
+        .count();
+    let ratio = surfaced as f64 / total as f64;
+    DashboardHealth {
+        label: format!("{surfaced}/{total} routed"),
+        ratio,
+        style: if ratio >= 0.8 {
+            Style::default().fg(GREEN).bg(GREEN_BG)
+        } else {
+            Style::default().fg(YELLOW).bg(YELLOW_BG)
+        },
+    }
+}
+
+fn surface_summary(state: &CapabilityDashboardState) -> String {
+    let mut surfaces = dashboard_records(state)
+        .into_iter()
+        .flat_map(|record| {
+            record
+                .surfaces
+                .split([',', '/', '+'])
+                .map(str::trim)
+                .filter(|value| !value.is_empty() && *value != "unknown")
+                .map(str::to_string)
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>();
+    surfaces.sort();
+    surfaces.dedup();
+    if surfaces.is_empty() {
+        return "registry pending".to_string();
+    }
+    surfaces.into_iter().take(4).collect::<Vec<_>>().join(" + ")
+}
+
+fn policy_summary(state: &CapabilityDashboardState) -> String {
+    let records = dashboard_records(state);
+    let mapped = records
+        .iter()
+        .filter(|record| {
+            let policy = record.policy.trim();
+            !policy.is_empty() && policy != "unknown"
+        })
+        .count();
+    format!("{mapped}/{} mapped", records.len().max(1))
+}
+
+fn route_summary_lines(state: &CapabilityDashboardState) -> Vec<Line<'static>> {
+    let mut routes = dashboard_records(state)
+        .into_iter()
+        .take(4)
+        .map(|record| {
+            Line::from(vec![
+                Span::styled(record.id, Style::default().fg(CYAN)),
+                Span::raw("  "),
+                Span::styled(record.status.as_str(), status_style(record.status)),
+                Span::raw(" / "),
+                Span::styled(record.surfaces, Style::default().fg(MUTED)),
+            ])
+        })
+        .collect::<Vec<_>>();
+    if routes.is_empty() {
+        routes.push(Line::from(vec![Span::styled(
+            "registry pending",
+            Style::default().fg(MUTED),
+        )]));
+    }
+    routes
+}
+
 fn ratio(numerator: u64, denominator: u64) -> f64 {
     if denominator == 0 {
         return 0.0;
@@ -1112,7 +1344,7 @@ fn compact_number(value: u64) -> String {
 fn buffer_to_lines(buf: &Buffer) -> Vec<Line<'static>> {
     let mut lines = Vec::new();
     for y in buf.area.y..buf.area.y.saturating_add(buf.area.height) {
-        let mut row_cells = Vec::new();
+        let mut row_cells: Vec<(String, Style)> = Vec::new();
         for x in buf.area.x..buf.area.x.saturating_add(buf.area.width) {
             let cell = &buf[(x, y)];
             row_cells.push((cell.symbol().to_string(), cell.style()));
@@ -1128,19 +1360,30 @@ fn buffer_to_lines(buf: &Buffer) -> Vec<Line<'static>> {
         let mut spans: Vec<Span<'static>> = Vec::new();
         let mut current_text = String::new();
         let mut current_style: Option<Style> = None;
-        for (symbol, style) in row_cells {
-            if current_style.as_ref().is_some_and(|existing| existing == &style) {
+        for entry in row_cells {
+            let symbol: String = entry.0;
+            let style: Style = entry.1;
+            if current_style
+                .as_ref()
+                .is_some_and(|existing| existing == &style)
+            {
                 current_text.push_str(&symbol);
                 continue;
             }
             if !current_text.is_empty() {
-                spans.push(Span::styled(current_text, current_style.unwrap_or_default()));
+                spans.push(Span::styled(
+                    current_text,
+                    current_style.unwrap_or_default(),
+                ));
             }
             current_text = symbol;
             current_style = Some(style);
         }
         if !current_text.is_empty() {
-            spans.push(Span::styled(current_text, current_style.unwrap_or_default()));
+            spans.push(Span::styled(
+                current_text,
+                current_style.unwrap_or_default(),
+            ));
         }
         lines.push(Line::from(spans));
     }
@@ -1168,10 +1411,18 @@ mod tests {
     #[test]
     fn buffer_conversion_preserves_cell_style_and_gauge_fill() {
         let mut buf = Buffer::empty(Rect::new(0, 0, 4, 1));
-        buf[(0, 0)].set_symbol("A").set_style(Style::default().fg(CYAN).bg(BLUE_BG));
-        buf[(1, 0)].set_symbol(" ").set_style(Style::default().fg(CYAN).bg(BLUE_BG));
-        buf[(2, 0)].set_symbol("B").set_style(Style::default().fg(GREEN).bg(GREEN_BG));
-        buf[(3, 0)].set_symbol(" ").set_style(Style::default().fg(MUTED).bg(BG));
+        buf[(0, 0)]
+            .set_symbol("A")
+            .set_style(Style::default().fg(CYAN).bg(BLUE_BG));
+        buf[(1, 0)]
+            .set_symbol(" ")
+            .set_style(Style::default().fg(CYAN).bg(BLUE_BG));
+        buf[(2, 0)]
+            .set_symbol("B")
+            .set_style(Style::default().fg(GREEN).bg(GREEN_BG));
+        buf[(3, 0)]
+            .set_symbol(" ")
+            .set_style(Style::default().fg(MUTED).bg(BG));
 
         let lines = buffer_to_lines(&buf);
         assert_eq!(lines.len(), 1);

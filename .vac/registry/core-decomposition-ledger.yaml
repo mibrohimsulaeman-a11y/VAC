@@ -1,5 +1,5 @@
 schema_version: 1
-kind: core_decomposition_ledger
+kind: registry_status
 id: core-decomposition.o5o6.zero-residual-static
 updated_at: 2026-06-02T00:00:00Z
 policy:

@@ -1,6 +1,8 @@
 schema_version: 1
 kind: evidence
 id: evidence.o5o6.compile_fix_targeted_tv.2026_05_31
+chain:
+  self_hash: 7acb342cd59a9c7b55172b39adcbc969b4684be31e24ea2e7a1fe3fa25b32146
 status: ready
 created_at: '2026-05-31T04:55:00Z'
 summary: Targeted offline cargo checks verified compiler-driven fixes for vac-core, vac-tui, and vac-cli after audit findings.

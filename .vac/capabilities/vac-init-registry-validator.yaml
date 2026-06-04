@@ -23,11 +23,10 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-vac-init-registry-validator-contract.sh
-    - vac doctor registry .
   palette: true
   tui:
     routes:
-    - /capabilities
+    - /init/registry
 policy:
   risk: safe_read
   mutates_files: false
@@ -49,6 +48,3 @@ validation:
     approval: policy
   gates:
   - vac_init_registry_validator_contract
-docs:
-- docs/vac-init/VAC_INIT_BATCH_02_05_IMPLEMENTATION.md
-- docs/validation/VAC_INIT_REGISTRY_VALIDATOR_GATE.md

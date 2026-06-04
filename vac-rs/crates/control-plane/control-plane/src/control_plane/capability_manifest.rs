@@ -116,14 +116,34 @@ pub struct CapabilityValidation {
     pub gates: Vec<String>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum CapabilityOwnershipTargetKind {
+    Module,
+    Crate,
+    Path,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct CapabilityOwnershipTarget {
-    pub crate_name: String,
-    pub module: String,
+    #[serde(default = "default_ownership_target_kind")]
+    pub kind: CapabilityOwnershipTargetKind,
+    #[serde(default)]
+    pub crate_name: Option<String>,
+    #[serde(default)]
+    pub module: Option<String>,
+    #[serde(default)]
+    pub include: Vec<String>,
+    #[serde(default)]
+    pub exclude: Vec<String>,
     #[serde(default)]
     pub test_only: bool,
     #[serde(default)]
     pub retired: bool,
+}
+
+const fn default_ownership_target_kind() -> CapabilityOwnershipTargetKind {
+    CapabilityOwnershipTargetKind::Module
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, JsonSchema)]
@@ -272,6 +292,16 @@ struct RawCapabilityManifest {
     compatibility_transport: Option<Vec<RawCapabilityCompatibilityTransport>>,
     #[serde(default)]
     docs: Option<Vec<String>>,
+    #[serde(default)]
+    runtime_support: Option<serde_yaml::Value>,
+    #[serde(default)]
+    operator_evidence: Option<serde_yaml::Value>,
+    #[serde(default)]
+    operator_ui_batch3_validation: Option<serde_yaml::Value>,
+    #[serde(default)]
+    operator_ui_hardening_validation: Option<serde_yaml::Value>,
+    #[serde(default)]
+    hardening_batch_4_10: Option<serde_yaml::Value>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -374,9 +404,31 @@ enum RawCapabilityPolicyValue {
 #[serde(deny_unknown_fields)]
 struct RawCapabilityValidation {
     #[serde(default)]
-    commands: Option<Vec<String>>,
+    commands: Option<Vec<RawValidationEntry>>,
     #[serde(default)]
-    gates: Option<Vec<String>>,
+    gates: Option<Vec<RawValidationEntry>>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+enum RawValidationEntry {
+    String(String),
+    Object(RawValidationCommand),
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct RawValidationCommand {
+    #[serde(default)]
+    id: Option<String>,
+    #[serde(default)]
+    runner: Option<String>,
+    #[serde(default)]
+    args: Vec<String>,
+    #[serde(default)]
+    risk: Option<String>,
+    #[serde(default)]
+    approval: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -398,8 +450,18 @@ struct RawCapabilityStatesLabels {
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct RawOwnershipTarget {
-    crate_name: String,
-    module: String,
+    #[serde(default)]
+    kind: Option<String>,
+    #[serde(default)]
+    crate_name: Option<String>,
+    #[serde(default, rename = "crate")]
+    crate_alias: Option<String>,
+    #[serde(default)]
+    module: Option<String>,
+    #[serde(default)]
+    include: Option<Vec<String>>,
+    #[serde(default)]
+    exclude: Option<Vec<String>>,
     #[serde(default)]
     test_only: bool,
     #[serde(default)]
@@ -438,6 +500,8 @@ struct RawCapabilityCompatibilityTransport {
     dependency: Option<String>,
     status: Option<String>,
     owner: Option<String>,
+    #[serde(default)]
+    quarantine_marker: Option<String>,
     deletion_condition: Option<String>,
     replacement: Option<String>,
     target_removal_plan: Option<String>,
@@ -584,6 +648,13 @@ impl CapabilityManifest {
         let surfaces = parse_surfaces(raw.surfaces, path)?;
         let policy = parse_policy(raw.policy, path)?;
         let validation = parse_validation(raw.validation, path)?;
+        let _metadata = (
+            raw.runtime_support,
+            raw.operator_evidence,
+            raw.operator_ui_batch3_validation,
+            raw.operator_ui_hardening_validation,
+            raw.hardening_batch_4_10,
+        );
 
         let description = raw.description.filter(|value| !value.trim().is_empty());
         let reason = raw.reason.filter(|value| !value.trim().is_empty());
@@ -755,8 +826,8 @@ fn parse_validation(
     let raw = raw.ok_or_else(|| {
         CapabilityManifestError::new(path, "validation", "missing required field")
     })?;
-    let commands = normalize_string_list(raw.commands, path, "validation.commands")?;
-    let gates = normalize_string_list(raw.gates, path, "validation.gates")?;
+    let commands = normalize_validation_entries(raw.commands, path, "validation.commands")?;
+    let gates = normalize_validation_entries(raw.gates, path, "validation.gates")?;
     Ok(CapabilityValidation { commands, gates })
 }
 
@@ -806,26 +877,38 @@ fn parse_ownership(
     let mut targets = Vec::new();
     if let Some(raw_targets) = raw.targets {
         for (index, raw_target) in raw_targets.into_iter().enumerate() {
-            let crate_name = normalize_non_empty_string(
-                Some(raw_target.crate_name),
-                path,
-                &format!("ownership.targets[{index}].crate_name"),
-            )?;
-            let module = normalize_non_empty_string(
-                Some(raw_target.module),
-                path,
-                &format!("ownership.targets[{index}].module"),
-            )?;
+            let field_path = format!("ownership.targets[{index}]");
+            let kind = parse_ownership_target_kind(raw_target.kind, path, &field_path)?;
+            let crate_name = raw_target.crate_name.or(raw_target.crate_alias);
+            let crate_name = crate_name
+                .map(|value| {
+                    normalize_non_empty_string(Some(value), path, &format!("{field_path}.crate"))
+                })
+                .transpose()?;
+            let module = raw_target
+                .module
+                .map(|value| {
+                    normalize_non_empty_string(Some(value), path, &format!("{field_path}.module"))
+                })
+                .transpose()?;
+            let include =
+                normalize_string_list(raw_target.include, path, &format!("{field_path}.include"))?;
+            let exclude =
+                normalize_string_list(raw_target.exclude, path, &format!("{field_path}.exclude"))?;
+            validate_ownership_target(path, &field_path, kind, &crate_name, &module, &include)?;
             if raw_target.test_only && raw_target.retired {
                 return Err(CapabilityManifestError::new(
                     path,
-                    format!("ownership.targets[{index}]"),
+                    field_path,
                     "test_only and retired cannot both be true",
                 ));
             }
             targets.push(CapabilityOwnershipTarget {
+                kind,
                 crate_name,
                 module,
+                include,
+                exclude,
                 test_only: raw_target.test_only,
                 retired: raw_target.retired,
             });
@@ -856,6 +939,63 @@ fn parse_ownership(
         deletion_plan,
         targets,
     })
+}
+
+fn parse_ownership_target_kind(
+    raw: Option<String>,
+    path: &Path,
+    field_path: &str,
+) -> Result<CapabilityOwnershipTargetKind, CapabilityManifestError> {
+    match raw.as_deref().unwrap_or("module") {
+        "module" => Ok(CapabilityOwnershipTargetKind::Module),
+        "crate" => Ok(CapabilityOwnershipTargetKind::Crate),
+        "path" => Ok(CapabilityOwnershipTargetKind::Path),
+        other => Err(CapabilityManifestError::new(
+            path,
+            format!("{field_path}.kind"),
+            format!("unknown ownership target kind `{other}`"),
+        )),
+    }
+}
+
+fn validate_ownership_target(
+    path: &Path,
+    field_path: &str,
+    kind: CapabilityOwnershipTargetKind,
+    crate_name: &Option<String>,
+    module: &Option<String>,
+    include: &[String],
+) -> Result<(), CapabilityManifestError> {
+    match kind {
+        CapabilityOwnershipTargetKind::Crate => {
+            if crate_name.is_none() {
+                return Err(CapabilityManifestError::new(
+                    path,
+                    format!("{field_path}.crate"),
+                    "crate ownership targets require crate",
+                ));
+            }
+        }
+        CapabilityOwnershipTargetKind::Module => {
+            if crate_name.is_none() || module.is_none() {
+                return Err(CapabilityManifestError::new(
+                    path,
+                    format!("{field_path}.module"),
+                    "module ownership targets require crate and module",
+                ));
+            }
+        }
+        CapabilityOwnershipTargetKind::Path => {
+            if include.is_empty() {
+                return Err(CapabilityManifestError::new(
+                    path,
+                    format!("{field_path}.include"),
+                    "path ownership targets require include patterns",
+                ));
+            }
+        }
+    }
+    Ok(())
 }
 
 fn parse_donor_source(
@@ -938,6 +1078,7 @@ fn parse_compatibility_transport(
         path,
         "compatibility_transport.target_removal_plan",
     )?;
+    let _quarantine_marker = raw.quarantine_marker;
     let status = match raw.status.as_deref() {
         Some("compatibility_transport") => {
             CapabilityCompatibilityTransportStatus::CompatibilityTransport
@@ -1149,6 +1290,81 @@ fn normalize_string_list(
 ) -> Result<Vec<String>, CapabilityManifestError> {
     let values = values.unwrap_or_default();
     normalize_list(values, path, field_path)
+}
+
+fn normalize_validation_entries(
+    values: Option<Vec<RawValidationEntry>>,
+    path: &Path,
+    field_path: &str,
+) -> Result<Vec<String>, CapabilityManifestError> {
+    let values = values.unwrap_or_default();
+    let mut normalized = Vec::with_capacity(values.len());
+    for (index, value) in values.into_iter().enumerate() {
+        let item_path = format!("{field_path}[{index}]");
+        let value = match value {
+            RawValidationEntry::String(value) => {
+                normalize_non_empty_string(Some(value), path, &item_path)?
+            }
+            RawValidationEntry::Object(command) => {
+                normalize_validation_command(command, path, &item_path)?
+            }
+        };
+        normalized.push(value);
+    }
+    Ok(normalized)
+}
+
+fn normalize_validation_command(
+    command: RawValidationCommand,
+    path: &Path,
+    field_path: &str,
+) -> Result<String, CapabilityManifestError> {
+    if let Some(id) = command.id.as_deref() {
+        validate_command_id(path, &format!("{field_path}.id"), id)?;
+    }
+    if let Some(risk) = command.risk.as_deref() {
+        validate_command_id(path, &format!("{field_path}.risk"), risk)?;
+    }
+    if let Some(approval) = command.approval.as_deref() {
+        validate_command_id(path, &format!("{field_path}.approval"), approval)?;
+    }
+
+    let runner = command
+        .runner
+        .map(|value| normalize_non_empty_string(Some(value), path, &format!("{field_path}.runner")))
+        .transpose()?;
+    let args = normalize_list(command.args, path, &format!("{field_path}.args"))?;
+
+    if runner.is_none() && args.is_empty() {
+        return Err(CapabilityManifestError::new(
+            path,
+            field_path,
+            "structured validation command requires runner or args",
+        ));
+    }
+
+    let mut parts = Vec::new();
+    if let Some(runner) = runner {
+        parts.push(runner);
+    }
+    parts.extend(args);
+    Ok(parts.join(" "))
+}
+
+fn validate_command_id(
+    path: &Path,
+    field_path: &str,
+    value: &str,
+) -> Result<(), CapabilityManifestError> {
+    normalize_non_empty_string(Some(value.to_string()), path, field_path)?;
+    if value.chars().any(char::is_whitespace) {
+        return Err(CapabilityManifestError::new(
+            path,
+            field_path,
+            "value must not contain whitespace",
+        ));
+    }
+    Ok(())
 }
 
 fn serde_path_to_string(path: &serde_path_to_error::Path) -> String {

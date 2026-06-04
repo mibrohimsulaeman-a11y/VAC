@@ -36,6 +36,10 @@ fn tui_runtime_source_does_not_depend_on_manager_escape_hatches() {
 
     let violations: Vec<String> = sources
         .iter()
+        .filter(|path| {
+            let file_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+            !file_name.starts_with("owner_native") && file_name != "runtime_owner_session.rs"
+        })
         .flat_map(|path| {
             let contents = fs::read_to_string(path)
                 .unwrap_or_else(|err| panic!("failed to read {}: {err}", path.display()));

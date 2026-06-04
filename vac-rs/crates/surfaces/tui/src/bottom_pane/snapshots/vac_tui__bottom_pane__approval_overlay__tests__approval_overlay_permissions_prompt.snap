@@ -1,17 +1,19 @@
 ---
-source: tui/src/bottom_pane/approval_overlay.rs
+source: crates/surfaces/tui/src/bottom_pane/approval_overlay.rs.inc
+assertion_line: 2141
 expression: "normalize_snapshot_paths(render_overlay_lines(&view, 120))"
 ---
 
-  Would you like to grant these permissions?
+  approval required
 
-  Reason: need workspace access
+  action kind  PERMISSIONS the agent wants expanded permissions
+  policy       need workspace access
+  request      network; read `/tmp/readme.txt`; write `/tmp/out.txt`
+  hotkeys  y approve once   a approve+remember   n reject   r reject with reason
 
-  Permission rule: network; read `/tmp/readme.txt`; write `/tmp/out.txt`
-
-› 1. Yes, grant these permissions for this turn (y)
-  2. Yes, grant for this turn with strict auto review (r)
-  3. Yes, grant these permissions for this session (a)
-  4. No, continue without permissions (d)
+› 1. approve once · permissions for this turn (y)
+  2. approve once · strict auto review (r)
+  3. approve+remember · permissions for this session (a)
+  4. reject (d)
 
   Press enter to confirm or esc to cancel

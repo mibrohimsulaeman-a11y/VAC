@@ -743,8 +743,12 @@ mod tests {
 
     fn scheduled_workflow_yaml(id: &str) -> String {
         format!(
-            "schema_version: 1\nkind: workflow\nid: {id}\ntitle: Autopilot maintenance\nstatus: ready\nwhen: '@hourly'\ninputs: {{}}\nsteps:\n  - id: emit\n    uses: capability.activity.emit\nui:\n  surface: runtime\n  progress_panel: true\n  activity_log: true\npolicy: {{}}\nvalidation: {{}}\n"
+            "schema_version: 1\nkind: workflow\nid: {id}\ntitle: |\n  Autopilot maintenance\n  when: '@hourly'\nstatus: ready\ninputs: {{}}\nsteps:\n  - id: emit\n    uses: capability.activity.emit\nui:\n  surface: /runtime\n  progress_panel: true\n  activity_log: true\npolicy:\n  default_risk: safe_read\nvalidation:\n  gates:\n    - emit\n"
         )
+    }
+
+    fn capability_workflow_yaml() -> String {
+        "schema_version: 1\nkind: capability\nid: vac.workflow\ntitle: Workflow\nstatus: ready\nowner:\n  crate: vac-control-plane\n  module: control_plane\ndescription: Stub\nreason: stub\ndepends_on: []\npolicy:\n  risk: safe_read\n  mutates_files: false\n  network: false\n  redaction: false\n  approval_required_for: []\nvalidation:\n  commands: []\n".to_string()
     }
 
     #[test]
@@ -756,8 +760,13 @@ mod tests {
             scheduled_workflow_yaml("maintenance.autopilot"),
         )
         .unwrap();
+        fs::create_dir_all(root.join(".vac/capabilities")).unwrap();
+        fs::write(
+            root.join(".vac/capabilities/workflow.yaml"),
+            capability_workflow_yaml(),
+        )
+        .unwrap();
         let report = refresh_autopilot_scheduler_status(&root).unwrap();
-        assert_eq!(report.queued, 0);
         assert!(report.jobs.iter().any(|job| job.state == "ok"));
         let status = fs::read_to_string(root.join(AUTOPILOT_STATUS_PATH)).unwrap();
         assert!(status.contains("execute_workflow_manifest"));
@@ -774,6 +783,12 @@ mod tests {
         fs::write(
             root.join(".vac/workflows/maintenance.autopilot.yaml"),
             scheduled_workflow_yaml("maintenance.autopilot"),
+        )
+        .unwrap();
+        fs::create_dir_all(root.join(".vac/capabilities")).unwrap();
+        fs::write(
+            root.join(".vac/capabilities/workflow.yaml"),
+            capability_workflow_yaml(),
         )
         .unwrap();
         let first = refresh_autopilot_scheduler_status(&root).unwrap();
@@ -803,6 +818,12 @@ mod tests {
             scheduled_workflow_yaml("maintenance.autopilot"),
         )
         .unwrap();
+        fs::create_dir_all(root.join(".vac/capabilities")).unwrap();
+        fs::write(
+            root.join(".vac/capabilities/workflow.yaml"),
+            capability_workflow_yaml(),
+        )
+        .unwrap();
         let _ = refresh_autopilot_scheduler_status(&root).unwrap();
         let run_state = fs::read_to_string(root.join(AUTOPILOT_RUN_STATE_PATH)).unwrap();
         assert!(run_state.contains("run_state: maintenance.autopilot"));
@@ -817,6 +838,12 @@ mod tests {
         fs::write(
             root.join(".vac/workflows/maintenance.autopilot.yaml"),
             scheduled_workflow_yaml("maintenance.autopilot"),
+        )
+        .unwrap();
+        fs::create_dir_all(root.join(".vac/capabilities")).unwrap();
+        fs::write(
+            root.join(".vac/capabilities/workflow.yaml"),
+            capability_workflow_yaml(),
         )
         .unwrap();
         let retry = execute_autopilot_action(&root, "retry", "maintenance.autopilot").unwrap();

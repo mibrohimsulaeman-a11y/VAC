@@ -18,21 +18,21 @@ policy:
   approval_required_for: []
 steps:
 - id: runtime_surface_uses_adapter
-  uses: capability.tui.operator_live_adapter.runtime
+  uses: capability.vac.tui.check
   ui:
     surface: /runtime
     progress_panel: true
     activity_log: true
     evidence_surface: true
 - id: capability_surface_uses_adapter
-  uses: capability.tui.operator_live_adapter.capabilities
+  uses: capability.vac.tui.check
   ui:
     surface: /capabilities
     progress_panel: true
     activity_log: true
     evidence_surface: true
 - id: deterministic_renderer_preserved
-  uses: capability.tui.operator_live_adapter.snapshot
+  uses: capability.vac.tui.check
   ui:
     surface: /capabilities
     progress_panel: true

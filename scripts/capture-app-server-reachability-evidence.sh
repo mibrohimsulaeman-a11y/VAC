@@ -122,8 +122,8 @@ capture() {
 
 capture 'git status short' "$REPO_ROOT" 'git status --short'
 capture 'disk guard' "$REPO_ROOT" 'df -h . /tmp'
-capture 'tui source grep app server imports' "$REPO_ROOT" "git grep -n 'vac_app_server\|vac_app_server_client\|vac_app_server_protocol\|vac_app_server_transport' -- vac-rs/tui/src || true"
-capture 'tui manifest and source rg app server' "$REPO_ROOT" "rg -n 'vac_app_server|vac_app_server_client|vac_app_server_protocol|vac_app_server_transport|vac-app-server' vac-rs/tui/Cargo.toml vac-rs/tui/src || true"
+capture 'tui source grep app server imports' "$REPO_ROOT" "git grep -n 'vac_app_server\|vac_app_server_client\|vac_app_server_protocol\|vac_app_server_transport' -- vac-rs/crates/surfaces/tui/src || true"
+capture 'tui manifest and source rg app server' "$REPO_ROOT" "rg -n 'vac_app_server|vac_app_server_client|vac_app_server_protocol|vac_app_server_transport|vac-app-server' vac-rs/crates/surfaces/tui/Cargo.toml vac-rs/crates/surfaces/tui/src || true"
 capture 'workspace app server consumer audit' "$REPO_ROOT" "rg -n 'vac_app_server|vac_app_server_client|vac_app_server_protocol|vac_app_server_transport|vac-app-server' vac-rs --glob 'Cargo.toml' --glob '*.rs' || true"
 
 if [ -d vac-rs ]; then

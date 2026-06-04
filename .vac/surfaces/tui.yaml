@@ -3,138 +3,147 @@ kind: surface
 id: surface.tui
 title: TUI surface
 capabilities:
-- vac.init.evidence-chain
-- vac.init.patch-guard
-- vac.init.approval-binding
-- vac.init.semantic-plan
-- vac.init.command-gate
-- vac.init.policy-evaluator
-- vac.init.risk-policy
-- vac.init.control-plane
-- vac.init.schema-envelope
-- vac.tui.operator-visual-gate
-- vac.tui.operator-live-adapter
-- vac.tui.ansi-style
+- vac.approvals
 - vac.autopilot.scheduler
-- vac.tui
-- vac.tui.capability-dashboard-runtime
-- vac.tui.agent-streaming-runtime
-- vac.tui.approval-popup-safety
 - vac.autopilot.scheduler-monitor-only
-- vac.tui.operator-visual-fidelity-matrix
-- vac.tui.spec-driven-consolidation
-- vac.tui.source-artifact-hygiene
-- vac.init.manifest-contracts
-- vac.init.registry-validator
+- vac.chat
+- vac.identity
+- vac.identity.check
+- vac.init.approval-binding
+- vac.init.command-gate
+- vac.init.control-plane
+- vac.init.evidence-chain
 - vac.init.lifecycle
+- vac.init.manifest-contracts
 - vac.init.ownership-scanner
+- vac.init.patch-guard
+- vac.init.policy-evaluator
+- vac.init.registry-validator
+- vac.init.risk-policy
+- vac.init.schema-envelope
+- vac.init.semantic-plan
+- vac.ownership
+- vac.sandbox
+- vac.sessions
+- vac.tools
+- vac.tui
+- vac.tui.agent-streaming-runtime
+- vac.tui.ansi-style
+- vac.tui.approval-popup-safety
+- vac.tui.capability-dashboard-runtime
+- vac.tui.operator-live-adapter
+- vac.tui.operator-visual-fidelity-matrix
+- vac.tui.operator-visual-gate
+- vac.tui.source-artifact-hygiene
+- vac.tui.spec-driven-consolidation
+- vac.workflow
 routes:
 - kind: tui
   path: /
-  capability: vac.tui
-  owner: vac-tui/lib
+  capability: vac.chat
+  owner: vac-capability-chat/contract
   visible: true
   status: ready
 - kind: tui
   path: /capabilities
   capability: vac.tui
-  owner: vac-tui/lib
+  owner: vac-surface-tui/lib
   visible: true
   status: ready
 - kind: tui
   path: /workflow
-  capability: vac.tui
-  owner: vac-tui/lib
+  capability: vac.workflow
+  owner: vac-control-plane/control_plane
   visible: true
   status: ready
 - kind: tui
   path: /debug-config
-  capability: vac.tui
-  owner: vac-tui/lib
+  capability: vac.identity
+  owner: vac-capability-identity/contract
   visible: true
   status: ready
 - kind: tui
   path: /activity
-  capability: vac.tui
-  owner: vac-tui/lib
+  capability: vac.sessions
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: tui
   path: /approvals
-  capability: vac.tui
-  owner: vac-tui/lib
+  capability: vac.approvals
+  owner: vac-control-plane/control_plane.approval_lifecycle
   visible: true
   status: ready
 - kind: tui
   path: /evidence
   capability: vac.tui
-  owner: vac-tui/lib
+  owner: vac-surface-tui/lib
   visible: true
   status: ready
 - kind: tui
   path: /runtime
   capability: vac.autopilot.scheduler
-  owner: vac-tui/operator_ui
+  owner: vac-surface-tui/operator_ui
   visible: true
   status: ready
 - kind: tui
   path: /runtime/jobs
   capability: vac.autopilot.scheduler
-  owner: vac-tui/operator_ui
+  owner: vac-surface-tui/operator_ui
   visible: true
   status: ready
 - kind: tui
   path: /visual-gate
   capability: vac.tui.operator-visual-gate
-  owner: vac-tui/operator_ui
+  owner: vac-surface-tui/operator_ui
   visible: false
   status: ready
 - kind: tui
   path: /style-tokens
   capability: vac.tui.ansi-style
-  owner: vac-tui/operator_style
+  owner: vac-surface-tui/operator_style
   visible: false
   status: ready
 - kind: tui
   path: /agent-streaming
   capability: vac.tui.agent-streaming-runtime
-  owner: vac-tui/operator_ui
+  owner: vac-surface-tui/operator_ui
   visible: false
   status: ready
 - kind: tui
   path: /approval-popup
   capability: vac.tui.approval-popup-safety
-  owner: vac-tui/bottom_pane.approval_overlay
+  owner: vac-surface-tui/bottom_pane.approval_overlay
   visible: false
   status: ready
 - kind: tui
   path: /visual-matrix
   capability: vac.tui.operator-visual-fidelity-matrix
-  owner: vac-tui/operator_ui
+  owner: vac-surface-tui/operator_ui
   visible: false
   status: ready
 - kind: tui
   path: /hardening
   capability: vac.tui.spec-driven-consolidation
-  owner: vac-tui/operator_ui
+  owner: vac-surface-tui/operator_ui
   visible: false
   status: ready
 - kind: tui
   path: /artifact-hygiene
   capability: vac.tui.source-artifact-hygiene
-  owner: vac-tui/operator_ui
+  owner: vac-surface-tui/operator_ui
   visible: false
   status: ready
 - kind: tui
   path: /runtime/monitor-only
   capability: vac.autopilot.scheduler-monitor-only
-  owner: vac-tui/operator_ui
+  owner: vac-surface-tui/operator_ui
   visible: false
   status: ready
 - kind: tui
   path: /vac-init
   capability: vac.init.control-plane
-  owner: vac-core/control_plane/schema_envelope
+  owner: vac-core/control_plane::schema_envelope
   visible: false
   status: partial
   reason: Full interactive init progress surface is scheduled for the lifecycle/TUI integration batches.
@@ -142,36 +151,114 @@ routes:
 - kind: tui
   path: /init/manifests
   capability: vac.init.manifest-contracts
-  owner: vac-tui/capability_dashboard
+  owner: vac-core/control_plane::vac_init_manifest_contract
   visible: false
   status: ready
 - kind: tui
   path: /init/registry
   capability: vac.init.registry-validator
-  owner: vac-tui/capability_dashboard
+  owner: vac-core/control_plane::vac_init_registry_validator
   visible: false
   status: ready
 - kind: tui
   path: /init/lifecycle
   capability: vac.init.lifecycle
-  owner: vac-tui/capability_dashboard
+  owner: vac-core/control_plane::vac_init_lifecycle
   visible: false
   status: ready
 - kind: tui
   path: /init/ownership
   capability: vac.init.ownership-scanner
-  owner: vac-tui/capability_dashboard
+  owner: vac-core/control_plane::vac_init_ownership_scanner
+  visible: false
+  status: ready
+- kind: tui
+  path: /init/evidence-chain
+  capability: vac.init.evidence-chain
+  owner: vac-core/control_plane::vac_init_evidence_chain
+  visible: false
+  status: ready
+- kind: tui
+  path: /init/patch-guard
+  capability: vac.init.patch-guard
+  owner: vac-core/control_plane::vac_init_patch_guard
+  visible: false
+  status: ready
+- kind: tui
+  path: /init/approval-binding
+  capability: vac.init.approval-binding
+  owner: vac-core/control_plane::vac_init_approval_binding
+  visible: false
+  status: ready
+- kind: tui
+  path: /init/semantic-plan
+  capability: vac.init.semantic-plan
+  owner: vac-core/control_plane::vac_init_semantic_plan
+  visible: false
+  status: ready
+- kind: tui
+  path: /init/command-gate
+  capability: vac.init.command-gate
+  owner: vac-core/control_plane::vac_init_command_gate
+  visible: false
+  status: ready
+- kind: tui
+  path: /init/policy-evaluator
+  capability: vac.init.policy-evaluator
+  owner: vac-core/control_plane::vac_init_policy_evaluator
+  visible: false
+  status: ready
+- kind: tui
+  path: /init/risk-policy
+  capability: vac.init.risk-policy
+  owner: vac-core/control_plane::vac_init_risk_policy
+  visible: false
+  status: ready
+- kind: tui
+  path: /init/schema-envelope
+  capability: vac.init.schema-envelope
+  owner: vac-core/control_plane::schema_envelope
+  visible: false
+  status: ready
+- kind: tui
+  path: /capabilities/runtime
+  capability: vac.tui.capability-dashboard-runtime
+  owner: vac-surface-tui/capability_dashboard
+  visible: false
+  status: ready
+- kind: tui
+  path: /operator-live-adapter
+  capability: vac.tui.operator-live-adapter
+  owner: vac-surface-tui/operator_ui_styles
   visible: false
   status: ready
 
 # VAC-Init Batch 13-15 readiness routes
-vac_init_batch13_15:
-  capabilities:
-    - vac.init.safe-rationale
-    - vac.init.memory-governance
-    - vac.init.doctor-release
-  commands:
-    - bash scripts/check-vac-init-batch13-15-contract.sh
-  routes:
-    - /capabilities
-    - /runtime
+- kind: tui
+  path: /capabilities/vac.tools
+  capability: vac.tools
+  owner: vac-capability-tools/contract
+  visible: false
+  status: ready
+  reason: Capability dashboard drilldown route for root feature conversion coverage.
+- kind: tui
+  path: /capabilities/vac.sandbox
+  capability: vac.sandbox
+  owner: vac-core/sandboxing
+  visible: false
+  status: ready
+  reason: Capability dashboard drilldown route for root feature conversion coverage.
+- kind: tui
+  path: /capabilities/vac.identity-check
+  capability: vac.identity.check
+  owner: vac-control-plane/control_plane.identity_check
+  visible: false
+  status: ready
+  reason: Capability dashboard drilldown route for root feature conversion coverage.
+- kind: tui
+  path: /capabilities/vac.ownership
+  capability: vac.ownership
+  owner: vac-capability-ownership/project_workspace
+  visible: false
+  status: ready
+  reason: Capability dashboard drilldown route for root feature conversion coverage.

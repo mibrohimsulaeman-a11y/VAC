@@ -19,16 +19,15 @@ depends_on:
 - vac.tui.ansi-style
 - vac.tui.operator-live-adapter
 surfaces:
-  tui:
-    routes:
-    - /
-    - /capabilities
-    - /runtime
-  slash:
+  cli:
+    enabled: true
     commands:
-    - /capabilities
-    - /runtime
-  palette: true
+    - bash scripts/check-tui-renderer-semantic-contract.sh
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -58,5 +57,3 @@ validation:
   - semantic_line_span_specs
   - ansi_strip_round_trip
   - live_adapter_uses_specs
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

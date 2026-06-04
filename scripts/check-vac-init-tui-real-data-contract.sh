@@ -9,8 +9,6 @@ require_grep() { grep -qE "$1" "$2" || fail "missing pattern in $2: $1"; }
 SRC="vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_tui_real_data.rs"
 require_file "$SRC"
 require_file scripts/check-vac-init-tui-real-data-contract.sh
-require_file docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_F_TUI_REAL_DATA.md
-require_file docs/validation/PRODUCTION_HARDENING_F1_F3_VALIDATION.md
 require_file .vac/capabilities/tui-real-data.yaml
 require_file .vac/workflows/maintenance.tui-real-data.yaml
 require_grep "load_capability_dashboard_data_from_workspace" "$SRC"
@@ -24,7 +22,7 @@ python3 - <<'PY'
 import pathlib, yaml
 cap = yaml.safe_load(pathlib.Path('.vac/capabilities/tui-real-data.yaml').read_text())
 wf = yaml.safe_load(pathlib.Path('.vac/workflows/maintenance.tui-real-data.yaml').read_text())
-for field in ('owner', 'ownership', 'policy', 'surfaces', 'validation', 'docs'):
+for field in ('owner', 'ownership', 'policy', 'surfaces', 'validation'):
     assert cap.get(field), f'capability missing {field}'
 for command in cap['validation']['commands'] + wf['validation']['commands']:
     assert isinstance(command, dict), 'validation command must be structured'

@@ -1,5 +1,5 @@
 schema_version: 1
-kind: provider_identity_config
+kind: registry_status
 id: provider.identity.default_off
 updated_at: 2026-06-02T00:00:00Z
 identity:

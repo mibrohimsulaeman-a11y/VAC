@@ -8,40 +8,36 @@ owner:
   module: control_plane::vac_init_patch_guard
 ownership:
   crates:
-    - vac-core
+  - vac-core
   modules:
-    - control_plane::vac_init_patch_guard
-    - control_plane::vac_init_policy_evaluator
-    - control_plane::vac_init_evidence_chain
-    - control_plane::vac_init_approval_binding
-    - control_plane::vac_init_risk_policy
+  - control_plane::vac_init_patch_guard
+  - control_plane::vac_init_policy_evaluator
+  - control_plane::vac_init_evidence_chain
+  - control_plane::vac_init_approval_binding
+  - control_plane::vac_init_risk_policy
   targets:
-    - crate_name: vac-core
-      module: control_plane::vac_init_patch_guard
-    - crate_name: vac-core
-      module: control_plane::vac_init_policy_evaluator
-    - crate_name: vac-core
-      module: control_plane::vac_init_evidence_chain
-    - crate_name: vac-core
-      module: control_plane::vac_init_approval_binding
-    - crate_name: vac-core
-      module: control_plane::vac_init_risk_policy
+  - crate_name: vac-core
+    module: control_plane::vac_init_patch_guard
+  - crate_name: vac-core
+    module: control_plane::vac_init_policy_evaluator
+  - crate_name: vac-core
+    module: control_plane::vac_init_evidence_chain
+  - crate_name: vac-core
+    module: control_plane::vac_init_approval_binding
+  - crate_name: vac-core
+    module: control_plane::vac_init_risk_policy
 description: Adds rustc-free evidence that VAC-Init GAP-B fixtures exist and GAP-C semantic anchor resolution is implemented fail-closed.
 depends_on:
-  - vac.init.patch-guard
-  - vac.init.policy-evaluator
-  - vac.init.evidence-chain
-  - vac.init.approval-binding
-  - vac.init.risk-policy
+- vac.init.patch-guard
+- vac.init.policy-evaluator
+- vac.init.evidence-chain
+- vac.init.approval-binding
+- vac.init.risk-policy
 surfaces:
   cli:
     enabled: true
     commands:
-      - bash scripts/check-vac-init-gap-bc-depth-static.sh
-  palette: true
-  tui:
-    routes:
-      - /capabilities
+    - bash scripts/check-vac-init-gap-bc-depth-static.sh
 policy:
   risk: safe_read
   mutates_files: false
@@ -49,19 +45,17 @@ policy:
   redaction: false
   approval_required_for: []
 states:
-  - empty
-  - loading
-  - success
-  - failure
+- empty
+- loading
+- success
+- failure
 validation:
   gates:
-    - vac_init_gap_bc_depth_static
+  - vac_init_gap_bc_depth_static
   commands:
-    - id: vac.init.gap-bc-depth.validation.cmd001
-      runner: bash
-      args:
-        - scripts/check-vac-init-gap-bc-depth-static.sh
-      risk: safe_read
-      approval: never
-docs:
-  - docs/vac-init/VAC_INIT_GAP_BC_DEPTH_REMEDIATION.md
+  - id: vac.init.gap-bc-depth.validation.cmd001
+    runner: bash
+    args:
+    - scripts/check-vac-init-gap-bc-depth-static.sh
+    risk: safe_read
+    approval: never

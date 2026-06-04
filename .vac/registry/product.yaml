@@ -1,11 +1,9 @@
 schema_version: 1
-kind: registry_status
-id: vac.registry.product
+kind: product
+id: vac
 title: VAC
 command: vac
 status: ready
 control_plane: .vac
 runtime: vac-rs
 launcher: vac-cli/bin/vac.js
-legacy_kind: product
-legacy_id: vac

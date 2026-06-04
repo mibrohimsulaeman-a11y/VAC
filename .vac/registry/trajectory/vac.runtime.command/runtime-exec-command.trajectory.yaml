@@ -1,0 +1,11 @@
+schema_version: 1
+kind: trajectory
+id: trajectory.vac.runtime.command.runtime.exec.command
+file: runtime/exec-command
+capability: vac.runtime.command
+evidence:
+  - evidence.runtime.exec-command.1780496820
+rationale:
+  summary: "Runtime command completed with exit_code=0; command display is recorded without raw chain-of-thought: runtime.exec-command"
+  excluded:
+    raw_chain_of_thought: true

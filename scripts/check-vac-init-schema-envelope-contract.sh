@@ -28,33 +28,29 @@ require_grep() {
   fi
 }
 
-require_file vac-rs/control-plane/src/control_plane/schema_envelope.rs
-require_file vac-rs/control-plane/src/control_plane/kind_registry.rs
+require_file vac-rs/crates/control-plane/control-plane/src/control_plane/schema_envelope.rs
+require_file vac-rs/crates/control-plane/control-plane/src/control_plane/kind_registry.rs
 require_file .vac/capabilities/vac-init-control-plane.yaml
 require_file .vac/capabilities/vac-init-schema-envelope.yaml
 require_file .vac/workflows/maintenance.vac-init-baseline-audit.yaml
 require_file .vac/workflows/maintenance.vac-init-schema-envelope.yaml
 require_file scripts/check-vac-init-baseline-contract.sh
-require_file docs/vac-init/VAC_INIT_EXECUTION_PLAN.md
-require_file docs/vac-init/VAC_INIT_IMPLEMENTATION_MAP.md
-require_file docs/validation/VAC_INIT_BASELINE_AUDIT.md
-require_file docs/validation/VAC_INIT_SCHEMA_ENVELOPE_GATE.md
 
-require_grep 'pub struct SchemaEnvelope' vac-rs/control-plane/src/control_plane/schema_envelope.rs
-require_grep 'pub struct SchemaEnvelopeFields' vac-rs/control-plane/src/control_plane/schema_envelope.rs
-require_grep 'SUPPORTED_SCHEMA_VERSION: u32 = 1' vac-rs/control-plane/src/control_plane/schema_envelope.rs
-require_grep 'parse_schema_envelope_from_yaml_str' vac-rs/control-plane/src/control_plane/schema_envelope.rs
-require_grep 'validate_manifest_id' vac-rs/control-plane/src/control_plane/schema_envelope.rs
-require_grep 'pub enum VacManifestKind' vac-rs/control-plane/src/control_plane/kind_registry.rs
-require_grep 'KIND_REGISTRY' vac-rs/control-plane/src/control_plane/kind_registry.rs
-require_grep 'CurrentWorkspaceCompatibility' vac-rs/control-plane/src/control_plane/kind_registry.rs
-for kind in capability policy workflow workflow_step surface registry_status domains init_state evidence plan approval_request ownership_report memory_record risk_finding migration trajectory test_assertion product status donor_inventory; do
-  require_grep "\"$kind\"" vac-rs/control-plane/src/control_plane/kind_registry.rs
+require_grep 'pub struct SchemaEnvelope' vac-rs/crates/control-plane/control-plane/src/control_plane/schema_envelope.rs
+require_grep 'pub struct SchemaEnvelopeFields' vac-rs/crates/control-plane/control-plane/src/control_plane/schema_envelope.rs
+require_grep 'SUPPORTED_SCHEMA_VERSION: u32 = 1' vac-rs/crates/control-plane/control-plane/src/control_plane/schema_envelope.rs
+require_grep 'parse_schema_envelope_from_yaml_str' vac-rs/crates/control-plane/control-plane/src/control_plane/schema_envelope.rs
+require_grep 'validate_manifest_id' vac-rs/crates/control-plane/control-plane/src/control_plane/schema_envelope.rs
+require_grep 'pub enum VacManifestKind' vac-rs/crates/control-plane/control-plane/src/control_plane/kind_registry.rs
+require_grep 'KIND_REGISTRY' vac-rs/crates/control-plane/control-plane/src/control_plane/kind_registry.rs
+require_grep 'CurrentWorkspaceCompatibility' vac-rs/crates/control-plane/control-plane/src/control_plane/kind_registry.rs
+for kind in capability policy workflow workflow_step surface registry_status domains init_state evidence plan approval_request ownership_report memory_record risk_finding migration trajectory test_assertion runtime_owner_support semantic_plan product status donor_inventory; do
+  require_grep "\"$kind\"" vac-rs/crates/control-plane/control-plane/src/control_plane/kind_registry.rs
 done
-require_grep 'pub mod schema_envelope;' vac-rs/control-plane/src/control_plane/mod.rs
-require_grep 'pub mod kind_registry;' vac-rs/control-plane/src/control_plane/mod.rs
-require_grep 'pub use schema_envelope::SchemaEnvelope;' vac-rs/control-plane/src/control_plane/mod.rs
-require_grep 'pub use kind_registry::VacManifestKind;' vac-rs/control-plane/src/control_plane/mod.rs
+require_grep 'pub mod schema_envelope;' vac-rs/crates/control-plane/control-plane/src/control_plane/mod.rs
+require_grep 'pub mod kind_registry;' vac-rs/crates/control-plane/control-plane/src/control_plane/mod.rs
+require_grep 'pub use schema_envelope::SchemaEnvelope;' vac-rs/crates/control-plane/control-plane/src/control_plane/mod.rs
+require_grep 'pub use kind_registry::VacManifestKind;' vac-rs/crates/control-plane/control-plane/src/control_plane/mod.rs
 
 require_grep '^schema_version: 1$' .vac/capabilities/vac-init-schema-envelope.yaml
 require_grep '^kind: capability$' .vac/capabilities/vac-init-schema-envelope.yaml
@@ -64,9 +60,9 @@ require_grep '^kind: workflow$' .vac/workflows/maintenance.vac-init-schema-envel
 require_grep '^id: maintenance\.vac-init-schema-envelope$' .vac/workflows/maintenance.vac-init-schema-envelope.yaml
 require_grep 'vac\.init\.schema-envelope' .vac/surfaces/cli.yaml
 
-"$RUSTC_BIN" --edition 2024 --cfg vac_standalone_schema_envelope --test vac-rs/control-plane/src/control_plane/schema_envelope.rs -o "$SCHEMA_TEST"
+"$RUSTC_BIN" --edition 2024 --cfg vac_standalone_schema_envelope --test vac-rs/crates/control-plane/control-plane/src/control_plane/schema_envelope.rs -o "$SCHEMA_TEST"
 "$SCHEMA_TEST" --nocapture
-"$RUSTC_BIN" --edition 2024 --test vac-rs/control-plane/src/control_plane/kind_registry.rs -o "$KIND_TEST"
+"$RUSTC_BIN" --edition 2024 --test vac-rs/crates/control-plane/control-plane/src/control_plane/kind_registry.rs -o "$KIND_TEST"
 "$KIND_TEST" --nocapture
 
 python3 - <<'PY'
@@ -80,6 +76,7 @@ known = {
     'registry_status', 'domains', 'init_state', 'evidence', 'plan',
     'approval_request', 'ownership_report', 'memory_record', 'risk_finding',
     'migration', 'trajectory', 'test_assertion',
+    'runtime_owner_support', 'semantic_plan',
     # Current-workspace compatibility descriptors kept until registry migration.
     'product', 'status', 'donor_inventory',
 }

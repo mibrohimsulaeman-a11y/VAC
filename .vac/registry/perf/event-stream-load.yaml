@@ -1,5 +1,5 @@
 schema_version: 1
-kind: perf_evidence
+kind: registry_status
 id: perf.event-stream-load
 status: NotEvaluated
 reason: cargo_or_runtime_missing

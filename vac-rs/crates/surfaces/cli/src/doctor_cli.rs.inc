@@ -3,7 +3,9 @@ use clap::Subcommand;
 use serde_yaml::Value;
 use std::ffi::OsString;
 use std::fs;
+use std::path::Path;
 use std::path::PathBuf;
+use std::time::SystemTime;
 use vac_core::control_plane::load_architecture_invariant_report;
 use vac_core::control_plane::load_control_plane_registry_report;
 use vac_core::control_plane::load_docs_maintenance_report;
@@ -187,6 +189,15 @@ struct WorkflowDoctorCommand {
 
 impl WorkflowDoctorCommand {
     fn run(self) {
+        let report = load_workflow_run_report(&self.path);
+        println!("{}", report.render_text());
+        if self.visibility_contract {
+            println!("surface visibility contract: enforced");
+            println!("  - planned + visible=true is rejected");
+            println!("  - ready + visible=false is rejected");
+            println!("  - partial routes require reason/degraded guidance");
+        }
+
         let aggregate = build_real_doctor_aggregate(&self.path);
 
         println!("VAC Doctor Taxonomy Aggregate");
@@ -197,15 +208,6 @@ impl WorkflowDoctorCommand {
         }
         if aggregate.exit_code != 0 {
             std::process::exit(aggregate.exit_code);
-        }
-
-        let report = load_workflow_run_report(&self.path);
-        println!("{}", report.render_text());
-        if self.visibility_contract {
-            println!("surface visibility contract: enforced");
-            println!("  - planned + visible=true is rejected");
-            println!("  - ready + visible=false is rejected");
-            println!("  - partial routes require reason/degraded guidance");
         }
         if report.is_failure() {
             std::process::exit(1);
@@ -692,18 +694,93 @@ fn doctor_check_from_failure(
     DoctorCheckReport::new(kind, status, findings)
 }
 
-fn build_not_evaluated_build_check() -> DoctorCheckReport {
+fn build_not_evaluated_build_check(message: impl Into<String>) -> DoctorCheckReport {
     DoctorCheckReport::new(
         DoctorKind::Build,
         DoctorStatus::Warning,
         vec![DoctorFinding {
             code: "doctor.build.not_evaluated".to_string(),
             severity: DoctorSeverity::Warning,
-            message: "build doctor was not executed by release aggregate; run `vac doctor build .` explicitly".to_string(),
+            message: message.into(),
             path: None,
-            hint: Some("minimal sandbox readiness must report unexecuted build gates as warning/not evaluated, never pass".to_string()),
+            hint: Some("run `cargo build --manifest-path vac-rs/Cargo.toml -p vac-surface-cli` or `vac doctor build .` before release aggregation".to_string()),
         }],
     )
+}
+
+fn build_artifact_doctor_check(path: &Path) -> DoctorCheckReport {
+    let binary_name = if cfg!(windows) { "vac.exe" } else { "vac" };
+    let binary = path.join("vac-rs").join("target").join("debug").join(binary_name);
+    let Ok(binary_meta) = fs::metadata(&binary) else {
+        return build_not_evaluated_build_check(format!(
+            "build artifact not found at {}; run cargo build for vac-cli",
+            binary.display()
+        ));
+    };
+    let Ok(binary_modified) = binary_meta.modified() else {
+        return build_not_evaluated_build_check(format!(
+            "build artifact mtime unreadable at {}; rebuild before release aggregation",
+            binary.display()
+        ));
+    };
+
+    let mut latest_source = None;
+    for source_root in [
+        path.join("vac-rs").join("Cargo.toml"),
+        path.join("vac-rs").join("Cargo.lock"),
+        path.join("vac-rs").join("core"),
+        path.join("vac-rs").join("crates"),
+    ] {
+        collect_latest_source_mtime(&source_root, &mut latest_source);
+    }
+
+    if latest_source.is_some_and(|modified| modified > binary_modified) {
+        return build_not_evaluated_build_check(format!(
+            "build artifact {} is older than source changes; rebuild vac-cli",
+            binary.display()
+        ));
+    }
+
+    DoctorCheckReport::new(
+        DoctorKind::Build,
+        DoctorStatus::Pass,
+        vec![DoctorFinding {
+            code: "doctor.build.fresh_artifact".to_string(),
+            severity: DoctorSeverity::Info,
+            message: format!("fresh build artifact found at {}", binary.display()),
+            path: Some(binary.display().to_string()),
+            hint: None,
+        }],
+    )
+}
+
+fn collect_latest_source_mtime(path: &Path, latest: &mut Option<SystemTime>) {
+    let Ok(metadata) = fs::metadata(path) else {
+        return;
+    };
+    if metadata.is_file() {
+        if let Ok(modified) = metadata.modified() {
+            if latest.is_none_or(|current| modified > current) {
+                *latest = Some(modified);
+            }
+        }
+        return;
+    }
+    if !metadata.is_dir() {
+        return;
+    }
+    let Some(name) = path.file_name().and_then(|name| name.to_str()) else {
+        return;
+    };
+    if matches!(name, "target" | ".git" | "donor") {
+        return;
+    }
+    let Ok(entries) = fs::read_dir(path) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        collect_latest_source_mtime(&entry.path(), latest);
+    }
 }
 
 fn count_release_ownership_context(path: &PathBuf) -> (usize, usize) {
@@ -763,7 +840,7 @@ fn build_real_doctor_aggregate(path: &PathBuf) -> vac_core::control_plane::Docto
                 "workflow doctor evaluated real workflow report",
             ),
             evidence.as_check(DoctorKind::Evidence),
-            build_not_evaluated_build_check(),
+            build_artifact_doctor_check(path),
             memory.as_check(DoctorKind::Memory),
             init.as_check(DoctorKind::Init),
         ],
@@ -2197,6 +2274,7 @@ validation:
     fn surfaces_doctor_helper_compiles_for_root_paths() {
         let _ = SurfacesDoctorCommand {
             path: PathBuf::from("."),
+            visibility_contract: false,
         };
     }
 
@@ -2204,6 +2282,7 @@ validation:
     fn workflow_doctor_helper_compiles_for_root_paths() {
         let _ = WorkflowDoctorCommand {
             path: PathBuf::from("."),
+            visibility_contract: false,
         };
     }
 
@@ -2240,6 +2319,7 @@ validation:
     fn architecture_doctor_helper_compiles_for_root_paths() {
         let _ = ArchitectureDoctorCommand {
             path: PathBuf::from("."),
+            visibility_contract: false,
         };
     }
 
@@ -2287,6 +2367,7 @@ validation:
     fn docs_doctor_helper_compiles_for_root_paths() {
         let _ = DocsDoctorCommand {
             path: PathBuf::from("."),
+            visibility_contract: false,
         };
     }
 

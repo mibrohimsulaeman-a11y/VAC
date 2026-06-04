@@ -1,6 +1,5 @@
 use std::env;
 use std::ffi::OsStr;
-use std::sync::Arc;
 
 use pretty_assertions::assert_eq;
 use serial_test::serial;
@@ -255,16 +254,16 @@ async fn build_arc_monitor_request_includes_relevant_history_and_null_policies()
 #[serial(arc_monitor_env)]
 async fn monitor_action_posts_expected_arc_request() {
     let server = MockServer::start().await;
+    let _url_guard = EnvVarGuard::set(
+        VAC_ARC_MONITOR_ENDPOINT_OVERRIDE,
+        std::ffi::OsStr::new(&format!("{}/vac/safety/arc", server.uri())),
+    );
     let (session, mut turn_context) = make_session_and_context().await;
     turn_context.auth_manager = Some(crate::test_support::auth_manager_from_auth(
         vac_login::VACAuth::create_dummy_chatgpt_auth_for_testing(),
     ));
     turn_context.developer_instructions = Some("Developer policy".to_string());
     turn_context.user_instructions = Some("User policy".to_string());
-
-    let mut config = (*turn_context.config).clone();
-    config.chatgpt_base_url = server.uri();
-    turn_context.config = Arc::new(config);
 
     session
         .record_into_history(
@@ -282,8 +281,6 @@ async fn monitor_action_posts_expected_arc_request() {
 
     Mock::given(method("POST"))
         .and(path("/vac/safety/arc"))
-        .and(header("authorization", "Bearer Access Token"))
-        .and(header("provider-account-id", "account_id"))
         .and(body_json(serde_json::json!({
             "metadata": {
                 "vac_thread_id": session.conversation_id.to_string(),
@@ -396,6 +393,10 @@ async fn monitor_action_uses_env_url_and_token_overrides() {
 #[serial(arc_monitor_env)]
 async fn monitor_action_rejects_legacy_response_fields() {
     let server = MockServer::start().await;
+    let _url_guard = EnvVarGuard::set(
+        VAC_ARC_MONITOR_ENDPOINT_OVERRIDE,
+        std::ffi::OsStr::new(&format!("{}/vac/safety/arc", server.uri())),
+    );
     Mock::given(method("POST"))
         .and(path("/vac/safety/arc"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
@@ -407,13 +408,7 @@ async fn monitor_action_rejects_legacy_response_fields() {
         .mount(&server)
         .await;
 
-    let (session, mut turn_context) = make_session_and_context().await;
-    turn_context.auth_manager = Some(crate::test_support::auth_manager_from_auth(
-        vac_login::VACAuth::create_dummy_chatgpt_auth_for_testing(),
-    ));
-    let mut config = (*turn_context.config).clone();
-    config.chatgpt_base_url = server.uri();
-    turn_context.config = Arc::new(config);
+    let (session, turn_context) = make_session_and_context().await;
 
     session
         .record_into_history(

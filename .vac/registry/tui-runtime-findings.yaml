@@ -1,5 +1,5 @@
 schema_version: 1
-kind: tui_runtime_findings
+kind: registry_status
 id: findings.o5o6.snapshot8.tui-source-closure
 updated_at: 2026-06-03T00:00:00Z
 source_checkpoint: vac-o5o6-zero-residual-static-validated-toolchain-blocked

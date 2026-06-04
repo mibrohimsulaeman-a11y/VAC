@@ -41,11 +41,17 @@ impl UpdateAction {
             UpdateAction::BrewUpgrade => ("brew", &["upgrade", "--cask", "vac"]),
             UpdateAction::StandaloneUnix => (
                 "sh",
-                &["-c", "curl -fsSL https://developers.vastar.com/vac/install.sh | sh"],
+                &[
+                    "-c",
+                    "curl -fsSL https://developers.vastar.com/vac/install.sh | sh",
+                ],
             ),
             UpdateAction::StandaloneWindows => (
                 "powershell",
-                &["-c", "irm https://developers.vastar.com/vac/install.ps1|iex"],
+                &[
+                    "-c",
+                    "irm https://developers.vastar.com/vac/install.ps1|iex",
+                ],
             ),
         }
     }
@@ -113,14 +119,20 @@ mod tests {
             UpdateAction::StandaloneUnix.command_args(),
             (
                 "sh",
-                &["-c", "curl -fsSL https://developers.vastar.com/vac/install.sh | sh"][..],
+                &[
+                    "-c",
+                    "curl -fsSL https://developers.vastar.com/vac/install.sh | sh"
+                ][..],
             )
         );
         assert_eq!(
             UpdateAction::StandaloneWindows.command_args(),
             (
                 "powershell",
-                &["-c", "irm https://developers.vastar.com/vac/install.ps1|iex"][..],
+                &[
+                    "-c",
+                    "irm https://developers.vastar.com/vac/install.ps1|iex"
+                ][..],
             )
         );
     }

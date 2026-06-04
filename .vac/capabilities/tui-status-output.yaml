@@ -17,12 +17,18 @@ description: Hardened /status surface that keeps active model, always-visible ac
 depends_on:
 - vac.tui
 surfaces:
+  cli:
+    enabled: true
+    commands:
+    - bash scripts/check-tui-status-output-contract.sh
   slash:
     commands:
     - /status
-  tui:
-    routes:
-    - /status
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -63,8 +69,3 @@ validation:
   - status_display_policy_rejects_quota_balance_rows
   - slash_status_asserts_local_only_policy
   - ambient_limit_warnings_not_routed_to_status_breakdown
-docs:
-- docs/tui/OPERATOR_UI_HARDENING_03_STATUS_OUTPUT.md
-- docs/tui/STATUS_OUTPUT_DEEP_HARDENING.md
-- docs/validation/TUI_STATUS_OUTPUT_GATE.md
-- docs/validation/TUI_STATUS_OUTPUT_DEEP_GATE.md

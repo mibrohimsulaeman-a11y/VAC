@@ -14,7 +14,6 @@ ownership:
   targets:
   - kind: path
     include:
-    - docs/dogfood/**
     - .vac/registry/plans/plan.dogfood.assistant-model.vac-session.yaml
     - .vac/registry/evidence/evidence.2026-05-30-dogfood-assistant-model.yaml
     - .vac/registry/trajectory/dogfood-assistant-model.yaml
@@ -39,11 +38,6 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-vac-dogfood-session.sh
-  palette: true
-  tui:
-    routes:
-    - /workflow
-    - /evidence
 states:
 - empty
 - loading
@@ -59,5 +53,3 @@ validation:
     - scripts/check-vac-dogfood-session.sh
     risk: execute_process
     approval: policy
-docs:
-- docs/dogfood/2026-05-30-assistant-model-vac-dogfood.md

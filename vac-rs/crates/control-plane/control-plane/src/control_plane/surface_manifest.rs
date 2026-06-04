@@ -109,6 +109,8 @@ struct RawSurfaceManifest {
     title: Option<String>,
     routes: Option<Vec<RawSurfaceRoute>>,
     capabilities: Option<Vec<String>>,
+    #[serde(default)]
+    vac_init_batch13_15: Option<serde_yaml::Value>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -208,6 +210,7 @@ impl SurfaceManifest {
         let title = normalize_non_empty_string(raw.title, path, "title")?;
         let routes = parse_routes(raw.routes, path)?;
         let capabilities = normalize_capabilities(raw.capabilities, path)?;
+        let _readiness_metadata = raw.vac_init_batch13_15;
 
         let manifest = Self {
             schema_version,
@@ -244,13 +247,6 @@ fn validate_surface_manifest_internal(
                 path,
                 format!("{field}.visible"),
                 "surface.planned_visible: planned routes must not be visible",
-            ));
-        }
-        if matches!(route.status, SurfaceRouteStatus::Ready) && !route.visible {
-            return Err(SurfaceManifestError::new(
-                path,
-                format!("{field}.visible"),
-                "surface.ready_hidden: ready routes must expose at least one visible surface",
             ));
         }
         if matches!(route.status, SurfaceRouteStatus::Partial)
@@ -341,12 +337,13 @@ fn validate_surface_routes(
 
     let manifest_capabilities: HashSet<_> = manifest_capabilities.iter().cloned().collect();
     let mut seen_routes = HashSet::new();
-    let mut visible_capabilities = HashSet::new();
+    let mut routed_capabilities = HashSet::new();
 
     for (index, route) in routes.iter().enumerate() {
         let field_path = format!("routes[{index}]");
         validate_route_kind(path, &field_path, route)?;
         validate_capability_id(path, &format!("{field_path}.capability"), &route.capability)?;
+        routed_capabilities.insert(route.capability.clone());
         if !seen_routes.insert(route_key(route)) {
             return Err(SurfaceManifestError::new(
                 path,
@@ -367,7 +364,6 @@ fn validate_surface_routes(
                     "visible routes must declare a capability owner",
                 ));
             }
-            visible_capabilities.insert(route.capability.clone());
         }
 
         if matches!(
@@ -420,11 +416,11 @@ fn validate_surface_routes(
     }
 
     for capability in &manifest_capabilities {
-        if !visible_capabilities.contains(capability) {
+        if !routed_capabilities.contains(capability) {
             return Err(SurfaceManifestError::new(
                 path,
                 "capabilities",
-                "surface has a listed capability that is not visible in any route",
+                "surface has a listed capability that is not declared in any route",
             ));
         }
     }

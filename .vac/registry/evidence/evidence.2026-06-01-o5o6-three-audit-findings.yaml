@@ -1,6 +1,8 @@
 schema_version: 1
 kind: evidence
 id: evidence.2026-06-01-o5o6-three-audit-findings
+chain:
+  self_hash: 0571afdf3a64f0303e7c0e7af2a14fb1320a32e99279f1d9c2902f3b29c2eaac
 timestamp: 2026-06-01T23:45:00Z
 plan_id: plan.o5o6.three-audit-findings
 capability: vac.o5o6.monolith-quality

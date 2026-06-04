@@ -13,9 +13,18 @@ path = "src/main.rs"
 name = "md-events"
 path = "src/bin/md-events.rs"
 
+[[bin]]
+name = "operator-style-snapshot-harness"
+path = "tools/operator_style_snapshot_harness.rs"
+
+[[bin]]
+name = "operator-ui-snapshot-harness"
+path = "tools/operator_ui_snapshot_harness.rs"
+
 [lib]
 name = "vac_tui"
 path = "src/lib.rs"
+
 
 [lints]
 workspace = true
@@ -31,19 +40,142 @@ feedback = ["vac-feedback/feedback-upload"]
 
 [dependencies]
 anyhow = { workspace = true }
+base64 = { workspace = true }
+chrono = { workspace = true, features = ["serde"] }
 clap = { workspace = true, features = ["derive"] }
-pulldown-cmark = { workspace = true }
-serde = { workspace = true, features = ["derive"] }
-shlex = { workspace = true }
-supports-color = { workspace = true }
+vac-ansi-escape = { workspace = true }
+async-trait = { workspace = true }
 vac-arg0 = { workspace = true }
-vac-config = { workspace = true }
-vac-core = { workspace = true }
 vac-install-context = { workspace = true }
-vac-login = { workspace = true, optional = true }
-vac-feedback = { workspace = true, optional = true }
+vac-config = { workspace = true }
+vac-connectors = { workspace = true }
+vac-core = { workspace = true }
+vac-core-plugins = { workspace = true }
+vac-core-skills = { workspace = true }
+vac-exec-server = { workspace = true }
+vac-features = { workspace = true }
+vac-feedback = { workspace = true }
+vac-file-search = { workspace = true }
+vac-git-utils = { workspace = true }
+vac-local-runtime-owner = { workspace = true }
+vac-login = { workspace = true }
+vac-memories-write = { workspace = true }
+vac-model-provider = { workspace = true }
+vac-model-provider-info = { workspace = true }
+vac-models-manager = { workspace = true }
+vac-otel = { workspace = true }
+vac-plugin = { workspace = true }
 vac-protocol = { workspace = true }
+vac-runtime-protocol = { workspace = true }
+vac-thread-store = { workspace = true }
+vac-rollout = { workspace = true }
+vac-shell-command = { workspace = true }
+vac-state = { workspace = true }
+vac-terminal-detection = { workspace = true }
+vac-utils-approval-presets = { workspace = true }
+vac-utils-absolute-path = { workspace = true }
 vac-utils-cli = { workspace = true }
+vac-utils-elapsed = { workspace = true }
+vac-utils-fuzzy-match = { workspace = true }
+vac-utils-oss = { workspace = true }
+vac-utils-path = { workspace = true }
+vac-utils-plugins = { workspace = true }
+vac-utils-sandbox-summary = { workspace = true }
+vac-utils-sleep-inhibitor = { workspace = true }
+vac-utils-string = { workspace = true }
+color-eyre = { workspace = true }
+crossterm = { workspace = true, features = ["bracketed-paste", "event-stream"] }
+derive_more = { workspace = true, features = ["is_variant"] }
+diffy = { workspace = true }
+dirs = { workspace = true }
+dunce = { workspace = true }
+image = { workspace = true, features = ["jpeg", "png", "gif", "webp"] }
+itertools = { workspace = true }
+lazy_static = { workspace = true }
+pathdiff = { workspace = true }
+pulldown-cmark = { workspace = true }
+rand = { workspace = true }
+ratatui = { workspace = true, features = [
+    "scrolling-regions",
+    "unstable-backend-writer",
+    "unstable-rendered-line-info",
+    "unstable-widget-ref",
+] }
+ratatui-macros = { workspace = true }
+regex-lite = { workspace = true }
+reqwest = { workspace = true, features = ["json"] }
+rmcp = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true, features = ["preserve_order"] }
+shlex = { workspace = true }
+strum = { workspace = true }
+strum_macros = { workspace = true }
+supports-color = { workspace = true }
+tempfile = { workspace = true }
+textwrap = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = [
+    "io-std",
+    "macros",
+    "process",
+    "rt-multi-thread",
+    "signal",
+    "test-util",
+    "time",
+] }
+tokio-stream = { workspace = true, features = ["sync"] }
+toml = { workspace = true }
+tracing = { workspace = true, features = ["log"] }
+tracing-appender = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+syntect = "5"
+two-face = { version = "0.5", default-features = false, features = ["syntect-default-onig"] }
+unicode-segmentation = { workspace = true }
+unicode-width = { workspace = true }
+url = { workspace = true }
+urlencoding = { workspace = true }
+webbrowser = { workspace = true }
+uuid = { workspace = true }
+
+vac-windows-sandbox = { workspace = true }
+tokio-util = { workspace = true, features = ["time"] }
+
+
+[target.'cfg(unix)'.dependencies]
+libc = { workspace = true }
+
+[target.'cfg(windows)'.dependencies]
+which = { workspace = true }
+windows-sys = { version = "0.52", features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_Storage_FileSystem",
+    "Win32_System_Console",
+    "Win32_System_IO",
+    "Win32_System_Pipes",
+    "Win32_System_Threading",
+] }
+winsplit = "0.1"
+
+# Clipboard support via `arboard` is not available on Android/Termux.
+# Only include it for non-Android targets so the crate builds on Android.
+[target.'cfg(not(target_os = "android"))'.dependencies]
+arboard = { workspace = true }
+
 
 [dev-dependencies]
+vac-cli = { workspace = true }
+vac-mcp = { workspace = true }
+vac-utils-cargo-bin = { workspace = true }
+vac-utils-pty = { workspace = true }
+assert_matches = { workspace = true }
+chrono = { workspace = true, features = ["serde"] }
+insta = { workspace = true }
 pretty_assertions = { workspace = true }
+rand = { workspace = true }
+serial_test = { workspace = true }
+vt100 = { workspace = true }
+uuid = { workspace = true }
+serde_json = { workspace = true }
+toml = { workspace = true }
+tempfile = { workspace = true }

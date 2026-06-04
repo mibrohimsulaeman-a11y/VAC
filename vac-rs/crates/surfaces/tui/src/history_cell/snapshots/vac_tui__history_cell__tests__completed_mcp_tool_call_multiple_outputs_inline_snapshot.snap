@@ -1,0 +1,8 @@
+---
+source: crates/surfaces/tui/src/history_cell/split_006_finalmessageseparator.rs.inc
+assertion_line: 1349
+expression: rendered
+---
+• Called metrics.summary({"metric":"trace.latency","window":"15m"})
+  └ Latency summary: p50=120ms, p95=480ms.
+    No anomalies detected.

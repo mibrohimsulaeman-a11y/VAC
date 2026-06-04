@@ -53,7 +53,7 @@ pub(crate) struct ToolRouterParams<'a> {
 }
 
 impl ToolRouter {
-    pub fn from_config(config: &ToolsConfig, params: ToolRouterParams<'_>) -> Self {
+    pub(crate) fn from_config(config: &ToolsConfig, params: ToolRouterParams<'_>) -> Self {
         let ToolRouterParams {
             mcp_tools,
             deferred_mcp_tools,
@@ -173,7 +173,7 @@ impl ToolRouter {
     }
 
     #[instrument(level = "trace", skip_all, err)]
-    pub async fn build_tool_call(
+    pub(crate) async fn build_tool_call(
         session: &Session,
         item: ResponseItem,
     ) -> Result<Option<ToolCall>, FunctionCallError> {
@@ -267,7 +267,7 @@ impl ToolRouter {
     }
 
     #[instrument(level = "trace", skip_all, err)]
-    pub async fn dispatch_tool_call_with_code_mode_result(
+    pub(crate) async fn dispatch_tool_call_with_code_mode_result(
         &self,
         session: Arc<Session>,
         turn: Arc<TurnContext>,

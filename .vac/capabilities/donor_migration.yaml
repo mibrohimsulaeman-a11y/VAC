@@ -99,7 +99,4 @@ ownership:
   modules:
   - doctor_cli
 docs:
-- docs/migration/00E_REACHABILITY_AUDIT.md
-- docs/workflow-control-plane/plans/20-donor-gate.md
-- docs/monolith-quality/O5_5_DONOR_DELETE_GATE_REPORT.md
 - .vac/registry/donor-inventory.yaml

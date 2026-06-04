@@ -10,9 +10,13 @@ ownership:
   crates:
   - vac-capability-sessions
   - vac-core
+  - vac-protocol
+  - vac-runtime-protocol
   modules:
   - session
   targets:
+  - crate_name: vac-core
+    module: session
   - crate_name: vac-core
     module: session_prefix
   - crate_name: vac-core
@@ -83,6 +87,18 @@ ownership:
     module: user_input
   - crate_name: vac-protocol
     module: vastar_models
+  - crate_name: vac-runtime-protocol
+    module: experimental_api
+  - crate_name: vac-runtime-protocol
+    module: export
+  - crate_name: vac-runtime-protocol
+    module: jsonrpc_lite
+  - crate_name: vac-runtime-protocol
+    module: protocol
+  - crate_name: vac-runtime-protocol
+    module: schema_fixtures
+  - crate_name: vac-runtime-protocol
+    module: write_schema_fixtures
 description: Interactive session lifecycle, resume, and thread state.
 reason: 'Session lifecycle surfaces, owner metadata, validation, and source-domain mapping are synchronized with the root capability catalog. Future session UX work is feature work, not a root-manifest readiness blocker.
 
@@ -90,6 +106,10 @@ reason: 'Session lifecycle surfaces, owner metadata, validation, and source-doma
 depends_on:
 - vac.chat
 surfaces:
+  cli:
+    enabled: true
+    commands:
+    - vac resume
   slash:
     commands:
     - /branch
@@ -105,16 +125,14 @@ surfaces:
     - /rename
     - /resume
     - /settings
-    - /status
     - /statusline
     - /theme
     - /title
     - /vim
-  cli:
-    enabled: true
-    commands:
-    - vac resume
   palette: true
+  tui:
+    routes:
+    - /activity
 states:
 - empty
 - loading
@@ -139,5 +157,3 @@ validation:
     - vac-core
     risk: execute_process
     approval: policy
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

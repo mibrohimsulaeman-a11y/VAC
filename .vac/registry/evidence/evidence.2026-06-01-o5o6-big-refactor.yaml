@@ -1,6 +1,8 @@
 schema_version: 1
 kind: evidence
 id: evidence.2026-06-01-o5o6-big-refactor
+chain:
+  self_hash: b7278c648b20e9b2a5797f84d4885f0126b39a229161dfb08a1b8978f229880f
 created_at: '2026-06-01T00:00:00Z'
 plan_id: plan.o5o6.big-refactor
 capability: vac.architecture

@@ -867,7 +867,6 @@ impl AuthModeWidget {
         if matches!(
             self.login_status,
             LoginStatus::AuthMode(AppServerAuthMode::ProviderCredential)
-                | LoginStatus::AuthMode(AppServerAuthMode::ProviderCredential)
         ) {
             *write_lock(&self.sign_in_state) = SignInState::ChatGptSuccess;
             self.request_frame.schedule_frame();
@@ -1051,7 +1050,7 @@ mod tests {
             Some(API_KEY_DISABLED_MESSAGE)
         );
         assert!(matches!(
-            &*widget.read_lock(&sign_in_state),
+            &*read_lock(&widget.sign_in_state),
             SignInState::PickMode
         ));
     }
@@ -1067,7 +1066,7 @@ mod tests {
             Some(API_KEY_DISABLED_MESSAGE)
         );
         assert!(matches!(
-            &*widget.read_lock(&sign_in_state),
+            &*read_lock(&widget.sign_in_state),
             SignInState::PickMode
         ));
         assert_eq!(widget.login_status, LoginStatus::NotAuthenticated);
@@ -1082,7 +1081,7 @@ mod tests {
 
         assert_eq!(handled, true);
         assert!(matches!(
-            &*widget.read_lock(&sign_in_state),
+            &*read_lock(&widget.sign_in_state),
             SignInState::ChatGptSuccess
         ));
     }
@@ -1090,8 +1089,8 @@ mod tests {
     #[tokio::test]
     async fn cancel_active_attempt_resets_browser_login_state() {
         let (widget, _tmp) = widget_forced_chatgpt().await;
-        *widget.write_lock(&error) = Some("still logging in".to_string());
-        *widget.write_lock(&sign_in_state) =
+        *write_lock(&widget.error) = Some("still logging in".to_string());
+        *write_lock(&widget.sign_in_state) =
             SignInState::ChatGptContinueInBrowser(ContinueInBrowserState {
                 login_id: "login-1".to_string(),
                 auth_url: "https://auth.example.com".to_string(),
@@ -1101,7 +1100,7 @@ mod tests {
 
         assert_eq!(widget.error_message(), None);
         assert!(matches!(
-            &*widget.read_lock(&sign_in_state),
+            &*read_lock(&widget.sign_in_state),
             SignInState::PickMode
         ));
     }
@@ -1109,8 +1108,8 @@ mod tests {
     #[tokio::test]
     async fn cancel_active_attempt_notifies_device_code_login() {
         let (widget, _tmp) = widget_forced_chatgpt().await;
-        *widget.write_lock(&error) = Some("still logging in".to_string());
-        *widget.write_lock(&sign_in_state) =
+        *write_lock(&widget.error) = Some("still logging in".to_string());
+        *write_lock(&widget.sign_in_state) =
             SignInState::ChatGptDeviceCode(ContinueWithDeviceCodeState::ready(
                 "request-1".to_string(),
                 "login-1".to_string(),
@@ -1122,7 +1121,7 @@ mod tests {
 
         assert_eq!(widget.error_message(), None);
         assert!(matches!(
-            &*widget.read_lock(&sign_in_state),
+            &*read_lock(&widget.sign_in_state),
             SignInState::PickMode
         ));
     }
@@ -1151,7 +1150,7 @@ mod tests {
         let runtime = tokio::runtime::Runtime::new().unwrap();
         let (widget, _tmp) = runtime.block_on(widget_forced_chatgpt());
         let url = "https://auth.example.com/login?state=abc123";
-        *widget.write_lock(&sign_in_state) =
+        *write_lock(&widget.sign_in_state) =
             SignInState::ChatGptContinueInBrowser(ContinueInBrowserState {
                 login_id: "login-1".to_string(),
                 auth_url: url.to_string(),
@@ -1171,7 +1170,7 @@ mod tests {
     fn auth_widget_suppresses_animations_when_device_code_is_visible() {
         let runtime = tokio::runtime::Runtime::new().unwrap();
         let (widget, _tmp) = runtime.block_on(widget_forced_chatgpt());
-        *widget.write_lock(&sign_in_state) =
+        *write_lock(&widget.sign_in_state) =
             SignInState::ChatGptDeviceCode(ContinueWithDeviceCodeState::ready(
                 "request-1".to_string(),
                 "login-1".to_string(),
@@ -1186,7 +1185,7 @@ mod tests {
     fn auth_widget_suppresses_animations_while_requesting_device_code() {
         let runtime = tokio::runtime::Runtime::new().unwrap();
         let (widget, _tmp) = runtime.block_on(widget_forced_chatgpt());
-        *widget.write_lock(&sign_in_state) = SignInState::ChatGptDeviceCode(
+        *write_lock(&widget.sign_in_state) = SignInState::ChatGptDeviceCode(
             ContinueWithDeviceCodeState::pending("request-1".to_string()),
         );
 
@@ -1196,7 +1195,7 @@ mod tests {
     #[tokio::test]
     async fn device_code_login_completion_advances_to_success_message() {
         let (mut widget, _tmp) = widget_forced_chatgpt().await;
-        *widget.write_lock(&sign_in_state) =
+        *write_lock(&widget.sign_in_state) =
             SignInState::ChatGptDeviceCode(ContinueWithDeviceCodeState::ready(
                 "request-1".to_string(),
                 "login-1".to_string(),
@@ -1211,7 +1210,7 @@ mod tests {
         });
 
         assert!(matches!(
-            &*widget.read_lock(&sign_in_state),
+            &*read_lock(&widget.sign_in_state),
             SignInState::ChatGptSuccessMessage
         ));
     }

@@ -11,7 +11,7 @@ async fn exec_approval_emits_proposed_command_and_decision_history() {
         approval_id: Some("call-short".into()),
         turn_id: "turn-short".into(),
         command: vec!["bash".into(), "-lc".into(), "echo hello world".into()],
-        cwd: AbsolutePathBuf::current_dir().expect("current dir"),
+        cwd: test_project_cwd(),
         reason: Some(
             "this is a test reason such as one that would be produced by the model".into(),
         ),
@@ -93,7 +93,7 @@ async fn exec_approval_uses_approval_id_when_present() {
             approval_id: Some("approval-subcommand".into()),
             turn_id: "turn-short".into(),
             command: vec!["bash".into(), "-lc".into(), "echo hello world".into()],
-            cwd: AbsolutePathBuf::current_dir().expect("current dir"),
+            cwd: test_project_cwd(),
             reason: Some(
                 "this is a test reason such as one that would be produced by the model".into(),
             ),
@@ -136,7 +136,7 @@ async fn exec_approval_decision_truncates_multiline_and_long_commands() {
         approval_id: Some("call-multi".into()),
         turn_id: "turn-multi".into(),
         command: vec!["bash".into(), "-lc".into(), "echo line1\necho line2".into()],
-        cwd: AbsolutePathBuf::current_dir().expect("current dir"),
+        cwd: test_project_cwd(),
         reason: Some(
             "this is a test reason such as one that would be produced by the model".into(),
         ),
@@ -189,7 +189,7 @@ async fn exec_approval_decision_truncates_multiline_and_long_commands() {
         approval_id: Some("call-long".into()),
         turn_id: "turn-long".into(),
         command: vec!["bash".into(), "-lc".into(), long],
-        cwd: AbsolutePathBuf::current_dir().expect("current dir"),
+        cwd: test_project_cwd(),
         reason: None,
         network_approval_context: None,
         proposed_execpolicy_amendment: None,
@@ -275,7 +275,7 @@ async fn unified_exec_begin_restores_working_status_snapshot() {
     let height = chat.desired_height(width);
     let mut terminal = ratatui::Terminal::new(ratatui::backend::TestBackend::new(width, height))
         .expect("create terminal");
-    terminal.set_viewport_area(Rect::new(0, 0, width, height));
+    terminal.resize(Rect::new(0, 0, width, height)).expect("resize");
     terminal
         .draw(|f| chat.render(f.area(), f.buffer_mut()))
         .expect("draw chatwidget");
@@ -1064,7 +1064,7 @@ async fn approval_modal_exec_snapshot() -> anyhow::Result<()> {
         approval_id: Some("call-approve-cmd".into()),
         turn_id: "turn-approve-cmd".into(),
         command: vec!["bash".into(), "-lc".into(), "echo hello world".into()],
-        cwd: AbsolutePathBuf::current_dir().expect("current dir"),
+        cwd: test_project_cwd(),
         reason: Some(
             "this is a test reason such as one that would be produced by the model".into(),
         ),
@@ -1121,7 +1121,7 @@ async fn approval_modal_exec_without_reason_snapshot() -> anyhow::Result<()> {
         approval_id: Some("call-approve-cmd-noreason".into()),
         turn_id: "turn-approve-cmd-noreason".into(),
         command: vec!["bash".into(), "-lc".into(), "echo hello world".into()],
-        cwd: AbsolutePathBuf::current_dir().expect("current dir"),
+        cwd: test_project_cwd(),
         reason: None,
         network_approval_context: None,
         proposed_execpolicy_amendment: Some(ExecPolicyAmendment {
@@ -1137,7 +1137,7 @@ async fn approval_modal_exec_without_reason_snapshot() -> anyhow::Result<()> {
     let height = chat.desired_height(width);
     let mut terminal =
         ratatui::Terminal::new(VT100Backend::new(width, height)).expect("create terminal");
-    terminal.set_viewport_area(Rect::new(0, 0, width, height));
+    terminal.resize(Rect::new(0, 0, width, height)).expect("resize");
     terminal
         .draw(|f| chat.render(f.area(), f.buffer_mut()))
         .expect("draw approval modal (no reason)");
@@ -1167,7 +1167,7 @@ async fn approval_modal_exec_multiline_prefix_hides_execpolicy_option_snapshot()
         approval_id: Some("call-approve-cmd-multiline-trunc".into()),
         turn_id: "turn-approve-cmd-multiline-trunc".into(),
         command: command.clone(),
-        cwd: AbsolutePathBuf::current_dir().expect("current dir"),
+        cwd: test_project_cwd(),
         reason: None,
         network_approval_context: None,
         proposed_execpolicy_amendment: Some(ExecPolicyAmendment { command }),
@@ -1181,7 +1181,7 @@ async fn approval_modal_exec_multiline_prefix_hides_execpolicy_option_snapshot()
     let height = chat.desired_height(width);
     let mut terminal =
         ratatui::Terminal::new(VT100Backend::new(width, height)).expect("create terminal");
-    terminal.set_viewport_area(Rect::new(0, 0, width, height));
+    terminal.resize(Rect::new(0, 0, width, height)).expect("resize");
     terminal
         .draw(|f| chat.render(f.area(), f.buffer_mut()))
         .expect("draw approval modal (multiline prefix)");
@@ -1225,7 +1225,7 @@ async fn approval_modal_patch_snapshot() -> anyhow::Result<()> {
     let height = chat.desired_height(/*width*/ 80);
     let mut terminal =
         ratatui::Terminal::new(VT100Backend::new(/*width*/ 80, height)).expect("create terminal");
-    terminal.set_viewport_area(Rect::new(0, 0, 80, height));
+    terminal.resize(Rect::new(0, 0, 80, height)).expect("resize");
     terminal
         .draw(|f| chat.render(f.area(), f.buffer_mut()))
         .expect("draw patch approval modal");

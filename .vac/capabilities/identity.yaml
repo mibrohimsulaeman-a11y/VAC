@@ -9,56 +9,60 @@ owner:
 ownership:
   crates:
   - vac-capability-identity
-  - vac-cli
+  - vac-surface-cli
   modules:
   - auth_cli
   targets:
-  - crate_name: vac-api
+  - crate_name: vac-surface-cli
+    module: auth_cli
+  - crate_name: vac-provider-http
     module: api_bridge
-  - crate_name: vac-api
+  - crate_name: vac-provider-http
     module: auth
-  - crate_name: vac-api
+  - crate_name: vac-provider-http
+    module: client_sse
+  - crate_name: vac-provider-http
+    module: client_transport
+  - crate_name: vac-provider-http
     module: common
-  - crate_name: vac-api
+  - crate_name: vac-provider-http
+    module: custom_ca
+  - crate_name: vac-provider-http
+    module: default_client
+  - crate_name: vac-provider-http
     module: endpoint
-  - crate_name: vac-api
+  - crate_name: vac-provider-http
     module: error
-  - crate_name: vac-api
+  - crate_name: vac-provider-http
     module: files
-  - crate_name: vac-api
+  - crate_name: vac-provider-http
     module: provider
-  - crate_name: vac-api
+  - crate_name: vac-provider-http
+    module: provider_features
+  - crate_name: vac-provider-http
     module: rate_limits
-  - crate_name: vac-api
+  - crate_name: vac-provider-http
+    module: request
+  - crate_name: vac-provider-http
+    module: request_telemetry
+  - crate_name: vac-provider-http
     module: requests
-  - crate_name: vac-api
+  - crate_name: vac-provider-http
+    module: retry
+  - crate_name: vac-provider-http
     module: sse
-  - crate_name: vac-api
+  - crate_name: vac-provider-http
     module: telemetry
+  - crate_name: vac-provider-http
+    module: transport
+  - crate_name: vac-provider-http
+    module: transport_error
   - crate_name: vac-aws-auth
     module: config
   - crate_name: vac-aws-auth
     module: signing
   - crate_name: vac-client
-    module: chatgpt_cloudflare_cookies
-  - crate_name: vac-client
-    module: chatgpt_hosts
-  - crate_name: vac-client
-    module: custom_ca
-  - crate_name: vac-client
-    module: default_client
-  - crate_name: vac-client
-    module: error
-  - crate_name: vac-client
-    module: request
-  - crate_name: vac-client
-    module: retry
-  - crate_name: vac-client
-    module: sse
-  - crate_name: vac-client
-    module: telemetry
-  - crate_name: vac-client
-    module: transport
+    module: provider_ca_probe
   - crate_name: vac-device-key
     module: platform
   - crate_name: vac-login
@@ -112,6 +116,10 @@ reason: 'Identity/auth CLI and slash surfaces, owner metadata, validation, and s
 depends_on:
 - vac.sessions
 surfaces:
+  cli:
+    enabled: true
+    commands:
+    - vac auth
   slash:
     commands:
     - /debug-m-drop
@@ -120,11 +128,10 @@ surfaces:
     - /memories
     - /model
     - /personality
-  cli:
-    enabled: true
-    commands:
-    - vac auth
   palette: true
+  tui:
+    routes:
+    - /debug-config
 states:
 - empty
 - loading
@@ -146,8 +153,6 @@ validation:
     - +1.93.0
     - check
     - -p
-    - vac-cli
+    - vac-surface-cli
     risk: execute_process
     approval: policy
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

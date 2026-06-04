@@ -22,18 +22,21 @@ const NO_DUPLICATE_TUI_SCAN_ROOTS: &[&str] = &["vac-rs", ".vac"];
 
 const NO_DUPLICATE_TUI_EXEMPT_FILES: &[&str] = &[
     ".vac/registry/status.yaml",
+    ".vac/registry/donor-inventory.yaml",
     ".vac/workflows/README.md",
     ".vac/workflows/maintenance.no-duplicate-tui.yaml",
     ".vac/workflows/maintenance.release-gate.yaml",
     "docs/product/CAPABILITY_MAP.md",
     "docs/product/domain-prds/tui-action-recorder-replay.md",
-    "vac-rs/core/src/control_plane/identity_check.rs",
-    "vac-rs/core/src/control_plane/no_duplicate_tui.rs",
-    "vac-rs/core/src/control_plane/mod.rs",
+    "vac-rs/crates/control-plane/control-plane/src/control_plane/donor_domain_contract.rs",
+    "vac-rs/crates/control-plane/control-plane/src/control_plane/identity_check.rs",
+    "vac-rs/crates/control-plane/control-plane/src/control_plane/no_duplicate_tui.rs",
+    "vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_live_scanner_policy.rs",
+    "vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/**",
 ];
 
 /// TUI dependency crates that, combined with a binary target or a TUI-themed
-/// crate name, indicate a structural duplicate TUI outside `vac-rs/tui`.
+/// crate name, indicate a structural duplicate TUI outside the root TUI crate.
 const TUI_DEPENDENCY_CRATES: &[&str] = &["ratatui", "crossterm"];
 
 const TERM_VAC_TUI_RUNTIME: &str = concat!("vac", "_tui", "_runtime");
@@ -212,7 +215,7 @@ fn structural_tui_cargo_finding(relative: &Path, contents: &str) -> Option<NoDup
     let rel = relative.display().to_string();
 
     // Exempted: workspace root + active product TUI crate live inside this exempt path.
-    if rel == "vac-rs/Cargo.toml" || rel.starts_with("vac-rs/tui/") {
+    if rel == "vac-rs/Cargo.toml" || rel.starts_with("vac-rs/crates/surfaces/tui/") {
         return None;
     }
 
@@ -246,7 +249,7 @@ fn structural_tui_cargo_finding(relative: &Path, contents: &str) -> Option<NoDup
             line: 1,
             term: "structural duplicate TUI crate".to_string(),
             snippet: format!(
-                "Cargo manifest declares a TUI-like crate or binary (deps: {}) outside vac-rs/tui",
+                "Cargo manifest declares a TUI-like crate or binary (deps: {}) outside vac-rs/crates/surfaces/tui",
                 matched_tui_deps.join(", ")
             ),
         });
@@ -298,10 +301,13 @@ fn should_skip_path(root: &Path, path: &Path) -> bool {
         return false;
     };
 
-    if NO_DUPLICATE_TUI_EXEMPT_FILES
-        .iter()
-        .any(|exempt| relative == Path::new(exempt))
-    {
+    if NO_DUPLICATE_TUI_EXEMPT_FILES.iter().any(|exempt| {
+        if let Some(prefix) = exempt.strip_suffix("/**") {
+            relative.starts_with(prefix)
+        } else {
+            relative == Path::new(exempt)
+        }
+    }) {
         return true;
     }
 
@@ -412,7 +418,7 @@ ratatui = { workspace = true }
         fs::write(
             tempdir.path().join("vac-rs/Cargo.toml"),
             r#"[workspace]
-members = ["tui", "ansi-escape"]
+members = ["crates/surfaces/tui", "ansi-escape"]
 [workspace.dependencies]
 ratatui = "0.29.0"
 "#,
@@ -420,9 +426,9 @@ ratatui = "0.29.0"
         .expect("workspace cargo fixture");
 
         // Approved active product TUI passes
-        fs::create_dir_all(tempdir.path().join("vac-rs/tui")).expect("tui dir");
+        fs::create_dir_all(tempdir.path().join("vac-rs/crates/surfaces/tui")).expect("tui dir");
         fs::write(
-            tempdir.path().join("vac-rs/tui/Cargo.toml"),
+            tempdir.path().join("vac-rs/crates/surfaces/tui/Cargo.toml"),
             r#"[package]
 name = "vac-tui"
 version = "0.0.0"

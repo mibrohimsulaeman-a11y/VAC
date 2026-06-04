@@ -17,16 +17,14 @@ require_file() {
   fi
 }
 
-require_file vac-rs/control-plane/src/control_plane/vac_init_production_rc.rs
-require_file docs/vac-init/VAC_INIT_PRODUCTION_RC1.md
-require_file docs/validation/PRODUCTION_HARDENING_I1_I3_VALIDATION.md
+require_file vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_production_rc.rs
 require_file scripts/check-vac-init-live-scanner-policy.sh
 require_file scripts/check-vac-tui-real-data-adapters.sh
 require_file scripts/check-vac-evidence-why-live-index.sh
 require_file scripts/check-vac-registry-migration-runtime.sh
 require_file scripts/check-vac-minimal-e2e-dry-run.sh
 
-"$RUSTC_BIN" --edition 2024 --test vac-rs/control-plane/src/control_plane/vac_init_production_rc.rs -o "$TMPROOT/vac_init_production_rc_test"
+"$RUSTC_BIN" --edition 2024 --test vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_production_rc.rs -o "$TMPROOT/vac_init_production_rc_test"
 "$TMPROOT/vac_init_production_rc_test" --nocapture
 
 bash scripts/check-no-hardcoded-readiness-scoreboard.sh

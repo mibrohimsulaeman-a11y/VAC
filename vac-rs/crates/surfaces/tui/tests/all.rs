@@ -1,5 +1,6 @@
 // Single integration test binary that aggregates all test modules.
 // The submodules live in `tests/suite/`.
+#![cfg(feature = "full-tui")]
 mod test_backend;
 
 #[allow(unused_imports)]

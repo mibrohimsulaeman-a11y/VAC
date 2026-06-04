@@ -46,9 +46,6 @@ fn main() {
     }
 
     let Some(src_dir) = resolve_optional_bwrap_source_dir(&manifest_dir) else {
-        println!(
-            "cargo:warning=build-time bubblewrap is disabled by default; enable the vendored-bwrap feature with vac-rs/vendor/bubblewrap, set VAC_BUILD_VENDORED_BWRAP=1, or set VAC_BWRAP_SOURCE_DIR to a bubblewrap checkout, to enable the optional vendored launcher"
-        );
         return;
     };
 

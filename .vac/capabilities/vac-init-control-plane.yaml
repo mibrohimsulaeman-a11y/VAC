@@ -2,7 +2,7 @@ schema_version: 1
 kind: capability
 id: vac.init.control-plane
 title: VAC-Init Engine and Workflow Control Plane Foundation
-status: partial
+status: ready
 owner:
   crate: vac-core
   module: control_plane::schema_envelope
@@ -17,20 +17,21 @@ ownership:
     module: control_plane::schema_envelope
   - crate_name: vac-core
     module: control_plane::kind_registry
-reason: Batch 0-1 implements the schema envelope, kind registry, execution plan, and baseline gate. Full interactive vac init lifecycle, scanners, policy evaluator, command gate, approval replay protection, evidence chain, and vac why remain scheduled for later batches.
+reason: Control-plane foundation is ready. Schema envelope, kind registry, execution plan, baseline gate, lifecycle, scanners, policy evaluator, command gate, approval replay protection, evidence chain, and why surfaces are now represented by dedicated ready capabilities and validation gates.
 description: Manifest-first foundation for turning repositories into VAC-controlled agentic workspaces.
 depends_on:
 - vac.workflow
 surfaces:
   cli:
-    enabled: false
+    enabled: true
     commands:
     - vac init --dry-run
-    - vac doctor registry .
+    - bash scripts/check-vac-init-batch2-5-contract.sh
+    - bash scripts/check-vac-init-batch6-12-contract.sh
   palette: true
   tui:
     routes:
-    - /capabilities
+    - /vac-init
 states:
 - empty
 - loading
@@ -49,6 +50,8 @@ validation:
   - vac_init_schema_envelope_contract
   - vac_init_kind_registry_contract
   - vac_init_baseline_audit
+  - vac_init_batch2_5_contract
+  - vac_init_batch6_12_contract
   - source_artifact_hygiene
   commands:
   - id: vac.init.control-plane.validation.cmd001
@@ -63,7 +66,15 @@ validation:
     - scripts/check-vac-init-baseline-contract.sh
     risk: execute_process
     approval: policy
-docs:
-- docs/vac-init/VAC_INIT_EXECUTION_PLAN.md
-- docs/vac-init/VAC_INIT_IMPLEMENTATION_MAP.md
-- docs/validation/VAC_INIT_BASELINE_AUDIT.md
+  - id: vac.init.control-plane.validation.cmd003
+    runner: bash
+    args:
+    - scripts/check-vac-init-batch2-5-contract.sh
+    risk: execute_process
+    approval: policy
+  - id: vac.init.control-plane.validation.cmd004
+    runner: bash
+    args:
+    - scripts/check-vac-init-batch6-12-contract.sh
+    risk: execute_process
+    approval: policy

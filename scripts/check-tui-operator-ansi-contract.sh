@@ -10,7 +10,7 @@ RUSTC_BIN="${RUSTC:-rustc}"
 HARNESS_TEST="${TMPDIR:-/tmp}/vac-operator-style-tests"
 OUT_DIR="${TMPDIR:-/tmp}/vac-operator-ansi-contract"
 
-"$RUSTC_BIN" --edition 2024 --test vac-rs/tui/src/operator_style.rs -o "$HARNESS_TEST"
+"$RUSTC_BIN" --edition 2024 --test vac-rs/crates/surfaces/tui/src/operator_style.rs -o "$HARNESS_TEST"
 "$HARNESS_TEST"
 
 bash scripts/render-tui-operator-ansi-snapshots.sh "$OUT_DIR"
@@ -23,7 +23,7 @@ grep -q "approval required" "$sample"
 grep -q "DESTRUCTIVE" "$sample"
 
 for role in plain chrome muted accent success warning danger user agent status; do
-  grep -q "$role" vac-rs/tui/src/operator_style.rs
+  grep -q "$role" vac-rs/crates/surfaces/tui/src/operator_style.rs
 done
 
 printf 'operator ANSI style contract ok\n'

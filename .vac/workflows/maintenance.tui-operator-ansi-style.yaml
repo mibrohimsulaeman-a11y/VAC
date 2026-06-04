@@ -18,14 +18,14 @@ policy:
   approval_required_for: []
 steps:
 - id: semantic_roles_registered
-  uses: capability.tui.ansi_style.roles
+  uses: capability.vac.tui.check
   ui:
     surface: /capabilities
     progress_panel: true
     activity_log: true
     evidence_surface: true
 - id: ansi_snapshot_generated
-  uses: capability.tui.ansi_style.snapshot
+  uses: capability.vac.tui.check
   ui:
     surface: /capabilities
     inspect_surface: /runtime
@@ -33,7 +33,7 @@ steps:
     activity_log: true
     evidence_surface: true
 - id: layout_drift_checked
-  uses: capability.tui.ansi_style.strip_ansi
+  uses: capability.vac.tui.check
   ui:
     surface: /capabilities
     progress_panel: true

@@ -1,13 +1,15 @@
 schema_version: 1
 kind: evidence
 id: evidence.o6_1.runtime_panic_baseline.2026_05_30
+chain:
+  self_hash: 7157cd927083d785d8a25da8cb5088aeea1bdff99dd1cba2debc5f3b66b8283e
 title: O6.1 runtime panic baseline evidence
 status: ready
 updated_at: '2026-05-30T10:00:00Z'
 slice: O6.1-depanic-true-runtime-baseline
 date: 2026-05-30
 implementer: notion-ai-sandbox
-status: Measured_SV-Done
+measurement_status: Measured_SV-Done
 method: >
   Counted panic-capable call sites across runtime crates only, then re-counted
   after removing #[cfg(test)] modules via brace-depth matching. The path filter

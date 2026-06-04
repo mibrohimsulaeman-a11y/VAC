@@ -45,6 +45,3 @@ validation:
     - vac-core
     risk: execute_process
     approval: policy
-docs:
-- docs/validation/TUI_PTY_DOGFOOD_GATE.md
-- docs/workflow-control-plane/plans/23-pty-operator-gate.md

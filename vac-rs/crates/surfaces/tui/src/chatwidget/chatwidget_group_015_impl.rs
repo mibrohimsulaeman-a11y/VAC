@@ -105,6 +105,9 @@ impl ChatWidget {
     }
 
     pub(crate) fn add_capability_dashboard_output(&mut self) {
+        self.add_to_history(crate::capability_dashboard::new_capability_dashboard_output(
+            &self.config,
+        ));
         self.bottom_pane
             .show_selection_view(crate::capability_dashboard::new_capability_dashboard_view(&self.config));
         self.request_redraw();

@@ -1,6 +1,8 @@
 schema_version: 1
 kind: evidence
 id: evidence.2026-06-01-o5o6-current-auditfix
+chain:
+  self_hash: 1595249bb122ef267b53044b8bb342abc09c9f8d892aff6253fcd9020b045d3f
 created_at: '2026-06-01T00:00:00Z'
 plan_id: plan.o5o6.current-auditfix
 status: SV-Done_TV-Pending

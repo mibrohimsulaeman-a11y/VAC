@@ -130,13 +130,12 @@ pub(crate) mod agent_roles;
 pub mod edit;
 mod managed_features;
 mod network_proxy_spec;
-mod permissions;
+pub mod permissions;
 #[cfg(test)]
 mod schema;
 pub use managed_features::ManagedFeatures;
 pub use network_proxy_spec::NetworkProxySpec;
 pub use network_proxy_spec::StartedNetworkProxy;
-pub(crate) use permissions::resolve_permission_profile;
 pub use vac_config::Constrained;
 pub use vac_config::ConstraintError;
 pub use vac_config::ConstraintResult;
@@ -1664,4 +1663,3 @@ fn thread_store_config(
         }),
     }
 }
-

@@ -115,10 +115,8 @@ async fn build_uploaded_local_argument_value(
 mod tests {
     use super::*;
     use crate::session::tests::make_session_and_context;
-    use pretty_assertions::assert_eq;
     use std::sync::Arc;
     use tempfile::tempdir;
-    use vac_utils_absolute_path::AbsolutePathBuf;
 
     #[tokio::test]
     async fn vastar_file_argument_rewrite_requires_declared_file_params() {
@@ -141,244 +139,63 @@ mod tests {
 
     #[tokio::test]
     async fn build_uploaded_local_argument_value_uploads_local_file_path() {
-        use wiremock::Mock;
-        use wiremock::MockServer;
-        use wiremock::ResponseTemplate;
-        use wiremock::matchers::body_json;
-        use wiremock::matchers::header;
-        use wiremock::matchers::method;
-        use wiremock::matchers::path;
-
-        let server = MockServer::start().await;
-        Mock::given(method("POST"))
-            .and(path("/provider-api/files"))
-            .and(header("provider-account-id", "account_id"))
-            .and(body_json(serde_json::json!({
-                "file_name": "file_report.csv",
-                "file_size": 5,
-                "use_case": "vac",
-            })))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
-                "file_id": "file_123",
-                "upload_url": format!("{}/upload/file_123", server.uri()),
-            })))
-            .expect(1)
-            .mount(&server)
-            .await;
-        Mock::given(method("PUT"))
-            .and(path("/upload/file_123"))
-            .respond_with(ResponseTemplate::new(200))
-            .expect(1)
-            .mount(&server)
-            .await;
-        Mock::given(method("POST"))
-            .and(path("/provider-api/files/file_123/uploaded"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
-                "status": "success",
-                "download_url": format!("{}/download/file_123", server.uri()),
-                "file_name": "file_report.csv",
-                "mime_type": "text/csv",
-                "file_size_bytes": 5,
-            })))
-            .expect(1)
-            .mount(&server)
-            .await;
-
-        let (_, mut turn_context) = make_session_and_context().await;
-        let auth = VACAuth::create_dummy_chatgpt_auth_for_testing();
+        let (_, turn_context) = make_session_and_context().await;
         let dir = tempdir().expect("temp dir");
         let local_path = dir.path().join("file_report.csv");
         tokio::fs::write(&local_path, b"hello")
             .await
             .expect("write local file");
-        turn_context.cwd = AbsolutePathBuf::try_from(dir.path()).expect("absolute path");
 
-        let mut config = (*turn_context.config).clone();
-        config.chatgpt_base_url = format!("{}/provider-api", server.uri());
-        turn_context.config = Arc::new(config);
-
-        let rewritten = build_uploaded_local_argument_value(
+        // Cloud upload is intentionally disabled in the local coding-agent build.
+        // build_uploaded_local_argument_value must fail-closed with the disabled reason.
+        let err = build_uploaded_local_argument_value(
             &turn_context,
-            Some(&auth),
+            /*auth*/ None,
             "file",
             /*index*/ None,
             "file_report.csv",
         )
         .await
-        .expect("rewrite should upload the local file");
+        .expect_err("cloud upload is disabled; should return disabled-feature error");
 
-        assert_eq!(
-            rewritten,
-            serde_json::json!({
-                "download_url": format!("{}/download/file_123", server.uri()),
-                "file_id": "file_123",
-                "mime_type": "text/csv",
-                "file_name": "file_report.csv",
-                "uri": "sediment://file_123",
-                "file_size_bytes": 5,
-            })
+        assert!(
+            err.contains("legacy ChatGPT-account backend integration is disabled"),
+            "error should mention disabled backend: {err}"
+        );
+        assert!(
+            err.contains("file_report.csv"),
+            "error should mention the file: {err}"
         );
     }
 
     #[tokio::test]
     async fn rewrite_argument_value_for_vastar_files_rewrites_scalar_path() {
-        use wiremock::Mock;
-        use wiremock::MockServer;
-        use wiremock::ResponseTemplate;
-        use wiremock::matchers::body_json;
-        use wiremock::matchers::header;
-        use wiremock::matchers::method;
-        use wiremock::matchers::path;
-
-        let server = MockServer::start().await;
-        Mock::given(method("POST"))
-            .and(path("/provider-api/files"))
-            .and(header("provider-account-id", "account_id"))
-            .and(body_json(serde_json::json!({
-                "file_name": "file_report.csv",
-                "file_size": 5,
-                "use_case": "vac",
-            })))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
-                "file_id": "file_123",
-                "upload_url": format!("{}/upload/file_123", server.uri()),
-            })))
-            .expect(1)
-            .mount(&server)
-            .await;
-        Mock::given(method("PUT"))
-            .and(path("/upload/file_123"))
-            .respond_with(ResponseTemplate::new(200))
-            .expect(1)
-            .mount(&server)
-            .await;
-        Mock::given(method("POST"))
-            .and(path("/provider-api/files/file_123/uploaded"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
-                "status": "success",
-                "download_url": format!("{}/download/file_123", server.uri()),
-                "file_name": "file_report.csv",
-                "mime_type": "text/csv",
-                "file_size_bytes": 5,
-            })))
-            .expect(1)
-            .mount(&server)
-            .await;
-
-        let (_, mut turn_context) = make_session_and_context().await;
-        let auth = VACAuth::create_dummy_chatgpt_auth_for_testing();
+        let (_, turn_context) = make_session_and_context().await;
         let dir = tempdir().expect("temp dir");
         let local_path = dir.path().join("file_report.csv");
         tokio::fs::write(&local_path, b"hello")
             .await
             .expect("write local file");
-        turn_context.cwd = AbsolutePathBuf::try_from(dir.path()).expect("absolute path");
 
-        let mut config = (*turn_context.config).clone();
-        config.chatgpt_base_url = format!("{}/provider-api", server.uri());
-        turn_context.config = Arc::new(config);
-        let rewritten = rewrite_argument_value_for_vastar_files(
+        // Cloud upload is intentionally disabled.
+        let err = rewrite_argument_value_for_vastar_files(
             &turn_context,
-            Some(&auth),
+            /*auth*/ None,
             "file",
             &serde_json::json!("file_report.csv"),
         )
         .await
-        .expect("rewrite should succeed");
+        .expect_err("cloud upload is disabled; should return disabled-feature error");
 
-        assert_eq!(
-            rewritten,
-            Some(serde_json::json!({
-                "download_url": format!("{}/download/file_123", server.uri()),
-                "file_id": "file_123",
-                "mime_type": "text/csv",
-                "file_name": "file_report.csv",
-                "uri": "sediment://file_123",
-                "file_size_bytes": 5,
-            }))
+        assert!(
+            err.contains("legacy ChatGPT-account backend integration is disabled"),
+            "error should mention disabled backend: {err}"
         );
     }
 
     #[tokio::test]
     async fn rewrite_argument_value_for_vastar_files_rewrites_array_paths() {
-        use wiremock::Mock;
-        use wiremock::MockServer;
-        use wiremock::ResponseTemplate;
-        use wiremock::matchers::body_json;
-        use wiremock::matchers::header;
-        use wiremock::matchers::method;
-        use wiremock::matchers::path;
-
-        let server = MockServer::start().await;
-        Mock::given(method("POST"))
-            .and(path("/provider-api/files"))
-            .and(header("provider-account-id", "account_id"))
-            .and(body_json(serde_json::json!({
-                "file_name": "one.csv",
-                "file_size": 3,
-                "use_case": "vac",
-            })))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
-                "file_id": "file_1",
-                "upload_url": format!("{}/upload/file_1", server.uri()),
-            })))
-            .expect(1)
-            .mount(&server)
-            .await;
-        Mock::given(method("POST"))
-            .and(path("/provider-api/files"))
-            .and(header("provider-account-id", "account_id"))
-            .and(body_json(serde_json::json!({
-                "file_name": "two.csv",
-                "file_size": 3,
-                "use_case": "vac",
-            })))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
-                "file_id": "file_2",
-                "upload_url": format!("{}/upload/file_2", server.uri()),
-            })))
-            .expect(1)
-            .mount(&server)
-            .await;
-        Mock::given(method("PUT"))
-            .and(path("/upload/file_1"))
-            .respond_with(ResponseTemplate::new(200))
-            .expect(1)
-            .mount(&server)
-            .await;
-        Mock::given(method("PUT"))
-            .and(path("/upload/file_2"))
-            .respond_with(ResponseTemplate::new(200))
-            .expect(1)
-            .mount(&server)
-            .await;
-        Mock::given(method("POST"))
-            .and(path("/provider-api/files/file_1/uploaded"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
-                "status": "success",
-                "download_url": format!("{}/download/file_1", server.uri()),
-                "file_name": "one.csv",
-                "mime_type": "text/csv",
-                "file_size_bytes": 3,
-            })))
-            .expect(1)
-            .mount(&server)
-            .await;
-        Mock::given(method("POST"))
-            .and(path("/provider-api/files/file_2/uploaded"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
-                "status": "success",
-                "download_url": format!("{}/download/file_2", server.uri()),
-                "file_name": "two.csv",
-                "mime_type": "text/csv",
-                "file_size_bytes": 3,
-            })))
-            .expect(1)
-            .mount(&server)
-            .await;
-
-        let (_, mut turn_context) = make_session_and_context().await;
-        let auth = VACAuth::create_dummy_chatgpt_auth_for_testing();
+        let (_, turn_context) = make_session_and_context().await;
         let dir = tempdir().expect("temp dir");
         tokio::fs::write(dir.path().join("one.csv"), b"one")
             .await
@@ -386,40 +203,20 @@ mod tests {
         tokio::fs::write(dir.path().join("two.csv"), b"two")
             .await
             .expect("write second local file");
-        turn_context.cwd = AbsolutePathBuf::try_from(dir.path()).expect("absolute path");
 
-        let mut config = (*turn_context.config).clone();
-        config.chatgpt_base_url = format!("{}/provider-api", server.uri());
-        turn_context.config = Arc::new(config);
-        let rewritten = rewrite_argument_value_for_vastar_files(
+        // Cloud upload is intentionally disabled.
+        let err = rewrite_argument_value_for_vastar_files(
             &turn_context,
-            Some(&auth),
+            /*auth*/ None,
             "files",
             &serde_json::json!(["one.csv", "two.csv"]),
         )
         .await
-        .expect("rewrite should succeed");
+        .expect_err("cloud upload is disabled; should return disabled-feature error");
 
-        assert_eq!(
-            rewritten,
-            Some(serde_json::json!([
-                {
-                    "download_url": format!("{}/download/file_1", server.uri()),
-                    "file_id": "file_1",
-                    "mime_type": "text/csv",
-                    "file_name": "one.csv",
-                    "uri": "sediment://file_1",
-                    "file_size_bytes": 3,
-                },
-                {
-                    "download_url": format!("{}/download/file_2", server.uri()),
-                    "file_id": "file_2",
-                    "mime_type": "text/csv",
-                    "file_name": "two.csv",
-                    "uri": "sediment://file_2",
-                    "file_size_bytes": 3,
-                }
-            ]))
+        assert!(
+            err.contains("legacy ChatGPT-account backend integration is disabled"),
+            "error should mention disabled backend: {err}"
         );
     }
 
@@ -438,9 +235,14 @@ mod tests {
             Some(&["file".to_string()]),
         )
         .await
-        .expect_err("missing file should fail");
+        .expect_err("cloud upload is disabled; should return disabled-feature error");
 
-        assert!(error.contains("failed to upload"));
-        assert!(error.contains("file"));
+        // The upload backend is disabled; the error mentions both the disabled reason
+        // and the field name.
+        assert!(
+            error.contains("legacy ChatGPT-account backend integration is disabled"),
+            "error should mention disabled backend: {error}"
+        );
+        assert!(error.contains("file"), "error should mention the field: {error}");
     }
 }

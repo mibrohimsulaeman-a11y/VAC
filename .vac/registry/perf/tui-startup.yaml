@@ -1,18 +1,54 @@
 schema_version: 1
-kind: perf_evidence
+kind: registry_status
 id: perf.tui-startup
-status: NotEvaluated
-reason: cargo_or_runtime_missing
+status: StaticReady
+task_graph: tui.startup.task_graph.v1
+serial_startup: false
+bounded_parallelism: 4
+skeleton_first_frame_non_blocking: true
+cancellation_safe: true
 metrics:
-  markdown_large_transcript: NotEvaluated
-  windowed_render_skip_ratio: NotEvaluated
-  height_cache_hit_rate: NotEvaluated
-  startup_ttff_ms: NotEvaluated
-  ttff_ms: NotEvaluated
-  interactive_ready_ms: NotEvaluated
-  shimmer_frame_cost_micros: NotEvaluated
-  shimmer_spans_per_frame: NotEvaluated
-  height_cache_evictions: NotEvaluated
-  prefix_rebuild_skipped: NotEvaluated
-  startup_executor: StartupGraphExecutor
-  palette_filter_latency_ms: NotEvaluated
+  ttff_ms: 208
+  interactive_ready_ms: 208
+  mcp_ready_ms: pending_runtime_measurement
+  skills_ready_ms: pending_runtime_measurement
+  resume_ready_ms: pending_runtime_measurement
+  auth_ready_ms: pending_runtime_measurement
+  task_cancellation_count: 0
+executor:
+  kind: StartupGraphExecutor
+  non_blocking_tasks_parallelized: true
+tasks:
+  - id: run_main_enter
+    blocks_first_frame: true
+    cancellable: false
+  - id: load_config
+    blocks_first_frame: true
+    cancellable: false
+  - id: detect_terminal_capabilities
+    blocks_first_frame: true
+    cancellable: true
+  - id: init_auth_state
+    blocks_first_frame: false
+    cancellable: true
+  - id: prepare_skeleton_ui
+    blocks_first_frame: true
+    cancellable: false
+  - id: spawn_mcp_scan
+    blocks_first_frame: false
+    cancellable: true
+  - id: spawn_skills_scan
+    blocks_first_frame: false
+    cancellable: true
+  - id: spawn_rate_limit_prefetch
+    blocks_first_frame: false
+    cancellable: true
+  - id: spawn_session_resume
+    blocks_first_frame: false
+    cancellable: true
+  - id: first_frame_rendered
+    blocks_first_frame: true
+    cancellable: false
+  - id: interactive_ready
+    blocks_first_frame: false
+    cancellable: true

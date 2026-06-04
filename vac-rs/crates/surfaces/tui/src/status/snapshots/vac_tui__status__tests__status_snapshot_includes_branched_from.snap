@@ -1,20 +1,22 @@
 ---
-source: tui/src/status/tests.rs
+source: crates/surfaces/tui/src/status/tests.rs
+assertion_line: 725
 expression: sanitized
 ---
 /status
 
-╭───────────────────────────────────────────────────────────────────────╮
-│  >_ Vastar VAC (v0.0.0)                                               │
-│                                                                       │
-│                                                                       │
-│  Model:            gpt-5.1-vac-max (reasoning none, summaries auto)   │
-│  Directory: [[workspace]]                                             │
-│  Permissions:      Custom (workspace with network access, on-request) │
-│  Agents.md:        <none>                                             │
-│  Session:          0f0f3c13-6cf9-4aa4-8b80-7d49c2f1be2e               │
-│  Branched from:    e9f18a88-8081-4e51-9d4e-8af5cde2d8dd               │
-│                                                                       │
-│  Token usage:      1.2K total  (800 input + 400 output)               │
-│  Context window:   100% left (1.2K used / 272K)                       │
-╰───────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────────────────────╮
+│  >_ Vastar VAC (v0.0.0)                                                      │
+│                                                                              │
+│  Model:             gpt-5.1-vac-max (reasoning none, summaries auto)         │
+│  Model provider:    Vastar (vastar, responses)                               │
+│  Model providers:   4 registered; active=*vastar; amazon-bedrock:Amazon Bedr │
+│  Directory: [[workspace]]                                                    │
+│  Permissions:       Custom (workspace with network access, on-request)       │
+│  Agents.md:         <none>                                                   │
+│  Session:           0f0f3c13-6cf9-4aa4-8b80-7d49c2f1be2e                     │
+│  Branched from:     e9f18a88-8081-4e51-9d4e-8af5cde2d8dd                     │
+│                                                                              │
+│  Token usage:       1.2K total  (800 input + 400 output)                     │
+│  Context window:    100% left (1.2K used / 272K)                             │
+╰──────────────────────────────────────────────────────────────────────────────╯

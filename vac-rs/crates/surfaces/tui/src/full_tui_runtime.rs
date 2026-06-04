@@ -1,8 +1,6 @@
 // Forbid accidental stdout/stderr writes in the *library* portion of the TUI.
 // The standalone `vac-tui` binary prints a short help message before the
 // alternate‑screen mode starts; that file opts‑out locally via `allow`.
-#![deny(clippy::print_stdout, clippy::print_stderr)]
-#![deny(clippy::disallowed_methods)]
 use crate::legacy_core::check_execpolicy_for_warnings;
 use crate::legacy_core::config::Config;
 use crate::legacy_core::config::ConfigBuilder;
@@ -212,7 +210,6 @@ mod voice {
     use crate::legacy_core::config::Config;
     use crate::session_protocol::ThreadRealtimeAudioChunk;
     use std::sync::Arc;
-use std::time::Instant;
     use std::sync::atomic::{AtomicBool, AtomicU16};
 
     pub struct VoiceCapture;
@@ -1236,7 +1233,7 @@ async fn run_ratatui_app(
     // this must happen after the last possible reload.
     if let Some(w) = crate::render::highlight::set_theme_override(
         config.tui_theme.clone(),
-        find_vac_home().ok().map(AbsolutePathBuf::into_path_buf),
+        find_vac_home().ok(),
     ) {
         config.startup_warnings.push(w);
     }
@@ -1483,13 +1480,10 @@ fn should_show_login_screen(login_status: LoginStatus, config: &Config) -> bool 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::local_runtime_session::LocalRuntimeStartedThread;
     use crate::legacy_core::config::ConfigBuilder;
     use crate::legacy_core::config::ConfigOverrides;
     use crate::session_protocol::AskForApproval;
-    use crate::session_protocol::ClientRequest;
-    use crate::session_protocol::RequestId;
-    use crate::session_protocol::ThreadStartParams;
-    use crate::session_protocol::ThreadStartResponse;
     use pretty_assertions::assert_eq;
     use serial_test::serial;
     use tempfile::TempDir;
@@ -1625,18 +1619,15 @@ mod tests {
     async fn embedded_app_server_supports_thread_start_rpc() -> color_eyre::Result<()> {
         let temp_dir = TempDir::new()?;
         let config = build_config(&temp_dir).await?;
-        let app_server = start_test_embedded_app_server(config).await?;
-        let response: ThreadStartResponse = app_server
-            .request_typed(ClientRequest::ThreadStart {
-                request_id: RequestId::Integer(1),
-                params: ThreadStartParams {
-                    ephemeral: Some(true),
-                    ..ThreadStartParams::default()
-                },
-            })
+        let mut app_server = into_local_runtime_session(AppServerClient::InProcess(
+            start_test_embedded_app_server(config.clone()).await?,
+        ));
+        let response = app_server
+            .start_thread(&config)
             .await
             .expect("thread/start should succeed");
-        assert!(!response.thread.id.is_empty());
+        let (session, _turns) = response.into_parts();
+        assert!(!session.thread_id.to_string().is_empty());
 
         app_server.shutdown().await?;
         Ok(())

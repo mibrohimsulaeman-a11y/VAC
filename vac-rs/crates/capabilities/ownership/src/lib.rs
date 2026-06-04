@@ -30,4 +30,5 @@ pub const fn readiness_contract() -> CapabilityContract {
 }
 
 /// Direct ownership-domain workspace classifier exported without `vac-core` path bridges.
+#[path = "core_migrated/project_workspace.rs"]
 pub mod project_workspace;

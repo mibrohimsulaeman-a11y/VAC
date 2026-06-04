@@ -13,7 +13,9 @@ use core_test_support::responses::sse;
 use core_test_support::responses::start_mock_server;
 use pretty_assertions::assert_eq;
 use serde::Deserialize;
+use serial_test::serial;
 use std::collections::HashMap;
+use std::ffi::OsStr;
 use std::sync::Arc;
 use tempfile::tempdir;
 use tracing::Instrument;
@@ -34,6 +36,37 @@ use vac_hooks::HooksConfig;
 use vac_model_provider::create_model_provider;
 use vac_protocol::models::PermissionProfile;
 use vac_protocol::protocol::AskForApproval;
+
+/// Matches the const in `arc_monitor.rs` — used to redirect ARC calls to the
+/// wiremock mock server in tests that exercise the safety monitor code path.
+const VAC_ARC_MONITOR_ENDPOINT_OVERRIDE: &str = "VAC_ARC_MONITOR_ENDPOINT_OVERRIDE";
+
+struct EnvVarGuard {
+    key: &'static str,
+    original: Option<std::ffi::OsString>,
+}
+
+impl EnvVarGuard {
+    fn set(key: &'static str, value: &OsStr) -> Self {
+        let original = std::env::var_os(key);
+        // SAFETY: test-only env mutation; serial test isolation prevents races.
+        unsafe {
+            std::env::set_var(key, value);
+        }
+        Self { key, original }
+    }
+}
+
+impl Drop for EnvVarGuard {
+    fn drop(&mut self) {
+        match self.original.take() {
+            // SAFETY: restoring to original; serial test isolation prevents races.
+            Some(value) => unsafe { std::env::set_var(self.key, value) },
+            // SAFETY: restoring to absent; serial test isolation prevents races.
+            None => unsafe { std::env::remove_var(self.key) },
+        }
+    }
+}
 
 fn annotations(
     read_only: Option<bool>,
@@ -2328,6 +2361,7 @@ async fn prompt_mode_waits_for_approval_when_annotations_do_not_require_approval
 }
 
 #[tokio::test]
+#[serial(arc_monitor_env)]
 async fn approve_mode_blocks_when_arc_returns_interrupt_for_model() {
     use wiremock::Mock;
     use wiremock::MockServer;
@@ -2336,6 +2370,10 @@ async fn approve_mode_blocks_when_arc_returns_interrupt_for_model() {
     use wiremock::matchers::path;
 
     let server = MockServer::start().await;
+    let _url_guard = EnvVarGuard::set(
+        VAC_ARC_MONITOR_ENDPOINT_OVERRIDE,
+        OsStr::new(&format!("{}/vac/safety/arc", server.uri())),
+    );
     Mock::given(method("POST"))
         .and(path("/vac/safety/arc"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
@@ -2357,10 +2395,6 @@ async fn approve_mode_blocks_when_arc_returns_interrupt_for_model() {
     turn_context.auth_manager = Some(crate::test_support::auth_manager_from_auth(
         vac_login::VACAuth::create_dummy_chatgpt_auth_for_testing(),
     ));
-    let mut config = (*turn_context.config).clone();
-    config.chatgpt_base_url = server.uri();
-    turn_context.config = Arc::new(config);
-
     let session = Arc::new(session);
     let turn_context = Arc::new(turn_context);
     let invocation = McpInvocation {
@@ -2400,6 +2434,7 @@ async fn approve_mode_blocks_when_arc_returns_interrupt_for_model() {
 }
 
 #[tokio::test]
+#[serial(arc_monitor_env)]
 async fn custom_approve_mode_blocks_when_arc_returns_interrupt_for_model() {
     use wiremock::Mock;
     use wiremock::MockServer;
@@ -2408,6 +2443,10 @@ async fn custom_approve_mode_blocks_when_arc_returns_interrupt_for_model() {
     use wiremock::matchers::path;
 
     let server = MockServer::start().await;
+    let _url_guard = EnvVarGuard::set(
+        VAC_ARC_MONITOR_ENDPOINT_OVERRIDE,
+        OsStr::new(&format!("{}/vac/safety/arc", server.uri())),
+    );
     Mock::given(method("POST"))
         .and(path("/vac/safety/arc"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
@@ -2429,9 +2468,6 @@ async fn custom_approve_mode_blocks_when_arc_returns_interrupt_for_model() {
     turn_context.auth_manager = Some(crate::test_support::auth_manager_from_auth(
         vac_login::VACAuth::create_dummy_chatgpt_auth_for_testing(),
     ));
-    let mut config = (*turn_context.config).clone();
-    config.chatgpt_base_url = server.uri();
-    turn_context.config = Arc::new(config);
 
     let session = Arc::new(session);
     let turn_context = Arc::new(turn_context);
@@ -2472,6 +2508,7 @@ async fn custom_approve_mode_blocks_when_arc_returns_interrupt_for_model() {
 }
 
 #[tokio::test]
+#[serial(arc_monitor_env)]
 async fn approve_mode_blocks_when_arc_returns_interrupt_without_annotations() {
     use wiremock::Mock;
     use wiremock::MockServer;
@@ -2480,6 +2517,10 @@ async fn approve_mode_blocks_when_arc_returns_interrupt_without_annotations() {
     use wiremock::matchers::path;
 
     let server = MockServer::start().await;
+    let _url_guard = EnvVarGuard::set(
+        VAC_ARC_MONITOR_ENDPOINT_OVERRIDE,
+        OsStr::new(&format!("{}/vac/safety/arc", server.uri())),
+    );
     Mock::given(method("POST"))
         .and(path("/vac/safety/arc"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
@@ -2501,9 +2542,6 @@ async fn approve_mode_blocks_when_arc_returns_interrupt_without_annotations() {
     turn_context.auth_manager = Some(crate::test_support::auth_manager_from_auth(
         vac_login::VACAuth::create_dummy_chatgpt_auth_for_testing(),
     ));
-    let mut config = (*turn_context.config).clone();
-    config.chatgpt_base_url = server.uri();
-    turn_context.config = Arc::new(config);
 
     let session = Arc::new(session);
     let turn_context = Arc::new(turn_context);

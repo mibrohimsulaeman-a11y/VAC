@@ -236,6 +236,7 @@ impl App {
                         .as_deref()
                         .map(split_command_string)
                         .unwrap_or_default(),
+                    cwd: params.cwd.clone().unwrap_or_else(|| self.config.cwd.clone()),
                     reason: params.reason.clone(),
                     available_decisions: params.available_decisions.clone().unwrap_or_else(|| {
                         default_exec_approval_decisions(

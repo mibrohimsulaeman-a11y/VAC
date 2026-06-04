@@ -31,7 +31,8 @@ surfaces:
 policy:
   mutates_files: false
 validation:
-  commands: []
+  commands:
+    - cargo test -p vac-control-plane ownership_scan
 "#,
     )
     .expect("ownership manifest");
@@ -112,7 +113,8 @@ surfaces:
 policy:
   mutates_files: false
 validation:
-  commands: []
+  commands:
+    - cargo test -p vac-surface-tui operator_ui
 "#,
     )
     .expect("test-only manifest");
@@ -158,7 +160,8 @@ surfaces:
 policy:
   mutates_files: false
 validation:
-  commands: []
+  commands:
+    - cargo test -p vac-control-plane ownership_scan
 "#,
     )
     .expect("retired manifest");
@@ -266,7 +269,8 @@ surfaces:
 policy:
   mutates_files: false
 validation:
-  commands: []
+  commands:
+    - cargo test -p vac-surface-tui operator_ui
 "#,
     )
     .expect("approvals manifest");
@@ -361,6 +365,192 @@ validation:
         !rendered.contains("vac-core/control_plane.ownership_scan hidden"),
         "rendered:\n{rendered}"
     );
+}
+
+#[test]
+fn double_colon_module_ownership_matches_dotted_inventory() {
+    let tempdir = tempdir().expect("tempdir");
+    let vac_root = tempdir.path().join(".vac");
+    fs::create_dir_all(vac_root.join("capabilities")).expect("capabilities dir");
+    fs::create_dir_all(
+        tempdir
+            .path()
+            .join("vac-rs/control-plane/src/control_plane"),
+    )
+    .expect("source dir");
+    fs::write(
+        tempdir.path().join("vac-rs/control-plane/Cargo.toml"),
+        r#"
+[package]
+name = "vac-control-plane"
+version = "0.0.0"
+edition = "2024"
+"#,
+    )
+    .expect("cargo toml");
+    fs::write(
+        tempdir.path().join("vac-rs/control-plane/src/lib.rs"),
+        "pub mod control_plane;\n",
+    )
+    .expect("lib rs");
+    fs::write(
+        tempdir
+            .path()
+            .join("vac-rs/control-plane/src/control_plane/mod.rs"),
+        "pub mod vac_init_registry_validator;\n",
+    )
+    .expect("control plane mod rs");
+    fs::write(
+        tempdir
+            .path()
+            .join("vac-rs/control-plane/src/control_plane/vac_init_registry_validator.rs"),
+        "",
+    )
+    .expect("validator rs");
+    fs::write(
+        vac_root.join("capabilities/registry-validator.yaml"),
+        r#"
+schema_version: 1
+kind: capability
+id: vac.init.registry-validator
+title: Registry validator
+status: ready
+states:
+  - success
+owner:
+  crate: vac-control-plane
+  module: control_plane::vac_init_registry_validator
+ownership:
+  crates:
+    - vac-control-plane
+  modules:
+    - control_plane.vac_init_registry_validator
+  targets:
+    - crate_name: vac-control-plane
+      module: control_plane::vac_init_registry_validator
+surfaces:
+  tui:
+    routes:
+      - /capabilities
+  palette: false
+policy:
+  mutates_files: false
+validation:
+  commands:
+    - cargo test -p vac-control-plane ownership_scan
+"#,
+    )
+    .expect("capability manifest");
+
+    let report = load_ownership_scan_report(tempdir.path());
+    let ownership = report
+        .entries()
+        .iter()
+        .find(|entry| entry.id == "vac.init.registry-validator")
+        .and_then(|entry| entry.ownership.as_ref())
+        .unwrap_or_else(|| panic!("ownership:\n{}", report.render_text()));
+
+    assert!(report.source_inventory().contains_module(
+        "vac-control-plane",
+        "control_plane::vac_init_registry_validator"
+    ));
+    assert!(report.missing_claimed_modules(ownership).is_empty());
+}
+
+#[test]
+fn wrapped_runtime_module_ownership_matches_leaf_domain() {
+    let tempdir = tempdir().expect("tempdir");
+    let vac_root = tempdir.path().join(".vac");
+    fs::create_dir_all(vac_root.join("capabilities")).expect("capabilities dir");
+    fs::create_dir_all(tempdir.path().join("vac-rs/tui/src")).expect("source dir");
+    fs::create_dir_all(tempdir.path().join("vac-rs/tui/src/bottom_pane")).expect("bottom pane dir");
+    fs::write(
+        tempdir.path().join("vac-rs/tui/Cargo.toml"),
+        r#"
+[package]
+name = "vac-surface-tui"
+version = "0.0.0"
+edition = "2024"
+"#,
+    )
+    .expect("cargo toml");
+    fs::write(
+        tempdir.path().join("vac-rs/tui/src/lib.rs"),
+        "include!(\"full_tui_runtime.rs\");\n",
+    )
+    .expect("lib rs");
+    fs::write(
+        tempdir.path().join("vac-rs/tui/src/full_tui_runtime.rs"),
+        "mod operator_ui;\nmod bottom_pane;\n",
+    )
+    .expect("runtime rs");
+    fs::write(tempdir.path().join("vac-rs/tui/src/operator_ui.rs"), "").expect("operator ui rs");
+    fs::write(
+        tempdir.path().join("vac-rs/tui/src/bottom_pane.rs"),
+        "mod approval_overlay;\n",
+    )
+    .expect("bottom pane rs");
+    fs::write(
+        tempdir
+            .path()
+            .join("vac-rs/tui/src/bottom_pane/approval_overlay.rs"),
+        "",
+    )
+    .expect("approval overlay rs");
+    fs::write(
+        vac_root.join("capabilities/tui.yaml"),
+        r#"
+schema_version: 1
+kind: capability
+id: vac.tui
+title: TUI
+status: ready
+states:
+  - success
+owner:
+  crate: vac-surface-tui
+  module: operator_ui
+ownership:
+  crates:
+    - vac-surface-tui
+  modules:
+    - operator_ui
+  targets:
+    - crate_name: vac-surface-tui
+      module: bottom_pane.approval_overlay
+surfaces:
+  tui:
+    routes:
+      - /
+  palette: false
+policy:
+  mutates_files: false
+validation:
+  commands:
+    - cargo test -p vac-surface-tui operator_ui
+"#,
+    )
+    .expect("capability manifest");
+
+    let report = load_ownership_scan_report(tempdir.path());
+    let ownership = report
+        .entries()
+        .iter()
+        .find(|entry| entry.id == "vac.tui")
+        .and_then(|entry| entry.ownership.as_ref())
+        .unwrap_or_else(|| panic!("ownership:\n{}", report.render_text()));
+
+    assert!(
+        report
+            .source_inventory()
+            .contains_module("vac-surface-tui", "operator_ui")
+    );
+    assert!(
+        report
+            .source_inventory()
+            .contains_module("vac-surface-tui", "bottom_pane.approval_overlay")
+    );
+    assert!(report.missing_claimed_modules(ownership).is_empty());
 }
 
 #[test]

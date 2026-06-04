@@ -8,13 +8,13 @@ cd "$REPO_ROOT"
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
-status_mod="vac-rs/tui/src/status/mod.rs"
-status_card="vac-rs/tui/src/status/card.rs"
-status_contract="vac-rs/tui/src/status/output_contract.rs"
-slash_dispatch="vac-rs/tui/src/chatwidget/slash_dispatch.rs"
-chatwidget="vac-rs/tui/src/chatwidget.rs"
-app_rs="vac-rs/tui/src/app.rs"
-status_snapshots="vac-rs/tui/src/status/snapshots"
+status_mod="vac-rs/crates/surfaces/tui/src/status/mod.rs"
+status_card="vac-rs/crates/surfaces/tui/src/status/card.rs"
+status_contract="vac-rs/crates/surfaces/tui/src/status/output_contract.rs"
+slash_dispatch="vac-rs/crates/surfaces/tui/src/chatwidget/slash_dispatch.rs"
+chatwidget="vac-rs/crates/surfaces/tui/src/chatwidget.rs"
+app_rs="vac-rs/crates/surfaces/tui/src/app.rs"
+status_snapshots="vac-rs/crates/surfaces/tui/src/status/snapshots"
 
 for file in "$status_mod" "$status_card" "$status_contract" "$slash_dispatch" "$chatwidget" "$app_rs"; do
   [ -f "$file" ] || fail "missing $file"

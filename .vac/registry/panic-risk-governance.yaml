@@ -1,5 +1,5 @@
 schema_version: 1
-kind: panic_risk_governance
+kind: registry_status
 id: panic-risk.o5o6.zero-residual
 updated_at: 2026-06-02T00:00:00Z
 status: statically_governed

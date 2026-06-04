@@ -31,7 +31,6 @@ require_absent() {
 }
 
 require_file .vac/registry/plans/plan.dogfood.assistant-model.vac-session.yaml
-require_file docs/dogfood/2026-05-30-assistant-model-vac-dogfood.md
 require_file .vac/registry/evidence/evidence.2026-05-30-dogfood-assistant-model.yaml
 require_file .vac/registry/trajectory/dogfood-assistant-model.yaml
 require_file .vac/capabilities/dogfood-session.yaml
@@ -51,7 +50,7 @@ require_absent 'cat /tmp/vac-hardcoded' scripts/check-no-hardcoded-readiness-sco
 TMPROOT="$(mktemp -d "${TMPDIR:-/tmp}/vac-dogfood-session.XXXXXX")"
 trap 'rm -rf "$TMPROOT"' EXIT
 
-if grep -RIn 'chain of thought\|private reasoning\|scratchpad' docs/dogfood .vac/registry/evidence .vac/registry/trajectory \
+if grep -RIn 'chain of thought\|private reasoning\|scratchpad' .vac/registry/evidence .vac/registry/trajectory \
   | grep -v 'raw_chain_of_thought: true' >"$TMPROOT/unsafe-rationale.txt"; then
   cat "$TMPROOT/unsafe-rationale.txt" >&2
   exit 1

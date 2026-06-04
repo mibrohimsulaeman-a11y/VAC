@@ -338,6 +338,10 @@
                 config.cwd.to_path_buf(),
                 VAC_CLI_VERSION,
             )
+            .with_operator_context(
+                history_cell::operator_profile_label(config),
+                history_cell::operator_rulebook_label(config),
+            )
             .with_yolo_mode(history_cell::is_yolo_mode(config)),
         )
     }

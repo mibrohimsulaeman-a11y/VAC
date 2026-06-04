@@ -2,7 +2,7 @@
 
 Declarative product metadata for the VAC control plane. The registry is the entry point that `vac doctor registry .` loads to discover product identity, domain coverage, and readiness status.
 
-- **Schema source**: registry loaders under `vac-rs/control-plane/src/control_plane/` (consumed by `vac doctor registry`).
+- **Schema source**: registry loaders under `vac-rs/crates/control-plane/control-plane/src/control_plane/` (consumed by `vac doctor registry`).
 - **Schema doc**: [`docs/workflow-control-plane/schema/registry.schema.md`](../../docs/workflow-control-plane/schema/registry.schema.md) (index: [`docs/workflow-control-plane/schema/INDEX.md`](../../docs/workflow-control-plane/schema/INDEX.md))
 - **Doctor gate**: `vac doctor registry .`
 

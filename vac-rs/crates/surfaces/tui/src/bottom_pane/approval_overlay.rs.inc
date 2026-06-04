@@ -74,6 +74,7 @@ pub(crate) enum ApprovalRequest {
         thread_label: Option<String>,
         id: String,
         command: Vec<String>,
+        cwd: AbsolutePathBuf,
         reason: Option<String>,
         available_decisions: Vec<CommandExecutionApprovalDecision>,
         network_approval_context: Option<NetworkApprovalContext>,
@@ -725,6 +726,7 @@ fn build_header(request: &ApprovalRequest) -> Box<dyn Renderable> {
             thread_label,
             reason,
             command,
+            cwd,
             network_approval_context,
             additional_permissions,
             ..
@@ -745,7 +747,7 @@ fn build_header(request: &ApprovalRequest) -> Box<dyn Renderable> {
             ]));
             header.push(Line::from(vec![
                 "cwd          ".dim(),
-                "current workspace".into(),
+                cwd.as_path().display().to_string().into(),
             ]));
             header.push(Line::from(vec![
                 "context      ".dim(),
@@ -1277,6 +1279,10 @@ mod tests {
         AbsolutePathBuf::from_absolute_path(path).expect("absolute path")
     }
 
+    fn test_cwd() -> AbsolutePathBuf {
+        absolute_path("/workspace")
+    }
+
     fn render_overlay_lines(view: &ApprovalOverlay, width: u16) -> String {
         let height = view.desired_height(width);
         let mut buf = Buffer::empty(Rect::new(0, 0, width, height));
@@ -1341,6 +1347,7 @@ mod tests {
             thread_label: None,
             id: "test".to_string(),
             command: vec!["echo".to_string(), "hi".to_string()],
+            cwd: test_cwd(),
             reason: Some("reason".to_string()),
             available_decisions: vec![
                 CommandExecutionApprovalDecision::Accept,
@@ -1480,6 +1487,7 @@ mod tests {
                 thread_label: None,
                 id: "test".to_string(),
                 command: vec!["echo".to_string(), "hi".to_string()],
+                cwd: test_cwd(),
                 reason: None,
                 available_decisions: vec![
                     CommandExecutionApprovalDecision::Accept,
@@ -1523,6 +1531,7 @@ mod tests {
                 thread_label: None,
                 id: "test".to_string(),
                 command: vec!["curl".to_string(), "https://example.com".to_string()],
+                cwd: test_cwd(),
                 reason: None,
                 available_decisions: vec![
                     CommandExecutionApprovalDecision::Accept,
@@ -1597,6 +1606,7 @@ mod tests {
                 thread_label: Some("Robie [explorer]".to_string()),
                 id: "test".to_string(),
                 command: vec!["echo".to_string(), "hi".to_string()],
+                cwd: test_cwd(),
                 reason: None,
                 available_decisions: vec![
                     CommandExecutionApprovalDecision::Accept,
@@ -1631,6 +1641,7 @@ mod tests {
                 thread_label: Some("Robie [explorer]".to_string()),
                 id: "test".to_string(),
                 command: vec!["echo".to_string(), "hi".to_string()],
+                cwd: test_cwd(),
                 reason: None,
                 available_decisions: vec![
                     CommandExecutionApprovalDecision::Accept,
@@ -1669,6 +1680,7 @@ mod tests {
                 thread_label: Some("Robie [explorer]".to_string()),
                 id: "test".to_string(),
                 command: vec!["echo".to_string(), "hi".to_string()],
+                cwd: test_cwd(),
                 reason: None,
                 available_decisions: vec![
                     CommandExecutionApprovalDecision::Accept,
@@ -1697,6 +1709,7 @@ mod tests {
                 thread_label: None,
                 id: "test".to_string(),
                 command: vec!["echo".to_string()],
+                cwd: test_cwd(),
                 reason: None,
                 available_decisions: vec![
                     CommandExecutionApprovalDecision::Accept,
@@ -1749,6 +1762,7 @@ mod tests {
                 thread_label: None,
                 id: "test".to_string(),
                 command: vec!["curl".to_string(), "https://example.com".to_string()],
+                cwd: test_cwd(),
                 reason: None,
                 available_decisions: vec![
                     CommandExecutionApprovalDecision::Accept,
@@ -1788,6 +1802,7 @@ mod tests {
             thread_label: None,
             id: "test".into(),
             command,
+            cwd: test_cwd(),
             reason: None,
             available_decisions: vec![
                 CommandExecutionApprovalDecision::Accept,
@@ -1847,10 +1862,10 @@ mod tests {
         assert_eq!(
             labels,
             vec![
-                "Yes, just this once".to_string(),
-                "Yes, and allow this host for this conversation".to_string(),
-                "Yes, and allow this host in the future".to_string(),
-                "No, and tell VAC what to do differently".to_string(),
+                "approve once".to_string(),
+                "approve+remember · host for this conversation".to_string(),
+                "approve+remember · allow host".to_string(),
+                "reject with reason".to_string(),
             ]
         );
     }
@@ -1873,9 +1888,9 @@ mod tests {
         assert_eq!(
             labels,
             vec![
-                "Yes, proceed".to_string(),
-                "Yes, and don't ask again for this command in this session".to_string(),
-                "No, and tell VAC what to do differently".to_string(),
+                "approve once".to_string(),
+                "approve+remember · command for this session".to_string(),
+                "reject with reason".to_string(),
             ]
         );
     }
@@ -1903,10 +1918,7 @@ mod tests {
         let labels: Vec<String> = options.into_iter().map(|option| option.label).collect();
         assert_eq!(
             labels,
-            vec![
-                "Yes, proceed".to_string(),
-                "No, and tell VAC what to do differently".to_string(),
-            ]
+            vec!["approve once".to_string(), "reject with reason".to_string()]
         );
     }
 
@@ -1920,10 +1932,10 @@ mod tests {
         assert_eq!(
             labels,
             vec![
-                "Yes, grant these permissions for this turn".to_string(),
-                "Yes, grant for this turn with strict auto review".to_string(),
-                "Yes, grant these permissions for this session".to_string(),
-                "No, continue without permissions".to_string(),
+                "approve once · permissions for this turn".to_string(),
+                "approve once · strict auto review".to_string(),
+                "approve+remember · permissions for this session".to_string(),
+                "reject".to_string(),
             ]
         );
     }
@@ -2056,6 +2068,7 @@ mod tests {
             thread_label: None,
             id: "test".into(),
             command: vec!["cat".into(), "/tmp/readme.txt".into()],
+            cwd: test_cwd(),
             reason: None,
             available_decisions: vec![
                 CommandExecutionApprovalDecision::Accept,
@@ -2091,8 +2104,8 @@ mod tests {
         assert!(
             rendered
                 .iter()
-                .any(|line| line.contains("Permission rule:")),
-            "expected permission-rule line, got {rendered:?}"
+                .any(|line| line.contains("writes requested")),
+            "expected requested permission context, got {rendered:?}"
         );
         assert!(
             rendered.iter().any(|line| line.contains("network;")),
@@ -2109,6 +2122,7 @@ mod tests {
             thread_label: None,
             id: "test".into(),
             command: vec!["cat".into(), "/tmp/readme.txt".into()],
+            cwd: test_cwd(),
             reason: Some("need filesystem access".into()),
             available_decisions: vec![
                 CommandExecutionApprovalDecision::Accept,
@@ -2186,6 +2200,7 @@ mod tests {
             thread_label: None,
             id: "test".into(),
             command: vec!["curl".into(), "https://example.com".into()],
+            cwd: test_cwd(),
             reason: Some("network request blocked".into()),
             available_decisions: vec![
                 CommandExecutionApprovalDecision::Accept,
@@ -2222,14 +2237,14 @@ mod tests {
             .collect();
 
         assert!(
-            rendered.iter().any(|line| {
-                line.contains("Do you want to approve network access to \"example.com\"?")
-            }),
-            "expected network title to include host, got {rendered:?}"
+            rendered
+                .iter()
+                .any(|line| line.contains("network host example.com")),
+            "expected network context to include host, got {rendered:?}"
         );
         assert!(
-            !rendered.iter().any(|line| line.contains("$ curl")),
-            "network prompt should not show command line, got {rendered:?}"
+            rendered.iter().any(|line| line.contains("$ curl")),
+            "network prompt should show command line, got {rendered:?}"
         );
         assert!(
             !rendered.iter().any(|line| line.contains("don't ask again")),

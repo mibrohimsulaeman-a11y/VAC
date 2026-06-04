@@ -1,4 +1,3 @@
-#![allow(clippy::expect_used)]
 use core_test_support::context_snapshot;
 use core_test_support::context_snapshot::ContextSnapshotOptions;
 use core_test_support::context_snapshot::ContextSnapshotRenderMode;

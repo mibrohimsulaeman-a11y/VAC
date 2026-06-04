@@ -495,7 +495,7 @@ rules:
         );
         assert_eq!(
             resolve_workflow_approval_capability_id("capability.donor_migration.drift_check"),
-            Some("vac.donor_migration")
+            Some("vac.donor_migration".to_string())
         );
     }
 
@@ -2003,7 +2003,7 @@ validation:
             );
             assert_eq!(
                 resolve_workflow_approval_capability_id(entry.uses),
-                Some(entry.canonical_capability_id),
+                Some(entry.canonical_capability_id.to_string()),
                 "alias mismatch for {}",
                 entry.uses
             );

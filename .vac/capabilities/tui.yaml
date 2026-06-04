@@ -141,11 +141,15 @@ ownership:
   - crate_name: vac-surface-tui
     module: ascii_animation
   - crate_name: vac-surface-tui
+    module: auth_state_banner
+  - crate_name: vac-surface-tui
     module: audio_device
   - crate_name: vac-surface-tui
     module: auto_review_denials
   - crate_name: vac-surface-tui
     module: bottom_pane
+  - crate_name: vac-surface-tui
+    module: chatwidget
   - crate_name: vac-surface-tui
     module: capability_dashboard
   - crate_name: vac-surface-tui
@@ -205,8 +209,6 @@ ownership:
   - crate_name: vac-surface-tui
     module: live_wrap
   - crate_name: vac-surface-tui
-    module: provider_feature_chatgpt_auth
-  - crate_name: vac-surface-tui
     module: local_runtime_session
   - crate_name: vac-surface-tui
     module: markdown
@@ -231,15 +233,33 @@ ownership:
   - crate_name: vac-surface-tui
     module: onboarding
   - crate_name: vac-surface-tui
+    module: operator_console
+  - crate_name: vac-surface-tui
+    module: operator_style
+  - crate_name: vac-surface-tui
+    module: operator_style_snapshot_harness
+  - crate_name: vac-surface-tui
     module: operator_ui
   - crate_name: vac-surface-tui
+    module: operator_ui_styles
+  - crate_name: vac-surface-tui
+    module: operator_widget_render
+  - crate_name: vac-surface-tui
     module: oss_selection
+  - crate_name: vac-surface-tui
+    module: owner_native_operation_parity
+  - crate_name: vac-surface-tui
+    module: owner_native_runtime_support
   - crate_name: vac-surface-tui
     module: pager_overlay
   - crate_name: vac-surface-tui
     module: palette_surface
   - crate_name: vac-surface-tui
+    module: perf_bench_harness
+  - crate_name: vac-surface-tui
     module: permission_compat
+  - crate_name: vac-surface-tui
+    module: provider_credential_import
   - crate_name: vac-surface-tui
     module: public_widgets
   - crate_name: vac-surface-tui
@@ -270,6 +290,8 @@ ownership:
     module: status
   - crate_name: vac-surface-tui
     module: status_indicator_widget
+  - crate_name: vac-surface-tui
+    module: startup_task_graph
   - crate_name: vac-surface-tui
     module: streaming
   - crate_name: vac-surface-tui
@@ -320,6 +342,8 @@ ownership:
     module: workflow_progress
   - crate_name: vac-surface-tui
     module: wrapping
+  - crate_name: vac-surface-tui
+    module: operator_ui_snapshot_harness
 description: Root interactive frontend and operator cockpit for the VAC product.
 reason: 'Default TUI session ownership now uses the owner-native runtime protocol and local-runtime-owner surfaces. Legacy app-server compatibility is retired; local means no separate app-server process, not offline-only inference. Provider login/API access remains supported.
 
@@ -332,15 +356,8 @@ surfaces:
   palette: true
   tui:
     routes:
-    - /
     - /capabilities
-    - /workflow
-    - /debug-config
-    - /activity
-    - /approvals
     - /evidence
-    - /runtime
-    - /runtime/jobs
 states:
 - empty
 - loading
@@ -395,20 +412,13 @@ operator_ui_hardening_validation:
   - bash scripts/check-tui-hardening-regression-lock.sh
   - bash scripts/check-tui-status-output-contract.sh
   - bash scripts/check-tui-status-deep-hardening-contract.sh
-  - rustc --edition 2024 --test vac-rs/tui/src/status/output_contract.rs -o /tmp/vac-status-output-contract-test && /tmp/vac-status-output-contract-test --nocapture
+  - rustc --edition 2024 --test vac-rs/crates/surfaces/tui/src/status/output_contract.rs -o /tmp/vac-status-output-contract-test && /tmp/vac-status-output-contract-test --nocapture
   - bash scripts/check-tui-renderer-semantic-contract.sh
   gates:
   - hardening_1_regression_lock
   - hardening_2_semantic_renderer_contract
   - status_output_no_rate_limit_credit_display
   - hardening_3_status_output_deep_contract
-  docs:
-  - docs/tui/OPERATOR_UI_HARDENING_PLAN_1_10.md
-  - docs/validation/TUI_OPERATOR_UI_HARDENING_GATE.md
-  - docs/tui/OPERATOR_UI_HARDENING_03_STATUS_OUTPUT.md
-  - docs/tui/STATUS_OUTPUT_DEEP_HARDENING.md
-  - docs/validation/TUI_STATUS_OUTPUT_GATE.md
-  - docs/validation/TUI_STATUS_OUTPUT_DEEP_GATE.md
 hardening_batch_4_10:
   status: ready
   source_artifact: vac-source-tui-operator-ui-hardening4-10.zip
@@ -422,5 +432,3 @@ hardening_batch_4_10:
   - vac.tui.source-artifact-hygiene
   validation:
   - bash scripts/check-tui-hardening-4-10-contract.sh
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

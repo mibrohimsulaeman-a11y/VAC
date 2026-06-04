@@ -43,6 +43,7 @@ mod extension_resources {
     pub(super) const RETENTION_DAYS: i64 = 7;
 }
 
+#[cfg(test)]
 mod guard_limits {
     pub(super) const VAC_LIMIT_ID: &str = "vac";
 }

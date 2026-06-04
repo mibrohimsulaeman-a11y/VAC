@@ -3,7 +3,7 @@ kind: capability
 id: vac.tui_session_runtime
 title: TUI Session Runtime
 status: ready
-owner: vac-rs/tui/src/app_server_session.rs
+owner: vac-surface-tui/local_runtime_session
 ownership:
   crates:
   - vac-tui
@@ -54,11 +54,8 @@ validation:
 compatibility_transport:
 - dependency: vac_app_server_client optional legacy transport
   status: compatibility_transport
-  owner: vac-rs/tui/src/app_server_session.rs
+  owner: vac-surface-tui/local_runtime_session
   quarantine_marker: 'VAC_RUNTIME_OWNER_COMPAT_DEFER: plan31-app-server-compat-quarantine'
   deletion_condition: A future deletion slice removes the optional legacy client transport after non-default rollback evidence is no longer required.
-  replacement: vac-rs/tui/src/local_runtime_session.rs plus vac-rs/local-runtime-owner request and event DTOs.
-  target_removal_plan: docs/workflow-control-plane/plans/31-inventory.md
-docs:
-- docs/workflow-control-plane/plans/31-inventory.md
-- docs/workflow-control-plane/plans/32-vac-runtime-owner-gates.md
+  replacement: vac-rs/crates/surfaces/tui/src/local_runtime_session.rs plus vac-rs/crates/capabilities/local-runtime-owner request and event DTOs.
+  target_removal_plan: pruned legacy plan archive; see docs/workflow-control-plane/plans/INDEX.md

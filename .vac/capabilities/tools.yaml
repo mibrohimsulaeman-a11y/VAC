@@ -10,9 +10,14 @@ ownership:
   crates:
   - vac-capability-tools
   - vac-core
+  - vac-tools
   modules:
   - tools
   targets:
+  - crate_name: vac-core
+    module: tools
+  - crate_name: vac-surface-cli
+    module: apply_cli
   - crate_name: vac-apply-patch
     module: invocation
   - crate_name: vac-apply-patch
@@ -148,6 +153,12 @@ reason: 'Tool invocation surfaces, owner metadata, tool policy, and validation a
 depends_on:
 - vac.sessions
 surfaces:
+  cli:
+    enabled: true
+    commands:
+    - vac a
+    - vac apply
+    - vac e
   slash:
     commands:
     - /apps
@@ -160,13 +171,10 @@ surfaces:
     - /ps
     - /rollout
     - /stop
-  cli:
-    enabled: true
-    commands:
-    - vac a
-    - vac apply
-    - vac e
   palette: true
+  tui:
+    routes:
+    - /capabilities/vac.tools
 states:
 - empty
 - loading
@@ -191,5 +199,3 @@ validation:
     - vac-core
     risk: execute_process
     approval: policy
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

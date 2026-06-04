@@ -26,7 +26,7 @@ surfaces:
   palette: true
   tui:
     routes:
-    - /capabilities
+    - /init/approval-binding
 policy:
   risk: safe_read
   mutates_files: false
@@ -49,6 +49,3 @@ validation:
     - scripts/check-vac-init-approval-binding-contract.sh
     risk: execute_process
     approval: policy
-docs:
-- docs/vac-init/VAC_INIT_BATCH_06_12_IMPLEMENTATION.md
-- docs/validation/VAC_INIT_APPROVAL_BINDING_GATE.md

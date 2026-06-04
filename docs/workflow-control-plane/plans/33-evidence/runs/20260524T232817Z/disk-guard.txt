@@ -1,9 +1,0 @@
-# disk guard
-cwd: /home/emp/Documents/VAC/vastar-agentic-cli
-command: df -h . /tmp
-
-Filesystem                 Size  Used Avail Use% Mounted on
-/dev/mapper/vgubuntu-root  225G  135G   78G  64% /
-/dev/mapper/vgubuntu-root  225G  135G   78G  64% /
-
-exit_status: 0

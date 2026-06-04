@@ -17,12 +17,10 @@ ownership:
     module: control_plane::vac_init_durable_stores
   - kind: path
     include:
-    - vac-rs/control-plane/src/control_plane/vac_init_durable_stores.rs
+    - vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_durable_stores.rs
     - scripts/check-vac-init-durable-stores-contract.sh
     - .vac/capabilities/durable-stores.yaml
     - .vac/workflows/maintenance.durable-stores.yaml
-    - docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_D_DURABLE_STORES.md
-    - docs/validation/PRODUCTION_HARDENING_D1_D3_VALIDATION.md
     exclude: []
 description: Production hardening contract for VAC-Init Durable Stores.
 depends_on:
@@ -34,12 +32,6 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-vac-init-durable-stores-contract.sh
-    - vac doctor release .
-  palette: true
-  tui:
-    routes:
-    - /capabilities
-    - /runtime
 policy:
   risk: safe_read
   mutates_files: false
@@ -61,6 +53,3 @@ validation:
     - scripts/check-vac-init-durable-stores-contract.sh
     risk: execute_process
     approval: policy
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_D_DURABLE_STORES.md
-- docs/validation/PRODUCTION_HARDENING_D1_D3_VALIDATION.md

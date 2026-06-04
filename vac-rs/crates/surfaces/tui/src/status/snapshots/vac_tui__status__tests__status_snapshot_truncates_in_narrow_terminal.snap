@@ -1,5 +1,6 @@
 ---
-source: tui/src/status/tests.rs
+source: crates/surfaces/tui/src/status/tests.rs
+assertion_line: 1100
 expression: sanitized
 ---
 /status
@@ -7,12 +8,13 @@ expression: sanitized
 ╭────────────────────────────────────────────────────────────────────╮
 │  >_ Vastar VAC (v0.0.0)                                            │
 │                                                                    │
-│                                                                    │
-│  Model:            gpt-5.1-vac-max (reasoning high, summaries deta │
+│  Model:             gpt-5.1-vac-max (reasoning high, summaries det │
+│  Model provider:    Vastar (vastar, responses)                     │
+│  Model providers:   4 registered; active=*vastar; amazon-bedrock:A │
 │  Directory: [[workspace]]                                          │
-│  Permissions:      Custom (workspace with network access, on-reque │
-│  Agents.md:        <none>                                          │
+│  Permissions:       Custom (workspace with network access, on-requ │
+│  Agents.md:         <none>                                         │
 │                                                                    │
-│  Token usage:      1.9K total  (1K input + 900 output)             │
-│  Context window:   100% left (2.25K used / 272K)                   │
+│  Token usage:       1.9K total  (1K input + 900 output)            │
+│  Context window:    100% left (2.25K used / 272K)                  │
 ╰────────────────────────────────────────────────────────────────────╯

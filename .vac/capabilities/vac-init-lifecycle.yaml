@@ -23,13 +23,11 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-vac-init-lifecycle-contract.sh
-    - vac init --dry-run
     - vac init --resume
-    - vac init --status
   palette: true
   tui:
     routes:
-    - /capabilities
+    - /init/lifecycle
 policy:
   risk: safe_read
   mutates_files: true
@@ -52,6 +50,3 @@ validation:
     approval: policy
   gates:
   - vac_init_lifecycle_contract
-docs:
-- docs/vac-init/VAC_INIT_BATCH_02_05_IMPLEMENTATION.md
-- docs/validation/VAC_INIT_LIFECYCLE_GATE.md

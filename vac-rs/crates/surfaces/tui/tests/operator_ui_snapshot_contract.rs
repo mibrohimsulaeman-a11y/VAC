@@ -100,8 +100,10 @@ fn generated_operator_snapshots_keep_user_reference_surfaces_visible() {
     assert!(dashboard.contains("TUI Capability Dashboard"));
     assert!(dashboard.contains("/capabilities"));
     assert!(dashboard.contains("Diagnostics"));
-    assert!(dashboard.contains("YAML diagnostic"));
+    assert!(dashboard.contains("no YAML/control-plane errors detected"));
     assert!(dashboard.contains("VALIDATION / DOCS"));
+    assert!(!dashboard.contains(".vac/capabilities/tui.yml:42:13"));
+    assert!(!dashboard.contains("almost_ready"));
     assert!(!dashboard.contains("metrics  ["));
     assert!(!dashboard.contains("layout  left:"));
     assert!(!dashboard.contains("right / Diagnostics"));

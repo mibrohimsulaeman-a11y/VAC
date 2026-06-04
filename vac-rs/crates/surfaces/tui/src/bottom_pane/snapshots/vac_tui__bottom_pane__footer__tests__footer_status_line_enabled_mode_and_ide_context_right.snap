@@ -1,0 +1,6 @@
+---
+source: crates/surfaces/tui/src/bottom_pane/footer.rs.inc
+assertion_line: 1529
+expression: terminal.backend()
+---
+"                                                                          Plan mode (shift+tab to cycle) · IDE context  "

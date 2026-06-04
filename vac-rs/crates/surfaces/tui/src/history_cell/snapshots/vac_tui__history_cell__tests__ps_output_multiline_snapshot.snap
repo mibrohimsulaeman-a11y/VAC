@@ -1,0 +1,14 @@
+---
+source: crates/surfaces/tui/src/history_cell/split_006_finalmessageseparator.rs.inc
+assertion_line: 566
+expression: rendered
+---
+/ps
+
+Background terminals
+
+  • echo hello [...]
+    ↳ hello
+      done
+  • rg "foo" src
+    ↳ src/main.rs:12:foo

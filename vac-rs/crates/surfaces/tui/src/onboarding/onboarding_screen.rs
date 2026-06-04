@@ -27,8 +27,6 @@ use vac_git_utils::resolve_root_git_project_for_trust;
 #[cfg(target_os = "windows")]
 use vac_protocol::config_types::WindowsSandboxLevel;
 
-use vac_protocol::config_types::ForcedLoginMethod;
-
 use crate::LoginStatus;
 use crate::key_hint::KeyBindingListExt;
 use crate::legacy_core::config::Config;

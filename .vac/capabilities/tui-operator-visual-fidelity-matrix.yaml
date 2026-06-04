@@ -13,8 +13,12 @@ depends_on:
 surfaces:
   tui:
     routes:
-    - /visual-gate
-  palette: false
+    - /visual-matrix
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -34,8 +38,6 @@ validation:
   - viewport_180x48
   - plain_snapshot_matrix
   - ansi_snapshot_matrix
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md
 ownership:
   crates:
   - vac-tui
@@ -48,6 +50,5 @@ ownership:
   - kind: path
     include:
     - .vac/capabilities/tui-operator-visual-fidelity-matrix.yaml
-    - docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md
     - scripts/check-tui-operator-visual-fidelity-matrix.sh
     exclude: []

@@ -1,5 +1,5 @@
 schema_version: 1
-kind: spec_conformance_ledger
+kind: registry_status
 id: spec-conformance.o5o6.zero-residual
 updated_at: 2026-06-02T00:00:00Z
 status: static_closed

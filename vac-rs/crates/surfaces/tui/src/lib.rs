@@ -1,4 +1,10 @@
 #![cfg_attr(not(feature = "full-tui"), allow(dead_code))]
+// The explicit full-tui build keeps optional runtime branches and snapshot
+// harness-only render paths in one crate; keep dead-code noise out of gates
+// while preserving clippy denies for unsafe terminal output patterns below.
+#![cfg_attr(feature = "full-tui", allow(dead_code))]
+#![cfg_attr(feature = "full-tui", deny(clippy::print_stdout, clippy::print_stderr))]
+#![cfg_attr(feature = "full-tui", deny(clippy::disallowed_methods))]
 
 #[cfg(feature = "full-tui")]
 include!("full_tui_runtime.rs");

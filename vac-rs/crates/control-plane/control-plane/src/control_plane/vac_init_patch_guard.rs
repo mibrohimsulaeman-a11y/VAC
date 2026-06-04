@@ -431,8 +431,9 @@ fn records_to_line_candidates(
             let key = (record.kind.clone(), record.name.clone());
             let from_line = *next_search_line.get(&key).unwrap_or(&1);
             let range = if record.kind == "impl" {
-                find_rust_declaration_line_range(source, "impl", lookup_name, from_line)
-                    .or_else(|| find_rust_declaration_line_range(source, "fn", lookup_name, from_line))?
+                find_rust_declaration_line_range(source, "impl", lookup_name, from_line).or_else(
+                    || find_rust_declaration_line_range(source, "fn", lookup_name, from_line),
+                )?
             } else {
                 find_rust_declaration_line_range(source, lookup_kind, lookup_name, from_line)?
             };

@@ -2,7 +2,7 @@
 
 Declarative workflow manifests. A workflow composes capability handlers into a typed, reproducible sequence with operator-visible progress, approvals, and validation gates.
 
-- **Schema source**: [`vac-rs/control-plane/src/control_plane/workflow_manifest.rs`](../../vac-rs/control-plane/src/control_plane/workflow_manifest.rs)
+- **Schema source**: [`vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_manifest.rs`](../../vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_manifest.rs)
 - **Schema doc**: [`docs/workflow-control-plane/schema/workflow-manifest.schema.md`](../../docs/workflow-control-plane/schema/workflow-manifest.schema.md) (index: [`docs/workflow-control-plane/schema/INDEX.md`](../../docs/workflow-control-plane/schema/INDEX.md))
 - **Doctor gate**: `vac doctor workflow .`
 

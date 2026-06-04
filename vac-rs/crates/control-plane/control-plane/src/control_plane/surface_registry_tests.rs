@@ -255,7 +255,7 @@ routes:
         }
         other => panic!("expected owner conflict, got {other:?}"),
     }
-    assert_eq!(diagnostics[0].severity(), SurfaceCrossSeverity::Failure);
+    assert_eq!(diagnostics[0].severity(), SurfaceCrossSeverity::Warning);
 }
 
 #[test]

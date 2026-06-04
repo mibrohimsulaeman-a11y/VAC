@@ -14,9 +14,6 @@ ownership:
   targets:
   - kind: path
     include:
-    - docs/PROJECT_STATE_CURRENT.md
-    - docs/DOCS_INDEX_CURRENT.md
-    - docs/DOCS_AUDIT.md
     - .vac/registry/docs-state.yaml
     - scripts/check-docs-state-refresh.sh
     exclude: []
@@ -30,11 +27,6 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-docs-state-refresh.sh
-  palette: true
-  tui:
-    routes:
-    - /docs
-    - /capabilities
 policy:
   risk: safe_read
   mutates_files: false
@@ -56,7 +48,3 @@ validation:
     - scripts/check-docs-state-refresh.sh
     risk: execute_process
     approval: policy
-docs:
-- docs/PROJECT_STATE_CURRENT.md
-- docs/DOCS_INDEX_CURRENT.md
-- docs/DOCS_AUDIT.md

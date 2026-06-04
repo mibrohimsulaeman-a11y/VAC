@@ -11,7 +11,7 @@ ok() { echo "OK:   $*"; }
 
 capability=".vac/capabilities/autopilot-scheduler.yaml"
 workflow=".vac/workflows/maintenance.autopilot-scheduler-readiness.yaml"
-operator_ui="vac-rs/tui/src/operator_ui.rs"
+operator_ui="vac-rs/crates/surfaces/tui/src/operator_ui.rs.inc"
 
 [ -f "$capability" ] || fail "missing $capability"
 [ -f "$workflow" ] || fail "missing $workflow"

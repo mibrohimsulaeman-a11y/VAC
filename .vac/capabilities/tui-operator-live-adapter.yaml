@@ -21,13 +21,12 @@ depends_on:
 surfaces:
   tui:
     routes:
-    - /capabilities
-    - /runtime
-  slash:
-    commands:
-    - /capabilities
-    - /runtime
-  palette: true
+    - /operator-live-adapter
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -57,5 +56,3 @@ validation:
   - runtime_surface_uses_adapter
   - capability_surface_uses_adapter
   - deterministic_renderer_preserved
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

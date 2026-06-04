@@ -9,7 +9,6 @@ require_file() {
 
 require_file THIRD_PARTY_NOTICES.md
 require_file docs/legal/NOTICES.md
-require_file docs/legal/LEGAL_RELEASE_BLOCKERS.md
 require_file .vac/registry/legal-release-blockers.yaml
 
 grep -q 'Portions of this repository are derived from or historically based on OpenAI Codex CLI' THIRD_PARTY_NOTICES.md

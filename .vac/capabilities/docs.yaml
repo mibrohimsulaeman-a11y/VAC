@@ -31,11 +31,7 @@ surfaces:
   cli:
     enabled: true
     commands:
-    - vac doctor docs .
-  palette: true
-  tui:
-    routes:
-    - /docs
+    - vac doctor docs
 states:
 - empty
 - loading
@@ -51,5 +47,3 @@ validation:
     - scripts/check-vac-o5o6-zero-residual-static.sh
     risk: execute_process
     approval: policy
-docs:
-- docs/monolith-quality/O5O6_ZERO_RESIDUAL_CLOSEOUT.md

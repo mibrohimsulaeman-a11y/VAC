@@ -2,10 +2,9 @@ schema_version: 1
 kind: workflow
 id: maintenance.regen-control-plane
 title: Regenerate VAC control-plane projections
-status: ready
+status: disabled
 description: Regenerate derivable .vac/.init and living docs projections while preserving authored intent and append-only history.
-inputs:
-  required: []
+inputs: {}
 steps:
   - id: protect_history
     uses: capability.docs.protect_append_only_history

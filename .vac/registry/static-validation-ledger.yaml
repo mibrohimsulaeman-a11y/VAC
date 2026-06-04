@@ -1,5 +1,5 @@
 schema_version: 1
-kind: static_validation_ledger
+kind: registry_status
 id: o5o6.zero_residual.static_only.continuation
 updated_at: 2026-06-02T00:00:00Z
 mode: static_only_no_cargo_no_toolchain

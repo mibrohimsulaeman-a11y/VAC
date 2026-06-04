@@ -1,6 +1,8 @@
 schema_version: 1
 kind: evidence
 id: evidence.2026-06-01-o5o6-autopilot-runtime-scheduler-guard
+chain:
+  self_hash: 1c4bf972b6a0be826ffc4a65df0b6b2c5d7279bfa9ac3044c431b77de6fab0f6
 timestamp: 2026-06-01T00:00:00Z
 plan_id: plan.o5o6.autopilot-runtime-scheduler-guard
 capability: vac.autopilot.scheduler

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# REQUIRES_TOOLCHAIN: optional cargo test for vac-core evidence chain unit tests
+# REQUIRES_TOOLCHAIN: optional cargo test for vac-control-plane evidence chain unit tests
 set -u
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT" || exit 1
@@ -23,7 +23,7 @@ require_file .vac/capabilities/vac-init-evidence-chain.yaml
 require_file .vac/workflows/maintenance.vac-init-evidence-chain.yaml
 require_grep 'bash scripts/check-vac-init-evidence-chain-contract.sh' .vac/surfaces/cli.yaml
 if command -v cargo >/dev/null 2>&1; then
-  (cd vac-rs && cargo test --offline -p vac-core vac_init_evidence_chain --lib)
+  cargo test --manifest-path vac-rs/Cargo.toml -p vac-control-plane vac_init_evidence_chain --lib -- --nocapture
   rc=$?
   [ "$rc" -eq 0 ] || exit "$rc"
   echo 'vac-init evidence-chain contract: PASS (cargo unit)'

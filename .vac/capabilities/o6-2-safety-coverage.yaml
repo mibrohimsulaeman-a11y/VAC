@@ -16,7 +16,6 @@ ownership:
     include:
     - .vac/registry/o6-safety-coverage.yaml
     - .vac/registry/compile-debt-ledger.yaml
-    - docs/monolith-quality/O6_2_SAFETY_ANNOTATION_COVERAGE.md
     - scripts/check-vac-o6-2-safety-coverage.sh
     exclude: []
 description: Static no-rustc gate ensuring each runtime unsafe occurrence has a nearby SAFETY comment.
@@ -34,11 +33,7 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-vac-o6-2-safety-coverage.sh
-  palette: true
-  tui:
-    routes:
-    - /doctor
-    - /release
+    - bash scripts/check-vac-sandbox-suite.sh
 states:
 - empty
 - loading
@@ -54,6 +49,3 @@ validation:
     - scripts/check-vac-o6-2-safety-coverage.sh
     risk: execute_process
     approval: policy
-docs:
-- docs/monolith-quality/O6_2_SAFETY_ANNOTATION_COVERAGE.md
-- docs/monolith-quality/O6_2_UNSAFE_TRIAGE.md

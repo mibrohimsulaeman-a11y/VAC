@@ -14,13 +14,11 @@ ownership:
   targets:
   - kind: path
     include:
-    - docs/legal/SAFE_PROVENANCE_SCRUB_O4.md
     - scripts/check-safe-provenance-scrub-o4.sh
-    - vac-rs/control-plane/src/control_plane/donor_domain_contract.rs
-    - vac-rs/local-runtime-owner/src/startup.rs
-    - vac-rs/tui/src/bottom_pane/feedback_view.rs
-    - vac-rs/tui/src/legacy_app_server_session.rs
-    - vac-rs/tui/src/local_runtime_session.rs
+    - vac-rs/crates/control-plane/control-plane/src/control_plane/donor_domain_contract.rs
+    - vac-rs/crates/capabilities/local-runtime-owner/src/startup.rs
+    - vac-rs/crates/surfaces/tui/src/bottom_pane/feedback_view.rs
+    - vac-rs/crates/surfaces/tui/src/local_runtime_session.rs
     exclude: []
 description: Narrow O4 provenance cleanup that preserves functional OpenAI provider identifiers and third-party license headers.
 depends_on:
@@ -37,11 +35,6 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-safe-provenance-scrub-o4.sh
-  palette: true
-  tui:
-    routes:
-    - /doctor
-    - /release
 states:
 - empty
 - loading
@@ -58,5 +51,4 @@ validation:
     risk: execute_process
     approval: policy
 docs:
-- docs/legal/SAFE_PROVENANCE_SCRUB_O4.md
 - THIRD_PARTY_NOTICES.md

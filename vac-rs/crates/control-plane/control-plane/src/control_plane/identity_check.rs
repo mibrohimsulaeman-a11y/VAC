@@ -94,6 +94,26 @@ const IDENTITY_CHECK_EXEMPTIONS: &[IdentityExemption] = &[
         expires_when: "Workflow identity vocabulary policy supports canonical ids",
     },
     IdentityExemption {
+        path: ".vac/.init/**",
+        reason: "VAC-Init generated source inventory and risk reports can quote historical scanner findings.",
+        expires_when: "Generated init projections are refreshed without retired vocabulary",
+    },
+    IdentityExemption {
+        path: ".vac/registry/donor-inventory.yaml",
+        reason: "Donor inventory records retired donor source identifiers while donor frontend stacks remain quarantined.",
+        expires_when: "Donor inventory is rewritten with opaque source ids",
+    },
+    IdentityExemption {
+        path: ".vac/registry/plan-state.yaml",
+        reason: "Plan state is historical registry metadata and can quote retired plan titles.",
+        expires_when: "Historical plan-state snapshots are archived",
+    },
+    IdentityExemption {
+        path: ".vac/registry/plans/**",
+        reason: "Registry plan snapshots quote historical/generated findings and ownership labels.",
+        expires_when: "Registry plan snapshots are moved outside identity-check scan roots",
+    },
+    IdentityExemption {
         path: ".vac/workflows/README.md",
         reason: "Workflow README lists canonical maintenance workflow ids.",
         expires_when: "Workflow identity vocabulary policy supports canonical ids",
@@ -299,7 +319,17 @@ const IDENTITY_CHECK_EXEMPTIONS: &[IdentityExemption] = &[
         expires_when: "Identity scanner stores terms outside scanned source",
     },
     IdentityExemption {
+        path: "vac-rs/crates/control-plane/control-plane/src/control_plane/identity_check.rs",
+        reason: "Scanner implementation defines forbidden terms and regression fixtures.",
+        expires_when: "Identity scanner stores terms outside scanned source",
+    },
+    IdentityExemption {
         path: "vac-rs/core/src/control_plane/no_duplicate_tui.rs",
+        reason: "TUI uniqueness scanner defines forbidden terms and regression fixtures.",
+        expires_when: "TUI uniqueness scanner stores terms outside scanned source",
+    },
+    IdentityExemption {
+        path: "vac-rs/crates/control-plane/control-plane/src/control_plane/no_duplicate_tui.rs",
         reason: "TUI uniqueness scanner defines forbidden terms and regression fixtures.",
         expires_when: "TUI uniqueness scanner stores terms outside scanned source",
     },
@@ -309,7 +339,17 @@ const IDENTITY_CHECK_EXEMPTIONS: &[IdentityExemption] = &[
         expires_when: "Workflow identity vocabulary policy supports canonical ids",
     },
     IdentityExemption {
+        path: "vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/**",
+        reason: "Workflow runner renders canonical maintenance workflow labels and diagnostics.",
+        expires_when: "Workflow identity vocabulary policy supports canonical ids",
+    },
+    IdentityExemption {
         path: "vac-rs/core/src/control_plane/mod.rs",
+        reason: "Control-plane module names expose the canonical TUI uniqueness scanner.",
+        expires_when: "Module naming migration is explicitly planned",
+    },
+    IdentityExemption {
+        path: "vac-rs/crates/control-plane/control-plane/src/control_plane/mod.rs",
         reason: "Control-plane module names expose the canonical TUI uniqueness scanner.",
         expires_when: "Module naming migration is explicitly planned",
     },
@@ -319,7 +359,17 @@ const IDENTITY_CHECK_EXEMPTIONS: &[IdentityExemption] = &[
         expires_when: "Workflow id migration is explicitly planned",
     },
     IdentityExemption {
+        path: "vac-rs/crates/control-plane/control-plane/src/control_plane/root_feature_catalog.rs",
+        reason: "Root feature catalog includes canonical maintenance workflow names.",
+        expires_when: "Workflow id migration is explicitly planned",
+    },
+    IdentityExemption {
         path: "vac-rs/core/src/control_plane/surface_doctor_tests.rs",
+        reason: "Surface doctor regression fixtures quote historical drift terms.",
+        expires_when: "Fixture vocabulary is migrated",
+    },
+    IdentityExemption {
+        path: "vac-rs/crates/control-plane/control-plane/src/control_plane/surface_doctor_tests.rs",
         reason: "Surface doctor regression fixtures quote historical drift terms.",
         expires_when: "Fixture vocabulary is migrated",
     },
@@ -329,8 +379,28 @@ const IDENTITY_CHECK_EXEMPTIONS: &[IdentityExemption] = &[
         expires_when: "Fixtures are migrated to synthetic tokens",
     },
     IdentityExemption {
+        path: "vac-rs/crates/surfaces/cli/src/doctor_cli.rs.inc",
+        reason: "CLI doctor tests quote forbidden terms as regression fixtures.",
+        expires_when: "Fixtures are migrated to synthetic tokens",
+    },
+    IdentityExemption {
+        path: "vac-rs/crates/control-plane/control-plane/src/control_plane/donor_domain_contract.rs",
+        reason: "Donor domain contract quotes retired donor source identifiers as a quarantine check.",
+        expires_when: "Donor source identifiers are externalized from scanned source",
+    },
+    IdentityExemption {
+        path: "vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_live_scanner_policy.rs",
+        reason: "VAC-Init scanner implementation matches retired donor paths as quarantine input.",
+        expires_when: "Scanner fixtures move outside identity-check scan roots",
+    },
+    IdentityExemption {
         path: "vac-rs/tui/src/workflow_browser.rs",
         reason: "TUI workflow browser tests quote forbidden terms as regression fixtures.",
+        expires_when: "Fixtures are migrated to synthetic tokens",
+    },
+    IdentityExemption {
+        path: "vac-rs/crates/surfaces/tui/src/workflow_browser.rs",
+        reason: "TUI workflow browser renders canonical scanner labels and quotes regression fixtures.",
         expires_when: "Fixtures are migrated to synthetic tokens",
     },
 ];

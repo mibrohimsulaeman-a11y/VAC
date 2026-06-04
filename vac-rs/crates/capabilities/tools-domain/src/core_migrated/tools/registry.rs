@@ -577,10 +577,13 @@ impl ToolRegistryBuilder {
 }
 
 fn unsupported_tool_call_message(payload: &ToolPayload, tool_name: &ToolName) -> String {
-    let tool_name = tool_name.display();
+    let tool_name_str = tool_name.display();
+    if tool_name_str.starts_with("mcp__vac_apps__") {
+        return crate::cloud_account_disabled::LEGACY_CLOUD_ACCOUNT_DISABLED_REASON.to_string();
+    }
     match payload {
-        ToolPayload::Custom { .. } => format!("unsupported custom tool call: {tool_name}"),
-        _ => format!("unsupported call: {tool_name}"),
+        ToolPayload::Custom { .. } => format!("unsupported custom tool call: {tool_name_str}"),
+        _ => format!("unsupported call: {tool_name_str}"),
     }
 }
 

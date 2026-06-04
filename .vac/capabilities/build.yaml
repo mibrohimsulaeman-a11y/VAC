@@ -4,16 +4,20 @@ id: vac.build
 title: Build
 status: ready
 owner:
-  crate: vac-capability-build
-  module: contract
+  crate: vac-control-plane
+  module: control_plane.build_check
 ownership:
   crates:
-  - vac-capability-build
-  - vac-core
-  - vac-cli
+  - vac-control-plane
+  - vac-surface-cli
   modules:
   - control_plane.build_check
   - doctor_cli
+  targets:
+  - crate_name: vac-control-plane
+    module: control_plane.build_check
+  - crate_name: vac-surface-cli
+    module: doctor_cli
 description: Approval-gated build and maintenance validation gates for the root product.
 reason: 'CLI doctor build entry-point and maintenance build workflow are ready for the default product path. `vac doctor build` runs a serial, approval-gated, allowlisted `cargo +1.93.0 check --manifest-path vac-rs/Cargo.toml -p vac-surface-cli` and emits a structured BuildCheckReport with timeout, exit status, and redacted diagnostics. Full workspace builds remain operator-gated release evidence because they are resource-heavy and environment-sensitive; missing full-workspace evidence is recorded as release/operator evidence, not a build capability implementation gap.
 
@@ -57,7 +61,7 @@ validation:
     - --manifest-path
     - vac-rs/Cargo.toml
     - -p
-    - vac-cli
+    - vac-surface-cli
     risk: execute_process
     approval: policy
 operator_evidence:
@@ -65,5 +69,3 @@ operator_evidence:
     status: operator_gated
     command: CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.93.0 build --manifest-path vac-rs/Cargo.toml --workspace
     release_policy: non_pass_until_recorded
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

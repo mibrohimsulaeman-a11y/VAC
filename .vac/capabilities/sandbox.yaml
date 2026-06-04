@@ -9,9 +9,13 @@ owner:
 ownership:
   crates:
   - vac-core
+  - vac-sandboxing
+  - vac-execpolicy
   modules:
   - sandboxing
   targets:
+  - crate_name: vac-core
+    module: sandboxing
   - crate_name: vac-core
     module: exec
   - crate_name: vac-core
@@ -110,6 +114,9 @@ surfaces:
     commands:
     - vac exec
   palette: true
+  tui:
+    routes:
+    - /capabilities/vac.sandbox
 states:
 - empty
 - loading
@@ -134,5 +141,3 @@ validation:
     - vac-core
     risk: execute_process
     approval: policy
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

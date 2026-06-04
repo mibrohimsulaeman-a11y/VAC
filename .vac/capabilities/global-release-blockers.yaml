@@ -33,11 +33,6 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-legal-release-blockers.sh
-  palette: true
-  tui:
-    routes:
-    - /doctor
-    - /release
 states:
 - empty
 - loading
@@ -54,5 +49,4 @@ validation:
     risk: execute_process
     approval: policy
 docs:
-- docs/legal/LEGAL_RELEASE_BLOCKERS.md
 - THIRD_PARTY_NOTICES.md

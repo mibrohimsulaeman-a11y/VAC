@@ -7,10 +7,14 @@ cd "$REPO_ROOT"
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
 bash scripts/check-autopilot-scheduler-contract.sh >/dev/null
-ui="vac-rs/tui/src/operator_ui.rs"
+ui="vac-rs/crates/surfaces/tui/src/operator_ui.rs.inc"
 capability=".vac/capabilities/autopilot-scheduler.yaml"
 workflow=".vac/workflows/maintenance.autopilot-scheduler-readiness.yaml"
-snapshot="docs/validation/tui-operator-ui-snapshots/runtime-jobs-120x36.txt"
+TMPROOT="$(mktemp -d "${TMPDIR:-/tmp}/vac-runtime-jobs.XXXXXX")"
+trap 'rm -rf "$TMPROOT"' EXIT
+snapshot="$TMPROOT/tui-operator-ui-snapshots/runtime-jobs-120x36.txt"
+
+bash scripts/render-tui-operator-snapshots.sh "$TMPROOT/tui-operator-ui-snapshots" >/dev/null
 
 grep -q 'struct AutopilotActionSpec' "$ui" || fail "autopilot action contract missing"
 grep -q 'default_monitor_actions' "$ui" || fail "default monitor actions missing"

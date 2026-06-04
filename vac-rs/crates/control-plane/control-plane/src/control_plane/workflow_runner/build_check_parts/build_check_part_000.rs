@@ -394,6 +394,7 @@ pub enum WorkflowStepHandler {
     RegistrySchemaCheck,
     CapabilityDashboardCheck,
     WorkflowBrowserCheck,
+    DeclarativeCapabilityCheck,
 }
 
 impl WorkflowStepHandler {
@@ -417,6 +418,7 @@ impl WorkflowStepHandler {
             Self::RegistrySchemaCheck => "registry.schema_check",
             Self::CapabilityDashboardCheck => "dashboard.check",
             Self::WorkflowBrowserCheck => "browser.check",
+            Self::DeclarativeCapabilityCheck => "declarative_capability.check",
         }
     }
 }
@@ -634,4 +636,3 @@ pub struct WorkflowDryRunMachine {
     state_trace: Vec<WorkflowDryRunState>,
     events: Vec<WorkflowDryRunEvent>,
 }
-

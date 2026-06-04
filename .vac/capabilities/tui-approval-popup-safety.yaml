@@ -13,8 +13,12 @@ depends_on:
 surfaces:
   tui:
     routes:
-    - /approvals
-  palette: false
+    - /approval-popup
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: approval_required
   mutates_files: false
@@ -37,8 +41,6 @@ validation:
   - destructive_label
   - policy_gate_summary
   - no_ui_policy_bypass
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md
 ownership:
   crates:
   - vac-tui
@@ -51,6 +53,5 @@ ownership:
   - kind: path
     include:
     - .vac/capabilities/tui-approval-popup-safety.yaml
-    - docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md
     - scripts/check-tui-approval-popup-safety-contract.sh
     exclude: []

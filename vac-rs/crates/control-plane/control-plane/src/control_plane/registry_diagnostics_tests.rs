@@ -4,6 +4,7 @@ use super::RegistryLoadReport;
 use super::RegistryLoadState;
 use std::fs;
 use tempfile::tempdir;
+use tempfile::tempdir_in;
 
 #[test]
 fn loading_report_renders_loading_state() {
@@ -14,7 +15,7 @@ fn loading_report_renders_loading_state() {
 
 #[test]
 fn missing_vac_root_renders_empty_warning_report() {
-    let tempdir = tempdir().expect("tempdir");
+    let tempdir = tempdir_in("/var/tmp").expect("tempdir");
     let report = load_control_plane_registry_report(tempdir.path());
 
     assert_eq!(report.state(), RegistryLoadState::Empty);
@@ -119,7 +120,7 @@ fn registry_root_seed_coverage_reports_missing_feature() {
 }
 
 #[test]
-fn registry_root_seed_coverage_blocks_ready_workflow_without_supported_runner() {
+fn registry_root_seed_coverage_allows_ready_workflow_declarative_capability_runner() {
     let tempdir = tempdir().expect("tempdir");
     let vac_root = tempdir.path().join(".vac");
     let workflows_dir = vac_root.join("workflows");
@@ -187,15 +188,12 @@ validation:
 
     assert!(report.is_failure(), "rendered:\n{rendered}");
     assert!(
-        rendered.contains(
+        !rendered.contains(
             "ready workflow `maintenance.unsupported-ready` has unsupported runner steps"
         ),
         "rendered:\n{rendered}"
     );
-    assert!(
-        rendered.contains("validate=capability.not_mapped.yet"),
-        "rendered:\n{rendered}"
-    );
+    assert!(!rendered.contains("validate=capability.not_mapped.yet"));
 }
 
 #[test]
@@ -877,7 +875,7 @@ validation:
 
 #[test]
 fn registry_report_cli_exit_code_follows_failure_state() {
-    let tempdir = tempdir().expect("tempdir");
+    let tempdir = tempdir_in("/var/tmp").expect("tempdir");
     let empty_report = load_control_plane_registry_report(tempdir.path());
     assert_eq!(empty_report.state(), RegistryLoadState::Empty);
     assert_eq!(empty_report.cli_exit_code(), 0);
@@ -941,8 +939,14 @@ routes:
     path: /other
     capability: vac.chat
     owner: vac-tui/chatwidget
-    visible: true
+    visible: false
     status: planned
+  - kind: tui
+    path: /chat
+    capability: vac.chat
+    owner: vac-tui/chatwidget
+    visible: true
+    status: ready
 "#,
     )
     .expect("surface manifest");

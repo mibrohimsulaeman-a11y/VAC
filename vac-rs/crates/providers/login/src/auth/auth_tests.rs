@@ -277,7 +277,7 @@ async fn loads_api_key_from_auth_json() {
 fn logout_removes_auth_file() -> Result<(), std::io::Error> {
     let dir = tempdir()?;
     let auth_dot_json = AuthDotJson {
-        auth_mode: Some(ApiAuthMode::ApiKey),
+        auth_mode: Some(AuthMode::ApiKey),
         vastar_api_key: Some("sk-test-key".to_string()),
         tokens: None,
         last_refresh: None,
@@ -403,7 +403,7 @@ async fn external_bearer_only_auth_manager_uses_cached_provider_token() {
     assert_eq!(first.as_deref(), Some("provider-token"));
     assert_eq!(second.as_deref(), Some("provider-token"));
     assert_eq!(manager.auth_mode(), Some(AuthMode::ApiKey));
-    assert_eq!(manager.get_api_auth_mode(), Some(ApiAuthMode::ApiKey));
+    assert_eq!(manager.get_api_auth_mode(), Some(AuthMode::ApiKey));
 }
 
 #[tokio::test]

@@ -13,8 +13,12 @@ depends_on:
 surfaces:
   tui:
     routes:
-    - /capabilities
-  palette: true
+    - /capabilities/runtime
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -33,8 +37,6 @@ validation:
   - typed_control_plane_diagnostics
   - diagnostics_never_blank
   - manifest_runtime_mapping
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md
 ownership:
   crates:
   - vac-tui
@@ -47,6 +49,5 @@ ownership:
   - kind: path
     include:
     - .vac/capabilities/tui-capability-dashboard-runtime.yaml
-    - docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md
     - scripts/check-tui-capability-dashboard-runtime-contract.sh
     exclude: []

@@ -1,17 +1,24 @@
 ---
-source: tui/src/chatwidget/tests/status_and_layout.rs
+source: crates/surfaces/tui/src/chatwidget/tests/status_and_layout.rs.inc
 expression: normalized_backend_snapshot(terminal.backend())
 ---
 "                                                                                                    "
 "                                                                                                    "
-"  Would you like to run the following command?                                                      "
+"  approval required                                                                                 "
 "                                                                                                    "
-"  Reason: this is a test reason such as one that would be produced by the model                     "
+"  action kind  BASH  the agent wants to run a shell command                                         "
+"  cwd          /tmp                                                                                 "
+"  context      runtime host · network inherit · writes policy-gated                                 "
+"  risk         process execution · operator approval required                                       "
+"  policy       this is a test reason such as one that would be produced by the model                "
+"  batch        batch 1/1 — policy-gated approval queue                                              "
 "                                                                                                    "
 "  $ echo 'hello world'                                                                              "
 "                                                                                                    "
-"› 1. Yes, proceed (y)                                                                               "
-"  2. Yes, and don't ask again for commands that start with `echo 'hello world'` (p)                 "
-"  3. No, and tell VAC what to do differently (esc)                                                  "
+"  hotkeys  y approve once   a approve+remember   n reject   r reject with reason                    "
+"                                                                                                    "
+"› 1. approve once (y)                                                                               "
+"  2. approve+remember · command prefix `echo 'hello world'` (p)                                     "
+"  3. reject with reason (esc)                                                                       "
 "                                                                                                    "
 "  Press enter to confirm or esc to cancel                                                           "

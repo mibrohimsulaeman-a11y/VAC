@@ -9,7 +9,7 @@ cd "$REPO_ROOT"
 fail() { echo "FAIL: $*" >&2; exit 1; }
 ok() { echo "OK:   $*"; }
 
-operator_ui="vac-rs/tui/src/operator_ui.rs"
+operator_ui="vac-rs/crates/surfaces/tui/src/operator_ui.rs.inc"
 [ -f "$operator_ui" ] || fail "missing $operator_ui"
 
 grep -q 'struct OperatorViewport' "$operator_ui" || fail "viewport-aware operator renderer missing"
@@ -45,9 +45,13 @@ grep -q 'DESTRUCTIVE' "$TMP_DIR/approval-popup-120x36.txt" || fail "approval sna
 grep -q 'approve+remember' "$TMP_DIR/approval-popup-120x36.txt" || fail "approval snapshot missing approve+remember hotkey"
 grep -q 'autopilot' "$TMP_DIR/runtime-jobs-120x36.txt" || fail "runtime jobs snapshot missing autopilot status"
 grep -q 'enter attach' "$TMP_DIR/runtime-jobs-120x36.txt" || fail "runtime jobs snapshot missing attach action"
-grep -q 'right / Diagnostics' "$TMP_DIR/capability-dashboard-180x48.txt" || fail "dashboard snapshot missing diagnostics panel"
-grep -q 'YAML diagnostic' "$TMP_DIR/capability-dashboard-180x48.txt" || fail "dashboard snapshot missing YAML diagnostic card"
-grep -q 'profile default' "$TMP_DIR/idle-120x36.txt" || fail "snapshot statusline missing profile"
+grep -q 'Diagnostics' "$TMP_DIR/capability-dashboard-180x48.txt" || fail "dashboard snapshot missing diagnostics panel"
+grep -q 'no YAML/control-plane errors detected' "$TMP_DIR/capability-dashboard-180x48.txt" || fail "dashboard snapshot missing healthy diagnostics fallback"
+if grep -q '.vac/capabilities/tui.yml:42:13\|almost_ready\|vac.yaml.parser' "$TMP_DIR/capability-dashboard-180x48.txt"; then
+  fail "dashboard snapshot leaked stale fake YAML diagnostic"
+fi
+grep -q 'profile ' "$TMP_DIR/idle-120x36.txt" || fail "snapshot statusline missing profile"
+grep -q 'rulebook runtime' "$TMP_DIR/idle-120x36.txt" || fail "idle snapshot statusline missing rulebook"
 grep -q 'rulebook vil.core' "$TMP_DIR/agent-working-120x36.txt" || fail "agent snapshot statusline missing full rulebook label"
 grep -q 'rulebook vil.core' "$TMP_DIR/runtime-jobs-120x36.txt" || fail "snapshot statusline missing rulebook"
 

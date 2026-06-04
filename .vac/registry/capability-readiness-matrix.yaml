@@ -1,6 +1,8 @@
 schema_version: 1
-kind: capability_readiness_matrix
+kind: registry_status
 id: capability-readiness.o5o6.actual-code-closure
+title: Capability readiness matrix
+status: ready
 updated_at: 2026-06-02T00:00:00Z
 capabilities:
   local-runtime-owner:

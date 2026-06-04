@@ -1,6 +1,8 @@
 schema_version: 1
 kind: evidence
 id: evidence.2026-06-02-o5o6-tui-init-no-interactive
+chain:
+  self_hash: a590ba8944268108b4110196e5e87401a4067569ac59db29c49b185386a90eca
 title: TUI VAC-Init no-interactive flag correction evidence
 status: SV-Done_TV-Pending
 plan_id: plan.o5o6.tui-init-no-interactive

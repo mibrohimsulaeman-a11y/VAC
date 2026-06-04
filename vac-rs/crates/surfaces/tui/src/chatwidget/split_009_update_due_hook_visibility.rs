@@ -394,6 +394,7 @@
             thread_label: None,
             id: ev.effective_approval_id(),
             command: ev.command,
+            cwd: ev.cwd,
             reason: ev.reason,
             available_decisions,
             network_approval_context: ev.network_approval_context,
@@ -432,4 +433,3 @@
             changes: ev.changes.keys().cloned().collect(),
         });
     }
-

@@ -3,101 +3,109 @@ kind: surface
 id: surface.cli
 title: CLI commands
 capabilities:
-- vac.init.evidence-chain
-- vac.init.patch-guard
-- vac.init.approval-binding
-- vac.init.semantic-plan
-- vac.init.command-gate
-- vac.init.policy-evaluator
-- vac.init.risk-policy
-- vac.init.control-plane
 - vac.approvals
 - vac.architecture
 - vac.build
 - vac.chat
+- vac.docs
+- vac.docs.plan-reconciliation
+- vac.docs.state-refresh
 - vac.donor_migration
 - vac.identity
+- vac.init.approval-binding
+- vac.init.cli-runtime-foundation
+- vac.init.command-gate
+- vac.init.control-plane
+- vac.init.deterministic-hardening-p0-p4
+- vac.init.doctor-release
+- vac.init.dogfood-session
+- vac.init.durable-stores
+- vac.init.evidence-chain
+- vac.init.evidence-why-live
+- vac.init.fixtures-security-regression
+- vac.init.gap-bc-depth
+- vac.init.lifecycle
+- vac.init.manifest-contracts
+- vac.init.memory-governance
+- vac.init.migration-runtime
+- vac.init.ownership-scanner
+- vac.init.patch-guard
+- vac.init.policy-evaluator
+- vac.init.production-rc
+- vac.init.registry-strictness
+- vac.init.registry-validator
+- vac.init.risk-policy
+- vac.init.runtime-gate-enforcement
+- vac.init.safe-rationale
+- vac.init.scanner-hardening-spec-flow
+- vac.init.scanner-policy-hardening
 - vac.init.schema-envelope
+- vac.init.semantic-plan
+- vac.init.tui-real-data
+- vac.monolith.godfile-staging
+- vac.o5-o6.completion-state
+- vac.o5-o6.monolith-quality
+- vac.o5o6.audit_closeout_remediation
 - vac.ownership
+- vac.quality.depanic-unsafe-triage
+- vac.quality.unsafe-safety-coverage
+- vac.rebrand.safe-provenance-scrub
 - vac.release
+- vac.release.legal-build-blockers
 - vac.sandbox
 - vac.sessions
+- vac.source_artifact.packaging_gate
 - vac.tools
+- vac.tui.renderer-semantic-contract
+- vac.tui.status-output
 - vac.workflow
-- vac.init.manifest-contracts
-- vac.init.registry-validator
-- vac.init.lifecycle
-- vac.init.ownership-scanner
-- vac.init.registry-strictness
-- vac.init.cli-runtime-foundation
-- vac.init.runtime-gate-enforcement
-- vac.init.durable-stores
-- vac.init.scanner-policy-hardening
-- vac.init.tui-real-data
-- vac.init.fixtures-security-regression
-- vac.init.migration-runtime
-- vac.init.production-rc
-- vac.init.deterministic-hardening-p0-p4
-- vac.init.evidence-why-live
-- vac.docs.state-refresh
-- vac.docs.plan-reconciliation
-- vac.init.dogfood-session
-- vac.init.scanner-hardening-spec-flow
-- vac.release.legal-build-blockers
-- vac.rebrand.safe-provenance-scrub
-- vac.o5-o6.monolith-quality
-- vac.monolith.godfile-staging
-- vac.quality.depanic-unsafe-triage
-- vac.o5-o6.completion-state
-- vac.quality.unsafe-safety-coverage
-- vac.init.gap-bc-depth
 routes:
 - kind: cli
   command: vac review
   capability: vac.approvals
-  owner: vac-tui/bottom_pane.approval_overlay
+  owner: vac-control-plane/control_plane.approval_lifecycle
   visible: true
   status: ready
 - kind: cli
   command: vac doctor architecture
   capability: vac.architecture
-  owner: vac-core/control_plane
+  owner: vac-control-plane/control_plane
   visible: true
   status: ready
 - kind: cli
   command: vac doctor build
   capability: vac.build
-  owner: vac-cli/main
+  owner: vac-control-plane/control_plane.build_check
   visible: true
   status: ready
 - kind: cli
   command: vac
   capability: vac.chat
-  owner: vac-tui/chatwidget
+  owner: vac-capability-chat/contract
   visible: true
   status: ready
 - kind: cli
   command: vac doctor donor
   capability: vac.donor_migration
-  owner: vac-cli/doctor_cli
+  owner: vac-surface-cli/doctor_cli
   visible: true
   status: ready
 - kind: cli
   command: vac auth
   capability: vac.identity
-  owner: vac-cli/auth_cli
+  owner: vac-capability-identity/contract
   visible: true
   status: ready
 - kind: cli
   command: vac doctor ownership
   capability: vac.ownership
-  owner: vac-core/control_plane
+  owner: vac-capability-ownership/project_workspace
   visible: true
   status: ready
 - kind: cli
   command: vac doctor release
   capability: vac.release
-  owner: vac-cli/doctor_cli
+  owner: vac-capability-release/contract
   visible: true
   status: ready
 - kind: cli
@@ -109,165 +117,165 @@ routes:
 - kind: cli
   command: vac resume
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: cli
   command: vac a
   capability: vac.tools
-  owner: vac-core/tools
+  owner: vac-capability-tools/contract
   visible: true
   status: ready
 - kind: cli
   command: vac apply
   capability: vac.tools
-  owner: vac-core/tools
+  owner: vac-capability-tools/contract
   visible: true
   status: ready
 - kind: cli
   command: vac e
   capability: vac.tools
-  owner: vac-core/tools
+  owner: vac-capability-tools/contract
   visible: true
   status: ready
 - kind: cli
   command: vac completion
   capability: vac.workflow
-  owner: vac-core/control_plane
+  owner: vac-control-plane/control_plane
   visible: true
   status: ready
 - kind: cli
   command: vac doctor
   capability: vac.workflow
-  owner: vac-core/control_plane
+  owner: vac-control-plane/control_plane
   visible: true
   status: ready
 - kind: cli
   command: vac doctor docs
-  capability: vac.workflow
-  owner: vac-core/control_plane
+  capability: vac.docs
+  owner: vac-capability-docs/contract
   visible: true
   status: ready
 - kind: cli
   command: vac doctor policy
   capability: vac.workflow
-  owner: vac-core/control_plane
+  owner: vac-control-plane/control_plane
   visible: true
   status: ready
 - kind: cli
   command: vac doctor registry
   capability: vac.workflow
-  owner: vac-core/control_plane
+  owner: vac-control-plane/control_plane
   visible: true
   status: ready
 - kind: cli
   command: vac doctor surfaces
   capability: vac.workflow
-  owner: vac-core/control_plane
+  owner: vac-control-plane/control_plane
   visible: true
   status: ready
 - kind: cli
   command: vac doctor workflow
   capability: vac.workflow
-  owner: vac-core/control_plane
+  owner: vac-control-plane/control_plane
   visible: true
   status: ready
 - kind: cli
   command: bash scripts/check-vac-init-schema-envelope-contract.sh
   capability: vac.init.schema-envelope
-  owner: vac-core/control_plane/schema_envelope
+  owner: vac-core/control_plane::schema_envelope
   visible: true
   status: ready
 - kind: cli
   command: vac init --dry-run
   capability: vac.init.control-plane
-  owner: vac-core/control_plane/schema_envelope
+  owner: vac-core/control_plane::schema_envelope
   visible: false
   status: partial
   reason: Interactive vac init lifecycle is scheduled for Batch 4; Batch 0-1 only registers foundation docs and schema envelope contracts.
 - kind: cli
   command: bash scripts/check-vac-init-manifest-structs-contract.sh
   capability: vac.init.manifest-contracts
-  owner: vac-core/control_plane/vac_init_manifest_contract
+  owner: vac-core/control_plane::vac_init_manifest_contract
   visible: true
   status: ready
 - kind: cli
   command: bash scripts/check-vac-init-registry-validator-contract.sh
   capability: vac.init.registry-validator
-  owner: vac-core/control_plane/vac_init_registry_validator
+  owner: vac-core/control_plane::vac_init_registry_validator
   visible: true
   status: ready
 - kind: cli
   command: bash scripts/check-vac-init-lifecycle-contract.sh
   capability: vac.init.lifecycle
-  owner: vac-core/control_plane/vac_init_lifecycle
+  owner: vac-core/control_plane::vac_init_lifecycle
   visible: true
   status: ready
 - kind: cli
   command: vac init --resume
   capability: vac.init.lifecycle
-  owner: vac-core/control_plane/vac_init_lifecycle
+  owner: vac-core/control_plane::vac_init_lifecycle
   visible: false
   status: partial
   reason: CLI interactive lifecycle wiring follows this contract batch; state machine and resume contract are source-backed now.
 - kind: cli
   command: bash scripts/check-vac-init-ownership-scanner-contract.sh
   capability: vac.init.ownership-scanner
-  owner: vac-core/control_plane/vac_init_ownership_scanner
+  owner: vac-core/control_plane::vac_init_ownership_scanner
   visible: true
   status: ready
 - kind: cli
   command: bash scripts/check-vac-init-batch2-5-contract.sh
   capability: vac.init.control-plane
-  owner: vac-core/control_plane
+  owner: vac-core/control_plane::schema_envelope
   visible: true
   status: ready
 - kind: cli
   command: bash scripts/check-vac-init-risk-policy-contract.sh
   capability: vac.init.risk-policy
-  owner: vac-core/control_plane/vac_init_risk_policy
+  owner: vac-core/control_plane::vac_init_risk_policy
   visible: true
   status: ready
 - kind: cli
   command: bash scripts/check-vac-init-policy-evaluator-contract.sh
   capability: vac.init.policy-evaluator
-  owner: vac-core/control_plane/vac_init_policy_evaluator
+  owner: vac-core/control_plane::vac_init_policy_evaluator
   visible: true
   status: ready
 - kind: cli
   command: bash scripts/check-vac-init-command-gate-contract.sh
   capability: vac.init.command-gate
-  owner: vac-core/control_plane/vac_init_command_gate
+  owner: vac-core/control_plane::vac_init_command_gate
   visible: true
   status: ready
 - kind: cli
   command: bash scripts/check-vac-init-semantic-plan-contract.sh
   capability: vac.init.semantic-plan
-  owner: vac-core/control_plane/vac_init_semantic_plan
+  owner: vac-core/control_plane::vac_init_semantic_plan
   visible: true
   status: ready
 - kind: cli
   command: bash scripts/check-vac-init-approval-binding-contract.sh
   capability: vac.init.approval-binding
-  owner: vac-core/control_plane/vac_init_approval_binding
+  owner: vac-core/control_plane::vac_init_approval_binding
   visible: true
   status: ready
 - kind: cli
   command: bash scripts/check-vac-init-patch-guard-contract.sh
   capability: vac.init.patch-guard
-  owner: vac-core/control_plane/vac_init_patch_guard
+  owner: vac-core/control_plane::vac_init_patch_guard
   visible: true
   status: ready
 - kind: cli
   command: bash scripts/check-vac-init-evidence-chain-contract.sh
   capability: vac.init.evidence-chain
-  owner: vac-core/control_plane/vac_init_evidence_chain
+  owner: vac-core/control_plane::vac_init_evidence_chain
   visible: true
   status: ready
 - kind: cli
   command: bash scripts/check-vac-init-batch6-12-contract.sh
   capability: vac.init.control-plane
-  owner: vac-core/control_plane
+  owner: vac-core/control_plane::schema_envelope
   visible: true
   status: ready
 - kind: cli
@@ -279,55 +287,55 @@ routes:
 - kind: cli
   command: vac init
   capability: vac.init.cli-runtime-foundation
-  owner: vac-cli/init_cli::plan_cli::why_cli::doctor_cli
+  owner: vac-surface-cli/init_cli::plan_cli::why_cli::doctor_cli
   visible: true
   status: ready
 - kind: cli
   command: vac init --status
   capability: vac.init.cli-runtime-foundation
-  owner: vac-cli/init_cli::plan_cli::why_cli::doctor_cli
+  owner: vac-surface-cli/init_cli::plan_cli::why_cli::doctor_cli
   visible: true
   status: ready
 - kind: cli
   command: vac init --scan
   capability: vac.init.cli-runtime-foundation
-  owner: vac-cli/init_cli::plan_cli::why_cli::doctor_cli
+  owner: vac-surface-cli/init_cli::plan_cli::why_cli::doctor_cli
   visible: true
   status: ready
 - kind: cli
   command: vac plan
   capability: vac.init.cli-runtime-foundation
-  owner: vac-cli/init_cli::plan_cli::why_cli::doctor_cli
+  owner: vac-surface-cli/init_cli::plan_cli::why_cli::doctor_cli
   visible: true
   status: ready
 - kind: cli
   command: vac plan validate
   capability: vac.init.cli-runtime-foundation
-  owner: vac-cli/init_cli::plan_cli::why_cli::doctor_cli
+  owner: vac-surface-cli/init_cli::plan_cli::why_cli::doctor_cli
   visible: true
   status: ready
 - kind: cli
   command: vac why
   capability: vac.init.cli-runtime-foundation
-  owner: vac-cli/init_cli::plan_cli::why_cli::doctor_cli
+  owner: vac-surface-cli/init_cli::plan_cli::why_cli::doctor_cli
   visible: true
   status: ready
 - kind: cli
   command: vac doctor evidence
   capability: vac.init.cli-runtime-foundation
-  owner: vac-cli/init_cli::plan_cli::why_cli::doctor_cli
+  owner: vac-surface-cli/init_cli::plan_cli::why_cli::doctor_cli
   visible: true
   status: ready
 - kind: cli
   command: vac doctor memory
   capability: vac.init.cli-runtime-foundation
-  owner: vac-cli/init_cli::plan_cli::why_cli::doctor_cli
+  owner: vac-surface-cli/init_cli::plan_cli::why_cli::doctor_cli
   visible: true
   status: ready
 - kind: cli
   command: vac doctor init
   capability: vac.init.cli-runtime-foundation
-  owner: vac-cli/init_cli::plan_cli::why_cli::doctor_cli
+  owner: vac-surface-cli/init_cli::plan_cli::why_cli::doctor_cli
   visible: true
   status: ready
 - kind: cli
@@ -387,7 +395,7 @@ routes:
 - kind: cli
   command: vac registry migrate
   capability: vac.init.migration-runtime
-  owner: vac-cli/registry_cli
+  owner: vac-core/control_plane::vac_init_migration_runtime
   visible: true
   status: ready
 - kind: cli
@@ -417,13 +425,13 @@ routes:
 - kind: cli
   command: bash scripts/check-legal-release-blockers.sh
   capability: vac.release.legal-build-blockers
-  owner: vac-core/control_plane
+  owner: vac-core/control_plane::registry
   visible: true
   status: ready
 - kind: cli
   command: bash scripts/check-safe-provenance-scrub-o4.sh
   capability: vac.rebrand.safe-provenance-scrub
-  owner: vac-core/control_plane
+  owner: vac-core/control_plane::donor_domain_contract
   visible: true
   status: ready
 - kind: cli
@@ -435,7 +443,7 @@ routes:
 - kind: cli
   command: bash scripts/check-vac-o5-2-godfile-staging.sh
   capability: vac.monolith.godfile-staging
-  owner: vac-core/quality::triage
+  owner: vac-surface-tui/chatwidget
   visible: true
   status: ready
 - kind: cli
@@ -483,16 +491,48 @@ routes:
 - kind: cli
   command: bash scripts/check-vac-init-gap-bc-depth-static.sh
   capability: vac.init.gap-bc-depth
-  owner: vac-core/control_plane/vac_init_patch_guard
+  owner: vac-core/control_plane::vac_init_patch_guard
   visible: true
   status: ready
-vac_init_batch13_15:
-  capabilities:
-  - vac.init.safe-rationale
-  - vac.init.memory-governance
-  - vac.init.doctor-release
-  commands:
-  - bash scripts/check-vac-init-batch13-15-contract.sh
-  routes:
-  - /capabilities
-  - /runtime
+- kind: cli
+  command: bash scripts/check-vac-init-why-contract.sh
+  capability: vac.init.safe-rationale
+  owner: vac-core/control_plane::vac_init_safe_rationale
+  visible: true
+  status: ready
+- kind: cli
+  command: bash scripts/check-vac-init-memory-governance-contract.sh
+  capability: vac.init.memory-governance
+  owner: vac-core/control_plane::vac_init_memory_governance
+  visible: true
+  status: ready
+- kind: cli
+  command: bash scripts/check-vac-init-doctor-release-contract.sh
+  capability: vac.init.doctor-release
+  owner: vac-core/control_plane::vac_init_doctor_release
+  visible: true
+  status: ready
+- kind: cli
+  command: bash scripts/check-vac-o5o6-all-audit-remainder.sh
+  capability: vac.o5o6.audit_closeout_remediation
+  owner: vac-core/control_plane
+  visible: true
+  status: ready
+- kind: cli
+  command: bash scripts/check-vac-source-artifact-packaging-gate.sh
+  capability: vac.source_artifact.packaging_gate
+  owner: vac-surface-cli/source_artifact_packaging_gate
+  visible: true
+  status: ready
+- kind: cli
+  command: bash scripts/check-tui-renderer-semantic-contract.sh
+  capability: vac.tui.renderer-semantic-contract
+  owner: vac-surface-tui/operator_ui
+  visible: true
+  status: ready
+- kind: cli
+  command: bash scripts/check-tui-status-output-contract.sh
+  capability: vac.tui.status-output
+  owner: vac-surface-tui/status
+  visible: true
+  status: ready

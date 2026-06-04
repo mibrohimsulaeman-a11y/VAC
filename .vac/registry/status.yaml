@@ -1,5 +1,5 @@
 schema_version: 1
-kind: registry_status
+kind: status
 id: vac.migration
 status: ready
 notes:
@@ -10,4 +10,3 @@ notes:
 - Donor-backed capabilities remain approval-gated and must pass the donor migration gate before release promotion.
 - docs/DOCS_AUDIT.md is current again and no longer claims donor-inventory.yaml is missing.
 - Documentation state refreshed from 415 docs/**/*.md files into docs/PROJECT_STATE_CURRENT.md and .vac/registry/docs-state.yaml.
-legacy_kind: status

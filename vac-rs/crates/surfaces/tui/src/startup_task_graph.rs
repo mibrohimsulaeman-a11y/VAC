@@ -177,7 +177,7 @@ impl StartupTaskGraphMetrics {
     pub(crate) fn to_yaml(&self) -> String {
         let mut out = String::new();
         let _ = writeln!(out, "schema_version: 1");
-        let _ = writeln!(out, "kind: perf_evidence");
+        let _ = writeln!(out, "kind: registry_status");
         let _ = writeln!(out, "id: perf.tui-startup");
         let _ = writeln!(out, "status: StaticReady");
         let _ = writeln!(out, "task_graph: {STARTUP_TASK_GRAPH_ID}");

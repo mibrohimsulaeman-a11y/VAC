@@ -17,9 +17,8 @@ ownership:
     module: control_plane::vac_init_evidence_writer
   - kind: path
     include:
-    - vac-rs/control-plane/src/control_plane/vac_init_evidence_writer.rs
+    - vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_evidence_writer.rs
     - scripts/check-vac-evidence-why-live-index.sh
-    - docs/vac-init/VAC_INIT_P7_EVIDENCE_WHY_LIVE_INDEX.md
     exclude: []
 description: Live evidence and trajectory writer backing safe `vac why` lookup.
 depends_on:
@@ -31,12 +30,6 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-vac-evidence-why-live-index.sh
-    - vac why <file>:<line>
-  palette: true
-  tui:
-    routes:
-    - /why
-    - /evidence
 policy:
   risk: safe_read
   mutates_files: true
@@ -59,6 +52,3 @@ validation:
     - scripts/check-vac-evidence-why-live-index.sh
     risk: execute_process
     approval: policy
-docs:
-- docs/vac-init/VAC_INIT_P7_EVIDENCE_WHY_LIVE_INDEX.md
-- docs/validation/P5_P9_VALIDATION.md

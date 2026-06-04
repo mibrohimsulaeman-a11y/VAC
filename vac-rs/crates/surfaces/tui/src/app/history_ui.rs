@@ -32,6 +32,10 @@ impl App {
             self.config.cwd.to_path_buf(),
             version,
         )
+        .with_operator_context(
+            history_cell::operator_profile_label(&self.config),
+            history_cell::operator_rulebook_label(&self.config),
+        )
         .with_yolo_mode(history_cell::is_yolo_mode(&self.config))
         .display_lines(width)
     }

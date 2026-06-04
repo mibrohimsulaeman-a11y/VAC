@@ -6,11 +6,6 @@ fail() { echo "FAIL: $*" >&2; exit 1; }
 require_file() { [[ -f "$1" ]] || fail "missing $1"; }
 require_grep() { grep -qE "$1" "$2" || fail "missing pattern in $2: $1"; }
 
-require_file docs/monolith-quality/VAC_O5_O6_MONOLITH_QUALITY_IMPL_PLAN.md
-require_file docs/monolith-quality/O5_1_PROTOCOL_DEDUP_SLICE.md
-require_file docs/monolith-quality/O5_2_SEMANTIC_SOURCE_SPLIT.md
-require_file docs/monolith-quality/O5O6_EPIC_A_APP_SERVER_RETIREMENT_REPORT.md
-require_file docs/monolith-quality/O5O6_ALL_AUDIT_REMAINDER_REPORT.md
 require_file .vac/registry/o5-godfile-staging-state.yaml
 require_file .vac/registry/o6-panic-surface.yaml
 require_file .vac/registry/o5-donor-delete-gate.yaml

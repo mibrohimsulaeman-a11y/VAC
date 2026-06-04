@@ -1,5 +1,5 @@
 schema_version: 1
-kind: layering_migration_ledger
+kind: registry_status
 id: layering.o5o6.continuation
 status: SV-Done
 updated_at: 2026-06-02T00:00:00Z

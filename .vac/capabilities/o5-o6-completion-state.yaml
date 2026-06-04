@@ -45,11 +45,8 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-vac-o5-o6-completion-state.sh
-  palette: true
-  tui:
-    routes:
-    - /doctor
-    - /release
+    - bash scripts/check-vac-o5-2-godfile-staging-all.sh
+    - bash scripts/check-vac-o5-5-donor-delete-gate.sh
 states:
 - empty
 - loading
@@ -65,10 +62,3 @@ validation:
     - scripts/check-vac-o5-o6-completion-state.sh
     risk: execute_process
     approval: policy
-docs:
-- docs/monolith-quality/O5_2_GODFILE_STAGING_ALL.md
-- docs/monolith-quality/O5_3_UTILS_CONSOLIDATION_REPORT.md
-- docs/monolith-quality/O5_4_WORKSPACE_CONSOLIDATION_REPORT.md
-- docs/monolith-quality/O5_5_DONOR_DELETE_GATE_REPORT.md
-- docs/monolith-quality/O6_3_DOCS_PRUNING_CLASSIFICATION.md
-- docs/monolith-quality/O6_4_E2E_EXPANSION_SCAFFOLD.md

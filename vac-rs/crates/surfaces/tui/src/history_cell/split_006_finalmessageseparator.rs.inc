@@ -192,7 +192,6 @@ mod tests {
     use vac_otel::RuntimeMetricTotals;
     use vac_otel::RuntimeMetricsSummary;
     use vac_protocol::ThreadId;
-    use vac_protocol::ThreadId;
     use vac_protocol::account::PlanType;
     use vac_protocol::parse_command::ParsedCommand;
 

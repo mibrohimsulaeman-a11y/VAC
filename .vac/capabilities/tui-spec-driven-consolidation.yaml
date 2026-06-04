@@ -12,8 +12,12 @@ depends_on:
 surfaces:
   tui:
     routes:
-    - /capabilities
-  palette: true
+    - /hardening
+states:
+- empty
+- loading
+- success
+- failure
 policy:
   risk: safe_read
   mutates_files: false
@@ -32,8 +36,6 @@ validation:
   - workflow_registered
   - surface_registered
   - validation_gate_registered
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md
 ownership:
   crates:
   - vac-tui
@@ -46,6 +48,5 @@ ownership:
   - kind: path
     include:
     - .vac/capabilities/tui-spec-driven-consolidation.yaml
-    - docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md
     - scripts/check-tui-spec-driven-consolidation.sh
     exclude: []

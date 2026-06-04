@@ -1,5 +1,7 @@
 use super::capability_manifest::CapabilityOwner;
 use super::capability_manifest::CapabilityOwnership;
+use super::capability_manifest::CapabilityOwnershipTarget;
+use super::capability_manifest::CapabilityOwnershipTargetKind;
 use super::capability_manifest::CapabilityStatus;
 use super::registry::ControlPlaneRegistry;
 use super::registry_diagnostics::RegistryLoadReport;
@@ -59,33 +61,42 @@ impl SourceInventoryReport {
     }
 
     pub fn contains_module(&self, crate_name: &str, module: &str) -> bool {
-        self.entries
-            .iter()
-            .any(|entry| entry.crate_name == crate_name && entry.module == module)
+        self.entries.iter().any(|entry| {
+            entry.crate_name == crate_name && module_domain_matches(&entry.module, module)
+        })
     }
 
     pub fn contains_module_any_crate(&self, module: &str) -> bool {
-        self.entries.iter().any(|entry| entry.module == module)
+        self.entries
+            .iter()
+            .any(|entry| module_domain_matches(&entry.module, module))
     }
 
     pub fn missing_claimed_modules(&self, ownership: &CapabilityOwnership) -> Vec<String> {
         let mut missing = Vec::new();
-        for module in &ownership.modules {
-            let found = if ownership.crates.is_empty() {
-                self.contains_module_any_crate(module)
-            } else {
-                ownership
-                    .crates
-                    .iter()
-                    .any(|crate_name| self.contains_module(crate_name, module))
-            };
-            if !found {
-                missing.push(module.clone());
+        if ownership.targets.is_empty() {
+            for module in &ownership.modules {
+                let found = if ownership.crates.is_empty() {
+                    self.contains_module_any_crate(module)
+                } else {
+                    ownership
+                        .crates
+                        .iter()
+                        .any(|crate_name| self.contains_module(crate_name, module))
+                };
+                if !found {
+                    missing.push(module.clone());
+                }
             }
         }
         for target in &ownership.targets {
-            if !self.contains_module(&target.crate_name, &target.module) {
-                missing.push(format!("{}::{}", target.crate_name, target.module));
+            if target.retired {
+                continue;
+            }
+            if let Some((crate_name, module)) = ownership_target_module_domain(target) {
+                if !self.contains_module(crate_name, module) {
+                    missing.push(format!("{crate_name}::{module}"));
+                }
             }
         }
         missing
@@ -301,9 +312,8 @@ impl OwnershipScanReport {
                             .iter()
                             .map(|t| {
                                 format!(
-                                    "{}::{}{}{}",
-                                    t.crate_name,
-                                    t.module,
+                                    "{}{}{}",
+                                    ownership_target_display(t),
                                     if t.test_only { " (test_only)" } else { "" },
                                     if t.retired { " (retired)" } else { "" }
                                 )
@@ -509,6 +519,15 @@ fn collect_declared_source_modules(
     parent_module: Option<&str>,
     modules: &mut BTreeMap<String, String>,
 ) {
+    for include_file in parse_included_source_files(source_file) {
+        collect_declared_source_modules(
+            source_root,
+            src_dir,
+            &include_file,
+            parent_module,
+            modules,
+        );
+    }
     for module in parse_declared_modules(source_file) {
         let dotted_module = parent_module
             .map(|parent| format!("{parent}.{module}"))
@@ -559,6 +578,41 @@ fn parse_declared_modules(path: &Path) -> Vec<String> {
         }
     }
     modules
+}
+
+fn parse_included_source_files(path: &Path) -> Vec<PathBuf> {
+    let Ok(contents) = fs::read_to_string(path) else {
+        return Vec::new();
+    };
+    let Some(parent_dir) = path.parent() else {
+        return Vec::new();
+    };
+    let mut files = Vec::new();
+    for raw_line in contents.lines() {
+        let line = raw_line.trim();
+        if line.starts_with('#') || line.starts_with("//") {
+            continue;
+        }
+        let Some(rest) = line.strip_prefix("include!(") else {
+            continue;
+        };
+        let Some((literal, _)) = rest.split_once(')') else {
+            continue;
+        };
+        let include_path = literal
+            .trim()
+            .trim_end_matches(';')
+            .trim()
+            .trim_matches('"');
+        if include_path.is_empty() {
+            continue;
+        }
+        let include_file = parent_dir.join(include_path);
+        if include_file.is_file() {
+            files.push(include_file);
+        }
+    }
+    files
 }
 
 fn parse_declared_bin_modules(contents: &str) -> Vec<String> {
@@ -679,12 +733,34 @@ fn target_claims_source_domain(
     target: &OwnershipTargetEntry,
     source: &SourceInventoryEntry,
 ) -> bool {
-    target.crate_name == source.crate_name
-        && (target.module == source.module
-            || source
-                .module
-                .strip_prefix(&target.module)
-                .is_some_and(|suffix| suffix.starts_with('.')))
+    target.crate_name == source.crate_name && module_domain_matches(&source.module, &target.module)
+}
+
+fn module_domain_matches(source_module: &str, claimed_module: &str) -> bool {
+    let source_module = normalize_module_domain(source_module);
+    let claimed_module = normalize_module_domain(claimed_module);
+    if source_module == claimed_module {
+        return true;
+    }
+    if source_module
+        .strip_prefix(&claimed_module)
+        .is_some_and(|suffix| suffix.starts_with('.'))
+    {
+        return true;
+    }
+    if claimed_module
+        .strip_prefix(&source_module)
+        .is_some_and(|suffix| suffix.starts_with('.'))
+    {
+        return true;
+    }
+
+    let wrapped_claim = format!(".{claimed_module}");
+    source_module.ends_with(&wrapped_claim) || source_module.contains(&format!("{wrapped_claim}."))
+}
+
+fn normalize_module_domain(module: &str) -> String {
+    module.replace("::", ".")
 }
 
 fn is_ignorable_source_domain(source: &SourceInventoryEntry) -> bool {
@@ -718,35 +794,42 @@ fn build_targets(entries: &[OwnershipScanEntry]) -> Vec<OwnershipTargetEntry> {
             continue;
         };
 
-        // 1. Classic Cartesian crates/modules
-        for crate_name in &ownership.crates {
-            for module in &ownership.modules {
-                let key = (crate_name.clone(), module.clone());
-                let target = targets.entry(key).or_insert_with(|| OwnershipTargetEntry {
-                    crate_name: crate_name.clone(),
-                    module: module.clone(),
-                    capabilities: Vec::new(),
-                    test_only: ownership.test_only,
-                    retired: ownership.retired,
-                });
-                if !target
-                    .capabilities
-                    .iter()
-                    .any(|capability| capability == &entry.id)
-                {
-                    target.capabilities.push(entry.id.clone());
+        // 1. Classic Cartesian crates/modules. When granular targets are
+        // present, crates/modules are summary metadata only; treating both as
+        // active claims recreates the historical overclaim problem.
+        if ownership.targets.is_empty() {
+            for crate_name in &ownership.crates {
+                for module in &ownership.modules {
+                    let key = (crate_name.clone(), module.clone());
+                    let target = targets.entry(key).or_insert_with(|| OwnershipTargetEntry {
+                        crate_name: crate_name.clone(),
+                        module: module.clone(),
+                        capabilities: Vec::new(),
+                        test_only: ownership.test_only,
+                        retired: ownership.retired,
+                    });
+                    if !target
+                        .capabilities
+                        .iter()
+                        .any(|capability| capability == &entry.id)
+                    {
+                        target.capabilities.push(entry.id.clone());
+                    }
+                    target.test_only &= ownership.test_only;
+                    target.retired &= ownership.retired;
                 }
-                target.test_only &= ownership.test_only;
-                target.retired &= ownership.retired;
             }
         }
 
         // 2. Granular targets (solves Cartesian overclaims!)
         for raw_target in &ownership.targets {
-            let key = (raw_target.crate_name.clone(), raw_target.module.clone());
+            let Some((crate_name, module)) = ownership_target_module_domain(raw_target) else {
+                continue;
+            };
+            let key = (crate_name.to_string(), module.to_string());
             let target = targets.entry(key).or_insert_with(|| OwnershipTargetEntry {
-                crate_name: raw_target.crate_name.clone(),
-                module: raw_target.module.clone(),
+                crate_name: crate_name.to_string(),
+                module: module.to_string(),
                 capabilities: Vec::new(),
                 test_only: raw_target.test_only,
                 retired: raw_target.retired,
@@ -773,6 +856,39 @@ fn build_targets(entries: &[OwnershipScanEntry]) -> Vec<OwnershipTargetEntry> {
             .then_with(|| left.module.cmp(&right.module))
     });
     targets
+}
+
+fn ownership_target_module_domain(target: &CapabilityOwnershipTarget) -> Option<(&str, &str)> {
+    if !matches!(target.kind, CapabilityOwnershipTargetKind::Module) {
+        return None;
+    }
+    Some((target.crate_name.as_deref()?, target.module.as_deref()?))
+}
+
+fn ownership_target_display(target: &CapabilityOwnershipTarget) -> String {
+    match target.kind {
+        CapabilityOwnershipTargetKind::Module => {
+            match (target.crate_name.as_deref(), target.module.as_deref()) {
+                (Some(crate_name), Some(module)) => format!("{crate_name}::{module}"),
+                (Some(crate_name), None) => format!("{crate_name}::<missing-module>"),
+                (None, Some(module)) => format!("<missing-crate>::{module}"),
+                (None, None) => "module:<missing>".to_string(),
+            }
+        }
+        CapabilityOwnershipTargetKind::Crate => target
+            .crate_name
+            .as_deref()
+            .map(|crate_name| format!("{crate_name}::*"))
+            .unwrap_or_else(|| "crate:<missing>".to_string()),
+        CapabilityOwnershipTargetKind::Path => {
+            let include = if target.include.is_empty() {
+                "<empty>".to_string()
+            } else {
+                target.include.join("|")
+            };
+            format!("path:{include}")
+        }
+    }
 }
 
 fn format_capability_owner(owner: &CapabilityOwner) -> String {

@@ -17,14 +17,12 @@ require_file() {
   fi
 }
 
-require_file vac-rs/control-plane/src/control_plane/vac_init_durable_stores.rs
+require_file vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_durable_stores.rs
 require_file scripts/check-vac-init-durable-stores-contract.sh
-require_file docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_D_DURABLE_STORES.md
-require_file docs/validation/PRODUCTION_HARDENING_D1_D3_VALIDATION.md
 require_file .vac/capabilities/durable-stores.yaml
 require_file .vac/workflows/maintenance.durable-stores.yaml
 
-"$RUSTC_BIN" --edition 2024 --test vac-rs/control-plane/src/control_plane/vac_init_durable_stores.rs -o "$TMPROOT/vac_init_durable_stores_test"
+"$RUSTC_BIN" --edition 2024 --test vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_durable_stores.rs -o "$TMPROOT/vac_init_durable_stores_test"
 "$TMPROOT/vac_init_durable_stores_test" --nocapture
 
 PY_STDERR="$TMPROOT/python-stderr.log"
@@ -34,7 +32,7 @@ import yaml
 
 cap = yaml.safe_load(pathlib.Path('.vac/capabilities/durable-stores.yaml').read_text())
 wf = yaml.safe_load(pathlib.Path('.vac/workflows/maintenance.durable-stores.yaml').read_text())
-for field in ('owner', 'ownership', 'policy', 'surfaces', 'validation', 'docs'):
+for field in ('owner', 'ownership', 'policy', 'surfaces', 'validation'):
     assert cap.get(field), f'capability missing {field}'
 for command in cap['validation']['commands'] + wf['validation']['commands']:
     assert isinstance(command, dict), 'validation command must be structured'

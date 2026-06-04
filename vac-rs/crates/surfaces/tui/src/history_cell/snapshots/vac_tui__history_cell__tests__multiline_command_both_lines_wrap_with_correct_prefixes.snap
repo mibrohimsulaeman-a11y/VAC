@@ -1,0 +1,10 @@
+---
+source: crates/surfaces/tui/src/history_cell/split_006_finalmessageseparator.rs.inc
+assertion_line: 1715
+expression: rendered
+---
+• Ran first_token_is_long_en
+  │ ough_to_wrap
+  │ second_token_is_also_lon
+  │ … +1 lines
+  └ (no output)

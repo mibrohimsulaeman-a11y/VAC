@@ -74,6 +74,11 @@ fn surface_error_to_registry_error(error: SurfaceManifestError) -> RegistryLoadE
 //                          presence of palette routes in any surface manifest
 //   * SurfaceRouteDrift  — capability declares tui/slash/cli routes that do
 //                          not exactly match what surfaces expose for it
+//
+// Duplicate routes remain blocking because they make dispatch ambiguous.
+// Owner and route drift are operator-facing audit signals; shared aggregate
+// routes such as `/capabilities` and CLI doctor aliases intentionally create
+// non-exact manifest projections.
 // =====================================================================
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -143,12 +148,10 @@ pub enum SurfaceCrossDiagnostic {
 impl SurfaceCrossDiagnostic {
     pub fn severity(&self) -> SurfaceCrossSeverity {
         match self {
-            Self::DuplicateRoute { .. } | Self::OwnerConflict { .. } => {
-                SurfaceCrossSeverity::Failure
-            }
-            Self::PaletteDrift { .. } | Self::SurfaceRouteDrift { .. } => {
-                SurfaceCrossSeverity::Warning
-            }
+            Self::DuplicateRoute { .. } => SurfaceCrossSeverity::Failure,
+            Self::OwnerConflict { .. }
+            | Self::PaletteDrift { .. }
+            | Self::SurfaceRouteDrift { .. } => SurfaceCrossSeverity::Warning,
         }
     }
 

@@ -457,11 +457,12 @@ mod tests {
                 .contains("started workflow=test.workflow title=Test workflow steps=3")
         }));
         assert!(progress.render_lines().iter().any(|line| {
-            line.spans
+            let rendered = line.spans
                 .iter()
                 .map(|span| span.content.as_ref())
-                .collect::<String>()
-                .contains("approval_id: approval:test.workflow:approve")
+                .collect::<String>();
+            rendered.contains("approval_id: approval:test.workflow:run:")
+                && rendered.contains(":attempt:attempt-1:step:approve")
         }));
     }
 
@@ -761,6 +762,7 @@ mod tests {
         let pending = progress.pending_approval_actions();
         assert_eq!(pending.len(), 1);
         assert_eq!(pending[0].0, "approve");
-        assert_eq!(pending[0].1, "approval:test.workflow:approve");
+        assert!(pending[0].1.starts_with("approval:test.workflow:run:"));
+        assert!(pending[0].1.ends_with(":attempt:attempt-1:step:approve"));
     }
 }

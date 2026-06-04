@@ -12,12 +12,26 @@ cd "$REPO_ROOT"
 OUT_DIR="${1:-docs/validation/tui-operator-ui-snapshots}"
 mkdir -p "$OUT_DIR"
 
+BIN="vac-rs/target/debug/operator-ui-snapshot-harness"
+is_fresh_binary() {
+  [ -x "$BIN" ] && ! find \
+    vac-rs/crates/surfaces/tui/Cargo.toml \
+    vac-rs/crates/surfaces/tui/build.rs \
+    vac-rs/crates/surfaces/tui/src \
+    vac-rs/crates/surfaces/tui/tools \
+    -newer "$BIN" -print -quit | grep -q .
+}
+
+if is_fresh_binary; then
+  "$BIN" "$OUT_DIR"
+  printf 'generated operator TUI snapshots in %s\n' "$OUT_DIR"
+  exit 0
+fi
+
 if command -v cargo >/dev/null 2>&1; then
-  cat >&2 <<'MSG'
-TV-Pending: widget snapshot regeneration is cargo-backed after operator_widget_render
-introduced ratatui Buffer/Block/Tabs/Gauge/Table/Layout dependencies.
-Run the vac-tui snapshot harness through Cargo in a full toolchain environment.
-MSG
+  cargo build --manifest-path vac-rs/crates/surfaces/tui/Cargo.toml --bin operator-ui-snapshot-harness
+  "$BIN" "$OUT_DIR"
+  printf 'generated operator TUI snapshots in %s\n' "$OUT_DIR"
   exit 0
 fi
 

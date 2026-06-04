@@ -3,103 +3,103 @@ kind: surface
 id: surface.palette
 title: Command palette
 capabilities:
-- vac.init.evidence-chain
-- vac.init.patch-guard
-- vac.init.approval-binding
-- vac.init.semantic-plan
-- vac.init.command-gate
-- vac.init.policy-evaluator
-- vac.init.risk-policy
-- vac.autopilot.scheduler
 - vac.approvals
 - vac.architecture
+- vac.autopilot.scheduler
 - vac.build
 - vac.chat
 - vac.donor_migration
-- vac.identity.check
 - vac.identity
+- vac.identity.check
+- vac.init.approval-binding
+- vac.init.command-gate
+- vac.init.control-plane
+- vac.init.evidence-chain
+- vac.init.lifecycle
+- vac.init.manifest-contracts
+- vac.init.ownership-scanner
+- vac.init.patch-guard
+- vac.init.policy-evaluator
+- vac.init.registry-validator
+- vac.init.risk-policy
+- vac.init.schema-envelope
+- vac.init.semantic-plan
 - vac.local_runtime_owner
-- vac.runtime_approval_bridge
 - vac.ownership
 - vac.release
+- vac.runtime_approval_bridge
 - vac.sandbox
 - vac.sessions
 - vac.tools
+- vac.tui
 - vac.tui.pty_gate
 - vac.tui_session_runtime
-- vac.tui
 - vac.workflow
-- vac.init.control-plane
-- vac.init.schema-envelope
-- vac.init.manifest-contracts
-- vac.init.registry-validator
-- vac.init.lifecycle
-- vac.init.ownership-scanner
 routes:
 - kind: palette
   action: open_approvals
   capability: vac.approvals
-  owner: vac-tui/bottom_pane.approval_overlay
+  owner: vac-control-plane/control_plane.approval_lifecycle
   visible: true
   status: ready
 - kind: palette
   action: open_architecture
   capability: vac.architecture
-  owner: vac-core/control_plane
+  owner: vac-control-plane/control_plane
   visible: true
   status: ready
 - kind: palette
   action: open_build
   capability: vac.build
-  owner: vac-cli/main
+  owner: vac-control-plane/control_plane.build_check
   visible: true
   status: ready
 - kind: palette
   action: open_chat
   capability: vac.chat
-  owner: vac-tui/chatwidget
+  owner: vac-capability-chat/contract
   visible: true
   status: ready
 - kind: palette
   action: open_donor_migration
   capability: vac.donor_migration
-  owner: vac-cli/doctor_cli
+  owner: vac-surface-cli/doctor_cli
   visible: true
   status: ready
 - kind: palette
   action: open_identity_check
   capability: vac.identity.check
-  owner: vac-core/control_plane
+  owner: vac-control-plane/control_plane.identity_check
   visible: true
   status: ready
 - kind: palette
   action: open_identity
   capability: vac.identity
-  owner: vac-cli/auth_cli
+  owner: vac-capability-identity/contract
   visible: true
   status: ready
 - kind: palette
   action: open_local_runtime_owner
   capability: vac.local_runtime_owner
-  owner: vac-rs/local-runtime-owner/src/startup.rs
+  owner: vac-rs/local-runtime-owner
   visible: true
   status: ready
 - kind: palette
   action: open_runtime_approval_bridge
   capability: vac.runtime_approval_bridge
-  owner: vac-rs/local-runtime-owner/src/command_bus.rs
+  owner: vac-rs/crates/capabilities/local-runtime-owner/src/command_bus.rs
   visible: true
   status: ready
 - kind: palette
   action: open_ownership
   capability: vac.ownership
-  owner: vac-core/control_plane
+  owner: vac-capability-ownership/project_workspace
   visible: true
   status: ready
 - kind: palette
   action: open_release
   capability: vac.release
-  owner: vac-cli/doctor_cli
+  owner: vac-capability-release/contract
   visible: true
   status: ready
 - kind: palette
@@ -111,13 +111,13 @@ routes:
 - kind: palette
   action: open_sessions
   capability: vac.sessions
-  owner: vac-core/session
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: palette
   action: open_tools
   capability: vac.tools
-  owner: vac-core/tools
+  owner: vac-capability-tools/contract
   visible: true
   status: ready
 - kind: palette
@@ -129,73 +129,106 @@ routes:
 - kind: palette
   action: open_tui_session_runtime
   capability: vac.tui_session_runtime
-  owner: vac-rs/tui/src/owner_native_operation_parity.rs
+  owner: vac-surface-tui/local_runtime_session
   visible: true
   status: ready
 - kind: palette
   action: open_tui
   capability: vac.tui
-  owner: vac-tui/lib
+  owner: vac-surface-tui/lib
   visible: true
   status: ready
 - kind: palette
   action: open_workflow
   capability: vac.workflow
-  owner: vac-core/control_plane
+  owner: vac-control-plane/control_plane
   visible: true
   status: ready
 - kind: palette
   action: open_runtime_jobs
   capability: vac.autopilot.scheduler
-  owner: vac-tui/operator_ui
+  owner: vac-surface-tui/operator_ui
   visible: true
   status: ready
 - kind: palette
   action: open_vac_init_control_plane
   capability: vac.init.control-plane
-  owner: vac-core/control_plane/schema_envelope
+  owner: vac-core/control_plane::schema_envelope
   visible: false
   status: partial
+  reason: Interactive init progress remains routed through capability dashboard until lifecycle batches expose a dedicated palette workflow.
 - kind: palette
   action: open_vac_init_schema_envelope
   capability: vac.init.schema-envelope
-  owner: vac-core/control_plane/schema_envelope
+  owner: vac-core/control_plane::schema_envelope
   visible: true
   status: ready
 
 - kind: palette
   action: open_vac_init_manifest_contracts
   capability: vac.init.manifest-contracts
-  owner: vac-core/control_plane/vac_init_manifest_contract
+  owner: vac-core/control_plane::vac_init_manifest_contract
   visible: true
   status: ready
 - kind: palette
   action: open_vac_init_registry_validator
   capability: vac.init.registry-validator
-  owner: vac-core/control_plane/vac_init_registry_validator
+  owner: vac-core/control_plane::vac_init_registry_validator
   visible: true
   status: ready
 - kind: palette
   action: open_vac_init_lifecycle
   capability: vac.init.lifecycle
-  owner: vac-core/control_plane/vac_init_lifecycle
+  owner: vac-core/control_plane::vac_init_lifecycle
   visible: true
   status: ready
 - kind: palette
   action: open_vac_init_ownership_scanner
   capability: vac.init.ownership-scanner
-  owner: vac-core/control_plane/vac_init_ownership_scanner
+  owner: vac-core/control_plane::vac_init_ownership_scanner
   visible: true
+  status: ready
+- kind: palette
+  action: open_vac_init_evidence_chain
+  capability: vac.init.evidence-chain
+  owner: vac-core/control_plane::vac_init_evidence_chain
+  visible: false
+  status: ready
+- kind: palette
+  action: open_vac_init_patch_guard
+  capability: vac.init.patch-guard
+  owner: vac-core/control_plane::vac_init_patch_guard
+  visible: false
+  status: ready
+- kind: palette
+  action: open_vac_init_approval_binding
+  capability: vac.init.approval-binding
+  owner: vac-core/control_plane::vac_init_approval_binding
+  visible: false
+  status: ready
+- kind: palette
+  action: open_vac_init_semantic_plan
+  capability: vac.init.semantic-plan
+  owner: vac-core/control_plane::vac_init_semantic_plan
+  visible: false
+  status: ready
+- kind: palette
+  action: open_vac_init_command_gate
+  capability: vac.init.command-gate
+  owner: vac-core/control_plane::vac_init_command_gate
+  visible: false
+  status: ready
+- kind: palette
+  action: open_vac_init_policy_evaluator
+  capability: vac.init.policy-evaluator
+  owner: vac-core/control_plane::vac_init_policy_evaluator
+  visible: false
+  status: ready
+- kind: palette
+  action: open_vac_init_risk_policy
+  capability: vac.init.risk-policy
+  owner: vac-core/control_plane::vac_init_risk_policy
+  visible: false
   status: ready
 
 # VAC-Init Batch 13-15 readiness routes
-vac_init_batch13_15:
-  capabilities:
-    - vac.init.safe-rationale
-    - vac.init.memory-governance
-    - vac.init.doctor-release
-  commands:
-    - bash scripts/check-vac-init-batch13-15-contract.sh
-  routes:
-    - /capabilities
-    - /runtime

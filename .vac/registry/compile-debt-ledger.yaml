@@ -1,5 +1,5 @@
 schema_version: 1
-kind: compile_debt_ledger
+kind: registry_status
 id: compile-debt.o5o6.zero-residual-static
 updated_at: 2026-06-03T00:00:00Z
 entries:

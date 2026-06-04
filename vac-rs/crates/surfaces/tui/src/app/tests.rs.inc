@@ -1,6 +1,5 @@
 // App-level orchestration tests for the TUI.
 
-mod model_catalog;
 
 use super::*;
 use crate::app_backtrack::BacktrackSelection;

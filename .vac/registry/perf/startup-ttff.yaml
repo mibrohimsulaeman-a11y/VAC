@@ -1,5 +1,5 @@
 schema_version: 1
-kind: perf_report
+kind: registry_status
 id: perf.startup-ttff
 status: NotEvaluated
 metrics:

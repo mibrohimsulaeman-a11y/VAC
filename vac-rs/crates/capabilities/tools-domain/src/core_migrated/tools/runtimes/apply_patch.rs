@@ -12,6 +12,7 @@ use crate::tools::sandboxing::ApprovalCtx;
 use crate::tools::sandboxing::ExecApprovalRequirement;
 use crate::tools::sandboxing::PermissionRequestPayload;
 use crate::tools::sandboxing::SandboxAttempt;
+use crate::tools::sandboxing::SandboxOverride;
 use crate::tools::sandboxing::Sandboxable;
 use crate::tools::sandboxing::ToolCtx;
 use crate::tools::sandboxing::ToolError;
@@ -99,6 +100,20 @@ impl Approvable<ApplyPatchRequest> for ApplyPatchRuntime {
 
     fn approval_keys(&self, req: &ApplyPatchRequest) -> Vec<Self::ApprovalKey> {
         req.file_paths.clone()
+    }
+
+    fn sandbox_mode_for_first_attempt(&self, req: &ApplyPatchRequest) -> SandboxOverride {
+        if matches!(
+            req.exec_approval_requirement,
+            ExecApprovalRequirement::Skip {
+                bypass_sandbox: true,
+                ..
+            }
+        ) {
+            SandboxOverride::BypassSandboxFirstAttempt
+        } else {
+            SandboxOverride::NoOverride
+        }
     }
 
     fn start_approval_async<'a>(

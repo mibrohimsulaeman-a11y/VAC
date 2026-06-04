@@ -17,7 +17,11 @@ ownership:
     module: control_plane
   - crate_name: vac-control-plane
     module: local_runtime
-  - crate_name: vac-cli
+  - crate_name: vac-surface-cli
+    module: registry_cli
+  - crate_name: vac-surface-cli
+    module: workflow_cli
+  - crate_name: vac-surface-cli
     module: wsl_paths
   - crate_name: vac-config
     module: config_requirements
@@ -131,8 +135,6 @@ ownership:
     module: targets
   - crate_name: vac-otel
     module: trace_context
-  - crate_name: vac-realtime-webrtc
-    module: native
   - crate_name: vac-rollout
     module: config
   - crate_name: vac-rollout
@@ -194,7 +196,7 @@ ownership:
   - crate_name: vac-thread-store
     module: local
   - crate_name: vac-thread-store
-    module: remote
+    module: remote_disabled
   - crate_name: vac-thread-store
     module: store
   - crate_name: vac-thread-store
@@ -248,6 +250,15 @@ reason: 'Workflow manifests, safe-runner vocabulary, doctor surfaces, policy/app
 depends_on:
 - vac.sessions
 surfaces:
+  cli:
+    enabled: true
+    commands:
+    - vac completion
+    - vac doctor
+    - vac doctor policy
+    - vac doctor registry
+    - vac doctor surfaces
+    - vac doctor workflow
   slash:
     commands:
     - /autoreview
@@ -257,17 +268,10 @@ surfaces:
     - /plan
     - /skills
     - /workflow
-  cli:
-    enabled: true
-    commands:
-    - vac completion
-    - vac doctor
-    - vac doctor docs
-    - vac doctor policy
-    - vac doctor registry
-    - vac doctor surfaces
-    - vac doctor workflow
   palette: true
+  tui:
+    routes:
+    - /workflow
 states:
 - empty
 - loading
@@ -289,8 +293,6 @@ validation:
     - +1.93.0
     - check
     - -p
-    - vac-cli
+    - vac-surface-cli
     risk: execute_process
     approval: policy
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

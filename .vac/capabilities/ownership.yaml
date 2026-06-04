@@ -5,13 +5,23 @@ title: Ownership
 status: ready
 owner:
   crate: vac-capability-ownership
-  module: contract
+  module: project_workspace
 ownership:
   crates:
   - vac-capability-ownership
-  - vac-core
+  - vac-control-plane
+  - vac-surface-cli
   modules:
-  - control_plane
+  - project_workspace
+  - control_plane.ownership_scan
+  - doctor_cli
+  targets:
+  - crate_name: vac-capability-ownership
+    module: project_workspace
+  - crate_name: vac-control-plane
+    module: control_plane.ownership_scan
+  - crate_name: vac-surface-cli
+    module: doctor_cli
 description: Capability ownership coverage and dead code drift reporting for the root product.
 reason: 'Ownership scan, CLI/dashboard surfaces, repo-wide source inventory, hidden-domain detection, and maintenance workflow support are synchronized after Plan 19/21 closeout.
 
@@ -24,6 +34,9 @@ surfaces:
     commands:
     - vac doctor ownership
   palette: true
+  tui:
+    routes:
+    - /capabilities/vac.ownership
 states:
 - empty
 - loading
@@ -42,8 +55,6 @@ validation:
     - +1.93.0
     - check
     - -p
-    - vac-cli
+    - vac-surface-cli
     risk: execute_process
     approval: policy
-docs:
-- docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md

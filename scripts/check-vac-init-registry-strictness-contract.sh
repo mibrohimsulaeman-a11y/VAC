@@ -16,15 +16,13 @@ require_file() {
   fi
 }
 
-require_file vac-rs/control-plane/src/control_plane/vac_init_registry_strictness.rs
-require_file vac-rs/control-plane/src/control_plane/vac_init_registry_validator.rs
+require_file vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_registry_strictness.rs
+require_file vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_registry_validator.rs
 require_file .vac/capabilities/vac-init-registry-strictness.yaml
 require_file .vac/workflows/maintenance.vac-init-registry-strictness.yaml
-require_file docs/vac-init/VAC_INIT_PRODUCTION_HARDENING_A.md
-require_file docs/validation/PRODUCTION_HARDENING_A1_A3_VALIDATION.md
 
 if command -v "$RUSTC_BIN" >/dev/null 2>&1; then
-  "$RUSTC_BIN" --edition 2024 --test vac-rs/control-plane/src/control_plane/vac_init_registry_strictness.rs -o "$TMPROOT/vac_init_registry_strictness_test"
+  "$RUSTC_BIN" --edition 2024 --test vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_registry_strictness.rs -o "$TMPROOT/vac_init_registry_strictness_test"
   "$TMPROOT/vac_init_registry_strictness_test" --nocapture
 else
   echo "registry strictness rustc unit gate: NotEvaluated (rustc not found: $RUSTC_BIN)" >&2

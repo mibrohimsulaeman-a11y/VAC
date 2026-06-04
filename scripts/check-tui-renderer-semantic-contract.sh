@@ -8,11 +8,11 @@ cd "$REPO_ROOT"
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
-style="vac-rs/tui/src/operator_style.rs"
-ui="vac-rs/tui/src/operator_ui.rs"
-adapter="vac-rs/tui/src/operator_ui_styles.rs"
-capability="vac-rs/tui/src/capability_dashboard.rs"
-chat="vac-rs/tui/src/chatwidget.rs"
+style="vac-rs/crates/surfaces/tui/src/operator_style.rs"
+ui="vac-rs/crates/surfaces/tui/src/operator_ui.rs.inc"
+adapter="vac-rs/crates/surfaces/tui/src/operator_ui_styles.rs"
+capability="vac-rs/crates/surfaces/tui/src/capability_dashboard.rs"
+chat="vac-rs/crates/surfaces/tui/src/chatwidget.rs"
 
 for file in "$style" "$ui" "$adapter" "$capability" "$chat"; do
   [ -f "$file" ] || fail "missing $file"

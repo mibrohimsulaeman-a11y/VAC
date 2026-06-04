@@ -28,7 +28,7 @@ surfaces:
   palette: true
   tui:
     routes:
-    - /capabilities
+    - /init/schema-envelope
 policy:
   risk: safe_read
   mutates_files: false
@@ -58,8 +58,3 @@ validation:
   - vac_init_schema_envelope_contract
   - vac_init_kind_registry_contract
   - vac_init_baseline_audit_contract
-docs:
-- docs/vac-init/VAC_INIT_EXECUTION_PLAN.md
-- docs/vac-init/VAC_INIT_IMPLEMENTATION_MAP.md
-- docs/validation/VAC_INIT_BASELINE_AUDIT.md
-- docs/validation/VAC_INIT_SCHEMA_ENVELOPE_GATE.md

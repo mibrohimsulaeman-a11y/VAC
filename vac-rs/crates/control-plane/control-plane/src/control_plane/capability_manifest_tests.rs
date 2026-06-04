@@ -788,8 +788,11 @@ validation:
 
     let ownership = manifest.ownership.expect("ownership should exist");
     assert_eq!(ownership.targets.len(), 1);
-    assert_eq!(ownership.targets[0].crate_name, "vac-core");
-    assert_eq!(ownership.targets[0].module, "control_plane");
+    assert_eq!(ownership.targets[0].crate_name.as_deref(), Some("vac-core"));
+    assert_eq!(
+        ownership.targets[0].module.as_deref(),
+        Some("control_plane")
+    );
     assert_eq!(ownership.targets[0].test_only, false);
     assert_eq!(ownership.targets[0].retired, true);
     assert_eq!(ownership.deletion_plan.as_deref(), Some("Sunset checklist"));

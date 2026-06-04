@@ -1,6 +1,8 @@
 schema_version: 1
 kind: evidence
 id: evidence.2026-05-30-o5o6-toolchain-gate-retry
+chain:
+  self_hash: 57946470deef6d5da3cd1e5dc6b17fd3d6558ee98121dfc83ebe29bcae9637bc
 timestamp: '2026-05-30T09:05:00Z'
 status: blocked_by_sandbox_reset
 summary: Real offline cargo verification was attempted with uploaded rustc/cargo 1.93.0 and restored vendor tree. The first targeted protocol build reached rustc and failed on include!-inserted inner doc comments (E0753). The compile-driven doc-comment fix was applied and static O5.2 staging hash gate passed. The retry reached vac-runtime-protocol compilation but the sandbox reset again before any cargo build/clippy/test gate could complete, so TV-Done cannot be claimed.

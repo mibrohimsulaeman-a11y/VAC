@@ -9,5 +9,4 @@ done
 [[ -f vac-rs/crates/foundation/runtime-protocol/src/bin/export.rs ]] || fail "missing runtime-protocol schema export bin"
 [[ -f vac-rs/crates/foundation/runtime-protocol/src/bin/write_schema_fixtures.rs ]] || fail "missing runtime-protocol schema write fixtures bin"
 grep -q 'decision: full_donor_source_tree_deleted_sv_done_tv_pending' .vac/registry/o5-donor-delete-gate.yaml || fail "donor gate state not updated"
-grep -q 'Full donor source tree removed' docs/monolith-quality/O5_5_DONOR_DELETE_GATE_REPORT.md || fail "donor report missing full tree closeout"
 printf 'O5.5 donor delete gate: PASS donor source tree and app-server scope deleted; cargo TV-Pending\n'

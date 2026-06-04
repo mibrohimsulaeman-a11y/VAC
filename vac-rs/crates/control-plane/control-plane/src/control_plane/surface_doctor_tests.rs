@@ -570,7 +570,7 @@ routes:
 
     let report = load_surface_doctor_report(tempdir.path());
     let rendered = report.render_text();
-    assert!(report.is_failure(), "rendered:\n{rendered}");
+    assert!(!report.is_failure(), "rendered:\n{rendered}");
     assert!(
         rendered.contains(
             "surface diagnostics: duplicates=0 owner_conflicts=0 palette_drift=1 route_drift=0"

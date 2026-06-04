@@ -14,6 +14,9 @@ mod operator_style;
 #[allow(dead_code)]
 #[path = "../src/operator_ui.rs"]
 mod operator_ui;
+#[allow(dead_code)]
+#[path = "../src/operator_widget_render.rs"]
+mod operator_widget_render;
 
 fn main() -> io::Result<()> {
     let out_dir = env::args_os()
