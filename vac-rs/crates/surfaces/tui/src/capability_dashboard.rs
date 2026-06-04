@@ -202,7 +202,7 @@ fn build_operator_dashboard_state(
         })
         .unwrap_or(0);
     let valid_percent = if capability_count == 0 {
-        if report.is_failure() { 0 } else { 100 }
+        0
     } else {
         ((ready_count * 100) / capability_count).min(100) as u8
     };

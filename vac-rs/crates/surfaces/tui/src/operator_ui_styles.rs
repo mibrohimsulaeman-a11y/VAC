@@ -89,7 +89,7 @@ mod tests {
         let input = vec![
             "approval required".to_string(),
             "DESTRUCTIVE bash".to_string(),
-            "[VIL-native] ready".to_string(),
+            "[VAC] ready".to_string(),
         ];
         let rendered = style_operator_lines_from_strings(input.clone());
         assert_eq!(rendered.len(), input.len());

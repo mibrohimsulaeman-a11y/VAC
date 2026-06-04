@@ -67,7 +67,6 @@ use vac_protocol::config_types::SandboxMode;
 use vac_protocol::config_types::WindowsSandboxLevel;
 use vac_rollout::state_db::get_state_db;
 use vac_state::log_db;
-use vac_terminal_detection::terminal_info;
 use vac_utils_absolute_path::AbsolutePathBuf;
 use vac_utils_absolute_path::canonicalize_existing_preserving_symlinks;
 use vac_utils_oss::ensure_oss_provider_ready;
@@ -1266,6 +1265,9 @@ async fn run_ratatui_app(
 
     let use_alt_screen = determine_alt_screen_mode(no_alt_screen, config.tui_alternate_screen);
     tui.set_alt_screen_enabled(use_alt_screen);
+    if use_alt_screen {
+        tui.enter_alt_screen()?;
+    }
     let app_server = match app_server {
         Some(app_server) => app_server,
         None => match start_app_server(
@@ -1359,20 +1361,16 @@ impl Drop for TerminalRestoreGuard {
 
 /// Determine whether to use the terminal's alternate screen buffer.
 ///
-/// The alternate screen buffer provides a cleaner fullscreen experience without polluting
-/// the terminal's scrollback history. However, it conflicts with terminal multiplexers like
-/// Zellij that strictly follow the xterm spec, which disallows scrollback in alternate screen
-/// buffers. Zellij intentionally disables scrollback in alternate screen mode (see
-/// https://github.com/zellij-org/zellij/pull/1032) and offers no configuration option to
-/// change this behavior.
+/// The alternate screen buffer provides the fullscreen operator experience expected from VAC.
+/// Users who need inline scrollback can opt out with `--no-alt-screen` or
+/// `tui.alternate_screen = "never"`.
 ///
 /// This function implements a pragmatic workaround:
 /// - If `--no-alt-screen` is explicitly passed, always disable alternate screen
 /// - Otherwise, respect the `tui.alternate_screen` config setting:
 ///   - `always`: Use alternate screen everywhere (original behavior)
 ///   - `never`: Inline mode only, preserves scrollback
-///   - `auto` (default): Auto-detect the terminal multiplexer and disable alternate screen
-///     only in Zellij, enabling it everywhere else
+///   - `auto` (default): Use alternate screen as the product default
 fn determine_alt_screen_mode(no_alt_screen: bool, tui_alternate_screen: AltScreenMode) -> bool {
     if no_alt_screen {
         false
@@ -1380,13 +1378,7 @@ fn determine_alt_screen_mode(no_alt_screen: bool, tui_alternate_screen: AltScree
         match tui_alternate_screen {
             AltScreenMode::Always => true,
             AltScreenMode::Never => false,
-            AltScreenMode::Auto => {
-                let terminal_info = terminal_info();
-                !matches!(
-                    terminal_info.multiplexer,
-                    Some(vac_terminal_detection::Multiplexer::Zellij {})
-                )
-            }
+            AltScreenMode::Auto => true,
         }
     }
 }

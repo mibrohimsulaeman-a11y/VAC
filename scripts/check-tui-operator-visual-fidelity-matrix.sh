@@ -28,7 +28,10 @@ for scenario in first-launch idle agent-working approval-popup runtime-jobs capa
 done
 
 grep -q 'Vastar Agentic CLI' "$snapshot_dir/first-launch-180x48.txt" || fail "first launch large snapshot missing header"
-grep -q 'VIL-native.*ready' "$snapshot_dir/idle-140x40.txt" || fail "idle medium snapshot missing ready tag"
+grep -q 'VAC.*ready' "$snapshot_dir/idle-140x40.txt" || fail "idle medium snapshot missing ready tag"
+if grep -q 'VIL-native' "$snapshot_dir/idle-140x40.txt"; then
+  fail "idle medium snapshot must not default to VIL-native"
+fi
 grep -Eq 'tool timeline.*last 5' "$snapshot_dir/agent-working-120x36.txt" || fail "agent small snapshot missing timeline cap"
 grep -q 'DESTRUCTIVE' "$snapshot_dir/approval-popup-120x36.txt" || fail "approval small snapshot missing destructive label"
 grep -q 'runtime jobs' "$snapshot_dir/runtime-jobs-140x40.txt" || fail "runtime medium snapshot missing route tab"

@@ -26,9 +26,22 @@ fn generated_operator_snapshots_are_bounded_widget_screens() {
             "{} width exceeds viewport",
             scenario.slug()
         );
+    }
+}
+
+#[test]
+fn generated_operator_panel_snapshots_keep_widget_geometry() {
+    for scenario in [
+        operator_ui::SnapshotScenario::AgentWorking,
+        operator_ui::SnapshotScenario::ApprovalPopup,
+        operator_ui::SnapshotScenario::RuntimeJobs,
+        operator_ui::SnapshotScenario::CapabilityDashboard,
+    ] {
+        let rendered =
+            operator_ui::render_operator_snapshot(scenario, scenario.default_viewport()).join("\n");
         assert!(
-            rendered.join("\n").contains('╭'),
-            "{} should contain rounded ratatui block geometry",
+            rendered.contains('╭'),
+            "{} should contain ratatui panel geometry",
             scenario.slug()
         );
     }
@@ -43,7 +56,8 @@ fn generated_operator_snapshots_keep_user_reference_surfaces_visible() {
     assert!(first_launch.contains("vac · interactive"));
     assert!(first_launch.contains("Vastar Agentic CLI"));
     assert!(first_launch.contains("hydrating startup snapshot"));
-    assert!(first_launch.contains("VIL-native"));
+    assert!(first_launch.contains("VAC operator console"));
+    assert!(!first_launch.contains("VIL-native"));
     assert!(first_launch.contains("type / for commands"));
 
     let idle = operator_ui::render_operator_snapshot_text(
@@ -51,7 +65,8 @@ fn generated_operator_snapshots_keep_user_reference_surfaces_visible() {
         operator_ui::SnapshotScenario::Idle.default_viewport(),
     );
     assert!(idle.contains("vac · interactive"));
-    assert!(idle.contains("VIL-native"));
+    assert!(idle.contains("VAC"));
+    assert!(!idle.contains("VIL-native"));
     assert!(idle.contains("ready"));
     assert!(idle.contains("recent tasks"));
     assert!(idle.contains("no persisted recent task loaded"));
@@ -143,7 +158,15 @@ fn operator_visual_fidelity_matrix_has_all_screenshot_sizes() {
                 viewport.width,
                 viewport.height
             );
-            assert!(rendered.join("\n").contains('╭'));
+            if matches!(
+                scenario,
+                operator_ui::SnapshotScenario::AgentWorking
+                    | operator_ui::SnapshotScenario::ApprovalPopup
+                    | operator_ui::SnapshotScenario::RuntimeJobs
+                    | operator_ui::SnapshotScenario::CapabilityDashboard
+            ) {
+                assert!(rendered.join("\n").contains('╭'));
+            }
             let filename =
                 operator_ui::render_operator_snapshot_filename_for_viewport(scenario, viewport);
             assert!(filename.contains(scenario.slug()));

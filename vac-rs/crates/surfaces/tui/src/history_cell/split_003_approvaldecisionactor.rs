@@ -273,8 +273,7 @@ pub(crate) fn new_session_info(
     if is_first_event {
         let idle_state =
             crate::operator_ui::IdleViewState::live(session.model.clone()).with_status_bar(status_bar);
-        let help_lines = crate::operator_ui::render_idle_visual_lines(&idle_state, 112);
-        parts.push(Box::new(PlainHistoryCell { lines: help_lines }));
+        parts.push(Box::new(OperatorIdleHistoryCell { state: idle_state }));
     } else {
         if config.show_tooltips
             && let Some(tooltips) = tooltip_override
@@ -294,6 +293,24 @@ pub(crate) fn new_session_info(
     }
 
     SessionInfoCell(CompositeHistoryCell { parts })
+}
+
+#[derive(Debug)]
+struct OperatorIdleHistoryCell {
+    state: crate::operator_ui::IdleViewState,
+}
+
+impl HistoryCell for OperatorIdleHistoryCell {
+    fn display_lines(&self, width: u16) -> Vec<Line<'static>> {
+        let inner_width = usize::from(width.saturating_sub(4)).max(1);
+        crate::operator_ui::render_idle_visual_lines(
+            &self.state,
+            inner_width.min(u16::MAX as usize) as u16,
+        )
+        .into_iter()
+        .map(|line| crate::line_truncation::truncate_line_to_width(line, inner_width))
+        .collect()
+    }
 }
 
 pub(crate) fn operator_profile_label(config: &Config) -> String {

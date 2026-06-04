@@ -13,12 +13,13 @@ status_card="vac-rs/crates/surfaces/tui/src/status/card.rs"
 status_contract="vac-rs/crates/surfaces/tui/src/status/output_contract.rs"
 status_dispatch="vac-rs/crates/surfaces/tui/src/chatwidget/slash_dispatch.rs"
 chatwidget="vac-rs/crates/surfaces/tui/src/chatwidget.rs"
+chatwidget_status="vac-rs/crates/surfaces/tui/src/chatwidget/chatwidget_group_015_impl.rs"
 app_rs="vac-rs/crates/surfaces/tui/src/app.rs"
 status_snapshots="vac-rs/crates/surfaces/tui/src/status/snapshots"
 slash_dispatch="vac-rs/crates/surfaces/tui/src/chatwidget/slash_dispatch.rs"
 chatwidget="vac-rs/crates/surfaces/tui/src/chatwidget.rs"
 
-for file in "$status_mod" "$status_card" "$status_contract" "$status_dispatch" "$chatwidget" "$app_rs"; do
+for file in "$status_mod" "$status_card" "$status_contract" "$status_dispatch" "$chatwidget" "$chatwidget_status" "$app_rs"; do
   [ -f "$file" ] || fail "missing $file"
 done
 [ -d "$status_snapshots" ] || fail "missing $status_snapshots"
@@ -62,7 +63,7 @@ if grep -Eq 'fn rate_limit_lines|fn rate_limit_row_lines|fn collect_rate_limit_l
   fail "/status runtime card still contains legacy rate-limit/credit row render path"
 fi
 
-grep -q 'let rate_limit_snapshots: &\[RateLimitSnapshotDisplay\] = &\[\];' "$chatwidget" || fail "/status output must ignore cached rate-limit snapshots"
+grep -q 'let rate_limit_snapshots: &\[RateLimitSnapshotDisplay\] = &\[\];' "$chatwidget_status" || fail "/status output must ignore cached rate-limit snapshots"
 grep -q 'SlashCommand::Status' "$status_dispatch" || fail "/status slash dispatch missing"
 grep -q '/status is an operator-local inventory surface' "$status_dispatch" || fail "/status local-only dispatch comment missing"
 grep -q '/status.*local-only' "$app_rs" || fail "startup prefetch comment must distinguish status-line/nudge from /status"
@@ -77,8 +78,8 @@ if printf '%s\n' "$status_dispatch_block" | grep -q 'RefreshRateLimits'; then
   fail "/status slash dispatch still triggers rate-limit refresh"
 fi
 
-grep -q 'let rate_limit_snapshots: \&\[RateLimitSnapshotDisplay\] = \&\[\];' "$chatwidget" || fail "add_status_output does not isolate cached rate-limit snapshots"
-grep -q 'Hardening 3: /status intentionally ignores cached account limit' "$chatwidget" || fail "cached rate-limit isolation rationale missing"
+grep -q 'let rate_limit_snapshots: \&\[RateLimitSnapshotDisplay\] = \&\[\];' "$chatwidget_status" || fail "add_status_output does not isolate cached rate-limit snapshots"
+grep -q 'Hardening 3: /status intentionally ignores cached account limit' "$chatwidget_status" || fail "cached rate-limit isolation rationale missing"
 
 if grep -RIn -E 'Limits:|Visit .*rate limits|rate limits and credits|Credits:|Credit balance' "$status_snapshots" >/tmp/vac-status-output-forbidden.txt; then
   cat /tmp/vac-status-output-forbidden.txt >&2

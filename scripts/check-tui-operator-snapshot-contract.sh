@@ -56,7 +56,7 @@ require_contains "$widget" "Gauge::default"
 require_contains "$widget" "Table::new"
 require_contains "$widget" "Layout::default"
 require_contains "$test_file" "operator_widget_render"
-require_contains "$test_file" "rounded ratatui block geometry"
+require_contains "$test_file" "ratatui panel geometry"
 require_contains "$widget" "style.bg, Some(BLUE_BG)"
 require_contains "$render_script" "TV-Pending"
 
@@ -68,13 +68,21 @@ for snapshot in \
   runtime-jobs-120x36.txt runtime-jobs-140x40.txt runtime-jobs-180x48.txt \
   capability-dashboard-120x36.txt capability-dashboard-140x40.txt capability-dashboard-180x48.txt; do
   [ -s "$SNAPSHOT_DIR/$snapshot" ] || fail "missing generated snapshot $snapshot"
+done
+
+for snapshot in \
+  agent-working-120x36.txt agent-working-140x40.txt agent-working-180x48.txt \
+  approval-popup-120x36.txt approval-popup-140x40.txt approval-popup-180x48.txt \
+  runtime-jobs-120x36.txt runtime-jobs-140x40.txt runtime-jobs-180x48.txt \
+  capability-dashboard-120x36.txt capability-dashboard-140x40.txt capability-dashboard-180x48.txt; do
   require_contains "$SNAPSHOT_DIR/$snapshot" "╭"
 done
 
 require_contains "$SNAPSHOT_DIR/first-launch-120x36.txt" "Vastar Agentic CLI"
 require_contains "$SNAPSHOT_DIR/first-launch-120x36.txt" "hydrating startup snapshot"
+require_contains "$SNAPSHOT_DIR/first-launch-120x36.txt" "VAC operator console"
 require_contains "$SNAPSHOT_DIR/idle-120x36.txt" "no persisted recent task loaded"
-require_contains "$SNAPSHOT_DIR/idle-120x36.txt" "composer"
+require_contains "$SNAPSHOT_DIR/idle-120x36.txt" "VAC"
 require_contains "$SNAPSHOT_DIR/agent-working-120x36.txt" "tool timeline"
 require_contains "$SNAPSHOT_DIR/agent-working-120x36.txt" "context"
 require_contains "$SNAPSHOT_DIR/approval-popup-120x36.txt" "DESTRUCTIVE"
@@ -97,6 +105,8 @@ reject_tree_contains "$SNAPSHOT_DIR" "Diagnostics fallback"
 reject_tree_contains "$SNAPSHOT_DIR" ".vac/capabilities/tui.yml:42:13"
 reject_tree_contains "$SNAPSHOT_DIR" "almost_ready"
 reject_tree_contains "$SNAPSHOT_DIR" "vac.yaml.parser"
+reject_tree_contains "$SNAPSHOT_DIR" "VIL-native"
+reject_tree_contains "$SNAPSHOT_DIR" "composer"
 
 if command -v cargo >/dev/null 2>&1; then
   cargo test --manifest-path vac-rs/Cargo.toml -p vac-surface-tui --test operator_ui_snapshot_contract -- --nocapture

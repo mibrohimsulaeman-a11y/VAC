@@ -38,7 +38,10 @@ for file in \
 done
 
 grep -q 'Vastar Agentic CLI' "$TMP_DIR/first-launch-120x36.txt" || fail "first launch snapshot missing header"
-grep -q 'VIL-native' "$TMP_DIR/idle-120x36.txt" || fail "idle snapshot missing VIL-native ready state"
+grep -q 'VAC.*ready' "$TMP_DIR/idle-120x36.txt" || fail "idle snapshot missing VAC ready state"
+if grep -q 'VIL-native' "$TMP_DIR/idle-120x36.txt"; then
+  fail "idle snapshot must not default to VIL-native"
+fi
 grep -q 'tool timeline' "$TMP_DIR/agent-working-120x36.txt" || fail "agent snapshot missing tool timeline"
 grep -q 'last 5' "$TMP_DIR/agent-working-120x36.txt" || fail "agent snapshot missing last-five marker"
 grep -q 'DESTRUCTIVE' "$TMP_DIR/approval-popup-120x36.txt" || fail "approval snapshot missing destructive risk label"
@@ -52,7 +55,7 @@ if grep -q '.vac/capabilities/tui.yml:42:13\|almost_ready\|vac.yaml.parser' "$TM
 fi
 grep -q 'profile ' "$TMP_DIR/idle-120x36.txt" || fail "snapshot statusline missing profile"
 grep -q 'rulebook runtime' "$TMP_DIR/idle-120x36.txt" || fail "idle snapshot statusline missing rulebook"
-grep -q 'rulebook vil.core' "$TMP_DIR/agent-working-120x36.txt" || fail "agent snapshot statusline missing full rulebook label"
-grep -q 'rulebook vil.core' "$TMP_DIR/runtime-jobs-120x36.txt" || fail "snapshot statusline missing rulebook"
+grep -q 'rulebook runtime' "$TMP_DIR/agent-working-120x36.txt" || fail "agent snapshot statusline missing runtime rulebook label"
+grep -q 'rulebook runtime' "$TMP_DIR/runtime-jobs-120x36.txt" || fail "snapshot statusline missing runtime rulebook"
 
 ok "operator TUI viewport snapshots match required visual contract"

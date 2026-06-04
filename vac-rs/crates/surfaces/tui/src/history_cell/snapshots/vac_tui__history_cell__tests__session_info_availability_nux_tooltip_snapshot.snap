@@ -13,7 +13,7 @@ hydrating startup snapshot ─
 │●  model          gpt-5                        runtime selected                         ││●  autopilot      runtime                      scheduler state loaded if present        │
 │●  fallback       configured                   loaded from provider stack               ││●  mcp            runtime                      configured connectors only               │
 │●  profile        runtime                      tool policy loaded                       ││●  sessions       runtime                      history loaded if present                │
-│●  rulebook       vil.core                     control-plane contract active            ││●  vil detect     workspace                    inventory resolved by registry           │
+│●  rulebook       runtime                      control-plane contract active            ││●  workspace      registry                     inventory resolved by control plane     │
 │                                                                                        ││                                                                                        │
 │                                                                                        ││                                                                                        │
 │                                                                                        ││                                                                                        │
@@ -27,7 +27,7 @@ hydrating startup snapshot ─
 │                                                                                        ││                                                                                        │
 ╰────────────────────────────────────────────────────────────────────────────────────────╯╰────────────────────────────────────────────────────────────────────────────────────────╯
 ready
- VIL-native    type / for commands, /help to explore, or start typing a task.
+ VAC           type / for commands, /help to explore, or start typing a task.
 recent   no recent task loaded
 
 

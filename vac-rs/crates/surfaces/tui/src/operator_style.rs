@@ -185,11 +185,7 @@ pub(crate) fn classify_operator_line(line: &str) -> OperatorStyleRole {
         return OperatorStyleRole::Warning;
     }
 
-    if lower.contains("ready")
-        || lower.contains("passed")
-        || lower.contains("valid 100%")
-        || lower.contains("vil-native")
-    {
+    if lower.contains("ready") || lower.contains("passed") || lower.contains("valid 100%") {
         return OperatorStyleRole::Success;
     }
 
@@ -279,9 +275,9 @@ mod tests {
     }
 
     #[test]
-    fn vil_native_ready_lines_are_success() {
+    fn vac_ready_lines_are_success() {
         assert_eq!(
-            classify_operator_line("[VIL-native] ready — engine connected"),
+            classify_operator_line("[VAC] ready — runtime connected"),
             OperatorStyleRole::Success
         );
     }

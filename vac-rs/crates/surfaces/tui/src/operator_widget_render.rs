@@ -61,48 +61,64 @@ pub(crate) fn render_snapshot_lines(
                 "~/code/vastar/vac",
                 "27bd8ed4",
             );
-            render_startup_lines(&snapshot, viewport.width as u16)
-                .into_iter()
-                .map(line_to_string)
-                .collect::<Vec<String>>()
+            render_startup_lines_with_height(
+                &snapshot,
+                viewport.width as u16,
+                viewport.height as u16,
+            )
+            .into_iter()
+            .map(line_to_string)
+            .collect::<Vec<String>>()
         }
         SnapshotScenario::Idle => {
             let state = IdleViewState::live("claude-sonnet-4.5");
-            render_idle_lines(&state, viewport.width as u16)
+            render_idle_lines_with_height(&state, viewport.width as u16, viewport.height as u16)
                 .into_iter()
                 .map(line_to_string)
                 .collect::<Vec<String>>()
         }
         SnapshotScenario::AgentWorking => {
             let state = AgentStreamingState::sample();
-            render_agent_streaming_lines(&state, viewport.width as u16)
-                .into_iter()
-                .map(line_to_string)
-                .collect::<Vec<String>>()
+            render_agent_streaming_lines_with_height(
+                &state,
+                viewport.width as u16,
+                viewport.height as u16,
+            )
+            .into_iter()
+            .map(line_to_string)
+            .collect::<Vec<String>>()
         }
         SnapshotScenario::ApprovalPopup => {
             let state = ApprovalPopupState::destructive_bash(
                 "rm -rf target/debug/incremental",
                 "~/code/vastar/vac",
             );
-            render_approval_lines(&state, viewport.width as u16)
+            render_approval_lines_with_height(&state, viewport.width as u16, viewport.height as u16)
                 .into_iter()
                 .map(line_to_string)
                 .collect::<Vec<String>>()
         }
         SnapshotScenario::RuntimeJobs => {
             let state = AutopilotSchedulerState::monitor_only_sample();
-            render_runtime_jobs_lines(&state, viewport.width as u16)
-                .into_iter()
-                .map(line_to_string)
-                .collect::<Vec<String>>()
+            render_runtime_jobs_lines_with_height(
+                &state,
+                viewport.width as u16,
+                viewport.height as u16,
+            )
+            .into_iter()
+            .map(line_to_string)
+            .collect::<Vec<String>>()
         }
         SnapshotScenario::CapabilityDashboard => {
             let state = CapabilityDashboardState::sample_dashboard();
-            render_capability_dashboard_lines(&state, viewport.width as u16)
-                .into_iter()
-                .map(line_to_string)
-                .collect::<Vec<String>>()
+            render_capability_dashboard_lines_with_height(
+                &state,
+                viewport.width as u16,
+                viewport.height as u16,
+            )
+            .into_iter()
+            .map(line_to_string)
+            .collect::<Vec<String>>()
         }
     };
     lines.truncate(viewport.height);
@@ -110,16 +126,32 @@ pub(crate) fn render_snapshot_lines(
 }
 
 pub(crate) fn render_startup_lines(snapshot: &StartupSnapshot, width: u16) -> Vec<Line<'static>> {
+    render_startup_lines_with_height(snapshot, width, 30)
+}
+
+pub(crate) fn render_startup_lines_with_height(
+    snapshot: &StartupSnapshot,
+    width: u16,
+    height: u16,
+) -> Vec<Line<'static>> {
     let width = width.clamp(72, 180);
-    let height = 30;
+    let height = height.max(30);
     render_to_lines(width, height, |area, buf| {
         render_startup(snapshot, area, buf)
     })
 }
 
 pub(crate) fn render_idle_lines(state: &IdleViewState, width: u16) -> Vec<Line<'static>> {
+    render_idle_lines_with_height(state, width, 24)
+}
+
+pub(crate) fn render_idle_lines_with_height(
+    state: &IdleViewState,
+    width: u16,
+    height: u16,
+) -> Vec<Line<'static>> {
     let width = width.clamp(72, 180);
-    let height = 24;
+    let height = height.max(24);
     render_to_lines(width, height, |area, buf| render_idle(state, area, buf))
 }
 
@@ -127,16 +159,32 @@ pub(crate) fn render_agent_streaming_lines(
     state: &AgentStreamingState,
     width: u16,
 ) -> Vec<Line<'static>> {
+    render_agent_streaming_lines_with_height(state, width, 31)
+}
+
+pub(crate) fn render_agent_streaming_lines_with_height(
+    state: &AgentStreamingState,
+    width: u16,
+    height: u16,
+) -> Vec<Line<'static>> {
     let width = width.clamp(72, 180);
-    let height = 31;
+    let height = height.max(31);
     render_to_lines(width, height, |area, buf| {
         render_agent_streaming(state, area, buf)
     })
 }
 
 pub(crate) fn render_approval_lines(state: &ApprovalPopupState, width: u16) -> Vec<Line<'static>> {
+    render_approval_lines_with_height(state, width, 24)
+}
+
+pub(crate) fn render_approval_lines_with_height(
+    state: &ApprovalPopupState,
+    width: u16,
+    height: u16,
+) -> Vec<Line<'static>> {
     let width = width.clamp(72, 180);
-    let height = 24;
+    let height = height.max(24);
     render_to_lines(width, height, |area, buf| render_approval(state, area, buf))
 }
 
@@ -144,8 +192,16 @@ pub(crate) fn render_runtime_jobs_lines(
     state: &AutopilotSchedulerState,
     width: u16,
 ) -> Vec<Line<'static>> {
+    render_runtime_jobs_lines_with_height(state, width, 27)
+}
+
+pub(crate) fn render_runtime_jobs_lines_with_height(
+    state: &AutopilotSchedulerState,
+    width: u16,
+    height: u16,
+) -> Vec<Line<'static>> {
     let width = width.clamp(72, 180);
-    let height = 27;
+    let height = height.max(27);
     render_to_lines(width, height, |area, buf| {
         render_runtime_jobs(state, area, buf)
     })
@@ -155,8 +211,16 @@ pub(crate) fn render_capability_dashboard_lines(
     state: &CapabilityDashboardState,
     width: u16,
 ) -> Vec<Line<'static>> {
+    render_capability_dashboard_lines_with_height(state, width, 42)
+}
+
+pub(crate) fn render_capability_dashboard_lines_with_height(
+    state: &CapabilityDashboardState,
+    width: u16,
+    height: u16,
+) -> Vec<Line<'static>> {
     let width = width.clamp(100, 220);
-    let height = 42;
+    let height = height.max(36);
     render_to_lines(width, height, |area, buf| {
         render_capability_dashboard(state, area, buf)
     })
@@ -190,7 +254,7 @@ fn render_startup(snapshot: &StartupSnapshot, area: Rect, buf: &mut Buffer) {
             Constraint::Length(1),
             Constraint::Length(8),
             Constraint::Length(4),
-            Constraint::Length(4),
+            Constraint::Min(1),
             Constraint::Length(2),
         ])
         .split(area);
@@ -210,7 +274,7 @@ fn render_startup(snapshot: &StartupSnapshot, area: Rect, buf: &mut Buffer) {
         Line::from(vec![
             Span::raw("         "),
             Span::styled(
-                "VIL-native operator console · advanced beta · control-plane hardening active",
+                "VAC operator console · local runtime · control-plane hardening active",
                 Style::default().fg(MUTED),
             ),
         ]),
@@ -247,7 +311,7 @@ fn render_startup(snapshot: &StartupSnapshot, area: Rect, buf: &mut Buffer) {
             Span::raw(" ─────────────────────────────────────────────────"),
         ]),
         Line::from(vec![
-            pill("VIL-native", BLUE_BG, CYAN),
+            pill("VAC", BLUE_BG, CYAN),
             Span::raw("   type / for commands, /help to explore, or start typing a task."),
         ]),
         Line::from(vec![
@@ -265,13 +329,11 @@ fn render_startup(snapshot: &StartupSnapshot, area: Rect, buf: &mut Buffer) {
     Paragraph::new(ready_lines)
         .style(Style::default().fg(FG).bg(BG))
         .render(chunks[4], buf);
-    Paragraph::new(Line::from(vec![
-        Span::styled("▸ ", Style::default().fg(CYAN)),
-        Span::raw("/help · /model · /resume · /runtime · shift+tab plan mode"),
-    ]))
-    .block(rounded_block("composer"))
-    .style(Style::default().fg(MUTED).bg(BG))
-    .render(chunks[5], buf);
+    render_input_hint(
+        "/help · /model · /resume · /runtime · shift+tab plan mode",
+        chunks[5],
+        buf,
+    );
     render_status_bar(&snapshot.status_bar, chunks[6], buf);
 }
 
@@ -282,13 +344,13 @@ fn render_idle(state: &IdleViewState, area: Rect, buf: &mut Buffer) {
             Constraint::Length(3),
             Constraint::Min(9),
             Constraint::Length(4),
-            Constraint::Length(4),
+            Constraint::Length(2),
             Constraint::Length(2),
         ])
         .split(area);
     render_chrome_header("vac · interactive", "idle", chunks[0], buf);
     let mut body = vec![Line::from(vec![
-        pill("VIL-native", BLUE_BG, CYAN),
+        pill("VAC", BLUE_BG, CYAN),
         Span::raw("   "),
         Span::styled(
             "ready",
@@ -342,13 +404,7 @@ fn render_idle(state: &IdleViewState, area: Rect, buf: &mut Buffer) {
         .style(Style::default().bg(BG))
         .render(chunks[2], buf);
     }
-    Paragraph::new(Line::from(vec![
-        Span::styled("▸ ", Style::default().fg(CYAN)),
-        Span::raw(state.bottom_mode.clone()),
-    ]))
-    .block(rounded_block("composer"))
-    .style(Style::default().bg(BG))
-    .render(chunks[3], buf);
+    render_input_hint(&state.bottom_mode, chunks[3], buf);
     render_status_bar(&state.status_bar, chunks[4], buf);
 }
 
@@ -361,7 +417,7 @@ fn render_agent_streaming(state: &AgentStreamingState, area: Rect, buf: &mut Buf
             Constraint::Length(9),
             Constraint::Length(4),
             Constraint::Length(4),
-            Constraint::Length(4),
+            Constraint::Min(1),
             Constraint::Length(2),
         ])
         .split(area);
@@ -433,9 +489,9 @@ fn render_agent_streaming(state: &AgentStreamingState, area: Rect, buf: &mut Buf
             .map(|line| Line::from(line.to_string())),
     );
     Paragraph::new(agent_lines)
-    .style(Style::default().fg(MUTED).bg(BG))
-    .wrap(Wrap { trim: false })
-    .render(chunks[3], buf);
+        .style(Style::default().fg(MUTED).bg(BG))
+        .wrap(Wrap { trim: false })
+        .render(chunks[3], buf);
 
     let ratio = ratio(state.context_used, state.context_limit);
     Gauge::default()
@@ -448,13 +504,7 @@ fn render_agent_streaming(state: &AgentStreamingState, area: Rect, buf: &mut Buf
         ))
         .ratio(ratio)
         .render(chunks[4], buf);
-    Paragraph::new(Line::from(vec![
-        Span::styled("▸ ", Style::default().fg(CYAN)),
-        Span::raw(state.composer_hint.clone()),
-    ]))
-    .block(rounded_block("composer"))
-    .style(Style::default().fg(MUTED).bg(BG))
-    .render(chunks[5], buf);
+    render_input_hint(&state.composer_hint, chunks[5], buf);
     render_status_bar(&state.status_bar, chunks[6], buf);
 }
 
@@ -781,31 +831,60 @@ fn render_dashboard_center(state: &CapabilityDashboardState, area: Rect, buf: &m
             ])
         })
         .collect();
-    Table::new(
-        rows,
-        [
-            Constraint::Percentage(15),
-            Constraint::Percentage(10),
-            Constraint::Percentage(15),
-            Constraint::Percentage(15),
-            Constraint::Percentage(15),
-            Constraint::Percentage(30),
-        ],
-    )
-    .header(
-        Row::new(vec![
-            "ID",
-            "STATUS",
-            "OWNER",
-            "SURFACES",
-            "POLICY",
-            "VALIDATION / DOCS",
+    if rows.is_empty() {
+        Paragraph::new(vec![
+            Line::from(vec![Span::styled(
+                "No capabilities registered yet",
+                Style::default().fg(FG).add_modifier(Modifier::BOLD),
+            )]),
+            Line::from(""),
+            Line::from(vec![
+                Span::styled("Create manifests in ", Style::default().fg(MUTED)),
+                Span::styled(".vac/capabilities/", Style::default().fg(CYAN)),
+                Span::styled(
+                    " so VAC can map owners, surfaces, policy, and validation.",
+                    Style::default().fg(MUTED),
+                ),
+            ]),
+            Line::from(vec![
+                Span::styled("Then run ", Style::default().fg(MUTED)),
+                Span::styled("vac doctor registry .", Style::default().fg(CYAN)),
+                Span::styled(" and reopen ", Style::default().fg(MUTED)),
+                Span::styled("/capabilities", Style::default().fg(CYAN)),
+                Span::styled(".", Style::default().fg(MUTED)),
+            ]),
         ])
-        .style(Style::default().fg(MUTED)),
-    )
-    .block(rounded_block("Capability registry"))
-    .style(Style::default().bg(BG))
-    .render(chunks[1], buf);
+        .block(rounded_block("Capability registry"))
+        .style(Style::default().bg(BG))
+        .wrap(Wrap { trim: false })
+        .render(chunks[1], buf);
+    } else {
+        Table::new(
+            rows,
+            [
+                Constraint::Percentage(15),
+                Constraint::Percentage(10),
+                Constraint::Percentage(15),
+                Constraint::Percentage(15),
+                Constraint::Percentage(15),
+                Constraint::Percentage(30),
+            ],
+        )
+        .header(
+            Row::new(vec![
+                "ID",
+                "STATUS",
+                "OWNER",
+                "SURFACES",
+                "POLICY",
+                "VALIDATION / DOCS",
+            ])
+            .style(Style::default().fg(MUTED)),
+        )
+        .block(rounded_block("Capability registry"))
+        .style(Style::default().bg(BG))
+        .render(chunks[1], buf);
+    }
 
     let bottom = Layout::default()
         .direction(Direction::Horizontal)
@@ -915,6 +994,15 @@ fn render_chrome_header(title: &str, mode: &str, area: Rect, buf: &mut Buffer) {
     Paragraph::new(line)
         .style(Style::default().bg(BG))
         .render(area, buf);
+}
+
+fn render_input_hint(hint: &str, area: Rect, buf: &mut Buffer) {
+    Paragraph::new(Line::from(vec![
+        Span::styled("▸ ", Style::default().fg(CYAN)),
+        Span::styled(hint.to_string(), Style::default().fg(MUTED)),
+    ]))
+    .style(Style::default().bg(BG))
+    .render(area, buf);
 }
 
 fn render_status_grid(
@@ -1214,7 +1302,14 @@ fn registry_health(state: &CapabilityDashboardState) -> DashboardHealth {
 
 fn policy_health(state: &CapabilityDashboardState) -> DashboardHealth {
     let records = dashboard_records(state);
-    let total = records.len().max(1);
+    if records.is_empty() {
+        return DashboardHealth {
+            label: "no manifests".to_string(),
+            ratio: 0.0,
+            style: Style::default().fg(MUTED).bg(PANEL),
+        };
+    }
+    let total = records.len();
     let policy_backed = records
         .iter()
         .filter(|record| {
@@ -1236,7 +1331,14 @@ fn policy_health(state: &CapabilityDashboardState) -> DashboardHealth {
 
 fn surface_health(state: &CapabilityDashboardState) -> DashboardHealth {
     let records = dashboard_records(state);
-    let total = records.len().max(1);
+    if records.is_empty() {
+        return DashboardHealth {
+            label: "no manifests".to_string(),
+            ratio: 0.0,
+            style: Style::default().fg(MUTED).bg(PANEL),
+        };
+    }
+    let total = records.len();
     let surfaced = records
         .iter()
         .filter(|record| {
@@ -1279,6 +1381,9 @@ fn surface_summary(state: &CapabilityDashboardState) -> String {
 
 fn policy_summary(state: &CapabilityDashboardState) -> String {
     let records = dashboard_records(state);
+    if records.is_empty() {
+        return "no manifests".to_string();
+    }
     let mapped = records
         .iter()
         .filter(|record| {
@@ -1286,7 +1391,7 @@ fn policy_summary(state: &CapabilityDashboardState) -> String {
             !policy.is_empty() && policy != "unknown"
         })
         .count();
-    format!("{mapped}/{} mapped", records.len().max(1))
+    format!("{mapped}/{} mapped", records.len())
 }
 
 fn route_summary_lines(state: &CapabilityDashboardState) -> Vec<Line<'static>> {
@@ -1450,11 +1555,16 @@ mod tests {
 
     #[test]
     fn every_operator_snapshot_uses_widget_geometry() {
-        for scenario in SnapshotScenario::ALL {
+        for scenario in [
+            SnapshotScenario::AgentWorking,
+            SnapshotScenario::ApprovalPopup,
+            SnapshotScenario::RuntimeJobs,
+            SnapshotScenario::CapabilityDashboard,
+        ] {
             let rendered = render_snapshot_lines(scenario, scenario.default_viewport()).join("\n");
             assert!(
                 rendered.contains('╭'),
-                "{scenario:?} should render rounded blocks"
+                "{scenario:?} should render rounded widget panels"
             );
         }
     }

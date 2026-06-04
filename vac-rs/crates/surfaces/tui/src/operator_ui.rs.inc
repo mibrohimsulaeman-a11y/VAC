@@ -199,9 +199,9 @@ impl StartupSnapshot {
                 StartupSnapshotRow::new("mcp", "runtime", "configured connectors only"),
                 StartupSnapshotRow::new("sessions", "runtime", "history loaded if present"),
                 StartupSnapshotRow::new(
-                    "vil detect",
                     "workspace",
-                    "inventory resolved by registry",
+                    "registry",
+                    "inventory resolved by control plane",
                 ),
             ],
             recent_task: None,
@@ -246,8 +246,8 @@ impl IdleViewState {
         let model = model.into();
         let status_bar = OperatorStatusBarState::input(model.clone());
         Self {
-            engine_status: "VIL Engine connected".to_string(),
-            rulebook_status: "rulebook runtime enforcing".to_string(),
+            engine_status: "local runtime connected".to_string(),
+            rulebook_status: "control-plane gates active".to_string(),
             recent_tasks: vec![RecentTaskLine::new(
                 "no persisted recent task loaded",
                 ".vac/registry/trajectory is the runtime source of truth",
@@ -604,7 +604,7 @@ impl AutopilotSchedulerState {
                 "68,240 tok",
                 "valid 92%",
             )
-            .with_profile_rulebook("profile default", "rulebook vil.core"),
+            .with_profile_rulebook("profile default", "rulebook runtime"),
         }
     }
 
@@ -851,14 +851,7 @@ impl CapabilityDashboardState {
             .filter(|record| record.status.is_control_plane_valid())
             .count();
         let valid_percent = if capability_count == 0 {
-            if diagnostic_records
-                .iter()
-                .any(|diagnostic| diagnostic.severity == DiagnosticSeverity::Error)
-            {
-                0
-            } else {
-                100
-            }
+            0
         } else {
             ((valid_count * 100) / capability_count).min(100) as u8
         };
@@ -1037,7 +1030,7 @@ impl OperatorChromeState {
             validation: "valid 92%".to_string(),
             lsp: "lsp E0 W3".to_string(),
             profile: "profile default".to_string(),
-            rulebook: "rulebook vil.core".to_string(),
+            rulebook: "rulebook runtime".to_string(),
             composer_hint: "/ commands   @ files   shift+tab plan   ctrl+j newline".to_string(),
         }
     }
@@ -1241,7 +1234,7 @@ impl AgentStreamingState {
                 "68,240 tok",
                 "valid 92%",
             )
-            .with_profile_rulebook("profile default", "rulebook vil.core"),
+            .with_profile_rulebook("profile default", "rulebook runtime"),
         }
     }
 }
@@ -1337,7 +1330,7 @@ fn semantic_body_line(screen: OperatorSemanticScreen, line: String) -> OperatorL
 fn semantic_first_launch_line(line: String) -> OperatorLineSpec {
     if line.contains("Vastar Agentic CLI") || line.contains("hydrating startup snapshot") {
         OperatorLineSpec::styled(OperatorStyleRole::Accent, line)
-    } else if line.trim() == "ready" || line.contains("[VIL-native]") {
+    } else if line.trim() == "ready" || line.contains("[VAC]") {
         OperatorLineSpec::styled(OperatorStyleRole::Success, line)
     } else if line.contains("version") || line.contains("provider") || line.contains("runtime") {
         OperatorLineSpec::styled(OperatorStyleRole::Status, line)
@@ -1347,7 +1340,7 @@ fn semantic_first_launch_line(line: String) -> OperatorLineSpec {
 }
 
 fn semantic_idle_line(line: String) -> OperatorLineSpec {
-    if line.contains("[VIL-native]") || line.contains("✓ validated") {
+    if line.contains("[VAC]") || line.contains("✓ validated") {
         OperatorLineSpec::styled(OperatorStyleRole::Success, line)
     } else if line.contains("recent tasks") || line.contains("update") {
         OperatorLineSpec::styled(OperatorStyleRole::Accent, line)
@@ -1525,7 +1518,7 @@ fn render_first_launch_body_lines(snapshot: &StartupSnapshot, width: usize) -> V
     rows.push("".to_string());
     rows.push(format!("     Vastar Agentic CLI  v{}", snapshot.version));
     rows.push(
-        "     VIL-native operator console · advanced beta · control-plane hardening active"
+        "     VAC operator console · local runtime · control-plane hardening active"
             .to_string(),
     );
     rows.push(format!(
@@ -1556,7 +1549,7 @@ fn render_first_launch_body_lines(snapshot: &StartupSnapshot, width: usize) -> V
     rows.push("".to_string());
     rows.push("ready".to_string());
     rows.push(
-        "[VIL-native]  type / for commands, /help to explore, or start typing a task.".to_string(),
+        "[VAC]  type / for commands, /help to explore, or start typing a task.".to_string(),
     );
     if let Some(recent) = snapshot.recent_task.as_ref() {
         rows.push(format!("recent  \"{recent}\"  · 2h ago"));
@@ -1568,7 +1561,7 @@ fn render_idle_body_lines(state: &IdleViewState, width: usize) -> Vec<String> {
     let mut rows = vec![
         "".to_string(),
         format!(
-            "[VIL-native]  ready  — {} · {}",
+            "[VAC]  ready  — {} · {}",
             state.engine_status, state.rulebook_status
         ),
         "".to_string(),
@@ -1641,7 +1634,7 @@ fn render_agent_streaming_body_lines(state: &AgentStreamingState, width: usize) 
         compact_number(state.context_used),
         compact_number(state.context_limit)
     ));
-    lines.push(format!("composer: {}", state.composer_hint));
+    lines.push(format!("input hint · {}", state.composer_hint));
     lines
         .into_iter()
         .map(|line| fit_line(&line, width))
@@ -2181,7 +2174,7 @@ mod tests {
                 "68,240 tok",
                 "valid 92%",
             )
-            .with_profile_rulebook("profile default", "rulebook vil.core"),
+            .with_profile_rulebook("profile default", "rulebook runtime"),
         };
 
         let rendered = render_agent_streaming_lines(&state).join("\n");
@@ -2308,9 +2301,20 @@ mod tests {
                 "{scenario:?} snapshot should fit viewport width"
             );
             assert!(rendered.contains("vac · interactive"));
-            assert!(rendered.contains('╭'), "{scenario:?} should use rounded widget blocks");
             assert!(rendered.contains("model"));
             assert!(rendered.contains("rulebook"));
+        }
+        for scenario in [
+            SnapshotScenario::AgentWorking,
+            SnapshotScenario::ApprovalPopup,
+            SnapshotScenario::RuntimeJobs,
+        ] {
+            let rendered =
+                render_operator_snapshot(scenario, OperatorViewport::new(120, 36)).join("\n");
+            assert!(
+                rendered.contains('╭'),
+                "{scenario:?} should use rounded widget panels"
+            );
         }
     }
 
@@ -2326,7 +2330,8 @@ mod tests {
 
         let idle = render_operator_snapshot(SnapshotScenario::Idle, OperatorViewport::new(120, 36))
             .join("\n");
-        assert!(idle.contains("VIL-native"));
+        assert!(idle.contains("VAC"));
+        assert!(idle.contains("ready"));
         assert!(idle.contains("shift+tab"));
         assert!(idle.contains("recent tasks"));
 
@@ -2519,7 +2524,15 @@ mod tests {
                         .iter()
                         .all(|line| line.chars().count() <= viewport.width)
                 );
-                assert!(rendered.join("\n").contains('╭'));
+                if matches!(
+                    scenario,
+                    SnapshotScenario::AgentWorking
+                        | SnapshotScenario::ApprovalPopup
+                        | SnapshotScenario::RuntimeJobs
+                        | SnapshotScenario::CapabilityDashboard
+                ) {
+                    assert!(rendered.join("\n").contains('╭'));
+                }
                 let filename = render_operator_snapshot_filename_for_viewport(scenario, viewport);
                 assert!(filename.ends_with(&format!("{}x{}.txt", viewport.width, viewport.height)));
             }

@@ -554,6 +554,9 @@ impl Tui {
         if !self.alt_screen_enabled {
             return Ok(());
         }
+        if self.alt_screen_active.load(Ordering::Relaxed) {
+            return Ok(());
+        }
         let _ = execute!(self.terminal.backend_mut(), EnterAlternateScreen);
         // Enable "alternate scroll" so terminals may translate wheel to arrows
         let _ = execute!(self.terminal.backend_mut(), EnableAlternateScroll);
@@ -574,6 +577,9 @@ impl Tui {
     /// Leave alternate screen and restore the previously saved inline viewport, if any.
     pub fn leave_alt_screen(&mut self) -> Result<()> {
         if !self.alt_screen_enabled {
+            return Ok(());
+        }
+        if !self.alt_screen_active.load(Ordering::Relaxed) {
             return Ok(());
         }
         // Disable alternate scroll when leaving alt-screen

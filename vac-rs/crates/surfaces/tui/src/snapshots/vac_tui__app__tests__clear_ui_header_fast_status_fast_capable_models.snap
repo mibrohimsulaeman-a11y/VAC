@@ -13,7 +13,7 @@ hydrating startup snapshot ─
 │●  model          gpt-5.4   runtime ││●  autopilot      runtime   schedule│
 │●  fallback       configure loaded f││●  mcp            runtime   configur│
 │●  profile        runtime   tool pol││●  sessions       runtime   history │
-│●  rulebook       vil.core  control-││●  vil detect     workspace inventor│
+│●  rulebook       runtime   control-││●  workspace      registry  inventor│
 │●  reasoning      xhigh     active e││                                    │
 │●  tier           fast      low-late││                                    │
 │                                    ││                                    │
@@ -27,7 +27,7 @@ hydrating startup snapshot ─
 │                                    ││                                    │
 ╰────────────────────────────────────╯╰────────────────────────────────────╯
 ready
- VIL-native    type / for commands, /help to explore, or start typing a task
+ VAC           type / for commands, /help to explore, or start typing a task
 recent   no recent task loaded
 
 

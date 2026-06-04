@@ -13,10 +13,11 @@ status_card="vac-rs/crates/surfaces/tui/src/status/card.rs"
 status_contract="vac-rs/crates/surfaces/tui/src/status/output_contract.rs"
 slash_dispatch="vac-rs/crates/surfaces/tui/src/chatwidget/slash_dispatch.rs"
 chatwidget="vac-rs/crates/surfaces/tui/src/chatwidget.rs"
+chatwidget_status="vac-rs/crates/surfaces/tui/src/chatwidget/chatwidget_group_015_impl.rs"
 app_rs="vac-rs/crates/surfaces/tui/src/app.rs"
 status_snapshots="vac-rs/crates/surfaces/tui/src/status/snapshots"
 
-for file in "$status_mod" "$status_card" "$status_contract" "$slash_dispatch" "$chatwidget" "$app_rs"; do
+for file in "$status_mod" "$status_card" "$status_contract" "$slash_dispatch" "$chatwidget" "$chatwidget_status" "$app_rs"; do
   [ -f "$file" ] || fail "missing $file"
 done
 [ -d "$status_snapshots" ] || fail "missing $status_snapshots"
@@ -32,12 +33,12 @@ grep -q 'self.add_status_output(' "$slash_dispatch" || fail "/status slash dispa
 grep -q '/\*refreshing_rate_limits\*/ false' "$slash_dispatch" || fail "/status slash dispatch must disable refresh flag"
 grep -q '/\*request_id\*/ None' "$slash_dispatch" || fail "/status slash dispatch must avoid refresh request id"
 
-grep -q 'let rate_limit_snapshots: &\[RateLimitSnapshotDisplay\] = &\[\];' "$chatwidget" || fail "/status output must pass empty limit snapshots"
-grep -q 'let (cell, _handle)' "$chatwidget" || fail "/status output must ignore legacy refresh handle"
-if grep -q 'refreshing_status_outputs.push' "$chatwidget"; then
+grep -q 'let rate_limit_snapshots: &\[RateLimitSnapshotDisplay\] = &\[\];' "$chatwidget_status" || fail "/status output must pass empty limit snapshots"
+grep -q 'let (cell, _handle)' "$chatwidget_status" || fail "/status output must ignore legacy refresh handle"
+if grep -q 'refreshing_status_outputs.push' "$chatwidget_status"; then
   fail "/status output still registers refresh handles"
 fi
-if grep -q 'Run /status for a breakdown' "$chatwidget"; then
+if grep -q 'Run /status for a breakdown' "$chatwidget_status"; then
   fail "ambient limit warning still claims /status renders quota breakdown"
 fi
 if grep -q 'first `/status`.*already has data' "$app_rs"; then
