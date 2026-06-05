@@ -129,7 +129,7 @@
             side_conversation_context_label: None,
             active_agent_label: None,
             history_search: None,
-            submit_keys: vec![key_hint::plain(KeyCode::Enter)],
+            submit_keys: default_keymap.composer.submit.clone(),
             queue_keys: vec![key_hint::plain(KeyCode::Tab)],
             toggle_shortcuts_keys: vec![
                 key_hint::plain(KeyCode::Char('?')),
@@ -650,4 +650,3 @@
             Some(Line::from(spans))
         }
     }
-

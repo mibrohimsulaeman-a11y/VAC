@@ -1,0 +1,38 @@
+schema_version: 1
+kind: capability
+id: vac.memory.read_transient
+title: Memory Read
+status: ready
+owner:
+  crate: vac-memories-read
+  module: lib
+description: Reads transient and semantic memory with governed citation and redaction boundaries.
+depends_on:
+- vac.init.memory-governance
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - vac doctor memory
+  tui:
+    routes:
+    - /memories
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: true
+states:
+- ready
+- degraded
+validation:
+  gates:
+  - memory_doctor
+  commands:
+  - id: capability.memory.read.validation.memory-doctor
+    runner: vac
+    args:
+    - doctor
+    - memory
+    risk: safe_read
+    approval: policy

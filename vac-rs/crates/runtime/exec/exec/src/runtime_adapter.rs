@@ -114,7 +114,7 @@ pub(crate) async fn run_local_runtime_prompt(
         warn!("failed to submit local runtime turn: {err}");
         let _ = thread.shutdown_and_wait().await;
         interrupt_handle.abort();
-        std::process::exit(1);
+        anyhow::bail!("failed to submit local runtime turn: {err}");
     }
 
     let mut error_seen = false;
@@ -157,7 +157,7 @@ pub(crate) async fn run_local_runtime_prompt(
     processor.print_final_output();
 
     if error_seen {
-        std::process::exit(1);
+        anyhow::bail!("local runtime prompt ended with an error");
     }
 
     Ok(())
@@ -242,7 +242,7 @@ pub(crate) async fn run_local_runtime_review(
         warn!("failed to submit local runtime review: {err}");
         let _ = thread.shutdown_and_wait().await;
         interrupt_handle.abort();
-        std::process::exit(1);
+        anyhow::bail!("failed to submit local runtime review: {err}");
     }
 
     let mut error_seen = false;
@@ -285,7 +285,7 @@ pub(crate) async fn run_local_runtime_review(
     processor.print_final_output();
 
     if error_seen {
-        std::process::exit(1);
+        anyhow::bail!("local runtime review ended with an error");
     }
 
     Ok(())
@@ -463,7 +463,7 @@ pub(crate) async fn run_local_runtime_resume(
         warn!("failed to submit local runtime resume turn: {err}");
         let _ = thread.shutdown_and_wait().await;
         interrupt_handle.abort();
-        std::process::exit(1);
+        anyhow::bail!("failed to submit local runtime resume turn: {err}");
     }
 
     let mut error_seen = false;
@@ -506,7 +506,7 @@ pub(crate) async fn run_local_runtime_resume(
     processor.print_final_output();
 
     if error_seen {
-        std::process::exit(1);
+        anyhow::bail!("local runtime resume ended with an error");
     }
 
     Ok(())
@@ -938,15 +938,23 @@ mod human_output_tests {
     use std::io::Write;
     use std::sync::Arc;
     use std::sync::Mutex;
+    use std::sync::MutexGuard;
+
+    fn lock_buffer(buffer: &Mutex<Vec<u8>>) -> MutexGuard<'_, Vec<u8>> {
+        match buffer.lock() {
+            Ok(guard) => guard,
+            Err(poisoned) => poisoned.into_inner(),
+        }
+    }
 
     struct SharedWriter(Arc<Mutex<Vec<u8>>>);
 
     impl Write for SharedWriter {
         fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-            self.0.lock().unwrap().write(buf)
+            lock_buffer(&self.0).write(buf)
         }
         fn flush(&mut self) -> std::io::Result<()> {
-            self.0.lock().unwrap().flush()
+            lock_buffer(&self.0).flush()
         }
     }
 
@@ -965,7 +973,7 @@ mod human_output_tests {
     }
 
     fn read_buf(buf: &Arc<Mutex<Vec<u8>>>) -> String {
-        String::from_utf8(buf.lock().unwrap().clone()).expect("utf8")
+        String::from_utf8(lock_buffer(buf).clone()).expect("utf8")
     }
 
     #[test]

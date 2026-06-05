@@ -4,16 +4,22 @@
 //! helpers, Phase 1 and Phase 2 prompt rendering, extension pruning, and
 //! workspace diffing.
 
+pub mod anti_loop;
 mod control;
+pub mod episodic;
 mod extensions;
 mod guard;
 mod metrics;
 mod phase1;
 mod phase2;
 mod prompts;
+pub mod redaction;
+pub mod reflection;
 mod runtime;
+pub mod semantic;
 mod start;
 mod storage;
+pub mod working;
 pub mod workspace;
 
 use std::path::Path;

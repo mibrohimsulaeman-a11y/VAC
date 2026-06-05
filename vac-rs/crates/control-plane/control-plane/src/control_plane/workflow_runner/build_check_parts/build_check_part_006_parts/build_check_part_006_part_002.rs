@@ -286,7 +286,7 @@
         let mut machine = WorkflowExecutionMachine::new(&workflow)
             .with_approval_checks(approval_policy.checks().to_vec())
             .with_build_check_report(build_check::report_from_output(
-                "cargo +1.93.0 check --manifest-path vac-rs/Cargo.toml -p vac-surface-cli".to_string(),
+                "cargo +1.95.0 check --manifest-path vac-rs/Cargo.toml -p vac-surface-cli".to_string(),
                 std::time::Duration::from_millis(3),
                 Some(0),
                 true,

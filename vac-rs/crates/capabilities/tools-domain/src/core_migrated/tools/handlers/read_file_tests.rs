@@ -274,7 +274,7 @@ class Bar:
 }
 
 #[tokio::test]
-#[ignore]
+#[ignore = "VAC-DEBT(owner=vac-tools,target=indentation-regression-lane): run with ignored tests until parser fixture is stabilized"]
 async fn indentation_mode_handles_javascript_sample() -> anyhow::Result<()> {
     let mut temp = NamedTempFile::new()?;
     use std::io::Write as _;

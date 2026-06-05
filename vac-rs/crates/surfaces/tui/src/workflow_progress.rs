@@ -457,7 +457,8 @@ mod tests {
                 .contains("started workflow=test.workflow title=Test workflow steps=3")
         }));
         assert!(progress.render_lines().iter().any(|line| {
-            let rendered = line.spans
+            let rendered = line
+                .spans
                 .iter()
                 .map(|span| span.content.as_ref())
                 .collect::<String>();

@@ -127,6 +127,8 @@ use crossterm::event::KeyEvent;
 use crossterm::event::KeyEventKind;
 use crossterm::event::KeyModifiers;
 use ratatui::backend::Backend;
+use ratatui::buffer::Buffer;
+use ratatui::style::Style;
 use ratatui::style::Stylize;
 use ratatui::text::Line;
 use ratatui::widgets::Paragraph;
@@ -322,6 +324,16 @@ fn managed_filesystem_sandbox_is_restricted(permission_profile: &PermissionProfi
 /// perceived typing speed for non-backlogged output.
 const COMMIT_ANIMATION_TICK: Duration = tui::TARGET_FRAME_INTERVAL;
 
+fn fill_app_background(area: ratatui::layout::Rect, buf: &mut Buffer) {
+    for y in area.y..area.y.saturating_add(area.height) {
+        for x in area.x..area.x.saturating_add(area.width) {
+            buf[(x, y)]
+                .set_symbol(" ")
+                .set_style(Style::default().bg(crate::ui_consts::APP_BG));
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct AppExitInfo {
     pub token_usage: TokenUsage,
@@ -490,6 +502,7 @@ pub(crate) struct App {
     primary_session_configured: Option<ThreadSessionState>,
     pending_primary_events: VecDeque<ThreadBufferedEvent>,
     pending_app_server_requests: PendingAppServerRequests,
+    startup_metrics: crate::startup_task_graph::StartupMetricsRecorder,
     // Serialize plugin enablement writes per plugin so stale completions cannot
     // overwrite a newer toggle, even if the plugin is toggled from different
     // cwd contexts.
@@ -600,6 +613,7 @@ impl App {
         entered_trust_nux: bool,
         should_prompt_windows_sandbox_nux_at_startup: bool,
         environment_manager: Arc<EnvironmentManager>,
+        startup_metrics: crate::startup_task_graph::StartupMetricsRecorder,
     ) -> Result<AppExitInfo>
     where
         S: LocalRuntimeSession,
@@ -634,8 +648,16 @@ impl App {
             ExternalAgentConfigMigrationStartupOutcome::ExitRequested => {
                 let exit_reason = "External config migration requested exit before session startup; no silent ExitRequested.";
                 let exit_path = config.cwd.join(".vac/registry/runtime/startup-exit.yaml");
-                if let Some(parent) = exit_path.parent() { let _ = std::fs::create_dir_all(parent); }
-                let _ = std::fs::write(&exit_path, format!("schema_version: 1\nkind: runtime.startup_exit\nid: runtime.startup_exit\nreason: {}\n", exit_reason));
+                if let Some(parent) = exit_path.parent() {
+                    let _ = std::fs::create_dir_all(parent);
+                }
+                let _ = std::fs::write(
+                    &exit_path,
+                    format!(
+                        "schema_version: 1\nkind: runtime.startup_exit\nid: runtime.startup_exit\nreason: {}\n",
+                        exit_reason
+                    ),
+                );
                 let _ = tui.notify(exit_reason);
                 app_server
                     .shutdown()
@@ -684,6 +706,8 @@ impl App {
         let requires_vastar_auth = bootstrap.requires_vastar_auth;
         let status_account_display = bootstrap.status_account_display.clone();
         let initial_plan_type = bootstrap.plan_type;
+        startup_metrics
+            .record_task_ready(crate::startup_task_graph::StartupTaskKind::InitAuthState);
         let session_telemetry = SessionTelemetry::new(
             ThreadId::new(),
             model.as_str(),
@@ -830,6 +854,8 @@ impl App {
         if let Some(message) = external_agent_config_migration_message {
             chat_widget.add_info_message(message, /*hint*/ None);
         }
+        startup_metrics
+            .record_task_ready(crate::startup_task_graph::StartupTaskKind::SpawnSessionResume);
 
         chat_widget
             .maybe_prompt_windows_sandbox_enable(should_prompt_windows_sandbox_nux_at_startup);
@@ -887,6 +913,7 @@ See the VAC keymap documentation for supported actions and examples."
             primary_session_configured: None,
             pending_primary_events: VecDeque::new(),
             pending_app_server_requests: PendingAppServerRequests::default(),
+            startup_metrics,
             pending_plugin_enabled_writes: HashMap::new(),
             pending_hook_enabled_writes: HashMap::new(),
         };
@@ -928,12 +955,17 @@ See the VAC keymap documentation for supported actions and examples."
         tokio::pin!(tui_events);
 
         tui.frame_requester().schedule_frame();
+        app.refresh_startup_mcp_inventory(&app_server);
         app.refresh_startup_skills(&app_server);
         // Kick off a non-blocking rate-limit prefetch for ambient status-line
         // and nudge surfaces. Hardened `/status` is local-only and does not
         // render or request account limit/credit rows.
         if requires_vastar_auth && has_chatgpt_account {
             app.refresh_rate_limits(&app_server, RateLimitRefreshOrigin::StartupPrefetch);
+        } else {
+            app.startup_metrics.record_task_ready(
+                crate::startup_task_graph::StartupTaskKind::SpawnRateLimitPrefetch,
+            );
         }
 
         let mut listen_for_app_server_events = true;
@@ -1107,13 +1139,18 @@ See the VAC keymap documentation for supported actions and examples."
                     // top-right overlay when the terminal is wide enough.
                     // The chat widget always lays out against the full
                     // transcript width; the overlay does not reduce it.
-                    let total_width = tui.terminal.size()?.width;
+                    let terminal_size = tui.terminal.size()?;
+                    let total_width = terminal_size.width;
                     let main_width =
                         crate::activity_sidebar::main_width_for_activity_sidebar(total_width);
-                    let desired_height = self.chat_widget.desired_height(main_width);
+                    let desired_height = self
+                        .chat_widget
+                        .desired_height(main_width)
+                        .max(terminal_size.height);
                     if terminal_resize_reflow_enabled {
                         tui.draw_with_resize_reflow(desired_height, |frame| {
                             let area = frame.area();
+                            fill_app_background(area, frame.buffer);
                             let (main_area, sidebar_area) =
                                 crate::activity_sidebar::split_for_activity_sidebar(area);
                             self.chat_widget.render(main_area, frame.buffer);
@@ -1131,6 +1168,7 @@ See the VAC keymap documentation for supported actions and examples."
                     } else {
                         tui.draw(desired_height, |frame| {
                             let area = frame.area();
+                            fill_app_background(area, frame.buffer);
                             let (main_area, sidebar_area) =
                                 crate::activity_sidebar::split_for_activity_sidebar(area);
                             self.chat_widget.render(main_area, frame.buffer);

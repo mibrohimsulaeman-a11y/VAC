@@ -171,6 +171,28 @@ impl TerminalTitleItem {
             Some(_) => " | ",
         }
     }
+
+    pub(crate) fn max_chars(self) -> Option<usize> {
+        match self {
+            TerminalTitleItem::Project => Some(24),
+            TerminalTitleItem::CurrentDir => Some(32),
+            TerminalTitleItem::Thread => Some(48),
+            TerminalTitleItem::GitBranch => Some(32),
+            TerminalTitleItem::ContextRemaining => Some(32),
+            TerminalTitleItem::ContextUsed => Some(32),
+            TerminalTitleItem::FiveHourLimit => Some(32),
+            TerminalTitleItem::WeeklyLimit => Some(32),
+            TerminalTitleItem::VACVersion => Some(32),
+            TerminalTitleItem::UsedTokens => Some(32),
+            TerminalTitleItem::TotalInputTokens => Some(32),
+            TerminalTitleItem::TotalOutputTokens => Some(32),
+            TerminalTitleItem::SessionId => Some(32),
+            TerminalTitleItem::FastMode => Some(32),
+            TerminalTitleItem::Model => Some(32),
+            TerminalTitleItem::ModelWithReasoning => Some(32),
+            _ => None,
+        }
+    }
 }
 
 pub(crate) fn preview_line_for_title_items(
@@ -185,7 +207,13 @@ pub(crate) fn preview_line_for_title_items(
             |item| {
                 item.preview_item()
                     .and_then(|preview_item| preview_data.value_for(preview_item))
-                    .map(str::to_owned)
+                    .map(|value| {
+                        if let Some(max_chars) = item.max_chars() {
+                            crate::text_formatting::truncate_text(value, max_chars)
+                        } else {
+                            value.to_owned()
+                        }
+                    })
             },
         );
         return Some(Line::from(preview));
@@ -203,7 +231,11 @@ pub(crate) fn preview_line_for_title_items(
                 return preview;
             };
             preview.push_str(item.separator_from_previous(previous));
-            preview.push_str(value);
+            if let Some(max_chars) = item.max_chars() {
+                preview.push_str(&crate::text_formatting::truncate_text(value, max_chars));
+            } else {
+                preview.push_str(value);
+            }
             previous = Some(item);
             preview
         });

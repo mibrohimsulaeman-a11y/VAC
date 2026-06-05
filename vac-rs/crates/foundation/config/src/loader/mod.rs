@@ -30,13 +30,13 @@ use std::path::Path;
 #[cfg(windows)]
 use std::path::PathBuf;
 use toml::Value as TomlValue;
-use vac_runtime_protocol::ConfigLayerSource;
 use vac_file_system::ExecutorFileSystem;
 use vac_git_utils::resolve_root_git_project_for_trust;
 use vac_protocol::config_types::ApprovalsReviewer;
 use vac_protocol::config_types::SandboxMode;
 use vac_protocol::config_types::TrustLevel;
 use vac_protocol::protocol::AskForApproval;
+use vac_runtime_protocol::ConfigLayerSource;
 use vac_utils_absolute_path::AbsolutePathBuf;
 use vac_utils_absolute_path::AbsolutePathBufGuard;
 

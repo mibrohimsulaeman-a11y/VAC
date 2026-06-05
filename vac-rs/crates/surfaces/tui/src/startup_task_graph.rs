@@ -7,6 +7,11 @@
 
 use std::fmt::Write as _;
 use std::path::Path;
+use std::path::PathBuf;
+use std::sync::Arc;
+use std::sync::Mutex;
+use std::sync::MutexGuard;
+use std::sync::PoisonError;
 use std::thread;
 use std::time::Instant;
 
@@ -54,17 +59,61 @@ pub(crate) struct StartupTaskSpec {
 }
 
 pub(crate) const STARTUP_TASK_GRAPH: &[StartupTaskSpec] = &[
-    StartupTaskSpec { kind: StartupTaskKind::RunMainEnter, blocks_first_frame: true, cancellable: false },
-    StartupTaskSpec { kind: StartupTaskKind::LoadConfig, blocks_first_frame: true, cancellable: false },
-    StartupTaskSpec { kind: StartupTaskKind::DetectTerminalCapabilities, blocks_first_frame: true, cancellable: true },
-    StartupTaskSpec { kind: StartupTaskKind::InitAuthState, blocks_first_frame: false, cancellable: true },
-    StartupTaskSpec { kind: StartupTaskKind::PrepareSkeletonUi, blocks_first_frame: true, cancellable: false },
-    StartupTaskSpec { kind: StartupTaskKind::SpawnMcpScan, blocks_first_frame: false, cancellable: true },
-    StartupTaskSpec { kind: StartupTaskKind::SpawnSkillsScan, blocks_first_frame: false, cancellable: true },
-    StartupTaskSpec { kind: StartupTaskKind::SpawnRateLimitPrefetch, blocks_first_frame: false, cancellable: true },
-    StartupTaskSpec { kind: StartupTaskKind::SpawnSessionResume, blocks_first_frame: false, cancellable: true },
-    StartupTaskSpec { kind: StartupTaskKind::FirstFrameRendered, blocks_first_frame: true, cancellable: false },
-    StartupTaskSpec { kind: StartupTaskKind::InteractiveReady, blocks_first_frame: false, cancellable: true },
+    StartupTaskSpec {
+        kind: StartupTaskKind::RunMainEnter,
+        blocks_first_frame: true,
+        cancellable: false,
+    },
+    StartupTaskSpec {
+        kind: StartupTaskKind::LoadConfig,
+        blocks_first_frame: true,
+        cancellable: false,
+    },
+    StartupTaskSpec {
+        kind: StartupTaskKind::DetectTerminalCapabilities,
+        blocks_first_frame: true,
+        cancellable: true,
+    },
+    StartupTaskSpec {
+        kind: StartupTaskKind::InitAuthState,
+        blocks_first_frame: false,
+        cancellable: true,
+    },
+    StartupTaskSpec {
+        kind: StartupTaskKind::PrepareSkeletonUi,
+        blocks_first_frame: true,
+        cancellable: false,
+    },
+    StartupTaskSpec {
+        kind: StartupTaskKind::SpawnMcpScan,
+        blocks_first_frame: false,
+        cancellable: true,
+    },
+    StartupTaskSpec {
+        kind: StartupTaskKind::SpawnSkillsScan,
+        blocks_first_frame: false,
+        cancellable: true,
+    },
+    StartupTaskSpec {
+        kind: StartupTaskKind::SpawnRateLimitPrefetch,
+        blocks_first_frame: false,
+        cancellable: true,
+    },
+    StartupTaskSpec {
+        kind: StartupTaskKind::SpawnSessionResume,
+        blocks_first_frame: false,
+        cancellable: true,
+    },
+    StartupTaskSpec {
+        kind: StartupTaskKind::FirstFrameRendered,
+        blocks_first_frame: true,
+        cancellable: false,
+    },
+    StartupTaskSpec {
+        kind: StartupTaskKind::InteractiveReady,
+        blocks_first_frame: false,
+        cancellable: true,
+    },
 ];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -75,7 +124,10 @@ pub(crate) struct StartupTaskGraph {
 
 impl StartupTaskGraph {
     pub(crate) const fn new(tasks: &'static [StartupTaskSpec], bounded_parallelism: usize) -> Self {
-        Self { tasks, bounded_parallelism }
+        Self {
+            tasks,
+            bounded_parallelism,
+        }
     }
 
     pub(crate) fn task_names(&self) -> impl Iterator<Item = &'static str> + '_ {
@@ -144,7 +196,9 @@ pub(crate) struct StartupTaskGraphMetrics {
 impl StartupTaskGraphMetrics {
     pub(crate) fn from_skeleton_frame(started_at: Instant, skeleton_rendered_at: Instant) -> Self {
         let graph = startup_task_graph();
-        let ttff_ms = skeleton_rendered_at.saturating_duration_since(started_at).as_millis();
+        let ttff_ms = skeleton_rendered_at
+            .saturating_duration_since(started_at)
+            .as_millis();
         Self {
             ttff_ms,
             interactive_ready_ms: ttff_ms,
@@ -174,16 +228,35 @@ impl StartupTaskGraphMetrics {
         }
     }
 
+    fn all_runtime_tasks_measured(&self) -> bool {
+        self.mcp_ready_ms.is_some()
+            && self.skills_ready_ms.is_some()
+            && self.resume_ready_ms.is_some()
+            && self.auth_ready_ms.is_some()
+    }
+
+    fn registry_status(&self) -> &'static str {
+        if self.all_runtime_tasks_measured() {
+            "RuntimeReady"
+        } else {
+            "SourcePartialPendingRuntimeTasks"
+        }
+    }
+
     pub(crate) fn to_yaml(&self) -> String {
         let mut out = String::new();
         let _ = writeln!(out, "schema_version: 1");
         let _ = writeln!(out, "kind: registry_status");
         let _ = writeln!(out, "id: perf.tui-startup");
-        let _ = writeln!(out, "status: StaticReady");
+        let _ = writeln!(out, "status: {}", self.registry_status());
         let _ = writeln!(out, "task_graph: {STARTUP_TASK_GRAPH_ID}");
         let _ = writeln!(out, "serial_startup: false");
         let _ = writeln!(out, "bounded_parallelism: {}", self.bounded_parallelism);
-        let _ = writeln!(out, "skeleton_first_frame_non_blocking: {}", self.skeleton_first_frame_non_blocking);
+        let _ = writeln!(
+            out,
+            "skeleton_first_frame_non_blocking: {}",
+            self.skeleton_first_frame_non_blocking
+        );
         let _ = writeln!(out, "cancellation_safe: {}", self.cancellation_safe);
         let _ = writeln!(out, "metrics:");
         let _ = writeln!(out, "  ttff_ms: {}", self.ttff_ms);
@@ -192,7 +265,11 @@ impl StartupTaskGraphMetrics {
         let _ = writeln!(out, "  skills_ready_ms: {}", opt_ms(self.skills_ready_ms));
         let _ = writeln!(out, "  resume_ready_ms: {}", opt_ms(self.resume_ready_ms));
         let _ = writeln!(out, "  auth_ready_ms: {}", opt_ms(self.auth_ready_ms));
-        let _ = writeln!(out, "  task_cancellation_count: {}", self.task_cancellation_count);
+        let _ = writeln!(
+            out,
+            "  task_cancellation_count: {}",
+            self.task_cancellation_count
+        );
         let _ = writeln!(out, "executor:");
         let _ = writeln!(out, "  kind: StartupGraphExecutor");
         let _ = writeln!(out, "  non_blocking_tasks_parallelized: true");
@@ -206,10 +283,66 @@ impl StartupTaskGraphMetrics {
     }
 }
 
-
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct StartupGraphExecutor {
     graph: StartupTaskGraph,
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct StartupMetricsRecorder {
+    cwd: PathBuf,
+    started_at: Instant,
+    metrics: Arc<Mutex<StartupTaskGraphMetrics>>,
+}
+
+impl StartupMetricsRecorder {
+    pub(crate) fn new(
+        cwd: PathBuf,
+        started_at: Instant,
+        initial_metrics: StartupTaskGraphMetrics,
+    ) -> Self {
+        Self {
+            cwd,
+            started_at,
+            metrics: Arc::new(Mutex::new(initial_metrics)),
+        }
+    }
+
+    pub(crate) fn record_task_ready(&self, kind: StartupTaskKind) {
+        self.record_task_ready_at(kind, self.started_at.elapsed().as_millis());
+    }
+
+    fn record_task_ready_at(&self, kind: StartupTaskKind, elapsed_ms: u128) {
+        let snapshot = {
+            let mut metrics = recover_metrics_lock(self.metrics.lock());
+            metrics.record_task_ready(kind, elapsed_ms);
+            metrics.refresh_interactive_ready();
+            metrics.clone()
+        };
+        if let Err(err) = write_startup_metrics_registry(&self.cwd, &snapshot) {
+            tracing::debug!(error = %err, task = kind.id(), "failed to persist TUI startup runtime metrics");
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn snapshot(&self) -> StartupTaskGraphMetrics {
+        recover_metrics_lock(self.metrics.lock()).clone()
+    }
+}
+
+fn recover_metrics_lock<'a>(
+    lock_result: Result<
+        MutexGuard<'a, StartupTaskGraphMetrics>,
+        PoisonError<MutexGuard<'a, StartupTaskGraphMetrics>>,
+    >,
+) -> MutexGuard<'a, StartupTaskGraphMetrics> {
+    match lock_result {
+        Ok(guard) => guard,
+        Err(err) => {
+            tracing::warn!("recovering poisoned TUI startup metrics lock");
+            err.into_inner()
+        }
+    }
 }
 
 impl StartupGraphExecutor {
@@ -220,7 +353,8 @@ impl StartupGraphExecutor {
     pub(crate) fn execute_probe(&self) -> StartupTaskGraphMetrics {
         let started = Instant::now();
         let skeleton_rendered_at = Instant::now();
-        let mut metrics = StartupTaskGraphMetrics::from_skeleton_frame(started, skeleton_rendered_at);
+        let mut metrics =
+            StartupTaskGraphMetrics::from_skeleton_frame(started, skeleton_rendered_at);
         let non_blocking = self
             .graph
             .tasks
@@ -248,24 +382,29 @@ impl StartupGraphExecutor {
                     match handle.join() {
                         Ok((kind, elapsed_ms)) => metrics.record_task_ready(kind, elapsed_ms),
                         Err(_) => {
-                            metrics.task_cancellation_count = metrics.task_cancellation_count.saturating_add(1);
+                            metrics.task_cancellation_count =
+                                metrics.task_cancellation_count.saturating_add(1);
                         }
                     }
                 }
             });
         }
-        metrics.interactive_ready_ms = metrics
-            .interactive_ready_ms
-            .max(metrics.mcp_ready_ms.unwrap_or_default())
-            .max(metrics.skills_ready_ms.unwrap_or_default())
-            .max(metrics.resume_ready_ms.unwrap_or_default())
-            .max(metrics.auth_ready_ms.unwrap_or_default())
-            .max(1);
+        metrics.refresh_interactive_ready();
         metrics
     }
 }
 
 impl StartupTaskGraphMetrics {
+    fn refresh_interactive_ready(&mut self) {
+        self.interactive_ready_ms = self
+            .interactive_ready_ms
+            .max(self.mcp_ready_ms.unwrap_or_default())
+            .max(self.skills_ready_ms.unwrap_or_default())
+            .max(self.resume_ready_ms.unwrap_or_default())
+            .max(self.auth_ready_ms.unwrap_or_default())
+            .max(1);
+    }
+
     fn record_task_ready(&mut self, kind: StartupTaskKind, elapsed_ms: u128) {
         match kind {
             StartupTaskKind::InitAuthState => self.auth_ready_ms = Some(elapsed_ms.max(1)),
@@ -288,7 +427,10 @@ impl StartupTaskGraphMetrics {
 }
 
 fn opt_ms(value: Option<u128>) -> String {
-    value.map_or_else(|| "pending_runtime_measurement".to_string(), |v| v.to_string())
+    value.map_or_else(
+        || "pending_runtime_measurement".to_string(),
+        |v| v.to_string(),
+    )
 }
 
 pub(crate) fn write_startup_metrics_registry(
@@ -310,7 +452,11 @@ mod tests {
 
     #[test]
     fn startup_task_graph_is_parallel_and_first_frame_safe() {
-        assert!(STARTUP_TASK_GRAPH.iter().any(|task| !task.blocks_first_frame));
+        assert!(
+            STARTUP_TASK_GRAPH
+                .iter()
+                .any(|task| !task.blocks_first_frame)
+        );
         assert_eq!(STARTUP_TASK_GRAPH_MAX_PARALLELISM, 4);
         let graph = startup_task_graph();
         assert!(!graph.serial_startup());
@@ -332,5 +478,35 @@ mod tests {
         assert!(metrics.mcp_ready_ms.is_some());
         assert!(metrics.skills_ready_ms.is_some());
         assert!(metrics.resume_ready_ms.is_some());
+    }
+
+    #[test]
+    fn startup_metrics_recorder_persists_runtime_ready_phases() {
+        let tempdir = tempfile::tempdir().expect("tempdir");
+        let started_at = Instant::now();
+        let recorder = StartupMetricsRecorder::new(
+            tempdir.path().to_path_buf(),
+            started_at,
+            StartupTaskGraphMetrics::from_skeleton_frame(started_at, started_at),
+        );
+
+        recorder.record_task_ready_at(StartupTaskKind::InitAuthState, 1);
+        recorder.record_task_ready_at(StartupTaskKind::SpawnMcpScan, 2);
+        recorder.record_task_ready_at(StartupTaskKind::SpawnSkillsScan, 3);
+        recorder.record_task_ready_at(StartupTaskKind::SpawnSessionResume, 4);
+
+        let snapshot = recorder.snapshot();
+        assert_eq!(snapshot.auth_ready_ms, Some(1));
+        assert_eq!(snapshot.mcp_ready_ms, Some(2));
+        assert_eq!(snapshot.skills_ready_ms, Some(3));
+        assert_eq!(snapshot.resume_ready_ms, Some(4));
+        assert!(snapshot.interactive_ready_ms >= 4);
+
+        let registry =
+            std::fs::read_to_string(tempdir.path().join(".vac/registry/perf/tui-startup.yaml"))
+                .expect("startup metrics registry");
+        assert!(registry.contains("status: RuntimeReady"));
+        assert!(registry.contains("mcp_ready_ms: 2"));
+        assert!(registry.contains("skills_ready_ms: 3"));
     }
 }

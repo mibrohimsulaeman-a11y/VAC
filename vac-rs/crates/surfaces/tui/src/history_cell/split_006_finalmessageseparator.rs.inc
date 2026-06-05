@@ -311,7 +311,12 @@ mod tests {
     }
 
     fn render_transcript(cell: &dyn HistoryCell) -> Vec<String> {
-        render_lines(&cell.transcript_lines(u16::MAX))
+        let lines = render_lines(&cell.transcript_lines(u16::MAX));
+        let re = regex_lite::Regex::new(r"session [0-9a-fA-F]{8}").unwrap();
+        lines
+            .into_iter()
+            .map(|line| re.replace_all(&line, "session 019e928f").into_owned())
+            .collect()
     }
 
     fn image_block(data: &str) -> serde_json::Value {
@@ -529,7 +534,8 @@ mod tests {
 
         let rendered = render_transcript(&cell).join("\n");
         assert!(!rendered.contains("Model just became available"));
-        assert!(rendered.contains("To get started"));
+        // First event now shows the operator idle view instead of the old onboarding text
+        assert!(rendered.contains("type / for commands"));
     }
 
     #[tokio::test]
@@ -1362,11 +1368,21 @@ mod tests {
         let lines = render_lines(&cell.display_lines(/*width*/ 80));
         let model_line = lines
             .iter()
-            .find(|line| line.contains("model:"))
+            .find(|line| line.contains("model"))
             .expect("model line");
+        assert!(model_line.contains("gpt-4o"));
 
-        assert!(model_line.contains("gpt-4o high   fast"));
-        assert!(model_line.contains("/model to change"));
+        let reasoning_line = lines
+            .iter()
+            .find(|line| line.contains("reasoning"))
+            .expect("reasoning line");
+        assert!(reasoning_line.contains("high"));
+
+        let tier_line = lines
+            .iter()
+            .find(|line| line.contains("tier"))
+            .expect("tier line");
+        assert!(tier_line.contains("fast"));
     }
 
     #[test]
@@ -1382,11 +1398,17 @@ mod tests {
         let lines = render_lines(&cell.display_lines(/*width*/ 80));
         let model_line = lines
             .iter()
-            .find(|line| line.contains("model:"))
+            .find(|line| line.contains("model"))
             .expect("model line");
+        assert!(model_line.contains("gpt-4o"));
 
-        assert!(model_line.contains("gpt-4o high"));
-        assert!(!model_line.contains("fast"));
+        let reasoning_line = lines
+            .iter()
+            .find(|line| line.contains("reasoning"))
+            .expect("reasoning line");
+        assert!(reasoning_line.contains("high"));
+
+        assert!(!lines.iter().any(|line| line.contains("tier") || line.contains("fast")));
     }
 
     #[test]

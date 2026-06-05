@@ -1,0 +1,8 @@
+.vac/registry/o6-panic-surface.yaml:49:claim_scope: static_tokenizer_measurement_not_refactor
+.vac/registry/o6-quality-triage.yaml:20:  claim_scope: static_tokenizer_measurement_not_refactor
+.vac/registry/evidence/spec-v14-addenda-baseline.txt:1:.vac/registry/o6-panic-surface.yaml:49:claim_scope: static_tokenizer_measurement_not_refactor
+.vac/registry/evidence/spec-v14-addenda-baseline.txt:2:.vac/registry/o6-quality-triage.yaml:20:  claim_scope: static_tokenizer_measurement_not_refactor
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_registry_validator.rs:823:            &capability_doc("vac.test", "ready").replace("schema_version: 1", "schema_version: 2"),
+vac-rs/crates/control-plane/control-plane/src/control_plane/policy_manifest_tests.rs:82:schema_version: 2
+vac-rs/crates/control-plane/control-plane/src/control_plane/schema_envelope.rs:365:schema_version: 2
+.vac/registry/evidence/evidence.2026-06-01-o5o6-autopilot-runtime-executor-closeout.yaml:9:claim_scope: source_static_only

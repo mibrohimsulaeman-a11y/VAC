@@ -1378,10 +1378,18 @@ async fn collab_slash_command_opens_picker_and_updates_mode() {
     );
 
     chat.handle_key_event(KeyEvent::from(KeyCode::Enter));
-    let selected_mask = match rx.try_recv() {
-        Ok(AppEvent::UpdateCollaborationMode(mask)) => mask,
-        other => panic!("expected UpdateCollaborationMode event, got {other:?}"),
-    };
+    let mut selected_mask = None;
+    let mut received = Vec::new();
+    while let Ok(event) = rx.try_recv() {
+        if let AppEvent::UpdateCollaborationMode(mask) = event {
+            selected_mask = Some(mask);
+            break;
+        }
+        received.push(event);
+    }
+    let selected_mask = selected_mask.unwrap_or_else(|| {
+        panic!("expected UpdateCollaborationMode event, got: {:?}", received)
+    });
     chat.set_collaboration_mask(selected_mask);
 
     chat.bottom_pane

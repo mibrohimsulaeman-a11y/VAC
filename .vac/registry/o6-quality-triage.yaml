@@ -44,5 +44,4 @@ unsafe:
 build:
   cargo_metadata_status: NotEvaluated
   cargo_build_status: NotEvaluated
-  reason: source artifact has no vendor/toolchain; previous offline cargo attempts
-    were aborted by sandbox reset
+  reason: cargo toolchain gates were aborted by sandbox reset and remain NotEvaluated

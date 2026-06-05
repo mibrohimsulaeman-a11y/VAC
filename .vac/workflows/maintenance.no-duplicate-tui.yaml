@@ -39,7 +39,7 @@ validation:
   - id: maintenance.no-duplicate-tui.validation.cmd001
     runner: cargo
     args:
-    - +1.93.0
+    - +1.95.0
     - check
     - -p
     - vac-tui
@@ -49,7 +49,7 @@ validation:
   - id: maintenance.no-duplicate-tui.validation.cmd002
     runner: cargo
     args:
-    - +1.93.0
+    - +1.95.0
     - check
     - -p
     - vac-cli

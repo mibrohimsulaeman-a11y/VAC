@@ -13,6 +13,7 @@ pub struct RegistryCommand {
 impl RegistryCommand {
     pub fn run(self) -> anyhow::Result<()> {
         match self.command {
+            RegistrySubcommand::EvidenceV2(command) => command.run(),
             RegistrySubcommand::Migrate(command) => command.run(),
         }
     }
@@ -20,8 +21,69 @@ impl RegistryCommand {
 
 #[derive(Debug, Subcommand)]
 enum RegistrySubcommand {
+    /// Manage signed evidence v2 registry records.
+    EvidenceV2(RegistryEvidenceV2Command),
+
     /// Dry-run or apply checked registry migrations.
     Migrate(RegistryMigrateCommand),
+}
+
+#[derive(Debug, Parser)]
+struct RegistryEvidenceV2Command {
+    #[command(subcommand)]
+    command: RegistryEvidenceV2Subcommand,
+}
+
+impl RegistryEvidenceV2Command {
+    fn run(self) -> anyhow::Result<()> {
+        match self.command {
+            RegistryEvidenceV2Subcommand::Resign(command) => command.run(),
+        }
+    }
+}
+
+#[derive(Debug, Subcommand)]
+enum RegistryEvidenceV2Subcommand {
+    /// Re-sign existing evidence v2 records using configured Ed25519 identities.
+    Resign(RegistryEvidenceV2ResignCommand),
+}
+
+#[derive(Debug, Parser)]
+struct RegistryEvidenceV2ResignCommand {
+    /// Apply signature rewrites. Required to avoid accidental registry mutation.
+    #[arg(long, default_value_t = false)]
+    apply: bool,
+
+    /// Workspace root.
+    #[arg(value_name = "PATH", default_value = ".")]
+    path: PathBuf,
+}
+
+impl RegistryEvidenceV2ResignCommand {
+    fn run(self) -> anyhow::Result<()> {
+        if !self.apply {
+            anyhow::bail!(
+                "vac registry evidence-v2 resign requires --apply after setting broker/operator signing keys"
+            );
+        }
+
+        let root = normalize_root(&self.path)?;
+        let signer =
+            vac_core::control_plane::EvidenceV2Signer::require_broker_and_operator_from_env()
+                .map_err(anyhow::Error::msg)?;
+        let store = vac_core::control_plane::EvidenceV2GitRefStore::new_with_signer(&root, signer);
+        let report = store
+            .resign_existing_records()
+            .map_err(|err| anyhow::anyhow!("{err:?}"))?;
+
+        println!("vac registry evidence-v2 resign: PASS");
+        println!("workspace: {}", root.display());
+        println!("evidence_records: {}", report.evidence_records);
+        println!("xref_markers: {}", report.xref_markers);
+        println!("anchors: {}", report.anchors);
+        println!("rewritten_files: {}", report.rewritten_files.len());
+        Ok(())
+    }
 }
 
 #[derive(Debug, Parser)]
@@ -42,21 +104,21 @@ struct RegistryMigrateCommand {
 impl RegistryMigrateCommand {
     fn run(self) -> anyhow::Result<()> {
         if self.dry_run == self.apply {
-            println!("vac registry migrate: FAIL");
-            println!("  choose exactly one of --dry-run or --apply");
-            std::process::exit(1);
+            anyhow::bail!("vac registry migrate requires exactly one of --dry-run or --apply");
         }
 
         let root = normalize_root(&self.path)?;
         let migration_dir = root.join(".vac/registry/migrations");
         if !migration_dir.is_dir() {
-            println!("vac registry migrate: FAIL");
-            println!("  missing {}", migration_dir.display());
-            std::process::exit(1);
+            anyhow::bail!(
+                "vac registry migrate requires migration directory {}",
+                migration_dir.display()
+            );
         }
 
-        let engine_previews = vac_core::control_plane::preview_vac_init_registry_migrations_with_engine(&root)
-            .map_err(anyhow::Error::msg)?;
+        let engine_previews =
+            vac_core::control_plane::preview_vac_init_registry_migrations_with_engine(&root)
+                .map_err(anyhow::Error::msg)?;
 
         let mut migrations = Vec::new();
         for entry in fs::read_dir(&migration_dir)? {
@@ -75,10 +137,16 @@ impl RegistryMigrateCommand {
         println!("migrations: {}", engine_previews.len());
         for preview in &engine_previews {
             println!("  - {}", preview.migration_id);
-            println!("      version: {} -> {}", preview.from_version, preview.to_version);
+            println!(
+                "      version: {} -> {}",
+                preview.from_version, preview.to_version
+            );
             println!("      verification: {}", preview.verification_command_id);
             for change in &preview.changes {
-                println!("      {:?}: {}:{} reversible={}", change.action, change.target, change.field, change.reversible);
+                println!(
+                    "      {:?}: {}:{} reversible={}",
+                    change.action, change.target, change.field, change.reversible
+                );
             }
         }
 

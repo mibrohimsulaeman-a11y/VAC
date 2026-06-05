@@ -496,11 +496,7 @@ fn enforce_vac_init_pre_command_runtime_gate(
     if !vac_root.exists() {
         return Ok(());
     }
-    let report = evaluate_vac_init_runtime_command_contract(
-        cwd,
-        raw_command,
-        command_for_display,
-    )?;
+    let report = evaluate_vac_init_runtime_command_contract(cwd, raw_command, command_for_display)?;
     if report.is_blocked() {
         return Err(report.render_text());
     }
@@ -515,11 +511,7 @@ fn enforce_vac_init_evidence_completion_runtime_gate(
     if !vac_root.exists() {
         return Ok(());
     }
-    let report = write_vac_init_runtime_command_evidence(
-        cwd,
-        "runtime.exec-command",
-        exit_code,
-    )?;
+    let report = write_vac_init_runtime_command_evidence(cwd, "runtime.exec-command", exit_code)?;
     if report.is_blocked() {
         return Err(report.render_text());
     }

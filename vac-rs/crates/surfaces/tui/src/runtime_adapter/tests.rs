@@ -1147,14 +1147,14 @@ fn activity_mode_check_lifecycle_uses_check_grammar() {
     assert!(matches!(started[0], RuntimeEvent::ValidationStarted(_)));
     assert_eq!(
         activity_history_label(&started[0]).as_deref(),
-        Some("VAC activity: check started — cargo check -p vac-surface-tui"),
+        Some("VAC activity: check started — cargo check -p vac-tui"),
     );
 
     let finished = bridge.project_exec_command_finished("v-activity", &[], 0);
     assert!(matches!(finished[0], RuntimeEvent::ValidationFinished(_)));
     assert_eq!(
         activity_history_label(&finished[0]).as_deref(),
-        Some("VAC activity: check passed — cargo check -p vac-surface-tui"),
+        Some("VAC activity: check passed — cargo check -p vac-tui"),
     );
 }
 

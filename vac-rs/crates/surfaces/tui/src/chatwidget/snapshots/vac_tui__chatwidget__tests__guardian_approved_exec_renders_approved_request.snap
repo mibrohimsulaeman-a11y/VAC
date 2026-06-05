@@ -1,5 +1,5 @@
 ---
-source: tui/src/chatwidget/tests/guardian.rs
+source: crates/surfaces/tui/src/chatwidget/tests/guardian.rs
 assertion_line: 161
 expression: normalize_snapshot_paths(term.backend().vt100().screen().contents())
 ---
@@ -10,8 +10,8 @@ expression: normalize_snapshot_paths(term.backend().vt100().screen().contents())
 
 ✔ Auto-reviewer approved vac to run rm -f /tmp/guardian-approved.sqlite this
   time
-
-
+ 
+ 
 › Ask VAC to do anything
-
+ 
   gpt-5.5 auto · /tmp/project

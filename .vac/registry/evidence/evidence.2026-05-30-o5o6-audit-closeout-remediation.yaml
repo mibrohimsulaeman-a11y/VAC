@@ -58,9 +58,9 @@ validation:
   - scripts/check-vac-o5o6-upload-sha256.sh
   gates_failed: []
   gates_not_evaluated:
-  - cargo build --offline --workspace --locked
-  - cargo clippy --offline --workspace -- -D warnings
-  - cargo test --offline --workspace
+  - cargo build --workspace --locked
+  - cargo clippy --workspace -- -D warnings
+  - cargo test --workspace
 approval:
   approved_by: operator
   approved_at: '2026-05-30T17:30:00Z'

@@ -119,7 +119,7 @@ require_grep 'tui_high_volume_unbounded_channels: 0' .vac/registry/unbounded-cha
 require_grep 'reachable_from_input_unwrap: forbidden' .vac/registry/panic-risk-governance.yaml
 
 # Existing static slices still need to remain satisfied without cargo side effects.
-VAC_STATIC_ONLY=1 bash scripts/check-vac-provider-prune-default-off-static.sh >/dev/null
+bash scripts/check-vac-provider-prune-default-off-static.sh >/dev/null
 bash scripts/check-vac-layering-migration-static.sh >/dev/null
 
 echo "zero-residual static gate: PASS"

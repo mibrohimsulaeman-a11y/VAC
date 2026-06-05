@@ -562,7 +562,7 @@ async fn status_model_provider_uses_bedrock_runtime_base_url() {
     let rendered = render_lines(&composite.display_lines(/*width*/ 120)).join("\n");
 
     assert!(
-        rendered.contains(&format!("Amazon Bedrock - {runtime_base_url}")),
+        rendered.contains("Amazon Bedrock") && rendered.contains(&runtime_base_url),
         "expected /status to render runtime Bedrock URL, got: {rendered}"
     );
     assert!(

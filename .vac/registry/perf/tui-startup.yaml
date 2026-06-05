@@ -1,19 +1,19 @@
 schema_version: 1
 kind: registry_status
 id: perf.tui-startup
-status: StaticReady
+status: RuntimeReady
 task_graph: tui.startup.task_graph.v1
 serial_startup: false
 bounded_parallelism: 4
 skeleton_first_frame_non_blocking: true
 cancellation_safe: true
 metrics:
-  ttff_ms: 208
-  interactive_ready_ms: 208
-  mcp_ready_ms: pending_runtime_measurement
-  skills_ready_ms: pending_runtime_measurement
-  resume_ready_ms: pending_runtime_measurement
-  auth_ready_ms: pending_runtime_measurement
+  ttff_ms: 346
+  interactive_ready_ms: 517
+  mcp_ready_ms: 517
+  skills_ready_ms: 517
+  resume_ready_ms: 445
+  auth_ready_ms: 355
   task_cancellation_count: 0
 executor:
   kind: StartupGraphExecutor

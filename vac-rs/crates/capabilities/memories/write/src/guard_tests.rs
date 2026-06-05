@@ -1,5 +1,7 @@
 use super::*;
 use vac_protocol::protocol::RateLimitReachedType;
+use vac_protocol::protocol::RateLimitSnapshot;
+use vac_protocol::protocol::RateLimitWindow;
 
 fn snapshot(
     primary_used_percent: Option<f64>,

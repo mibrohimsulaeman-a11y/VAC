@@ -1,0 +1,1256 @@
+vac-rs/crates/capabilities/local-runtime-owner/src/external_agent_config.rs:            outcome.plugin_import_outcomes[0].failed_marketplaces,
+vac-rs/crates/capabilities/local-runtime-owner/src/external_agent_config.rs:            outcome.plugin_import_outcomes[0].failed_plugin_ids,
+vac-rs/crates/integrations/network-proxy/src/runtime.rs:        assert_eq!(snapshot[0].host, "google.com");
+vac-rs/crates/integrations/network-proxy/src/runtime.rs:        assert_eq!(snapshot[0].decision.as_deref(), Some("ask"));
+vac-rs/crates/integrations/network-proxy/src/runtime.rs:        assert_eq!(drained[0].host, snapshot[0].host);
+vac-rs/crates/integrations/network-proxy/src/runtime.rs:        assert_eq!(drained[0].reason, snapshot[0].reason);
+vac-rs/crates/integrations/network-proxy/src/runtime.rs:        assert_eq!(drained[0].decision, snapshot[0].decision);
+vac-rs/crates/integrations/network-proxy/src/runtime.rs:        assert_eq!(drained[0].source, snapshot[0].source);
+vac-rs/crates/integrations/network-proxy/src/runtime.rs:        assert_eq!(drained[0].port, snapshot[0].port);
+vac-rs/crates/integrations/network-proxy/src/runtime.rs:        assert_eq!(blocked[0].host, "example5.com");
+vac-rs/crates/control-plane/control-plane/src/control_plane/capability_registry_tests.rs:    assert_eq!(registry.manifests[0].manifest.id, "vac.activity");
+vac-rs/crates/integrations/network-proxy/src/mitm_tests.rs:    assert_eq!(blocked[0].reason, REASON_METHOD_NOT_ALLOWED);
+vac-rs/crates/integrations/network-proxy/src/mitm_tests.rs:    assert_eq!(blocked[0].method.as_deref(), Some("POST"));
+vac-rs/crates/integrations/network-proxy/src/mitm_tests.rs:    assert_eq!(blocked[0].host, "example.com");
+vac-rs/crates/integrations/network-proxy/src/mitm_tests.rs:    assert_eq!(blocked[0].port, Some(443));
+vac-rs/crates/integrations/network-proxy/src/mitm_tests.rs:    assert_eq!(blocked[0].reason, REASON_NOT_ALLOWED_LOCAL);
+vac-rs/crates/integrations/network-proxy/src/mitm_tests.rs:    assert_eq!(blocked[0].host, "10.0.0.1");
+vac-rs/crates/integrations/network-proxy/src/mitm_tests.rs:    assert_eq!(blocked[0].port, Some(443));
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_migration_runtime.rs:        let migrated = apply_migration_action_to_yaml_text(source, &record.changes[0]).unwrap();
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_migration_runtime.rs:            apply_migration_action_to_yaml_text(&migrated, &record.rollback[0]).unwrap();
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_migration_runtime.rs:        record.rollback[0].to = Some("wrong".to_string());
+vac-rs/crates/integrations/network-proxy/src/config.rs:            err.to_string().contains("network.allow_unix_sockets[0]"),
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_ownership_scanner.rs:            Some(claimed_by[0].clone())
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_ownership_scanner.rs:    if parts.len() >= 3 && parts[0] == "vac-rs" {
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_ownership_scanner.rs:    } else if parts.len() >= 2 && parts[0].ends_with("-rs") {
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_ownership_scanner.rs:        Some(parts[0].to_string())
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_ownership_scanner.rs:        let entry = &inventory.entries[0];
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_ownership_scanner.rs:            report.actions_required[0].action_type,
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_ownership_scanner.rs:        assert!(report.files[0].blocks_write());
+vac-rs/crates/control-plane/control-plane/src/control_plane/donor_status.rs:        let entry = &report.entries[0];
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_doctor_release.rs:        checks[0] = DoctorCheckReport::new(
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_doctor_release.rs:        checks[0] = DoctorCheckReport::new(
+vac-rs/crates/integrations/rmcp-client/src/utils.rs:        let default_var = DEFAULT_ENV_VARS[0];
+vac-rs/crates/integrations/rmcp-client/src/oauth.rs:        Some(millis as u64)
+vac-rs/crates/integrations/rmcp-client/src/oauth.rs:    let now_ms = now.as_millis() as u64;
+vac-rs/crates/integrations/rmcp-client/src/oauth.rs:        .as_millis() as u64;
+vac-rs/crates/integrations/rmcp-client/src/oauth.rs:        let expired_at = now.as_millis() as u64;
+vac-rs/crates/integrations/rmcp-client/src/stdio_server_launcher.rs:                .contains(&crate::utils::DEFAULT_ENV_VARS[0].to_string()),
+vac-rs/crates/integrations/rmcp-client/src/perform_oauth_login.rs:        let timeout = Duration::from_secs(timeout_secs as u64);
+vac-rs/crates/capabilities/local-runtime-owner/src/event_stream.rs:                duration_ms: Some(Duration::from_millis(7).as_millis() as i64),
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_semantic_plan.rs:        plan.validation_commands[0].args.push("|".to_string());
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_semantic_plan.rs:        plan.allowed_files[0].operation = FileOperation::Create;
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_semantic_plan.rs:        plan.allowed_files[0].path = "src/new.rs".to_string();
+vac-rs/crates/capabilities/local-runtime-owner/src/lib.rs:        assert_eq!(response.data[0].cwd, config.cwd.join("other").to_path_buf());
+vac-rs/crates/control-plane/control-plane/src/control_plane/registry_tests.rs:        rendered.contains("steps[0].uses")
+vac-rs/crates/control-plane/control-plane/src/control_plane/registry_tests.rs:    assert!(!rendered.contains("steps[0].uses"), "rendered:\n{rendered}");
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_autopilot_scheduler.rs:            let id = parts[0].to_string();
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_autopilot_scheduler.rs:                state: parts[0].to_string(),
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_002.rs:        let approval_request_id = machine.approval_requests()[0].id.clone();
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_002.rs:        let approval_request_id = machine.approval_requests()[0].id.clone();
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_002.rs:            report.approval_requests()[0].status,
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_002.rs:        let check = &report.checks()[0];
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_002.rs:        let approval_request_id = machine.approval_requests()[0].id.clone();
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_002.rs:        let approval_request_id = machine.approval_requests()[0].id.clone();
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_002.rs:                assert!(reasons[0].contains("outside the built-in policy vocabulary"));
+vac-rs/crates/capabilities/core-skills/src/loader_tests.rs:        outcome.skills[0].policy,
+vac-rs/crates/capabilities/core-skills/src/loader_tests.rs:        outcome.skills[0].policy,
+vac-rs/crates/capabilities/core-skills/src/loader_tests.rs:        outcome.skills[0].policy,
+vac-rs/crates/capabilities/core-skills/src/loader_tests.rs:        outcome.errors[0]
+vac-rs/crates/capabilities/core-skills/src/loader_tests.rs:        outcome.errors[0]
+vac-rs/crates/capabilities/core-skills/src/loader_tests.rs:        outcome.errors[0].message.contains("invalid description"),
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_000.rs:        assert!(preview.blocked_steps[0].reason.contains("not yet mapped"));
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_000.rs:        let id = &execution.approval_requests()[0].id;
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_runtime_bridge.rs:            from_version: nested_usize(&value, &["from_version"]).unwrap_or(1) as u32,
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_runtime_bridge.rs:            to_version: nested_usize(&value, &["to_version"]).unwrap_or(1) as u32,
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_runtime_bridge.rs:        Value::Number(number) => number.as_u64().map(|value| value as usize),
+vac-rs/crates/control-plane/control-plane/src/control_plane/approval_lifecycle.rs:        assert_eq!(expired[0].id, id);
+vac-rs/crates/control-plane/control-plane/src/control_plane/approval_lifecycle.rs:        assert_eq!(expired[0].status, ApprovalStatus::Expired);
+vac-rs/crates/control-plane/control-plane/src/control_plane/approval_lifecycle.rs:        assert_eq!(expired[0].decided_at, Some(ts(61)));
+vac-rs/crates/control-plane/control-plane/src/control_plane/approval_lifecycle.rs:        assert_eq!(expired[0].decision_reason.as_deref(), Some("ttl elapsed"));
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_registry_tests.rs:        registry.manifests[0].manifest.id,
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_registry_tests.rs:    assert_eq!(error.field_path(), Some("steps[0].uses"));
+vac-rs/crates/integrations/vac-mcp/src/rmcp_client.rs:                    format!("This tool is part of plugin `{}`.", plugin_names[0])
+vac-rs/crates/integrations/vac-mcp/src/connection_manager_tests.rs:    assert_eq!(filtered[0].server_name, "server1");
+vac-rs/crates/integrations/vac-mcp/src/connection_manager_tests.rs:    assert_eq!(filtered[0].callable_name, "tool_a");
+vac-rs/crates/integrations/vac-mcp/src/connection_manager_tests.rs:    assert_eq!(cached_gateway_1[0].callable_name, "one");
+vac-rs/crates/integrations/vac-mcp/src/connection_manager_tests.rs:    assert_eq!(cached_gateway_2[0].callable_name, "two");
+vac-rs/crates/integrations/vac-mcp/src/connection_manager_tests.rs:    assert_eq!(read_user_1[0].callable_name, "one");
+vac-rs/crates/integrations/vac-mcp/src/connection_manager_tests.rs:    assert_eq!(read_user_2[0].callable_name, "two");
+vac-rs/crates/integrations/vac-mcp/src/connection_manager_tests.rs:    assert_eq!(cached[0].callable_name, "allowed_tool");
+vac-rs/crates/integrations/vac-mcp/src/connection_manager_tests.rs:    assert_eq!(cached[0].connector_id.as_deref(), Some("calendar"));
+vac-rs/crates/integrations/vac-mcp/src/connection_manager_tests.rs:    assert_eq!(startup_tools[0].server_name, VAC_APPS_MCP_SERVER_NAME);
+vac-rs/crates/integrations/vac-mcp/src/connection_manager_tests.rs:    assert_eq!(startup_tools[0].callable_name, "calendar_search");
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_policy_evaluator.rs:            report.matched[0].layer_kind,
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_policy_evaluator.rs:        assert_eq!(report.matched[0].rule_id, None);
+vac-rs/crates/control-plane/control-plane/src/local_runtime/tests_serde.rs:        assert!(w[0] < w[1], "expected {:?} < {:?}", w[0], w[1]);
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_live_scanner_policy.rs:            if window[0] == "crates" {
+vac-rs/crates/runtime/shell/hooks/src/registry.rs:            .filter(|argv| !argv.is_empty() && !argv[0].is_empty())
+vac-rs/crates/control-plane/control-plane/src/control_plane/surface_registry_tests.rs:    assert_eq!(registry.manifests[0].manifest.id, "surface.capabilities");
+vac-rs/crates/control-plane/control-plane/src/control_plane/surface_registry_tests.rs:        rendered.contains("routes[0].capability"),
+vac-rs/crates/control-plane/control-plane/src/control_plane/surface_registry_tests.rs:    match &diagnostics[0] {
+vac-rs/crates/control-plane/control-plane/src/control_plane/surface_registry_tests.rs:    assert_eq!(diagnostics[0].severity(), SurfaceCrossSeverity::Failure);
+vac-rs/crates/control-plane/control-plane/src/control_plane/surface_registry_tests.rs:    match &diagnostics[0] {
+vac-rs/crates/control-plane/control-plane/src/control_plane/surface_registry_tests.rs:    assert_eq!(diagnostics[0].severity(), SurfaceCrossSeverity::Warning);
+vac-rs/crates/runtime/shell/hooks/src/engine/dispatcher.rs:        assert_eq!(selected[0].display_order, 0);
+vac-rs/crates/runtime/shell/hooks/src/engine/dispatcher.rs:        assert_eq!(selected[0].display_order, 0);
+vac-rs/crates/runtime/shell/hooks/src/engine/dispatcher.rs:        assert_eq!(selected[0].display_order, 0);
+vac-rs/crates/runtime/shell/hooks/src/engine/dispatcher.rs:        assert_eq!(selected[0].display_order, 0);
+vac-rs/crates/runtime/shell/hooks/src/engine/dispatcher.rs:        assert_eq!(selected[0].display_order, 0);
+vac-rs/crates/runtime/shell/hooks/src/engine/dispatcher.rs:        assert_eq!(selected[0].display_order, 0);
+vac-rs/crates/runtime/shell/hooks/src/engine/dispatcher.rs:        assert_eq!(selected[0].command, "first");
+vac-rs/crates/capabilities/release/src/core_migrated/config/mod/split_005_env.rs:            && max_runtime_seconds > i64::MAX as u64
+vac-rs/crates/runtime/shell/hooks/src/engine/discovery.rs:        assert_eq!(handlers[0].matcher.as_deref(), Some("*"));
+vac-rs/crates/runtime/shell/hooks/src/engine/discovery.rs:        assert_eq!(handlers[0].event_name, HookEventName::PostToolUse);
+vac-rs/crates/runtime/shell/hooks/src/engine/discovery.rs:        assert_eq!(handlers[0].matcher.as_deref(), Some("Edit|Write"));
+vac-rs/crates/control-plane/control-plane/src/control_plane/evidence_v2/merkle.rs:            let right = pair.get(1).unwrap_or(&pair[0]);
+vac-rs/crates/control-plane/control-plane/src/control_plane/evidence_v2/merkle.rs:                format!("{}{}", pair[0], right).as_bytes(),
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:    assert!(engine.handlers[0].source.is_managed());
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:    assert!(listed.hooks[0].is_managed);
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:    assert_eq!(preview[0].source_path, managed_dir);
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:    assert!(engine.handlers[0].source.is_managed());
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:    assert_eq!(discovered.hook_entries[0].key, managed_disabled_key);
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:    assert_eq!(discovered.hook_entries[0].enabled, true);
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:    assert!(discovered.hook_entries[0].is_managed);
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:    assert!(engine.handlers[0].source.is_managed());
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:    assert_eq!(discovered.hook_entries[0].key, managed_key);
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:    assert_eq!(discovered.hook_entries[0].enabled, true);
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:    assert!(discovered.hook_entries[0].is_managed);
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:    assert_eq!(preview[0].source_path, hooks_json_path);
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:    assert_eq!(preview[0].source, HookSource::Plugin);
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:    assert_eq!(preview[0].source_path, source_path);
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:        listed.hooks[0].plugin_id.as_deref(),
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:    assert_eq!(outcome.hook_events[0].run.source, HookSource::Plugin);
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:    assert_eq!(outcome.hook_events[0].run.status, HookRunStatus::Completed);
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:    assert_eq!(outcome.hook_events[0].run.entries.len(), 1);
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:        outcome.hook_events[0].run.entries[0].kind,
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:        serde_json::from_str(&outcome.hook_events[0].run.entries[0].text)
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:        engine.handlers[0].command,
+vac-rs/crates/runtime/shell/hooks/src/engine/mod_tests.rs:        engine.handlers[0].env,
+vac-rs/crates/control-plane/control-plane/src/control_plane/no_duplicate_tui.rs:        let first = &self.findings[0];
+vac-rs/crates/control-plane/control-plane/src/control_plane/no_duplicate_tui.rs:        assert_eq!(report.findings()[0].path, "vac-rs/src/lib.rs");
+vac-rs/crates/control-plane/control-plane/src/control_plane/no_duplicate_tui.rs:        assert_eq!(report.findings()[0].line, 1);
+vac-rs/crates/control-plane/control-plane/src/control_plane/no_duplicate_tui.rs:        assert_eq!(report.findings()[0].term, term);
+vac-rs/crates/control-plane/control-plane/src/control_plane/no_duplicate_tui.rs:        assert_eq!(report.findings()[0].term, "structural duplicate TUI crate");
+vac-rs/crates/control-plane/control-plane/src/control_plane/no_duplicate_tui.rs:        assert_eq!(report.findings()[0].term, "structural duplicate TUI crate");
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_evidence_chain.rs:    let bit_len = (input.len() as u64) * 8;
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_evidence_chain.rs:        let mut a = h[0];
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_evidence_chain.rs:        h[0] = h[0].wrapping_add(a);
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_evidence_chain.rs:        changed.files_modified[0].lines_added += 1;
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_evidence_chain.rs:        changed.commands_executed[0].duration_ms += 1;
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_fixture_security_regression.rs:        unsafe_cases[0].rejected = false;
+vac-rs/crates/runtime/shell/hooks/src/events/pre_tool_use.rs:            runs[0].id,
+vac-rs/crates/runtime/shell/hooks/src/events/pre_tool_use.rs:        assert_eq!(completed.run.id, runs[0].id);
+vac-rs/crates/runtime/shell/hooks/src/events/pre_tool_use.rs:        assert_eq!(completed[0].run.id, runs[0].id);
+vac-rs/crates/control-plane/control-plane/src/control_plane/policy_registry_tests.rs:    assert_eq!(registry.manifests[0].manifest.id, "vac.default-local");
+vac-rs/crates/runtime/shell/hooks/src/events/post_tool_use.rs:            runs[0].id,
+vac-rs/crates/runtime/shell/hooks/src/events/post_tool_use.rs:        assert_eq!(completed.run.id, runs[0].id);
+vac-rs/crates/runtime/shell/hooks/src/events/post_tool_use.rs:        assert_eq!(completed[0].run.id, runs[0].id);
+vac-rs/crates/control-plane/control-plane/src/control_plane/registry_diagnostics_tests.rs:    let diagnostic = &report.diagnostics()[0];
+vac-rs/crates/control-plane/control-plane/src/control_plane/registry_diagnostics_tests.rs:    let diagnostic = &report.diagnostics()[0];
+vac-rs/crates/control-plane/control-plane/src/control_plane/registry_diagnostics_tests.rs:        rendered.contains("slash.yaml:routes[0]"),
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_runtime_enforcement.rs:        ctx.target_files[0].ownership_status = RuntimeOwnershipStatus::Partial;
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_manifest_tests.rs:    assert_eq!(manifest.steps[0].uses, "capability.intent.parse");
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_manifest_tests.rs:        manifest.steps[0].when.as_deref(),
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_manifest_tests.rs:        manifest.steps[0].when.as_deref(),
+vac-rs/crates/control-plane/control-plane/src/control_plane/identity_check.rs:        let first = &self.findings[0];
+vac-rs/crates/control-plane/control-plane/src/control_plane/identity_check.rs:        assert_eq!(report.findings()[0].path, "vac-rs/src/lib.rs");
+vac-rs/crates/control-plane/control-plane/src/control_plane/identity_check.rs:        assert_eq!(report.findings()[0].line, 1);
+vac-rs/crates/control-plane/control-plane/src/control_plane/identity_check.rs:        assert_eq!(report.findings()[0].term, term);
+vac-rs/crates/control-plane/control-plane/src/control_plane/identity_check.rs:        assert_eq!(report.findings()[0].severity, "fail");
+vac-rs/crates/control-plane/control-plane/src/control_plane/identity_check.rs:        assert!(report.findings()[0].reason.contains("root TUI"));
+vac-rs/crates/control-plane/control-plane/src/control_plane/identity_check.rs:        assert!(report.findings()[0].replacement_hint.contains("root TUI"));
+vac-rs/crates/control-plane/control-plane/src/control_plane/identity_check.rs:        assert_eq!(report.findings()[0].term, "duplicate TUI");
+vac-rs/crates/control-plane/control-plane/src/control_plane/identity_check.rs:            report.findings()[0].path,
+vac-rs/crates/control-plane/control-plane/src/control_plane/identity_check.rs:        assert_eq!(report.findings()[0].term, "duplicate TUI");
+vac-rs/crates/control-plane/control-plane/src/control_plane/policy_manifest_tests.rs:        manifest.rules[0].match_.action,
+vac-rs/crates/control-plane/control-plane/src/control_plane/policy_manifest_tests.rs:        manifest.rules[0].match_.path,
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_lifecycle.rs:                can_transition(pair[0], pair[1]),
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_lifecycle.rs:                pair[0],
+vac-rs/crates/control-plane/control-plane/src/control_plane/architecture_invariants.rs:            lines.push(format!("  {}. {}", index + 1, check.render_lines()[0]));
+vac-rs/crates/control-plane/control-plane/src/control_plane/capability_manifest_tests.rs:    assert!(err.contains("validation.commands[0].evidence"));
+vac-rs/crates/control-plane/control-plane/src/control_plane/capability_manifest_tests.rs:    assert_eq!(ownership.targets[0].crate_name.as_deref(), Some("vac-core"));
+vac-rs/crates/control-plane/control-plane/src/control_plane/capability_manifest_tests.rs:        ownership.targets[0].module.as_deref(),
+vac-rs/crates/control-plane/control-plane/src/control_plane/capability_manifest_tests.rs:    assert_eq!(ownership.targets[0].test_only, false);
+vac-rs/crates/control-plane/control-plane/src/control_plane/capability_manifest_tests.rs:    assert_eq!(ownership.targets[0].retired, true);
+vac-rs/crates/control-plane/control-plane/src/control_plane/capability_manifest_tests.rs:    assert!(err.contains("ownership.targets[0]"));
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_risk_policy.rs:        assert_eq!(findings[0].inferred_risk, RiskAction::ExecuteProcess);
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_risk_policy.rs:        assert_eq!(findings[0].confidence_label(), ConfidenceLabel::Certain);
+vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_risk_policy.rs:        assert!(findings[0].is_auto_assignable());
+vac-rs/crates/runtime/shell/shell-command/src/powershell.rs:    let shell = &command[0];
+vac-rs/crates/control-plane/control-plane/src/control_plane/surface_doctor_tests.rs:        rendered.contains("routes[0].capability"),
+vac-rs/crates/control-plane/control-plane/src/control_plane/surface_manifest_tests.rs:    assert_eq!(manifest.routes[0].kind, SurfaceRouteKind::Tui);
+vac-rs/crates/control-plane/control-plane/src/control_plane/surface_manifest_tests.rs:    assert_eq!(manifest.routes[0].status, SurfaceRouteStatus::Partial);
+vac-rs/crates/control-plane/control-plane/src/control_plane/surface_manifest_tests.rs:    assert_eq!(error.field_path(), "routes[0].owner");
+vac-rs/crates/control-plane/control-plane/src/control_plane/surface_manifest_tests.rs:    assert_eq!(error.field_path(), "routes[0].capability");
+vac-rs/crates/control-plane/control-plane/src/control_plane/surface_manifest_tests.rs:    assert_eq!(error.field_path(), "routes[0].capability");
+vac-rs/crates/control-plane/control-plane/src/control_plane/surface_manifest_tests.rs:    assert_eq!(error.field_path(), "routes[0].reason");
+vac-rs/crates/control-plane/control-plane/src/control_plane/surface_manifest_tests.rs:    assert_eq!(error.field_path(), "routes[0]");
+vac-rs/crates/control-plane/control-plane/src/control_plane/surface_manifest_tests.rs:    assert_eq!(error.field_path(), "routes[0].status");
+vac-rs/crates/control-plane/control-plane/src/control_plane/surface_manifest_tests.rs:    assert_eq!(error.field_path(), "routes[0]");
+vac-rs/crates/control-plane/control-plane/src/control_plane/surface_manifest_tests.rs:    assert_eq!(surface_route_target(&routes[0]), Some("/activity"));
+vac-rs/crates/control-plane/control-plane/src/control_plane/surface_manifest_tests.rs:    let tui_key = surface_route_dedup_key(&manifest.routes[0]).expect("tui key");
+vac-rs/core/tests/suite/model_visible_layout.rs:                ("First Request (Baseline)", &requests[0]),
+vac-rs/core/tests/suite/model_visible_layout.rs:        user_instructions_wrapper_count(&requests[0]),
+vac-rs/core/tests/suite/model_visible_layout.rs:                ("First Request (agents_one)", &requests[0]),
+vac-rs/crates/runtime/shell/shell-command/src/command_safety/windows_safe_commands.rs:    let command = words[0]
+vac-rs/core/tests/suite/review.rs:    let last_text = last["content"][0]["text"].as_str().unwrap();
+vac-rs/core/tests/suite/review.rs:        msg["content"][0]["text"]
+vac-rs/core/tests/suite/review.rs:        msg["content"][0]["text"]
+vac-rs/core/tests/suite/review.rs:    let body = requests[0].body_json();
+vac-rs/core/tests/suite/review.rs:        .filter_map(|msg| msg["content"][0]["text"].as_str())
+vac-rs/core/tests/suite/truncation.rs:        arr[0]["text"]
+vac-rs/core/tests/suite/model_switching.rs:    let first_body = requests[0].body_json();
+vac-rs/core/tests/suite/model_switching.rs:        image_generation_calls[0]["id"].as_str(),
+vac-rs/core/tests/suite/model_switching.rs:        image_generation_calls[0]["result"].as_str(),
+vac-rs/core/tests/suite/model_switching.rs:        image_generation_calls[0]["id"].as_str(),
+vac-rs/core/tests/suite/model_switching.rs:        image_generation_calls[0]["result"].as_str(),
+vac-rs/core/tests/suite/resume.rs:    let first_resumed = &requests[0];
+vac-rs/core/tests/suite/search_tool.rs:        &requests[0]
+vac-rs/core/tests/suite/search_tool.rs:    let first_request_body = requests[0].body_json();
+vac-rs/core/tests/suite/search_tool.rs:    let first_request_body = requests[0].body_json();
+vac-rs/core/tests/suite/search_tool.rs:    let first_request_tools = tool_names(&requests[0].body_json());
+vac-rs/core/tests/responses_headers.rs:        &requests[0]
+vac-rs/core/tests/suite/turn_state.rs:    assert_eq!(requests[0].header(TURN_STATE_HEADER), None);
+vac-rs/core/tests/suite/turn_state.rs:    let first_turn_id = parse_turn_id(requests[0].header("x-vac-turn-metadata"))
+vac-rs/core/tests/suite/turn_state.rs:    assert_eq!(handshakes[0].header(TURN_STATE_HEADER), None);
+vac-rs/core/tests/suite/shell_command.rs:        shell_responses_with_timeout(call_id, command, login, timeout.as_millis() as i64),
+vac-rs/crates/capabilities/release/src/core_migrated/config/permissions.rs:        && bytes[0].is_ascii_alphabetic()
+vac-rs/core/tests/suite/compact_resume_branch.rs:    let first_request_user_texts = json_message_input_texts(&requests[0], "user");
+vac-rs/core/tests/suite/compact_resume_branch.rs:    let first_request_user_texts = json_message_input_texts(&requests[0], "user");
+vac-rs/core/tests/common/responses.rs:        .up_to_n_times(num_calls as u64)
+vac-rs/core/tests/common/responses.rs:        .expect(num_calls as u64)
+vac-rs/core/tests/common/responses.rs:        .up_to_n_times(num_calls as u64)
+vac-rs/core/tests/common/responses.rs:        .expect(num_calls as u64)
+vac-rs/core/tests/common/responses.rs:        .up_to_n_times(num_calls as u64)
+vac-rs/core/tests/common/responses.rs:        .expect(num_calls as u64)
+vac-rs/crates/runtime/shell/apply-patch/src/parser.rs:    let first_line = lines[0].trim();
+vac-rs/crates/runtime/shell/apply-patch/src/parser.rs:            if remaining_lines[0].trim().is_empty() {
+vac-rs/crates/runtime/shell/apply-patch/src/parser.rs:            if remaining_lines[0].starts_with('*') {
+vac-rs/crates/runtime/shell/apply-patch/src/parser.rs:    let (change_context, start_index) = if lines[0] == EMPTY_CHANGE_CONTEXT_MARKER {
+vac-rs/crates/runtime/shell/apply-patch/src/parser.rs:    } else if let Some(context) = lines[0].strip_prefix(CHANGE_CONTEXT_MARKER) {
+vac-rs/crates/runtime/shell/apply-patch/src/parser.rs:                    lines[0]
+vac-rs/core/tests/suite/client_websockets.rs:        second_metadata["workspaces"][0]["has_changes"].as_bool(),
+vac-rs/crates/capabilities/release/src/core_migrated/config/mod_group_002.rs:            && max_runtime_seconds > i64::MAX as u64
+vac-rs/core/tests/suite/skills.rs:    assert_eq!(response.skills[0].cwd, cwd);
+vac-rs/core/tests/suite/skills.rs:    assert_eq!(response.skills[0].errors.len(), 0);
+vac-rs/core/tests/suite/skills.rs:        response.skills[0]
+vac-rs/core/tests/suite/skills.rs:        response.skills[0]
+vac-rs/core/tests/suite/skills.rs:    let error_path = errors[0].path.to_string_lossy();
+vac-rs/crates/runtime/shell/apply-patch/src/invocation.rs:            let name = APPLY_PATCH_QUERY.capture_names()[capture.index as usize];
+vac-rs/core/tests/common/context_snapshot.rs:                        return format!("{idx:02}:message/{role}:{}", rendered_parts[0]);
+vac-rs/core/tests/suite/web_search.rs:    let first_body = requests[0].body_json();
+vac-rs/core/tests/suite/permissions_messages.rs:    assert!(!permissions_base.contains(&new_permissions[0]));
+vac-rs/core/tests/suite/tool_harness.rs:            assert_eq!(update.plan[0].step, "Inspect workspace");
+vac-rs/core/tests/suite/tool_harness.rs:            assert_matches!(update.plan[0].status, StepStatus::InProgress);
+vac-rs/crates/capabilities/release/src/core_migrated/util.rs:    let exp = BACKOFF_FACTOR.powi(attempt.saturating_sub(1) as i32);
+vac-rs/crates/capabilities/release/src/core_migrated/util.rs:    let base = (INITIAL_DELAY_MS as f64 * exp) as u64;
+vac-rs/crates/capabilities/release/src/core_migrated/util.rs:    Duration::from_millis((base as f64 * jitter) as u64)
+vac-rs/crates/capabilities/release/src/core_migrated/git_info_tests.rs:    assert_eq!(entries[0].subject, "third change");
+vac-rs/crates/integrations/otel/src/metrics/runtime_metrics.rs:    clamped.round() as u64
+vac-rs/core/tests/suite/tools.rs:    let first_request_tools = tool_names(&requests[0].body_json());
+vac-rs/core/tests/suite/hooks_mcp.rs:            "hook_event_name": hook_inputs[0]["hook_event_name"],
+vac-rs/core/tests/suite/hooks_mcp.rs:            "tool_name": hook_inputs[0]["tool_name"],
+vac-rs/core/tests/suite/hooks_mcp.rs:            "tool_use_id": hook_inputs[0]["tool_use_id"],
+vac-rs/core/tests/suite/hooks_mcp.rs:            "tool_input": hook_inputs[0]["tool_input"],
+vac-rs/core/tests/suite/hooks_mcp.rs:    let transcript_path = hook_inputs[0]["transcript_path"]
+vac-rs/core/tests/suite/hooks_mcp.rs:            "hook_event_name": hook_inputs[0]["hook_event_name"],
+vac-rs/core/tests/suite/hooks_mcp.rs:            "tool_name": hook_inputs[0]["tool_name"],
+vac-rs/core/tests/suite/hooks_mcp.rs:            "tool_use_id": hook_inputs[0]["tool_use_id"],
+vac-rs/core/tests/suite/hooks_mcp.rs:            "tool_input": hook_inputs[0]["tool_input"],
+vac-rs/core/tests/suite/hooks_mcp.rs:            "tool_response": hook_inputs[0]["tool_response"],
+vac-rs/core/tests/suite/hooks_mcp.rs:    let transcript_path = hook_inputs[0]["transcript_path"]
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_001.rs:        let workflow = &report.workflows()[0];
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_001.rs:        let workflow = &report.workflows()[0];
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_001.rs:        let workflow = &report.workflows()[0];
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_001.rs:        let approval_request = &execution.approval_requests()[0];
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_001.rs:            machine.approval_requests()[0].id.as_str(),
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_001.rs:        let request = machine.approval_requests()[0].clone();
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_001.rs:            machine.approval_requests()[0].status,
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_001.rs:            report.approval_requests()[0].status,
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_001.rs:        let approval_request_id = machine.approval_requests()[0].id.clone();
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_001.rs:            report.approval_requests()[0].status,
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_001.rs:        let approval_request_id = machine.approval_requests()[0].id.clone();
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_001.rs:            report.approval_requests()[0].status,
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_001.rs:        let approval_request_id = machine.approval_requests()[0].id.clone();
+vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_runner/build_check_parts/build_check_part_006_parts/build_check_part_006_part_001.rs:        let approval_request_id = machine.approval_requests()[0].id.clone();
+vac-rs/crates/providers/provider-http/src/rate_limits.rs:        assert_eq!(updates[0].limit_id.as_deref(), Some("vac"));
+vac-rs/crates/providers/provider-http/src/rate_limits.rs:        assert_eq!(updates[0].limit_name, None);
+vac-rs/crates/providers/provider-http/src/rate_limits.rs:        assert_eq!(updates[0].limit_id.as_deref(), Some("vac"));
+vac-rs/crates/providers/provider-http/src/rate_limits.rs:        assert_eq!(updates[0].limit_name, None);
+vac-rs/crates/providers/provider-http/src/rate_limits.rs:        assert_eq!(updates[0].primary, None);
+vac-rs/crates/providers/provider-http/src/rate_limits.rs:        assert_eq!(updates[0].secondary, None);
+vac-rs/crates/providers/provider-http/src/rate_limits.rs:        assert_eq!(updates[0].credits, None);
+vac-rs/crates/capabilities/memories/write/src/semantic.rs:        assert!(rows[0].contains("semantic lookup"));
+vac-rs/crates/capabilities/memories/write/src/semantic.rs:        assert!(rows[0].contains("fresh_marker"));
+vac-rs/crates/providers/provider-http/src/client_transport/retry.rs:    let exp = 2u64.saturating_pow(attempt as u32 - 1);
+vac-rs/crates/providers/provider-http/src/client_transport/retry.rs:    let millis = base.as_millis() as u64;
+vac-rs/crates/providers/provider-http/src/client_transport/retry.rs:    Duration::from_millis((raw as f64 * jitter) as u64)
+vac-rs/crates/capabilities/chat/src/core_migrated/guardian/review.rs:        GUARDIAN_REVIEW_TIMEOUT.as_millis() as u64,
+vac-rs/crates/capabilities/memories/write/src/phase1.rs:            counts.claimed as i64,
+vac-rs/crates/capabilities/memories/write/src/phase1.rs:            counts.succeeded_with_output as i64,
+vac-rs/crates/capabilities/memories/write/src/phase1.rs:            counts.succeeded_with_output as i64,
+vac-rs/crates/capabilities/memories/write/src/phase1.rs:            counts.succeeded_no_output as i64,
+vac-rs/crates/capabilities/memories/write/src/phase1.rs:            counts.failed as i64,
+vac-rs/crates/capabilities/memories/write/src/phase2.rs:        input: raw_memory_count as i64,
+vac-rs/crates/capabilities/chat/src/core_migrated/plugins/discoverable_tests.rs:    assert_eq!(discoverable_plugins[0].id, plugin_id);
+vac-rs/crates/capabilities/chat/src/core_migrated/plugins/discoverable_tests.rs:    assert_eq!(discoverable_plugins[0].id, "slack@vastar-curated");
+vac-rs/crates/capabilities/chat/src/core_migrated/plugins/discoverable_tests.rs:    assert_eq!(discoverable_plugins[0].id, "slack@vastar-curated");
+vac-rs/crates/capabilities/memories/write/src/storage.rs:            let short_hash_seed = (thread_uuid.as_u128() & 0xFFFF_FFFF) as u32;
+vac-rs/crates/capabilities/memories/write/src/storage.rs:        let alphabet_idx = (short_hash_value % SHORT_HASH_ALPHABET.len() as u32) as usize;
+vac-rs/crates/capabilities/memories/write/src/storage.rs:        short_hash_value /= SHORT_HASH_ALPHABET.len() as u32;
+vac-rs/crates/providers/provider-http/src/endpoint/models.rs:        assert_eq!(models[0].slug, "gpt-test");
+vac-rs/crates/providers/provider-http/src/endpoint/models.rs:        assert_eq!(models[0].supported_in_api, true);
+vac-rs/crates/providers/provider-http/src/endpoint/models.rs:        assert_eq!(models[0].priority, 1);
+vac-rs/crates/providers/provider-http/src/endpoint/memories.rs:        assert_eq!(output[0].raw_memory, "raw summary");
+vac-rs/crates/providers/provider-http/src/endpoint/memories.rs:        assert_eq!(output[0].memory_summary, "memory summary");
+vac-rs/crates/providers/provider-http/src/endpoint/memories.rs:        assert_eq!(body["traces"][0]["id"], "trace-1");
+vac-rs/crates/providers/provider-http/src/endpoint/memories.rs:            body["traces"][0]["metadata"]["source_path"],
+vac-rs/crates/runtime/shell/shell-escalation/src/unix/socket.rs:    // SAFETY: Unix escalation boundary: this module owns the socket/fd buffer for the immediate libc or socket operation; `libc::CMSG_SPACE((count * size_of::<RawFd>()) as _) as usize` uses inputs that remain live for the duration of this block.
+vac-rs/crates/runtime/shell/shell-escalation/src/unix/socket.rs:    unsafe { libc::CMSG_SPACE((count * size_of::<RawFd>()) as _) as usize }
+vac-rs/crates/runtime/shell/shell-escalation/src/unix/socket.rs:                    // SAFETY: Unix escalation boundary: this module owns the socket/fd buffer for the immediate libc or socket operation; `libc::CMSG_LEN(0) as usize` uses inputs that remain live for the duration of this block.
+vac-rs/crates/runtime/shell/shell-escalation/src/unix/socket.rs:                    - unsafe { libc::CMSG_LEN(0) as usize };
+vac-rs/crates/runtime/shell/shell-escalation/src/unix/socket.rs:            let payload_len = u32::from_le_bytes(*len_bytes) as usize;
+vac-rs/crates/runtime/shell/shell-escalation/src/unix/socket.rs:        // SAFETY: Unix escalation boundary: this module owns the socket/fd buffer for the immediate libc or socket operation; `libc::fcntl(received_fds[0].as_raw_fd(), libc::F_GETFD)` uses inputs that remain live for the duration of this block.
+vac-rs/crates/runtime/shell/shell-escalation/src/unix/socket.rs:        let fd_status = unsafe { libc::fcntl(received_fds[0].as_raw_fd(), libc::F_GETFD) };
+vac-rs/crates/runtime/shell/shell-escalation/src/unix/escalate_server.rs:        // SAFETY: Unix escalation boundary: this module owns the socket/fd buffer for the immediate libc or socket operation; `std::os::fd::OwnedFd::from_raw_fd(pipe_fds[0])` uses inputs that remain live for the duration of this block.
+vac-rs/crates/runtime/shell/shell-escalation/src/unix/escalate_server.rs:        let read_end = unsafe { std::os::fd::OwnedFd::from_raw_fd(pipe_fds[0]) };
+vac-rs/crates/runtime/shell/shell-escalation/src/unix/escalate_server.rs:            .send_with_fds(&[0], &[server_stream_fd])
+vac-rs/crates/capabilities/memories/write/src/storage_tests.rs:    let canonical_rollout_summary_file = &files[0];
+vac-rs/crates/runtime/shell/shell-escalation/src/unix/escalate_protocol.rs:    /// The argv, including the program name (argv[0]).
+vac-rs/crates/runtime/shell/shell-escalation/src/unix/escalate_client.rs:    const HANDSHAKE_MESSAGE: [u8; 1] = [0];
+vac-rs/core/tests/suite/view_image.rs:        output_items[0].get("type").and_then(Value::as_str),
+vac-rs/core/tests/suite/view_image.rs:    let image_url = output_items[0]
+vac-rs/core/tests/suite/view_image.rs:        output_items[0].get("detail").and_then(Value::as_str),
+vac-rs/core/tests/suite/view_image.rs:    let image_url = output_items[0]
+vac-rs/core/tests/suite/view_image.rs:        output_items[0].get("detail").and_then(Value::as_str),
+vac-rs/core/tests/suite/view_image.rs:    let image_url = output_items[0]
+vac-rs/core/tests/suite/view_image.rs:        output_items[0].get("detail").and_then(Value::as_str),
+vac-rs/core/tests/suite/view_image.rs:    let image_url = output_items[0]
+vac-rs/core/tests/suite/view_image.rs:        output_items[0].get("detail").and_then(Value::as_str),
+vac-rs/core/tests/suite/view_image.rs:    let image_url = output_items[0]
+vac-rs/core/tests/suite/request_user_input.rs:    assert_eq!(request.questions[0].is_other, true);
+vac-rs/core/tests/suite/window_headers.rs:    let (initial_thread_id, first_generation) = window_id_parts(&requests[0]);
+vac-rs/core/tests/suite/remote_models.rs:    assert_eq!(requests[0].url.path(), "/v1/models");
+vac-rs/core/tests/suite/prompt_caching.rs:    let ui_text = input1[1]["content"][0]["text"]
+vac-rs/core/tests/suite/prompt_caching.rs:    let expected_permissions_msg = body1["input"][0].clone();
+vac-rs/core/tests/suite/prompt_caching.rs:    let expected_permissions_msg = body1["input"][0].clone();
+vac-rs/core/tests/suite/prompt_caching.rs:    let env_text = expected_env_msg_2["content"][0]["text"]
+vac-rs/core/tests/suite/prompt_caching.rs:    let expected_permissions_msg = body1["input"][0].clone();
+vac-rs/core/tests/suite/prompt_caching.rs:        expected_ui_msg["content"][0]["text"]
+vac-rs/core/tests/suite/prompt_caching.rs:    let expected_permissions_msg = body1["input"][0].clone();
+vac-rs/core/tests/suite/prompt_caching.rs:        expected_ui_msg["content"][0]["text"]
+vac-rs/core/tests/suite/cli_stream.rs:    // assert!(page.items[0].thread_id.is_some(), "missing thread_id");
+vac-rs/core/tests/suite/cli_stream.rs:    // assert!(page.items[0].created_at.is_some(), "missing created_at");
+vac-rs/core/tests/suite/cli_stream.rs:    let year = &comps[0];
+vac-rs/core/tests/suite/pending_input.rs:        from_slice(&requests[0]).unwrap_or_else(|err| panic!("parse first request: {err}"));
+vac-rs/core/tests/suite/pending_input.rs:    let first_body: Value = serde_json::from_slice(&requests[0]).expect("parse first request");
+vac-rs/crates/integrations/otel/src/metrics/client.rs:        counter.add(inc as u64, &attributes);
+vac-rs/crates/integrations/otel/src/metrics/client.rs:            duration.as_millis().min(i64::MAX as u128) as i64,
+vac-rs/core/tests/common/streaming_sse.rs:        .as_millis() as i64
+vac-rs/core/tests/common/streaming_sse.rs:        assert_eq!(first_chunks[0].body, "first");
+vac-rs/core/tests/common/streaming_sse.rs:        assert_eq!(second_chunks[0].body, "second");
+vac-rs/crates/integrations/otel/src/otlp.rs:    Some(Duration::from_millis(parsed as u64))
+vac-rs/crates/integrations/otel/src/events/session_telemetry.rs:                mcp_server_count = mcp_servers.len() as i64,
+vac-rs/crates/integrations/otel/src/events/session_telemetry.rs:            text_input_count = text_input_count as i64,
+vac-rs/crates/integrations/otel/src/events/session_telemetry.rs:            image_input_count = image_input_count as i64,
+vac-rs/crates/integrations/otel/src/events/session_telemetry.rs:            local_image_input_count = local_image_input_count as i64,
+vac-rs/crates/integrations/otel/src/events/session_telemetry.rs:            output_length = error.len() as i64,
+vac-rs/crates/integrations/otel/src/events/session_telemetry.rs:            output_line_count = error.lines().count() as i64,
+vac-rs/crates/integrations/otel/src/events/session_telemetry.rs:            arguments_length = arguments.len() as i64,
+vac-rs/crates/integrations/otel/src/events/session_telemetry.rs:            output_length = output.len() as i64,
+vac-rs/crates/integrations/otel/src/events/session_telemetry.rs:            output_line_count = output.lines().count() as i64,
+vac-rs/crates/integrations/otel/src/events/session_telemetry.rs:    Some(Duration::from_millis(clamped.round() as u64))
+vac-rs/crates/providers/analytics/src/events.rs:            completion_latency_ms: Some(self.started_instant.elapsed().as_millis() as u64),
+vac-rs/crates/integrations/otel/tests/suite/send.rs:                assert_eq!(points[0].value(), 1);
+vac-rs/crates/integrations/otel/tests/suite/send.rs:                attributes_to_map(points[0].attributes())
+vac-rs/crates/integrations/otel/tests/suite/send.rs:                points[0]
+vac-rs/crates/integrations/otel/tests/suite/send.rs:                points[0]
+vac-rs/crates/integrations/otel/tests/suite/send.rs:    let point = points[0];
+vac-rs/crates/integrations/otel/tests/suite/snapshot.rs:                attributes_to_map(points[0].attributes())
+vac-rs/crates/integrations/otel/tests/suite/snapshot.rs:                attributes_to_map(points[0].attributes())
+vac-rs/crates/providers/ollama/src/parser.rs:        assert_matches!(events2[0], PullEvent::Status(ref s) if s == "success");
+vac-rs/crates/providers/ollama/src/parser.rs:            &events[0],
+vac-rs/crates/providers/ollama/src/parser.rs:            &events2[0],
+vac-rs/crates/providers/secrets/src/lib.rs:        assert_eq!(listed[0].name, name);
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/handlers/multi_agents_v2/wait.rs:            let deadline = Instant::now() + Duration::from_millis(timeout_ms as u64);
+vac-rs/crates/providers/feedback/src/lib.rs:        assert_eq!(attachments_with_diagnostics[0].buffer, vec![1]);
+vac-rs/crates/providers/feedback/src/lib.rs:        assert_eq!(attachments_without_diagnostics[0].buffer, vec![1]);
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/handlers/multi_agents/wait.rs:            let deadline = Instant::now() + Duration::from_millis(timeout_ms as u64);
+vac-rs/crates/capabilities/sessions/src/core_migrated/thread_rollout_truncation_tests.rs:        RolloutItem::ResponseItem(items[0].clone()),
+vac-rs/crates/capabilities/sessions/src/core_migrated/thread_rollout_truncation_tests.rs:        RolloutItem::ResponseItem(items[0].clone()),
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    if let ResponseItem::Message { content, .. } = &preserved[0] {
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    match &history.items[0] {
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    match &history.items[0] {
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let stored = match &history.items[0] {
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let raw_len = serde_json::to_string(&image_item).unwrap().len() as i64;
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let expected = raw_len - payload.len() as i64 + RESIZED_IMAGE_BYTES_ESTIMATE;
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let raw_len = serde_json::to_string(&item).unwrap().len() as i64;
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let expected = raw_len - payload.len() as i64 + RESIZED_IMAGE_BYTES_ESTIMATE;
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let raw_len = serde_json::to_string(&item).unwrap().len() as i64;
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let expected = raw_len - payload.len() as i64 + RESIZED_IMAGE_BYTES_ESTIMATE;
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:        serde_json::to_string(&message_item).unwrap().len() as i64
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:        serde_json::to_string(&function_output_item).unwrap().len() as i64
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:        serde_json::to_string(&item).unwrap().len() as i64
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let raw_len = serde_json::to_string(&item).unwrap().len() as i64;
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let raw_len = serde_json::to_string(&item).unwrap().len() as i64;
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let expected = raw_len - payload.len() as i64 + RESIZED_IMAGE_BYTES_ESTIMATE;
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let raw_len = serde_json::to_string(&item).unwrap().len() as i64;
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let payload_sum = (payload_one.len() + payload_two.len()) as i64;
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let raw_len = serde_json::to_string(&item).unwrap().len() as i64;
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let expected = raw_len - payload.len() as i64 + EXPECTED_ORIGINAL_DETAIL_IMAGE_BYTES;
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let raw_len = serde_json::to_string(&item).unwrap().len() as i64;
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let expected = raw_len - payload.len() as i64 + capped_original_detail_image_bytes;
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let raw_len = serde_json::to_string(&item).unwrap().len() as i64;
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let expected = raw_len - payload.len() as i64 + EXPECTED_ORIGINAL_DETAIL_IMAGE_BYTES;
+vac-rs/crates/capabilities/sessions/src/core_migrated/context_manager/history_tests.rs:    let raw_len = serde_json::to_string(&item).unwrap().len() as i64;
+vac-rs/crates/capabilities/sessions/src/core_migrated/realtime_conversation.rs:    ((u64::from(samples_per_channel) * 1_000) / sample_rate) as u32
+vac-rs/crates/capabilities/sessions/src/core_migrated/message_history.rs:        line_lengths.push(bytes as u64);
+vac-rs/crates/capabilities/sessions/src/core_migrated/message_history.rs:        .clamp(1.0, max_bytes as f64) as u64;
+vac-rs/crates/capabilities/sessions/src/core_migrated/tasks/mod_tests.rs:                let point = points[0];
+vac-rs/crates/capabilities/sessions/src/core_migrated/stream_events_utils_tests.rs:    assert_eq!(memory_citation.entries[0].path, "MEMORY.md");
+vac-rs/crates/capabilities/sessions/src/core_migrated/compact_tests.rs:    let truncated_message = &history[0];
+vac-rs/crates/capabilities/sessions/src/core_migrated/compact_tests.rs:    let ResponseItem::Message { role, content, .. } = &initial_context[0] else {
+vac-rs/crates/capabilities/sessions/src/core_migrated/thread_manager_tests.rs:        RolloutItem::ResponseItem(items[0].clone()),
+vac-rs/crates/capabilities/sessions/src/core_migrated/thread_manager_tests.rs:        RolloutItem::ResponseItem(items[0].clone()),
+vac-rs/crates/capabilities/sessions/src/core_migrated/thread_manager_tests.rs:    assert_eq!(resumed_turn.environments[0].cwd, default_cwd);
+vac-rs/crates/capabilities/sessions/src/core_migrated/thread_manager_tests.rs:    assert_ne!(resumed_turn.environments[0].cwd, selected_cwd);
+vac-rs/crates/capabilities/sessions/src/core_migrated/thread_manager_tests.rs:    assert_eq!(branched_turn.environments[0].cwd, default_cwd);
+vac-rs/crates/capabilities/sessions/src/core_migrated/thread_manager_tests.rs:    assert_ne!(branched_turn.environments[0].cwd, selected_cwd);
+vac-rs/crates/capabilities/sessions/src/core_migrated/event_mapping_tests.rs:                hook_prompt.fragments[0],
+vac-rs/crates/capabilities/sessions/src/core_migrated/context/permissions_instructions.rs:        format!(" The writable root is {}.", roots_list[0])
+vac-rs/crates/capabilities/sessions/src/core_migrated/session/session.rs:                .is_some_and(|argv| !argv.is_empty() && !argv[0].is_empty());
+vac-rs/crates/capabilities/file-search/src/main.rs:                    Some(next) if **next == i as u32 => {
+vac-rs/crates/providers/provider-http/src/retry.rs:    let exp = 2u64.saturating_pow(attempt as u32 - 1);
+vac-rs/crates/providers/provider-http/src/retry.rs:    let millis = base.as_millis() as u64;
+vac-rs/crates/providers/provider-http/src/retry.rs:    Duration::from_millis((raw as f64 * jitter) as u64)
+vac-rs/crates/capabilities/file-search/src/lib.rs:                    cols[0] = Utf32String::from(relative_path);
+vac-rs/crates/capabilities/file-search/src/lib.rs:                    let limit = inner.limit.min(snapshot.matched_item_count() as usize);
+vac-rs/crates/capabilities/file-search/src/lib.rs:                        .matched_items(0..limit as u32)
+vac-rs/crates/capabilities/file-search/src/lib.rs:                                let haystack = item.matcher_columns[0].slice(..);
+vac-rs/crates/capabilities/file-search/src/lib.rs:                        total_match_count: snapshot.matched_item_count() as usize,
+vac-rs/crates/capabilities/file-search/src/lib.rs:                        scanned_file_count: snapshot.item_count() as usize,
+vac-rs/crates/providers/provider-http/src/sse/responses.rs:                return Some(Duration::from_millis(value as u64));
+vac-rs/crates/providers/provider-http/src/sse/responses.rs:            &events[0],
+vac-rs/crates/providers/provider-http/src/sse/responses.rs:        assert_matches!(events[0], Ok(ResponseEvent::OutputItemDone(_)));
+vac-rs/crates/providers/provider-http/src/sse/responses.rs:            &events[0],
+vac-rs/crates/providers/provider-http/src/sse/responses.rs:            &events[0],
+vac-rs/crates/providers/provider-http/src/sse/responses.rs:        match &events[0] {
+vac-rs/crates/providers/provider-http/src/sse/responses.rs:        match &events[0] {
+vac-rs/crates/providers/provider-http/src/sse/responses.rs:        assert_matches!(events[0], Err(ApiError::ContextWindowExceeded));
+vac-rs/crates/providers/provider-http/src/sse/responses.rs:        assert_matches!(events[0], Err(ApiError::ContextWindowExceeded));
+vac-rs/crates/providers/provider-http/src/sse/responses.rs:        assert_matches!(events[0], Err(ApiError::QuotaExceeded));
+vac-rs/crates/providers/provider-http/src/sse/responses.rs:        match &events[0] {
+vac-rs/crates/providers/provider-http/src/sse/responses.rs:        match &events[0] {
+vac-rs/crates/providers/provider-http/src/sse/responses.rs:        match &events[0] {
+vac-rs/crates/providers/provider-http/src/sse/responses.rs:                (case.expect_first)(&out[0]),
+vac-rs/crates/providers/provider-http/src/sse/responses.rs:        assert_matches!(&events[0], ResponseEvent::Created);
+vac-rs/crates/providers/provider-http/src/sse/responses.rs:            &events[0],
+vac-rs/crates/providers/provider-http/src/sse/responses.rs:            &events[0],
+vac-rs/crates/foundation/thread-store/src/local/list_threads.rs:        assert_eq!(page.items[0].model_provider, "test-provider");
+vac-rs/crates/foundation/thread-store/src/local/list_threads.rs:            page.items[0].first_user_message.as_deref(),
+vac-rs/crates/foundation/thread-store/src/local/list_threads.rs:        assert_eq!(active.items[0].archived_at, None);
+vac-rs/crates/foundation/thread-store/src/local/list_threads.rs:            archived.items[0].archived_at,
+vac-rs/crates/foundation/thread-store/src/local/list_threads.rs:            Some(archived.items[0].updated_at)
+vac-rs/crates/foundation/thread-store/src/local/list_threads.rs:        assert_eq!(page.items[0].thread_id, thread_id);
+vac-rs/crates/foundation/thread-store/src/local/list_threads.rs:        assert_eq!(page.items[0].rollout_path, Some(path));
+vac-rs/crates/foundation/thread-store/src/local/list_threads.rs:        assert_eq!(page.items[0].preview, "Hello from user");
+vac-rs/crates/foundation/thread-store/src/local/list_threads.rs:            page.items[0].first_user_message.as_deref(),
+vac-rs/crates/foundation/thread-store/src/local/list_threads.rs:        assert_eq!(page.items[0].model_provider, "test-provider");
+vac-rs/crates/foundation/thread-store/src/local/list_threads.rs:        assert_eq!(page.items[0].cli_version, "test_version");
+vac-rs/crates/foundation/thread-store/src/local/list_threads.rs:        assert_eq!(page.items[0].source, SessionSource::Cli);
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/spec_tests.rs:    match &outputs[0] {
+vac-rs/crates/foundation/thread-store/src/local/archive_thread.rs:        assert_eq!(archived.items[0].thread_id, thread_id);
+vac-rs/crates/foundation/thread-store/src/local/archive_thread.rs:        assert_eq!(archived.items[0].rollout_path, Some(archived_path));
+vac-rs/crates/foundation/thread-store/src/local/archive_thread.rs:            archived.items[0].archived_at,
+vac-rs/crates/foundation/thread-store/src/local/archive_thread.rs:            Some(archived.items[0].updated_at)
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/mcp_tool_call.rs:        span.record("server.port", port as i64);
+vac-rs/crates/runtime/exec/exec-server/tests/http_client.rs:        (HTTP_BODY_DELTA_CHANNEL_CAPACITY as usize, true)
+vac-rs/crates/runtime/exec/exec-server/tests/http_client.rs:            chunks < OVERFLOWING_BODY_DELTA_FRAMES as usize,
+vac-rs/crates/runtime/exec/exec-server/tests/http_request.rs:    let expected_seqs = (1..=deltas.len() as u64).collect::<Vec<_>>();
+vac-rs/crates/providers/model-provider/src/provider.rs:        assert_eq!(catalog.models[0].slug, "custom-bedrock-model");
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/shell/unix_escalation.rs:        timeout_ms: Some(effective_timeout.as_millis() as u64),
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/shell/unix_escalation.rs:                "intercepted exec request must contain argv[0]"
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/shell/unix_escalation.rs:/// The intercepted `argv` includes `argv[0]`, but once we have normalized the
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/shell/unix_escalation.rs:/// executable path in `program`, we should replace the original `argv[0]`
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/shell/unix_escalation_tests.rs:        hook_inputs[0]["tool_input"]["command"],
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/shell/unix_escalation_tests.rs:        hook_inputs[0]["tool_input"]["description"],
+vac-rs/crates/providers/model-provider/src/amazon_bedrock/catalog.rs:        assert_eq!(catalog.models[0].slug, GPT_5_4_CMB_MODEL_ID);
+vac-rs/crates/runtime/exec/exec/src/main_tests.rs:        cli.config_overrides.raw_overrides[0],
+vac-rs/crates/runtime/exec/exec/src/lib.rs:        .map(|chunk| decode_unit([chunk[0], chunk[1]]))
+vac-rs/crates/runtime/exec/exec/tests/suite/sandbox.rs:        let sent = libc::write(fds[0], msg.as_ptr() as *const libc::c_void, msg.len());
+vac-rs/crates/runtime/exec/exec/tests/suite/sandbox.rs:        let recvd_slice = &buf[..(recvd as usize)];
+vac-rs/crates/runtime/exec/exec/tests/suite/sandbox.rs:        let snt2 = libc::write(sfds[0], msg.as_ptr() as *const libc::c_void, msg.len());
+vac-rs/crates/runtime/exec/exec/tests/suite/sandbox.rs:        let _ = libc::close(sfds[0]);
+vac-rs/crates/runtime/exec/exec/tests/suite/sandbox.rs:        let _ = libc::close(fds[0]);
+vac-rs/crates/capabilities/sessions/src/core_migrated/message_history_tests.rs:    assert_eq!(entries[0].text, entry_two);
+vac-rs/crates/capabilities/sessions/src/core_migrated/message_history_tests.rs:    assert_eq!(entries[0].text, long_entry);
+vac-rs/crates/capabilities/sessions/src/core_migrated/message_history_tests.rs:        .expect("max bytes should be configured") as u64;
+vac-rs/crates/capabilities/sessions/src/core_migrated/message_history_tests.rs:        .clamp(1.0, max_bytes as f64) as u64;
+vac-rs/crates/capabilities/tools/src/agent_tool_tests.rs:            ["agent_status"]["allOf"][0]["oneOf"][0]["enum"],
+vac-rs/crates/runtime/exec/execpolicy/src/rule.rs:        if cmd.len() < pattern_length || cmd[0] != self.first.as_ref() {
+vac-rs/crates/capabilities/external-agent-sessions/src/export.rs:        assert_eq!(turns[0].items.len(), 2);
+vac-rs/crates/capabilities/external-agent-sessions/src/export.rs:            turns[0].items.last(),
+vac-rs/crates/capabilities/external-agent-sessions/src/detect.rs:    latest_timestamp >= now.saturating_sub(SESSION_IMPORT_MAX_AGE.as_secs() as i64)
+vac-rs/crates/capabilities/external-agent-sessions/src/lib.rs:        .map(|duration| duration.as_secs() as i64)
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/sandbox_users.rs:    let mut sid_len: u32 = sid_buffer.len() as u32;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/sandbox_users.rs:            sid_buffer.truncate(sid_len as usize);
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/sandbox_users.rs:            sid_buffer.resize(sid_len as usize, 0);
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/sandbox_users.rs:            domain.resize(domain_len as usize, 0);
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/sandbox_users.rs:    let mut out = vec![0u8; sid_len as usize];
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/sandbox_users.rs:    let mut name_buf: Vec<u16> = vec![0u16; name_len as usize];
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/sandbox_users.rs:    let mut domain_buf: Vec<u16> = vec![0u16; domain_len as usize];
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/sandbox_users.rs:            let idx = (*b as usize) % CHARS.len();
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/audit.rs:        for ent in read.flatten().take(MAX_ITEMS_PER_DIR as usize) {
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/audit.rs:            if start.elapsed() > Duration::from_secs(AUDIT_TIME_LIMIT_SECS as u64)
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/audit.rs:                || checked > MAX_CHECKED_LIMIT as usize
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/audit.rs:        if start.elapsed() > Duration::from_secs(AUDIT_TIME_LIMIT_SECS as u64)
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/audit.rs:            || checked > MAX_CHECKED_LIMIT as usize
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/audit.rs:            for ent in read.flatten().take(MAX_ITEMS_PER_DIR as usize) {
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/audit.rs:                if start.elapsed() > Duration::from_secs(AUDIT_TIME_LIMIT_SECS as u64)
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/audit.rs:                    || checked > MAX_CHECKED_LIMIT as usize
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/hide_users.rs:                std::mem::size_of_val(&value) as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/hide_users.rs:                    error = format_last_error(status as i32)
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/hide_users.rs:            error = format_last_error(status as i32)
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/hide_users.rs:        let err = unsafe { GetLastError() } as i32;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/hide_users.rs:        let err = unsafe { GetLastError() } as i32;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/process.rs:            si.StartupInfo.cb = std::mem::size_of::<STARTUPINFOEXW>() as u32;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/process.rs:                let err = GetLastError() as i32;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/process.rs:            si.cb = std::mem::size_of::<STARTUPINFOW>() as u32;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/process.rs:                let err = GetLastError() as i32;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/process.rs:                    buf.len() as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/process.rs:            on_chunk(&buf[..read_bytes as usize]);
+vac-rs/crates/integrations/otel/tests/harness/mod.rs:                let point = points[0];
+vac-rs/crates/capabilities/code-mode/src/runtime/globals.rs:    let array = v8::Array::new(scope, enabled_tools.len() as i32);
+vac-rs/crates/capabilities/code-mode/src/runtime/globals.rs:        if array.set_index(scope, index as u32, item.into()) != Some(true) {
+vac-rs/crates/integrations/otel/tests/suite/manager_metrics.rs:                attributes_to_map(points[0].attributes())
+vac-rs/crates/integrations/otel/tests/suite/manager_metrics.rs:                attributes_to_map(points[0].attributes())
+vac-rs/crates/integrations/otel/tests/suite/manager_metrics.rs:                attributes_to_map(points[0].attributes())
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/setup_orchestrator.rs:    sei.cbSize = std::mem::size_of::<SHELLEXECUTEINFOW>() as u32;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/setup_orchestrator.rs:                Some(code as i32),
+vac-rs/crates/capabilities/code-mode/src/runtime/timers.rs:    Ok(Some(timeout_id.trunc().min(u64::MAX as f64) as u64))
+vac-rs/crates/capabilities/code-mode/src/runtime/timers.rs:        delay_ms.trunc().min(u64::MAX as f64) as u64
+vac-rs/crates/capabilities/code-mode/src/description.rs:- `image(imageUrlOrItem: string | { image_url: string; detail?: "auto" | "low" | "high" | "original" | null } | ImageContent, detail?: "auto" | "low" | "high" | "original" | null)`: Appends an image item. `image_url` can be an HTTPS URL or a base64-encoded `data:` URL. To forward an MCP tool image, pass an individual `ImageContent` block from `result.content`, for example `image(result.content[0])`. MCP image blocks may request detail with `_meta: { "vac/imageDetail": "original" }`. When provided, the second `detail` argument overrides any detail embedded in the first argument.
+vac-rs/crates/foundation/rollout/src/recorder_tests.rs:    assert!(matches!(items[0], RolloutItem::SessionMeta(_)));
+vac-rs/crates/foundation/rollout/src/recorder_tests.rs:        &replacement_history[0],
+vac-rs/crates/foundation/rollout/src/recorder_tests.rs:    assert_eq!(page1.items[0].path, newest);
+vac-rs/crates/foundation/rollout/src/recorder_tests.rs:    assert_eq!(page2.items[0].path, middle);
+vac-rs/crates/foundation/rollout/src/recorder_tests.rs:    assert_eq!(page.items[0].path, real_path);
+vac-rs/crates/foundation/rollout/src/recorder_tests.rs:    assert_eq!(page.items[0].git_branch.as_deref(), Some("sqlite-branch"));
+vac-rs/crates/foundation/rollout/src/recorder_tests.rs:    assert_eq!(page.items[0].git_sha.as_deref(), Some("sqlite-sha"));
+vac-rs/crates/foundation/rollout/src/recorder_tests.rs:        page.items[0].git_origin_url.as_deref(),
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/command_runner_win.rs:        std::mem::size_of::<JOBOBJECT_EXTENDED_LIMIT_INFORMATION>() as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/command_runner_win.rs:        allow_null_device(cap_psid_ptrs[0]);
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/command_runner_win.rs:                            let chunk_len = chunk.len().min(u32::MAX as usize);
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/command_runner_win.rs:                                    chunk_len as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/command_runner_win.rs:                            offset += written as usize;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/command_runner_win.rs:    let timeout = req.timeout_ms.map(|ms| ms as u32).unwrap_or(INFINITE);
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/command_runner_win.rs:            exit_code = raw_exit as i32;
+vac-rs/crates/providers/login/src/auth/default_client_tests.rs:    let headers = &requests[0].headers;
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/handlers/mcp_resource_tests.rs:    assert_eq!(resources[0]["server"], json!("srv"));
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/handlers/agent_jobs.rs:                row_index: idx as i64,
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/handlers/tool_search.rs:            &handler.entries[0],
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/mod.rs:    let original_shell = shell_single_quote(&command[0]);
+vac-rs/crates/integrations/otel/tests/suite/otel_export_routing_policy.rs:    let span_events = &spans[0].events.events;
+vac-rs/crates/integrations/otel/tests/suite/otel_export_routing_policy.rs:    let span_events = &spans[0].events.events;
+vac-rs/crates/integrations/otel/tests/suite/otel_export_routing_policy.rs:    let span_events = &spans[0].events.events;
+vac-rs/crates/integrations/otel/tests/suite/otel_export_routing_policy.rs:        find_span_event_by_name_attr(&spans[0].events.events, "vac.conversation_starts");
+vac-rs/crates/integrations/otel/tests/suite/otel_export_routing_policy.rs:        find_span_event_by_name_attr(&spans[0].events.events, "vac.api_request");
+vac-rs/crates/integrations/otel/tests/suite/otel_export_routing_policy.rs:        find_span_event_by_name_attr(&spans[0].events.events, "vac.websocket_connect");
+vac-rs/crates/integrations/otel/tests/suite/otel_export_routing_policy.rs:        find_span_event_by_name_attr(&spans[0].events.events, "vac.websocket_request");
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/mod_tests.rs:    assert_eq!(rewritten[0], "/bin/zsh");
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/mod_tests.rs:    assert_eq!(rewritten[0], "/bin/bash");
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/mod_tests.rs:    assert_eq!(rewritten[0], "/bin/sh");
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/mod_tests.rs:    assert_eq!(rewritten[0], "/bin/zsh");
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/mod_tests.rs:    let output = Command::new(&rewritten[0])
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/mod_tests.rs:    let output = Command::new(&rewritten[0])
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/mod_tests.rs:    let output = Command::new(&rewritten[0])
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/mod_tests.rs:    let output = Command::new(&rewritten[0])
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/mod_tests.rs:    let output = Command::new(&rewritten[0])
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/mod_tests.rs:    let output = Command::new(&rewritten[0])
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/mod_tests.rs:    let mut command = Command::new(&rewritten[0]);
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/mod_tests.rs:    let output = Command::new(&rewritten[0])
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/mod_tests.rs:    let output = Command::new(&rewritten[0])
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/mod_tests.rs:    let output = Command::new(&rewritten[0])
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/mod_tests.rs:    let output = Command::new(&rewritten[0])
+vac-rs/crates/capabilities/tools-domain/src/core_migrated/tools/runtimes/mod_tests.rs:    let output = Command::new(&rewritten[0])
+vac-rs/crates/foundation/features/src/tests.rs:    assert_eq!(usages[0].alias, "features.use_legacy_landlock");
+vac-rs/crates/foundation/features/src/tests.rs:    assert_eq!(usages[0].feature, Feature::UseLegacyLandlock);
+vac-rs/crates/foundation/features/src/tests.rs:        usages[0].summary,
+vac-rs/crates/foundation/features/src/tests.rs:        usages[0].details.as_deref(),
+vac-rs/crates/capabilities/core-plugins/src/remote_bundle.rs:        let next_len = body.len() as u64 + chunk.len() as u64;
+vac-rs/crates/capabilities/core-plugins/src/remote_bundle.rs:        header.set_size(contents.len() as u64);
+vac-rs/crates/capabilities/core-plugins/src/loader_tests.rs:    assert_sources(&sources, &["plugin.json#hooks[0]"]);
+vac-rs/crates/capabilities/core-plugins/src/loader_tests.rs:    assert_sources(&sources, &["plugin.json#hooks[0]", "plugin.json#hooks[1]"]);
+vac-rs/crates/foundation/rollout/src/metadata.rs:                            outcome.parse_errors as i64,
+vac-rs/crates/foundation/rollout/src/metadata.rs:            stats.upserted as i64,
+vac-rs/crates/foundation/rollout/src/metadata.rs:            stats.failed as i64,
+vac-rs/crates/capabilities/ownership/src/core_migrated/agents_md.rs:        let mut remaining: u64 = max_total as u64;
+vac-rs/crates/capabilities/ownership/src/core_migrated/agents_md.rs:            let size = data.len() as u64;
+vac-rs/crates/capabilities/ownership/src/core_migrated/agents_md.rs:                data.truncate(remaining as usize);
+vac-rs/crates/capabilities/ownership/src/core_migrated/agents_md.rs:                remaining = remaining.saturating_sub(data.len() as u64);
+vac-rs/crates/capabilities/core-plugins/src/marketplace_add/source.rs:        && bytes[0].is_ascii_alphabetic()
+vac-rs/crates/capabilities/core-plugins/src/marketplace_add/metadata.rs:    Ok(format_utc_timestamp(duration.as_secs() as i64))
+vac-rs/crates/capabilities/ownership/src/core_migrated/connectors_tests.rs:    assert_eq!(connector_mention_slug(&merged[0]), "google-calendar");
+vac-rs/crates/providers/agent-identity/src/lib.rs:    secret_key[0] &= 248;
+vac-rs/crates/providers/agent-identity/src/lib.rs:    buf.extend_from_slice(&(value.len() as u32).to_be_bytes());
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:    assert_eq!(marketplaces[0].name, "agents-marketplace");
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:        marketplaces[0].path,
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:        marketplaces[0].interface,
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:    assert_eq!(marketplaces[0].name, "valid-marketplace");
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:    assert_eq!(outcome.marketplaces[0].name, "valid-marketplace");
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:    assert_eq!(outcome.errors[0].path, invalid_marketplace_path);
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:        outcome.errors[0]
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:        marketplaces[0].plugins,
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:        marketplaces[0].plugins[0].policy.installation,
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:        marketplaces[0].plugins[0].policy.authentication,
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:        marketplaces[0].plugins[0].policy.products,
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:        marketplaces[0].plugins[0].interface,
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:        marketplaces[0].plugins[0].policy.installation,
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:        marketplaces[0].plugins[0].policy.authentication,
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:    assert_eq!(marketplaces[0].plugins[0].policy.products, None);
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:        marketplaces[0].plugins[0].interface,
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:        marketplaces[0].plugins[0].policy.installation,
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:        marketplaces[0].plugins[0].policy.authentication,
+vac-rs/crates/capabilities/core-plugins/src/marketplace_tests.rs:    assert_eq!(marketplaces[0].plugins[0].policy.products, None);
+vac-rs/crates/foundation/utils/output-truncation/src/truncate_tests.rs:    let first_text = match &output[0] {
+vac-rs/crates/capabilities/ownership/src/core_migrated/agents_md_tests.rs:    assert_eq!(discovery[0], expected_parent);
+vac-rs/crates/capabilities/ownership/src/core_migrated/agents_md_tests.rs:        discovery[0].file_name().unwrap().to_string_lossy(),
+vac-rs/crates/capabilities/ownership/src/core_migrated/agents_md_tests.rs:        discovery[0]
+vac-rs/crates/capabilities/ownership/src/core_migrated/agents_md_tests.rs:        discovery[0]
+vac-rs/crates/foundation/rollout/src/tests.rs://     assert_eq!(page.items[0].path, db_rollout_path);
+vac-rs/crates/foundation/rollout/src/tests.rs://     assert_eq!(page.items[0].thread_id, Some(db_thread_id));
+vac-rs/crates/foundation/rollout/src/tests.rs://     assert_eq!(page.items[0].cwd, Some(home.to_path_buf()));
+vac-rs/crates/foundation/rollout/src/tests.rs://         page.items[0].first_user_message.as_deref(),
+vac-rs/crates/foundation/rollout/src/tests.rs://     assert_eq!(page.items[0].path, active_rollout_path);
+vac-rs/crates/foundation/rollout/src/tests.rs://     let file_name = page.items[0]
+vac-rs/crates/foundation/rollout/src/tests.rs:    assert_eq!(page.items[0].thread_id, Some(thread_id_from_uuid(uuid)));
+vac-rs/crates/foundation/rollout/src/tests.rs:    let path = &page.items[0].path;
+vac-rs/crates/foundation/rollout/src/tests.rs:            updated_at: page.items[0].updated_at.clone(),
+vac-rs/crates/foundation/rollout/src/tests.rs:    let head = read_head_for_summary(&page.items[0].path)
+vac-rs/crates/foundation/rollout/src/tests.rs:    let head = read_head_for_summary(&page.items[0].path)
+vac-rs/crates/foundation/utils/pty/src/win/psuedocon.rs:    info.dwOSVersionInfoSize = mem::size_of::<OSVERSIONINFOW>() as u32;
+vac-rs/crates/foundation/utils/pty/src/win/psuedocon.rs:        si.StartupInfo.cb = mem::size_of::<STARTUPINFOEXW>() as u32;
+vac-rs/crates/foundation/rollout/src/metadata_tests.rs:        (BACKFILL_LEASE_SECONDS + 1) as u64,
+vac-rs/crates/foundation/rollout/src/session_index.rs:        let read_size = usize::try_from(remaining.min(READ_CHUNK_SIZE as u64))
+vac-rs/crates/foundation/rollout/src/session_index.rs:        remaining -= read_size as u64;
+vac-rs/crates/foundation/utils/pty/src/pty.rs:            Ok(status) => status.exit_code() as i32,
+vac-rs/crates/foundation/utils/pty/src/tests.rs:    let mut read_end = unsafe { std::fs::File::from_raw_fd(fds[0]) };
+vac-rs/crates/foundation/utils/pty/src/tests.rs:    let read_end = unsafe { std::fs::File::from_raw_fd(fds[0]) };
+vac-rs/crates/foundation/utils/pty/src/tests.rs:    let read_end = unsafe { std::fs::File::from_raw_fd(fds[0]) };
+vac-rs/crates/foundation/utils/pty/src/tests.rs:    let read_end = unsafe { std::fs::File::from_raw_fd(fds[0]) };
+vac-rs/crates/foundation/utils/pty/src/tests.rs:    let mut read_end = unsafe { std::fs::File::from_raw_fd(fds[0]) };
+vac-rs/crates/providers/login/tests/suite/logout.rs:        requests[0]
+vac-rs/crates/providers/login/tests/suite/logout.rs:        requests[0]
+vac-rs/crates/foundation/utils/stream-parser/src/inline_hidden_tag.rs:        assert_eq!(out.extracted[0].tag, Tag::A);
+vac-rs/crates/foundation/utils/stream-parser/src/inline_hidden_tag.rs:        assert_eq!(out.extracted[0].content, "x");
+vac-rs/crates/foundation/utils/stream-parser/src/inline_hidden_tag.rs:        assert_eq!(out.extracted[0].tag, Tag::A);
+vac-rs/crates/foundation/utils/stream-parser/src/inline_hidden_tag.rs:        assert_eq!(out.extracted[0].content, "中");
+vac-rs/crates/foundation/utils/stream-parser/src/inline_hidden_tag.rs:        assert_eq!(out.extracted[0].tag, Tag::B);
+vac-rs/crates/foundation/utils/stream-parser/src/inline_hidden_tag.rs:        assert_eq!(out.extracted[0].content, "y");
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/lib.rs:            return Err(io::Error::from_raw_os_error(GetLastError() as i32));
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/lib.rs:            return Err(io::Error::from_raw_os_error(GetLastError() as i32));
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/lib.rs:            return Err(io::Error::from_raw_os_error(GetLastError() as i32));
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/lib.rs:            return Err(io::Error::from_raw_os_error(GetLastError() as i32));
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/lib.rs:            return Err(io::Error::from_raw_os_error(GetLastError() as i32));
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/lib.rs:            return Err(io::Error::from_raw_os_error(GetLastError() as i32));
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/lib.rs:                        tmp.len() as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/lib.rs:                buf.extend_from_slice(&tmp[..read_bytes as usize]);
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/lib.rs:                        tmp.len() as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/lib.rs:                buf.extend_from_slice(&tmp[..read_bytes as usize]);
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/lib.rs:        let timeout = timeout_ms.map(|ms| ms as u32).unwrap_or(INFINITE);
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/lib.rs:            exit_code_u32 as i32
+vac-rs/crates/surfaces/tui/src/shimmer.rs:        guard.chars_processed = guard.chars_processed.saturating_add(chars as u64);
+vac-rs/crates/surfaces/tui/src/shimmer.rs:        guard.spans_emitted = guard.spans_emitted.saturating_add(spans as u64);
+vac-rs/crates/surfaces/tui/src/shimmer.rs:            .saturating_add(duration.as_micros() as u64);
+vac-rs/crates/surfaces/tui/src/shimmer.rs:    let pos = pos_f as usize;
+vac-rs/crates/foundation/utils/string/src/truncate.rs:    let bytes_u64 = bytes as u64;
+vac-rs/crates/foundation/utils/string/src/truncate.rs:    bytes_u64.saturating_add((APPROX_BYTES_PER_TOKEN as u64).saturating_sub(1))
+vac-rs/crates/foundation/utils/string/src/truncate.rs:        / (APPROX_BYTES_PER_TOKEN as u64)
+vac-rs/crates/foundation/config/src/thread_config/proto/vac.thread_config.v1.rs:                        (tonic::Code::Unimplemented as i32).into(),
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/token.rs:        entries.len() as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/token.rs:        std::mem::size_of::<TokenDefaultDaclInfo>() as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/token.rs:    let mut buf: Vec<u8> = vec![0u8; size as usize];
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/token.rs:        let mut buf: Vec<u8> = vec![0u8; needed as usize];
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/token.rs:        if ok == 0 || (needed as usize) < std::mem::size_of::<u32>() {
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/token.rs:        let group_count = std::ptr::read_unaligned(buf.as_ptr() as *const u32) as usize;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/token.rs:        let after_count = unsafe { buf.as_ptr().add(std::mem::size_of::<u32>()) } as usize;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/token.rs:                let mut out = vec![0u8; sid_len as usize];
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/token.rs:    if ln_needed >= std::mem::size_of::<TOKEN_LINKED_TOKEN>() as u32 {
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/token.rs:        let mut ln_buf: Vec<u8> = vec![0u8; ln_needed as usize];
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/token.rs:    let mut user_buf: Vec<u8> = vec![0u8; needed as usize];
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/token.rs:    if ok == 0 || (needed as usize) < std::mem::size_of::<TOKEN_USER>() {
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/token.rs:    let mut user_sid_bytes = vec![0u8; sid_len as usize];
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/token.rs:    tp.Privileges[0].Luid = luid;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/token.rs:    tp.Privileges[0].Attributes = 0x00000002; // SE_PRIVILEGE_ENABLED
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/token.rs:        entries.len() as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/desktop.rs:            let err = unsafe { GetLastError() } as i32;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/desktop.rs:        entries.len() as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/wfp.rs:                RPC_C_AUTHN_DEFAULT as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/wfp.rs:    ensure_success_or(result, "FwpmProviderAdd0", &[FWP_E_ALREADY_EXISTS as u32])
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/wfp.rs:    ensure_success_or(result, "FwpmSubLayerAdd0", &[FWP_E_ALREADY_EXISTS as u32])
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/wfp.rs:        numFilterConditions: filter_conditions.len() as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/wfp.rs:        &[FWP_E_FILTER_NOT_FOUND as u32, FWP_E_NOT_FOUND as u32],
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/acl.rs:        std::mem::size_of::<ACL_SIZE_INFORMATION>() as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/acl.rs:    for i in 0..(info.AceCount as usize) {
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/acl.rs:        if GetAce(p_dacl as *const ACL, i as u32, &mut p_ace) == 0 {
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/acl.rs:        let base = p_ace as usize;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/acl.rs:        std::mem::size_of::<ACL_SIZE_INFORMATION>() as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/acl.rs:    let count = info.AceCount as usize;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/acl.rs:        if GetAce(p_dacl as *const ACL, i as u32, &mut p_ace) == 0 {
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/acl.rs:        let base = p_ace as usize;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/acl.rs:        std::mem::size_of::<ACL_SIZE_INFORMATION>() as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/acl.rs:        let base = p_ace as usize;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/acl.rs:            entries.len() as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/acl.rs:        SE_KERNEL_OBJECT as i32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/acl.rs:                SE_KERNEL_OBJECT as i32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/conpty/mod.rs:    si.StartupInfo.cb = std::mem::size_of::<STARTUPINFOEXW>() as u32;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/conpty/mod.rs:        let err = unsafe { GetLastError() } as i32;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/winutil.rs:            err as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/winutil.rs:        let slice = std::slice::from_raw_parts(buf_ptr, len as usize);
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/winutil.rs:    let mut sid_len: u32 = sid_buffer.len() as u32;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/winutil.rs:            sid_buffer.truncate(sid_len as usize);
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/winutil.rs:            sid_buffer.resize(sid_len as usize, 0);
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/winutil.rs:            domain.resize(domain_len as usize, 0);
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/winutil.rs:    let mut out = vec![0u8; sid_len as usize];
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/runner_client.rs:    si.cb = std::mem::size_of::<STARTUPINFOW>() as u32;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/runner_client.rs:        let err = unsafe { GetLastError() } as i32;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/runner_client.rs:                len_buf.len() as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/runner_client.rs:            let err = unsafe { GetLastError() } as i32;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/runner_client.rs:        if bytes_read == len_buf.len() as u32 {
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/runner_client.rs:            let frame_len = u32::from_le_bytes(len_buf) as usize;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/runner_client.rs:            if total_available as usize >= total_len {
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/proc_thread_attr.rs:                GetLastError() as i32
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/proc_thread_attr.rs:                GetLastError() as i32
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/proc_thread_attr.rs:                GetLastError() as i32
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/proc_thread_attr.rs:                GetLastError() as i32
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/dpapi.rs:        cbData: data.len() as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/dpapi.rs:        // SAFETY: Win32 sandbox boundary: adjacent checked API calls create or validate the raw handle/SID/ACL/token/pipe pointer used here; `std::slice::from_raw_parts(out_blob.pbData, out_blob.cbData as usize)` uses inputs that remain live for the duration of this block.
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/dpapi.rs:        unsafe { std::slice::from_raw_parts(out_blob.pbData, out_blob.cbData as usize) }.to_vec();
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/dpapi.rs:        // SAFETY: Win32 sandbox boundary: adjacent checked API calls create or validate the raw handle/SID/ACL/token/pipe pointer used here; `std::slice::from_raw_parts(out_blob.pbData, out_blob.cbData as usize)` uses inputs that remain live for the duration of this block.
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/dpapi.rs:        unsafe { std::slice::from_raw_parts(out_blob.pbData, out_blob.cbData as usize) }.to_vec();
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/ipc_framed.rs:    let len = payload.len() as u32;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/ipc_framed.rs:    let len = u32::from_le_bytes(len_buf) as usize;
+vac-rs/crates/surfaces/tui/src/goal_display.rs:    let seconds = seconds.max(0) as u64;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/setup_main_win.rs:            eas.len() as u32,
+vac-rs/crates/foundation/git-utils/src/apply.rs:        let out = std::process::Command::new(args[0])
+vac-rs/crates/foundation/utils/elapsed/src/lib.rs:    let millis = duration.as_millis() as i64;
+vac-rs/crates/foundation/utils/cli/src/config_override.rs:        assert_eq!(parsed[0].0.as_str(), "features.use_legacy_landlock");
+vac-rs/crates/foundation/utils/cli/src/config_override.rs:        assert_eq!(parsed[0].1.as_bool(), Some(true));
+vac-rs/crates/foundation/utils/path-utils/src/lib.rs:        drive_bytes.len() == 1 && drive_bytes[0].is_ascii_alphabetic()
+vac-rs/crates/surfaces/tui/src/operator_ui_styles.rs:        assert_eq!(rendered[0].spans.len(), 2);
+vac-rs/crates/surfaces/tui/src/operator_ui_styles.rs:        let text = rendered[0]
+vac-rs/crates/surfaces/tui/src/activity_sidebar.rs:    let width = width as usize;
+vac-rs/crates/surfaces/tui/src/activity_sidebar.rs:        assert_eq!(lines[0], "Activity timeline");
+vac-rs/crates/surfaces/tui/src/streaming/commit_tick.rs:            oldest_queued_age_ms = snapshot.oldest_age.map(|age| age.as_millis() as u64),
+vac-rs/crates/foundation/rollout-trace/src/reducer/inference_tests.rs:    let response_item_id = &inference.response_item_ids[0];
+vac-rs/crates/foundation/rollout-trace/src/reducer/inference_tests.rs:    let response_item_id = &inference.response_item_ids[0];
+vac-rs/crates/foundation/state/src/runtime/logs.rs:            let estimated_bytes = feedback_log_body.map_or(0, String::len) as i64
+vac-rs/crates/foundation/state/src/runtime/logs.rs:                + entry.level.len() as i64
+vac-rs/crates/foundation/state/src/runtime/logs.rs:                + entry.target.len() as i64
+vac-rs/crates/foundation/state/src/runtime/logs.rs:                + entry.module_path.as_ref().map_or(0, String::len) as i64
+vac-rs/crates/foundation/state/src/runtime/logs.rs:                + entry.file.as_ref().map_or(0, String::len) as i64;
+vac-rs/crates/foundation/state/src/runtime/logs.rs:            builder.push(" LIMIT ").push_bind(limit as i64);
+vac-rs/crates/foundation/state/src/runtime/logs.rs:            migrations: Cow::Owned(vec![LOGS_MIGRATOR.migrations[0].clone()]),
+vac-rs/crates/foundation/state/src/runtime/logs.rs:        assert_eq!(rows[0].message.as_deref(), Some("legacy-body"));
+vac-rs/crates/foundation/state/src/runtime/logs.rs:        assert_eq!(rows[0].message.as_deref(), Some("foo=2 alphabet"));
+vac-rs/crates/foundation/state/src/runtime/logs.rs:        assert_eq!(rows[0].ts, 2);
+vac-rs/crates/surfaces/tui/src/workflow_progress.rs:            progress.steps[0].lifecycle,
+vac-rs/crates/surfaces/tui/src/workflow_progress.rs:            progress.steps[0].lifecycle,
+vac-rs/crates/surfaces/tui/src/workflow_progress.rs:            progress.steps[0].lifecycle,
+vac-rs/crates/surfaces/tui/src/workflow_progress.rs:            progress.steps[0].lifecycle,
+vac-rs/crates/surfaces/tui/src/workflow_progress.rs:            progress.steps[0].resumed_after_approval,
+vac-rs/crates/surfaces/tui/src/workflow_progress.rs:        assert_eq!(build_steps[0].id, "check");
+vac-rs/crates/surfaces/tui/src/workflow_progress.rs:            build_steps[0].capability_id.as_deref(),
+vac-rs/crates/surfaces/tui/src/workflow_progress.rs:        assert_eq!(pending[0].0, "approve");
+vac-rs/crates/surfaces/tui/src/workflow_progress.rs:        assert!(pending[0].1.starts_with("approval:test.workflow:run:"));
+vac-rs/crates/surfaces/tui/src/workflow_progress.rs:        assert!(pending[0].1.ends_with(":attempt:attempt-1:step:approve"));
+vac-rs/crates/foundation/state/src/log_db.rs:            ts: now.as_secs() as i64,
+vac-rs/crates/foundation/state/src/log_db.rs:            ts_nanos: now.subsec_nanos() as i64,
+vac-rs/crates/foundation/state/src/log_db.rs:            line: metadata.line().map(|line| line as i64),
+vac-rs/crates/foundation/state/src/log_db.rs:        assert_eq!(after_flush[0].message.as_deref(), Some("buffered-log"));
+vac-rs/crates/foundation/state/src/log_db.rs:        assert_eq!(after_interval[0].message.as_deref(), Some("interval-log"));
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation/normalize.rs:        .map(|value| value.max(0) as u64)
+vac-rs/crates/foundation/state/src/runtime.rs:    if auto_vacuum != SqliteAutoVacuum::Incremental as i64 {
+vac-rs/crates/foundation/state/src/runtime/agent_jobs.rs:            builder.push_bind(limit as i64);
+vac-rs/crates/foundation/state/src/runtime/threads.rs:    builder.push_bind(limit as i64);
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation_tests.rs:    assert_eq!(second[0], first[0]);
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation_tests.rs:    assert_ne!(second[2], first[0]);
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation_tests.rs:            first.request_item_ids[0].clone(),
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation_tests.rs:            first.response_item_ids[0].clone(),
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation_tests.rs:            first.request_item_ids[0].clone(),
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation_tests.rs:            first.response_item_ids[0].clone(),
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation_tests.rs:    assert_eq!(second[0], first[1]);
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation_tests.rs:    assert_eq!(second[2], first[0]);
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation_tests.rs:    assert_ne!(second[1], first[0]);
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation_tests.rs:    let reasoning_item_id = &rollout.inference_calls["inference-1"].response_item_ids[0];
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation_tests.rs:            first.request_item_ids[0].clone(),
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation_tests.rs:            first.response_item_ids[0].clone(),
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation_tests.rs:        rollout.conversation_items[&first.response_item_ids[0]]
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation_tests.rs:    let reasoning_item_id = &first.response_item_ids[0];
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation_tests.rs:        vec![first.request_item_ids[0].clone(), reasoning_item_id.clone(),],
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation_tests.rs:    assert_ne!(second.request_item_ids[0], first.request_item_ids[0]);
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation_tests.rs:        compaction.replacement_item_ids[0],
+vac-rs/crates/foundation/rollout-trace/src/reducer/conversation_tests.rs:        rollout.conversation_items[&compaction.replacement_item_ids[0]].produced_by,
+vac-rs/crates/foundation/protocol/src/num_format.rs:        let scaled: i64 = (value * 10f64.powi(frac_digits as i32)).round() as i64;
+vac-rs/crates/foundation/protocol/src/num_format.rs:        format_with_separators_with_formatter(((n as f64) / 1e9).round() as i64, formatter)
+vac-rs/crates/foundation/protocol/src/protocol/split_004_exitedreviewmodeevent.rs:            .round() as i64
+vac-rs/crates/surfaces/tui/src/status/rate_limits.rs:    let filled = (ratio * STATUS_LIMIT_BAR_SEGMENTS as f64).round() as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/selection_popup_common.rs:    let width = width.max(1) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/selection_popup_common.rs:    let max_desc_col = content_width.saturating_sub(1) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/selection_popup_common.rs:        ((content_width as usize * (FIXED_LEFT_COLUMN_DENOMINATOR - FIXED_LEFT_COLUMN_NUMERATOR))
+vac-rs/crates/surfaces/tui/src/bottom_pane/selection_popup_common.rs:        ColumnWidthMode::Fixed => ((content_width as usize * FIXED_LEFT_COLUMN_NUMERATOR)
+vac-rs/crates/surfaces/tui/src/bottom_pane/selection_popup_common.rs:    let max_indent = max_width.saturating_sub(1) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/selection_popup_common.rs:    let max_desc_col = width.saturating_sub(1) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/selection_popup_common.rs:    let right_width = width.saturating_sub(desc_col as u16).max(1) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/selection_popup_common.rs:    let options = RtOptions::new(width.max(1) as usize)
+vac-rs/crates/surfaces/tui/src/bottom_pane/selection_popup_common.rs:    let viewport_height = viewport_height as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/selection_popup_common.rs:    let desc_measure_items = max_items.min(area.height.max(1) as usize);
+vac-rs/crates/surfaces/tui/src/bottom_pane/selection_popup_common.rs:        .min(area.height.max(1) as usize);
+vac-rs/crates/surfaces/tui/src/bottom_pane/selection_popup_common.rs:        let full_line = truncate_line_with_ellipsis_if_overflow(full_line, area.width as usize);
+vac-rs/crates/surfaces/tui/src/external_editor.rs:            Command::new(resolve_windows_program(&editor_cmd[0]))
+vac-rs/crates/surfaces/tui/src/external_editor.rs:            Command::new(&editor_cmd[0])
+vac-rs/crates/surfaces/tui/src/bottom_pane/multi_select_picker.rs:                render_area.height as usize,
+vac-rs/crates/surfaces/tui/src/bottom_pane/multi_select_picker.rs:            let max_preview_width = preview_area.width.saturating_sub(2) as usize;
+vac-rs/crates/surfaces/tui/src/clipboard_paste.rs:        let w = img.width as u32;
+vac-rs/crates/surfaces/tui/src/clipboard_paste.rs:        let h = img.height as u32;
+vac-rs/crates/surfaces/tui/src/bottom_pane/file_search_popup.rs:                        .map(|v| v.iter().map(|&i| i as usize).collect()),
+vac-rs/crates/surfaces/tui/src/bottom_pane/file_search_popup.rs:            score: index as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/runner_pipe.rs:            GetLastError() as i32
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/runner_pipe.rs:        nLength: std::mem::size_of::<SECURITY_ATTRIBUTES>() as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/runner_pipe.rs:            GetLastError() as i32
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/runner_pipe.rs:            return Err(io::Error::from_raw_os_error(err as i32));
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/runner_pipe.rs:            GetLastError() as i32
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/unified_exec/backends/legacy.rs:                bytes.len() as u32,
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/unified_exec/backends/legacy.rs:            let err = unsafe { GetLastError() } as i32;
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/unified_exec/backends/legacy.rs:        bytes = &bytes[written as usize..];
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/unified_exec/backends/legacy.rs:        raw_exit as i32
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/unified_exec/backends/legacy.rs:        let timeout = timeout_ms.map(|ms| ms as u32).unwrap_or(INFINITE);
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/unified_exec/tests.rs:        match &frames[0] {
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/unified_exec/tests.rs:        match &frames[0] {
+vac-rs/crates/surfaces/tui/src/full_tui_runtime.rs:            config.startup_warnings[0].contains("bogus-theme"),
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/linux_run_main_tests.rs:    let active_marker = registrations[0].marker_dir.join("1");
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/linux_run_main_tests.rs:    let active_marker = first_registrations[0].marker_dir.join("1");
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/linux_run_main_tests.rs:    let active_marker = registrations[0].marker_dir.join("1");
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/landlock.rs:                libc::AF_UNIX as u64,
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/landlock.rs:                    libc::AF_INET as u64,
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/landlock.rs:                    libc::AF_INET6 as u64,
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/landlock.rs:                libc::AF_UNIX as u64,
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/landlock.rs:        SeccompAction::Errno(libc::EPERM as u32), // when rule matches – return EPERM
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/proxy_routing.rs:    if ready[0] != HOST_BRIDGE_READY {
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/proxy_routing.rs:    Ok((pipe_fds[0], pipe_fds[1]))
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/proxy_routing.rs:        assert_eq!(plan.routes[0].env_key, "HTTP_PROXY");
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/proxy_routing.rs:            plan.routes[0].endpoint,
+vac-rs/crates/surfaces/cli/src/plan_cli.rs:        set_top_level_scalar(value, keys[0], new_value);
+vac-rs/crates/surfaces/cli/src/plan_cli.rs:        .entry(Value::String(keys[0].to_string()))
+vac-rs/crates/surfaces/cli/src/wsl_paths.rs:        || !bytes[0].is_ascii_alphabetic()
+vac-rs/crates/surfaces/cli/src/wsl_paths.rs:    let drive = (bytes[0] as char).to_ascii_lowercase();
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/linux_run_main.rs:        None => panic!("failed to resolve current process argv[0]"),
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/linux_run_main.rs:        wait_for_parent_exec_start(exec_start_pipe[0], exec_start_pipe[1]);
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/linux_run_main.rs:    close_child_exec_start_read(exec_start_pipe[0]);
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/linux_run_main.rs:    let read_fd = pipe_fds[0];
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/linux_run_main.rs:        CString::new(command[0].as_str()).expect("Failed to convert command to CString");
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/linux_run_main.rs:    panic!("Failed to execvp {}: {err}", command[0].as_str());
+vac-rs/crates/surfaces/tui/src/chatwidget/slash_dispatch.rs:                    width >= crate::activity_sidebar::ACTIVITY_SIDEBAR_MIN_TOTAL_WIDTH as usize
+vac-rs/crates/surfaces/cli/src/main.rs:        assert!(lines[0].starts_with("To continue this session, run vac resume "));
+vac-rs/crates/surfaces/tui/src/wrapping.rs:                // SAFETY: Terminal UI boundary: this adapter validates the terminal, clipboard, or editor handle before the platform call; `slice.as_ptr().offset_from(text.as_ptr()) as usize` uses inputs that remain live for the duration of this block.
+vac-rs/crates/surfaces/tui/src/wrapping.rs:                let start = unsafe { slice.as_ptr().offset_from(text.as_ptr()) as usize };
+vac-rs/crates/surfaces/tui/src/wrapping.rs:                // SAFETY: Terminal UI boundary: this adapter validates the terminal, clipboard, or editor handle before the platform call; `slice.as_ptr().offset_from(text.as_ptr()) as usize` uses inputs that remain live for the duration of this block.
+vac-rs/crates/surfaces/tui/src/wrapping.rs:                let start = unsafe { slice.as_ptr().offset_from(text.as_ptr()) as usize };
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert_eq!(concat_line(&out[0]), "hello");
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert_eq!(concat_line(&out[0]), "hello");
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert_eq!(concat_line(&out[0]), "hello");
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert_eq!(out[0].spans.len(), 1);
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert_eq!(out[0].spans[0].style.fg, Some(Color::Red));
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert_eq!(out[1].spans[0].style.fg, None);
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert!(concat_line(&out[0]).starts_with("- "));
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert_eq!(concat_line(&out[0]), "- hello");
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert!(concat_line(&out[0]).starts_with("hello"));
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert_eq!(concat_line(&out[0]), "");
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert_eq!(concat_line(&out[0]), "   hello");
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert_eq!(concat_line(&out[0]), "hello");
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert_eq!(concat_line(&out[0]), "supercalifragilistic");
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert_eq!(concat_line(&out[0]), "hello-");
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert_eq!(concat_line(&out[0]), ">>>>h");
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert_eq!(concat_line(&out[0]), "😀😀");
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert_eq!(out[0].spans.len(), 1);
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert_eq!(out[0].spans[0].style.fg, Some(Color::Red));
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert_eq!(out[1].spans[0].style.fg, Some(Color::Red));
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert_eq!(concat_line(&out[0]), "ab");
+vac-rs/crates/surfaces/tui/src/wrapping.rs:        assert!(rendered[0].starts_with("- "));
+vac-rs/crates/surfaces/tui/src/wrapping.rs:            concat_line(&out[0]),
+vac-rs/crates/surfaces/tui/src/wrapping.rs:            concat_line(&out[0]),
+vac-rs/crates/surfaces/tui/src/chatwidget/chatwidget_group_010_impl.rs:        let duration = Duration::from_millis(duration_ms.unwrap_or_default().max(0) as u64);
+vac-rs/crates/surfaces/tui/src/bottom_pane/app_link_view.rs:        let usable_width = width.max(1) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/app_link_view.rs:        let usable_width = width.max(1) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/app_link_view.rs:                    .map(|index| index as usize)
+vac-rs/crates/runtime/sandbox/sandboxing/src/landlock_tests.rs:            .any(|window| { window[0] == "--permission-profile" && !window[1].is_empty() }),
+vac-rs/crates/runtime/sandbox/sandboxing/src/landlock_tests.rs:            .any(|window| window[0] == "--command-cwd" && window[1] == "/tmp/link"),
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_001.rs:            ((self.cursor_pos as isize) + diff) as usize
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_001.rs:            .saturating_sub(effective_scroll as usize)
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_001.rs:                    e.range.start = ((e.range.start as isize) + diff) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_001.rs:                    e.range.end = ((e.range.end as isize) + diff) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_001.rs:            ((self.cursor_pos as isize) + diff) as usize
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_001.rs:                e.range.start = ((e.range.start as isize) + diff) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_001.rs:                e.range.end = ((e.range.end as isize) + diff) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_001.rs:                    Options::new(width as usize).wrap_algorithm(textwrap::WrapAlgorithm::FirstFit),
+vac-rs/crates/runtime/sandbox/sandboxing/src/seatbelt.rs:    let mut buf = vec![0_i8; (libc::PATH_MAX as usize) + 1];
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_002.rs:        let start = scroll as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_002.rs:        let end = (scroll + area.height).min(lines.len() as u16) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_002.rs:        let start = scroll as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_002.rs:        let end = (scroll + area.height).min(lines.len() as u16) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_002.rs:        let start = scroll as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_002.rs:        let end = (scroll + area.height).min(lines.len() as u16) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_002.rs:        let start = scroll as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_002.rs:        let end = (scroll + area.height).min(lines.len() as u16) as usize;
+vac-rs/crates/surfaces/tui/src/chatwidget/split_009_update_due_hook_visibility.rs:        let duration = Duration::from_millis(duration_ms.unwrap_or_default().max(0) as u64);
+vac-rs/crates/surfaces/tui/src/chatwidget/chatwidget_group_021_impl.rs:        self.last_rendered_width.set(Some(width as usize));
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_003.rs:        let elem_start = t.elements[0].range.start;
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_003.rs:        let elem_range = t.elements[0].range.clone();
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_003.rs:            .timestamp() as u64;
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_003.rs:            let mut boundaries: Vec<usize> = vec![0];
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_003.rs:                        let mut b: Vec<usize> = vec![0];
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_003.rs:                let total_lines = total_lines as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/textarea_parts/textarea_part_003.rs:                if (height as usize) >= total_lines {
+vac-rs/crates/surfaces/tui/src/bottom_pane/skills_toggle_view.rs:                render_area.height as usize,
+vac-rs/crates/surfaces/tui/src/chatwidget/split_024_thread_id.rs:                cell_id: idx as u64,
+vac-rs/crates/surfaces/tui/src/chatwidget/split_024_thread_id.rs:            cell_id: idx as u64,
+vac-rs/crates/surfaces/tui/src/chatwidget/split_024_thread_id.rs:        self.last_rendered_width.set(Some(area.width as usize));
+vac-rs/crates/surfaces/tui/src/bottom_pane/hooks_browser_view.rs:        let content_width = width.saturating_sub(4) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/hooks_browser_view.rs:        let width = content_area.width as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/hooks_browser_view.rs:                    .take(list_height as usize)
+vac-rs/crates/surfaces/tui/src/bottom_pane/hooks_browser_view.rs:                format!("{normalized:width$}", width = area.width as usize)
+vac-rs/crates/surfaces/tui/src/bottom_pane/hooks_browser_view.rs:                    idx as i64,
+vac-rs/crates/surfaces/tui/src/chatwidget/split_022_clear_mcp_inventory_loading.rs:        self.last_rendered_width.set(Some(width as usize));
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/permissions.rs:    let rendered = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/permissions.rs:        lines_to_single_string(&cells[0])
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/permissions.rs:            lines_to_single_string(&cells[0])
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/permissions.rs:        lines_to_single_string(&cells[0])
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/permissions.rs:    let rendered = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/permissions.rs:        lines_to_single_string(&cells_before_confirmation[0])
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/permissions.rs:        lines_to_single_string(&cells_after_confirmation[0])
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_001.rs:        let idx = (digit - 1) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_001.rs:                textwrap::wrap(&q.question, width.max(1) as usize)
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_001.rs:        let max_width = width.max(1) as usize;
+vac-rs/crates/surfaces/tui/src/chatwidget/chatwidget_group_007_impl.rs:                format!("apply_patch touching {}", files[0].display())
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/review_mode.rs:                path: first_images[0].clone(),
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/review_mode.rs:                path: second_images[0].clone(),
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/review_mode.rs:            first_images[0].clone(),
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/review_mode.rs:            second_images[0].clone(),
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/review_mode.rs:            existing_images[0].clone(),
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/review_mode.rs:    assert!(lines_to_single_string(&cells[0]).contains("Code review started"));
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/review_mode.rs:    assert!(lines_to_single_string(&cells[0]).contains("Code review started"));
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/review_mode.rs:    assert!(lines_to_single_string(&inserted[0]).contains("Review progress update"));
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/review_mode.rs:    assert!(lines_to_single_string(&inserted[0]).contains("queued while running"));
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/review_mode.rs:    assert!(lines_to_single_string(&inserted[0]).contains("queued while streaming"));
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/review_mode.rs:    assert!(lines_to_single_string(&inserted[0]).contains("other"));
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/review_mode.rs:    assert!(lines_to_single_string(&inserted[0]).contains("first"));
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/review_mode.rs:    assert!(stored_images[0].ends_with("pending-steer.png"));
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/review_mode.rs:    assert!(lines_to_single_string(&first_insert[0]).contains("first follow-up"));
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/review_mode.rs:    assert!(lines_to_single_string(&second_insert[0]).contains("second follow-up"));
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/review_mode.rs:    let exec_blob = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_003.rs:        assert_eq!(overlay.request.questions[0].id, "q2");
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_003.rs:        assert_eq!(overlay.request.questions[0].id, "q3");
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_003.rs:        let first_answer = &overlay.answers[0];
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_003.rs:        assert_eq!(overlay.answers[0].answer_committed, true);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_003.rs:        assert_eq!(overlay.answers[0].answer_committed, false);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_003.rs:        assert_eq!(overlay.answers[0].answer_committed, true);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_003.rs:        assert_eq!(overlay.answers[0].answer_committed, false);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_003.rs:        let draft = &overlay.answers[0].draft;
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_003.rs:        assert_eq!(draft.pending_pastes[0].1, large);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_003.rs:        assert!(draft.text.contains(&draft.pending_pastes[0].0));
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_003.rs:        let draft = &overlay.answers[0].draft;
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_003.rs:        assert!(draft.text.contains(&draft.pending_pastes[0].0));
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_003.rs:                let tip_width = UnicodeWidthStr::width(tip.text.as_str()).min(width as usize);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_003.rs:            assert!(used <= width as usize);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/app_server.rs:    assert!(lines_to_single_string(&inserted[0]).contains("Hi, are you there?"));
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/app_server.rs:    assert!(lines_to_single_string(&cells[0]).contains("Yes. What do you need?"));
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/app_server.rs:    let rendered = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/app_server.rs:    let rendered = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/app_server.rs:    let rendered = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/app_server.rs:    assert!(lines_to_single_string(&first_cells[0]).contains("permission denied"));
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/app_server.rs:    assert_eq!(lines_to_single_string(&cells[0]), "⚠ server overloaded\n");
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/app_server.rs:    let rendered = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/app_server.rs:    let rendered = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/app_server.rs:    let rendered = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_001.rs:        let idx = (digit - 1) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_001.rs:                textwrap::wrap(&q.question, width.max(1) as usize)
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_001.rs:        let max_width = width.max(1) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/layout.rs:            question_lines.truncate(question_height as usize);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/layout.rs:        question_lines.truncate(adjusted_question_height as usize);
+vac-rs/crates/foundation/utils/fuzzy-match/src/lib.rs:        let target_orig = result_orig_indices[0];
+vac-rs/crates/foundation/utils/fuzzy-match/src/lib.rs:        (last_lower_pos as i32 - first_lower_pos as i32 + 1) - (lowered_needle.len() as i32);
+vac-rs/crates/foundation/utils/fuzzy-match/src/lib.rs:        assert_eq!(idx, vec![0]);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_003.rs:        assert_eq!(overlay.request.questions[0].id, "q2");
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_003.rs:        assert_eq!(overlay.request.questions[0].id, "q3");
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_003.rs:        let first_answer = &overlay.answers[0];
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_003.rs:        assert_eq!(overlay.answers[0].answer_committed, true);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_003.rs:        assert_eq!(overlay.answers[0].answer_committed, false);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_003.rs:        assert_eq!(overlay.answers[0].answer_committed, true);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_003.rs:        assert_eq!(overlay.answers[0].answer_committed, false);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_003.rs:        let draft = &overlay.answers[0].draft;
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_003.rs:        assert_eq!(draft.pending_pastes[0].1, large);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_003.rs:        assert!(draft.text.contains(&draft.pending_pastes[0].0));
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_003.rs:        let draft = &overlay.answers[0].draft;
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_003.rs:        assert!(draft.text.contains(&draft.pending_pastes[0].0));
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_003.rs:                let tip_width = UnicodeWidthStr::width(tip.text.as_str()).min(width as usize);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_003.rs:            assert!(used <= width as usize);
+vac-rs/crates/surfaces/tui/src/external_agent_config_migration_startup.rs:        .as_secs() as i64
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/render.rs:            self.options_preferred_height(inner_width) as usize
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/render.rs:            self.notes_input_height(inner_width) as usize
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/render.rs:                DESIRED_SPACERS_BETWEEN_SECTIONS as usize
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/render.rs:        let footer_height = self.footer_required_height(inner_width) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/render.rs:        height = height.saturating_add(menu_surface_padding_height() as usize);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/render.rs:                    .ensure_visible(option_rows.len(), sections.options_area.height as usize);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/render.rs:            .take(footer_area.height as usize)
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/render.rs:            let line = truncate_line_word_boundary_with_ellipsis(line, footer_area.width as usize);
+vac-rs/crates/surfaces/tui/src/bottom_pane/selection_tabs.rs:        .take(area.height as usize)
+vac-rs/crates/surfaces/tui/src/bottom_pane/selection_tabs.rs:    let max_width = width.max(1) as usize;
+vac-rs/crates/foundation/utils/absolute-path/src/lib.rs:        && bytes[0].is_ascii_alphabetic()
+vac-rs/crates/surfaces/tui/src/chatwidget/status_surfaces.rs:            (elapsed.as_millis() / TERMINAL_TITLE_SPINNER_INTERVAL.as_millis()) as usize;
+vac-rs/crates/surfaces/tui/src/chatwidget/split_010_handle_elicitation_request_now.rs:        let duration = Duration::from_millis(duration_ms.unwrap_or_default().max(0) as u64);
+vac-rs/crates/surfaces/tui/src/chatwidget/split_007_capture_thread_input_state.rs:                format!("apply_patch touching {}", files[0].display())
+vac-rs/crates/surfaces/tui/src/history_cell/split_004_compositehistorycell.rs:            invocation_line.width() <= (width as usize).saturating_sub(reserved);
+vac-rs/crates/surfaces/tui/src/history_cell/split_004_compositehistorycell.rs:            let opts = RtOptions::new((width as usize).saturating_sub(4))
+vac-rs/crates/surfaces/tui/src/history_cell/split_004_compositehistorycell.rs:        let detail_wrap_width = (width as usize).saturating_sub(4).max(1);
+vac-rs/crates/surfaces/tui/src/history_cell/split_004_compositehistorycell.rs:                        width as usize,
+vac-rs/crates/surfaces/tui/src/history_cell/split_004_compositehistorycell.rs:        Some((self.start_time.elapsed().as_millis() / 50) as u64)
+vac-rs/crates/surfaces/tui/src/history_cell/split_004_compositehistorycell.rs:        let wrap_width = width.saturating_sub(2).max(1) as usize;
+vac-rs/crates/surfaces/tui/src/history_cell/split_004_compositehistorycell.rs:        let wrap_width = width.saturating_sub(4).max(1) as usize;
+vac-rs/crates/surfaces/tui/src/chatwidget/chatwidget_group_009_impl.rs:        let duration = Duration::from_millis(duration_ms.unwrap_or_default().max(0) as u64);
+vac-rs/crates/surfaces/tui/src/markdown.rs:                .any(|w| w[0].trim_end() == "1." && w[1] == "Tight item"),
+vac-rs/crates/surfaces/tui/src/history_cell/history_group_004_005.rs:            invocation_line.width() <= (width as usize).saturating_sub(reserved);
+vac-rs/crates/surfaces/tui/src/history_cell/history_group_004_005.rs:            let opts = RtOptions::new((width as usize).saturating_sub(4))
+vac-rs/crates/surfaces/tui/src/history_cell/history_group_004_005.rs:        let detail_wrap_width = (width as usize).saturating_sub(4).max(1);
+vac-rs/crates/surfaces/tui/src/history_cell/history_group_004_005.rs:                        width as usize,
+vac-rs/crates/surfaces/tui/src/history_cell/history_group_004_005.rs:        Some((self.start_time.elapsed().as_millis() / 50) as u64)
+vac-rs/crates/surfaces/tui/src/history_cell/history_group_004_005.rs:        let wrap_width = width.saturating_sub(2).max(1) as usize;
+vac-rs/crates/surfaces/tui/src/history_cell/history_group_004_005.rs:        let wrap_width = width.saturating_sub(4).max(1) as usize;
+vac-rs/crates/surfaces/tui/src/history_cell/history_group_004_005.rs:        Some((self.start_time.elapsed().as_millis() / 50) as u64)
+vac-rs/crates/surfaces/tui/src/history_cell/history_group_004_005.rs:        let width = width.max(1) as usize;
+vac-rs/crates/surfaces/tui/src/history_cell/history_group_004_005.rs:        let wrap_width = width.saturating_sub(4).max(1) as usize;
+vac-rs/crates/surfaces/tui/src/history_cell/history_group_004_005.rs:            let wrap_width = width.saturating_sub(4).max(1) as usize;
+vac-rs/crates/surfaces/tui/src/history_cell/history_group_004_005.rs:            let opts = RtOptions::new(width.saturating_sub(4).max(1) as usize)
+vac-rs/crates/surfaces/tui/src/insert_history.rs:    let wrap_width = area.width.max(1) as usize;
+vac-rs/crates/surfaces/tui/src/history_cell/hook_cell.rs:        Some(elapsed.as_millis() as u64 / 600)
+vac-rs/crates/surfaces/tui/src/ascii_animation.rs:            return frames[0];
+vac-rs/crates/surfaces/tui/src/ascii_animation.rs:        let idx = ((elapsed_ms / tick_ms) % frames.len() as u128) as usize;
+vac-rs/crates/surfaces/tui/src/history_cell/split_003_approvaldecisionactor.rs:        summary.push(Span::from(files[0].clone()).dim());
+vac-rs/crates/surfaces/tui/src/history_cell/split_003_approvaldecisionactor.rs:        summary.push(Span::from(files[0].clone()).dim());
+vac-rs/crates/surfaces/tui/src/history_cell/split_003_approvaldecisionactor.rs:        create_diff_summary(&self.changes, &self.cwd, width as usize)
+vac-rs/crates/surfaces/tui/src/history_cell/split_003_approvaldecisionactor.rs:    let inner_width = std::cmp::min(width.saturating_sub(4) as usize, max_inner_width);
+vac-rs/crates/surfaces/tui/src/history_cell/split_003_approvaldecisionactor.rs:            inner_width.min(u16::MAX as usize) as u16,
+vac-rs/crates/surfaces/tui/src/history_cell/split_003_approvaldecisionactor.rs:        crate::operator_ui::render_first_launch_visual_lines(&snapshot, inner_width.min(u16::MAX as usize) as u16)
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/exec_flow.rs:    let lines = &cells[0];
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/exec_flow.rs:    let lines = &cells[0];
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/exec_flow.rs:    let blob = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/exec_flow.rs:    let orphan_blob = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/exec_flow.rs:    let first = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/exec_flow.rs:    let blob = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/exec_flow.rs:    let combined = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/exec_flow.rs:        lines_to_single_string(&cells[0]).replace(&platform_file_url, "file:///tmp/ig-1.png");
+vac-rs/crates/surfaces/tui/src/history_cell/split_001_filechange.rs:            RtOptions::new(width as usize)
+vac-rs/crates/surfaces/tui/src/history_cell/split_001_filechange.rs:            RtOptions::new(width as usize)
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/history_replay.rs:                path: local_images[0].clone(),
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/history_replay.rs:                url: remote_image_urls[0].clone(),
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/history_replay.rs:            url: remote_image_urls[0].clone(),
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/history_replay.rs:            path: local_images[0].clone(),
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/history_replay.rs:    assert!(lines_to_single_string(&inserted[0]).contains("Review progress update"));
+vac-rs/crates/surfaces/tui/src/history_cell/split_005_empty_mcp_output.rs:        Some((self.start_time.elapsed().as_millis() / 50) as u64)
+vac-rs/crates/surfaces/tui/src/history_cell/split_005_empty_mcp_output.rs:        let width = width.max(1) as usize;
+vac-rs/crates/surfaces/tui/src/history_cell/split_005_empty_mcp_output.rs:        let wrap_width = width.saturating_sub(4).max(1) as usize;
+vac-rs/crates/surfaces/tui/src/history_cell/split_005_empty_mcp_output.rs:            let wrap_width = width.saturating_sub(4).max(1) as usize;
+vac-rs/crates/surfaces/tui/src/history_cell/split_005_empty_mcp_output.rs:            let opts = RtOptions::new(width.saturating_sub(4).max(1) as usize)
+vac-rs/crates/surfaces/tui/src/markdown_stream.rs:        let l = &out[0];
+vac-rs/crates/surfaces/tui/src/markdown_stream.rs:        assert_eq!(non_blank[0].style.fg, Some(Color::Green));
+vac-rs/crates/surfaces/tui/src/markdown_stream.rs:        assert_eq!(out[0].style.fg, Some(Color::Green));
+vac-rs/crates/surfaces/tui/src/markdown_stream.rs:                l.spans[0].style.fg,
+vac-rs/crates/surfaces/tui/src/markdown_stream.rs:                l.spans[0].style.fg
+vac-rs/crates/surfaces/tui/src/markdown_stream.rs:        assert_eq!(line_to_string(&out1[0]), "Hello.");
+vac-rs/crates/surfaces/tui/src/markdown_stream.rs:        let marker_span = &line.spans[0];
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/plan_mode.rs:        items[0],
+vac-rs/crates/surfaces/tui/src/ui_consts.rs:pub(crate) const FOOTER_INDENT_COLS: usize = LIVE_PREFIX_COLS as usize;
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    assert!(matches!(first[0], RuntimeEvent::SessionStarted(_)));
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    match &events[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    match &events[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    let label = verbose_runtime_history_label(&events[0]);
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    let label = verbose_runtime_history_label(&events[0]);
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    let label = verbose_runtime_history_label(&events[0]);
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    assert!(matches!(first[0], RuntimeEvent::AssistantDelta(_)));
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    match &events[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    match &events[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    match &ok_events[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    match &fail_events[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    match &events[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    match &s_events[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    match &f_events[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    let request_id = match &events[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    let request_id = match &events[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    let request_id = match &events[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    let request_id = match &events[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    let request_id = match &events[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    let label = verbose_runtime_history_label(&started[0]);
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    let label_done = verbose_runtime_history_label(&finished[0]);
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    let label = verbose_runtime_history_label(&started[0]);
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    let label_done = verbose_runtime_history_label(&finished[0]);
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    match &finished[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    match &finished[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        verbose_runtime_history_label(&started[0]),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    match &finished[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        verbose_runtime_history_label(&finished[0]),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    let label = verbose_runtime_history_label(&first[0]);
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        verbose_runtime_history_label(&exec_req[0]),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        verbose_runtime_history_label(&patch_req[0]),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        verbose_runtime_history_label(&perm_req[0]),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        verbose_runtime_history_label(&elic_req[0]),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    let request_id = match &exec_req[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    let request_id = match &req[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    let session_label = verbose_runtime_history_label(&events[0]);
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        verbose_runtime_history_label(&finished[0]),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        verbose_runtime_history_label(&started[0]),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    let label = verbose_runtime_history_label(&started[0]);
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        matches!(started[0], RuntimeEvent::ValidationStarted(_)),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        verbose_runtime_history_label(&started[0]),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        verbose_runtime_history_label(&events[0]),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    assert!(matches!(opening[0], RuntimeEvent::SessionStarted(_)));
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    assert_eq!(activity_history_label(&opening[0]), None);
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    assert_eq!(activity_history_label(&delta[0]), None);
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    assert!(matches!(started[0], RuntimeEvent::ToolCallStarted(_)));
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    assert_eq!(activity_history_label(&started[0]), None);
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        activity_history_label(&finished[0]).as_deref(),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        activity_history_label(&finished[0]).as_deref(),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    assert!(matches!(started[0], RuntimeEvent::ValidationStarted(_)));
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        activity_history_label(&started[0]).as_deref(),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    assert!(matches!(finished[0], RuntimeEvent::ValidationFinished(_)));
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        activity_history_label(&finished[0]).as_deref(),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        activity_history_label(&exec_req[0]).as_deref(),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:    let request_id = match &exec_req[0] {
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        activity_history_label(&completed[0]).as_deref(),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        activity_history_label(&interrupted[0]).as_deref(),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        activity_history_label(&started[0]).as_deref(),
+vac-rs/crates/surfaces/tui/src/runtime_adapter/tests.rs:        activity_history_label(&finished[0]).as_deref(),
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/composer_submission.rs:        items[0],
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/composer_submission.rs:            path: local_images[0].clone()
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/composer_submission.rs:        items[0],
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/composer_submission.rs:            path: local_images[0].clone(),
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/composer_submission.rs:    assert_eq!(text_elements[0].placeholder(&text), Some("[Image #2]"));
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/composer_submission.rs:        vec![local_images[0].path.clone()],
+vac-rs/crates/surfaces/tui/src/pager_overlay.rs:            .map(|c| c.desired_height(width) as usize)
+vac-rs/crates/surfaces/tui/src/pager_overlay.rs:            .min(content_height.saturating_sub(content_area.height as usize));
+vac-rs/crates/surfaces/tui/src/pager_overlay.rs:        Span::from("/ ".repeat(area.width as usize / 2))
+vac-rs/crates/surfaces/tui/src/pager_overlay.rs:        Span::from("─".repeat(sep_rect.width as usize))
+vac-rs/crates/surfaces/tui/src/pager_overlay.rs:            let max_scroll = total_len.saturating_sub(content_area.height as usize);
+vac-rs/crates/surfaces/tui/src/pager_overlay.rs:                let half_page = (area.height as usize).saturating_add(1) / 2;
+vac-rs/crates/surfaces/tui/src/pager_overlay.rs:                let half_page = (area.height as usize).saturating_add(1) / 2;
+vac-rs/crates/surfaces/tui/src/pager_overlay.rs:            .unwrap_or_else(|| self.content_area(viewport_area).height as usize)
+vac-rs/crates/surfaces/tui/src/pager_overlay.rs:        self.last_content_height = Some(height as usize);
+vac-rs/crates/surfaces/tui/src/pager_overlay.rs:            .map(|r| r.desired_height(area.width) as usize)
+vac-rs/crates/surfaces/tui/src/pager_overlay.rs:        let last = first + self.renderables[idx].desired_height(area.width) as usize;
+vac-rs/crates/surfaces/tui/src/pager_overlay.rs:        let current_bottom = current_top.saturating_add(area.height.saturating_sub(1) as usize);
+vac-rs/crates/surfaces/tui/src/pager_overlay.rs:            self.scroll_offset = last.saturating_sub(area.height.saturating_sub(1) as usize);
+vac-rs/crates/surfaces/tui/src/pager_overlay.rs:            page2[0], expected_page2_first,
+vac-rs/crates/surfaces/tui/src/terminal_probe.rs:                    buffer.extend_from_slice(&chunk[..count as usize]);
+vac-rs/crates/surfaces/tui/src/runtime_owner_session.rs:                history_entry_count: configured.history_entry_count as u64,
+vac-rs/crates/surfaces/tui/src/runtime_owner_session.rs:                .map(|duration| duration.as_secs() as i64)
+vac-rs/crates/surfaces/tui/src/runtime_owner_session.rs:                page_size: params.limit.unwrap_or(50).max(1) as usize,
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/helpers.rs:            used_percent: percent.round() as i32,
+vac-rs/crates/surfaces/tui/src/text_formatting.rs:    if has_leading_sep && !raw_segments.is_empty() && raw_segments[0].is_empty() {
+vac-rs/crates/surfaces/tui/src/text_formatting.rs:        1 => items[0].as_ref().to_string(),
+vac-rs/crates/surfaces/tui/src/text_formatting.rs:        2 => format!("{} and {}", items[0].as_ref(), items[1].as_ref()),
+vac-rs/crates/surfaces/tui/src/keymap_setup.rs:        assert_eq!(unbound_tab.items[0].name, "Toggle Vim Mode");
+vac-rs/crates/surfaces/tui/src/keymap_setup.rs:        assert_eq!(unbound_tab.items[0].description.as_deref(), Some("unbound"));
+vac-rs/crates/surfaces/tui/src/keymap_setup.rs:        assert!(!unbound_tab.items[0].is_disabled);
+vac-rs/crates/surfaces/tui/src/auto_review_denials.rs:                format!("apply_patch touching {}", files[0].display())
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/footer_flash_parts/footer_flash_group_005_impl.rs:                                .decide_begin_buffer(now, before, retro_chars as usize)
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:    render_chrome_header("vac · interactive", "first launch", chunks[0], buf);
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:    render_status_grid("VAC", &snapshot.rows_left, body_cols[0], buf);
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:    render_chrome_header("vac · interactive", "idle", chunks[0], buf);
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:    render_chrome_header("vac · interactive", "agent working", chunks[0], buf);
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:    render_chrome_header("vac · interactive", "destructive bash", chunks[0], buf);
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:    render_chrome_header("vac · interactive", "runtime jobs", chunks[0], buf);
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:    .render(inspect_cols[0], buf);
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:    render_chrome_header(&state.chrome_title, &state.chrome_mode, screen[0], buf);
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:    ]).style(Style::default().bg(BG)).render(top[0], buf);
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:    render_dashboard_left(state, body[0], buf);
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:        .render(chunks[0], buf);
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:            state.owned_domains as u64,
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:            (state.owned_domains + state.unowned_domains).max(1) as u64,
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:        .render(bottom[0], buf);
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:        .render(chunks[0], buf);
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:    let width = area.width as usize;
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:        assert_eq!(line_to_string(lines[0].clone()), "A B");
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:        assert_eq!(lines[0].spans.len(), 2);
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:        assert_eq!(lines[0].spans[0].style.bg, Some(BLUE_BG));
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:        assert_eq!(lines[0].spans[0].style.fg, Some(CYAN));
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:        assert_eq!(lines[0].spans[1].style.bg, Some(GREEN_BG));
+vac-rs/crates/surfaces/tui/src/operator_widget_render.rs:        assert_eq!(lines[0].spans[1].style.fg, Some(GREEN));
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/footer_flash_parts/footer_flash_group_003_impl.rs:                                .decide_begin_buffer(now, before, retro_chars as usize)
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/footer_flash_parts/footer_flash_group_999_epilogue.rs:                        hint_rect.width.saturating_sub(FOOTER_INDENT_COLS as u16) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/footer_flash_parts/footer_flash_group_999_epilogue.rs:                        hint_rect.width.saturating_sub(FOOTER_INDENT_COLS as u16) as usize;
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/footer_flash_parts/footer_flash_group_999_epilogue.rs:                            truncate_line_with_ellipsis_if_overflow(line.clone(), max_left as usize)
+vac-rs/crates/surfaces/tui/src/keymap.rs:        other if other.len() == 1 => KeyCode::Char(char::from(other.as_bytes()[0])),
+vac-rs/crates/surfaces/tui/src/bottom_pane/unified_exec_footer.rs:        let (truncated, _, _) = take_prefix_by_width(&message, width as usize);
+vac-rs/crates/surfaces/tui/src/live_wrap.rs:        assert_eq!(rows[0].text, "hello");
+vac-rs/crates/surfaces/tui/src/bottom_pane/status_line_style.rs:        assert_eq!(line.spans[0].style.fg, Some(Color::Cyan));
+vac-rs/crates/surfaces/tui/src/bottom_pane/status_line_style.rs:        assert!(!line.spans[0].style.add_modifier.contains(Modifier::DIM));
+vac-rs/crates/surfaces/tui/src/bottom_pane/status_line_style.rs:        assert_eq!(line.spans[0].style.fg, Some(Color::Red));
+vac-rs/crates/surfaces/tui/src/bottom_pane/status_line_style.rs:        assert!(!line.spans[0].style.add_modifier.contains(Modifier::DIM));
+vac-rs/crates/surfaces/tui/src/bottom_pane/status_line_style.rs:        assert_eq!(line.spans[0].style.fg, Some(Color::Rgb(228, 11, 11)));
+vac-rs/crates/surfaces/tui/src/bottom_pane/status_line_style.rs:        assert!(!line.spans[0].style.add_modifier.contains(Modifier::DIM));
+vac-rs/crates/surfaces/tui/src/bottom_pane/status_line_style.rs:        assert_eq!(line.spans[0].style.fg, None);
+vac-rs/crates/surfaces/tui/src/bottom_pane/status_line_style.rs:        assert!(line.spans[0].style.add_modifier.contains(Modifier::DIM));
+vac-rs/crates/surfaces/tui/src/bottom_pane/pending_input_preview.rs:            RtOptions::new(width as usize).subsequent_indent(Line::from("  ".dim())),
+vac-rs/crates/surfaces/tui/src/bottom_pane/pending_input_preview.rs:                    RtOptions::new(width as usize)
+vac-rs/crates/surfaces/tui/src/bottom_pane/pending_input_preview.rs:                    RtOptions::new(width as usize)
+vac-rs/crates/surfaces/tui/src/bottom_pane/pending_input_preview.rs:                    RtOptions::new(width as usize)
+vac-rs/crates/surfaces/tui/src/bottom_pane/pending_thread_approvals.rs:                RtOptions::new(width as usize)
+vac-rs/crates/surfaces/tui/src/custom_terminal.rs:    let mut last_nonblank_columns = vec![0; a.area.height as usize];
+vac-rs/crates/surfaces/tui/src/custom_terminal.rs:        let row_start = y as usize * a.area.width as usize;
+vac-rs/crates/surfaces/tui/src/custom_terminal.rs:        let row_end = row_start + a.area.width as usize;
+vac-rs/crates/surfaces/tui/src/custom_terminal.rs:        last_nonblank_columns[y as usize] = last_nonblank_column as u16;
+vac-rs/crates/surfaces/tui/src/custom_terminal.rs:            let row = i / a.area.width as usize;
+vac-rs/crates/surfaces/tui/src/token_usage.rs:            .round() as i64
+vac-rs/crates/surfaces/tui/src/theme_picker.rs:                render_width as usize,
+vac-rs/crates/surfaces/tui/src/theme_picker.rs:                render_width as usize,
+vac-rs/crates/surfaces/tui/src/theme_picker.rs:        list_width as usize
+vac-rs/crates/surfaces/tui/src/theme_picker.rs:        content_width as usize
+vac-rs/crates/surfaces/tui/src/tui.rs:                    y: cursor_pos.y as i32 - last_known_cursor_pos.y as i32,
+vac-rs/crates/runtime/sandbox/process-hardening/src/lib.rs:        assert_eq!(keys[0].as_os_str(), ld_test_var);
+vac-rs/crates/surfaces/tui/src/app_backtrack.rs:        let agent = cells[0]
+vac-rs/crates/surfaces/tui/src/app_backtrack.rs:        let intro_text: String = agent_lines[0]
+vac-rs/crates/surfaces/tui/src/app_backtrack.rs:        let agent_intro = cells[0]
+vac-rs/crates/surfaces/tui/src/app_backtrack.rs:        let intro_text: String = intro_lines[0]
+vac-rs/crates/surfaces/tui/src/app_backtrack.rs:        let between_text: String = between_lines[0]
+vac-rs/crates/surfaces/tui/src/app_backtrack.rs:        let first_user = cells[0]
+vac-rs/crates/surfaces/tui/src/app_backtrack.rs:        let intro = cells[0]
+vac-rs/crates/surfaces/tui/src/app_backtrack.rs:        let intro_text: String = intro_lines[0]
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer_history.rs:        self.populate_history_at_index(next_idx as usize, app_event_tx)
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer_history.rs:            Some(idx) if (idx as usize) + 1 >= total_entries => None,
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer_history.rs:                self.populate_history_at_index(idx as usize, app_event_tx)
+vac-rs/crates/surfaces/tui/src/render/highlight.rs:        let fn_span = lines[0].spans.iter().find(|sp| sp.content.as_ref() == "fn");
+vac-rs/crates/surfaces/tui/src/markdown_render.rs:        let content = format!("{} ", "#".repeat(level as usize));
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/footer_flash_parts/chat_composer_impl_parts/chat_composer_impl_00_002_parts/chat_composer_impl_00_002_000.rs:                                .decide_begin_buffer(now, before, retro_chars as usize)
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/footer_flash_parts/chat_composer_impl_parts/chat_composer_impl_00_002_parts/chat_composer_impl_00_002_002.rs:                                .decide_begin_buffer(now, before, retro_chars as usize)
+vac-rs/crates/surfaces/tui/src/onboarding/trust_directory.rs:                keys::CONFIRM[0].into(),
+vac-rs/crates/surfaces/tui/src/onboarding/auth.rs:        keys::CONFIRM[0]
+vac-rs/crates/surfaces/tui/src/onboarding/auth.rs:        keys::CANCEL[0]
+vac-rs/crates/surfaces/tui/src/onboarding/auth.rs:            (current_index as isize + delta).rem_euclid(options.len() as isize) as usize;
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/slash_commands.rs:    let rendered = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/slash_commands.rs:    let rendered = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/slash_commands.rs:    let rendered = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/slash_commands.rs:    let rendered = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/slash_commands.rs:    let rendered = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/slash_commands.rs:    let rendered = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/slash_commands.rs:    let rendered = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/slash_commands.rs:    let rendered = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/slash_commands.rs:    let rendered = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/slash_commands.rs:    let rendered = lines_to_single_string(&cells[0]);
+vac-rs/crates/surfaces/tui/src/external_agent_config_migration.rs:        let visible_rows = area.height as usize;
+vac-rs/crates/surfaces/tui/src/external_agent_config_migration.rs:            let line = truncate_line_with_ellipsis_if_overflow(line, area.width as usize);
+vac-rs/crates/surfaces/tui/src/external_agent_config_migration.rs:                .min(inner_area.height.saturating_sub(fixed_height) as usize) as u16;
+vac-rs/crates/foundation/state/src/runtime/memories/split_001_job_kind_memory_stage1.rs:            .rows_affected() as usize;
+vac-rs/crates/foundation/state/src/runtime/memories/split_001_job_kind_memory_stage1.rs:        .bind(n as i64)
+vac-rs/crates/foundation/state/src/runtime/memories/split_001_job_kind_memory_stage1.rs:        .bind(limit as i64)
+vac-rs/crates/foundation/state/src/runtime/memories/split_001_job_kind_memory_stage1.rs:        Ok(rows_affected as usize)
+vac-rs/crates/foundation/state/src/runtime/memories/split_001_job_kind_memory_stage1.rs:        .bind(n as i64)
+vac-rs/crates/foundation/state/src/runtime/memories/split_001_job_kind_memory_stage1.rs:        let max_running_jobs = max_running_jobs as i64;

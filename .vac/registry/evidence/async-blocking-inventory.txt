@@ -1,0 +1,143 @@
+vac-rs/crates/capabilities/file-search/src/lib.rs:824:        thread::sleep(Duration::from_millis(20));
+vac-rs/crates/capabilities/file-search/src/lib.rs:827:        thread::sleep(Duration::from_millis(20));
+vac-rs/crates/capabilities/file-search/src/lib.rs:942:        thread::sleep(Duration::from_millis(5));
+vac-rs/crates/surfaces/tui/src/tui/event_stream.rs:311:        rx: mpsc::UnboundedReceiver<EventResult>,
+vac-rs/crates/surfaces/tui/src/tui/event_stream.rs:312:        tx: mpsc::UnboundedSender<EventResult>,
+vac-rs/crates/surfaces/tui/src/tui/event_stream.rs:321:            let (tx, rx) = mpsc::unbounded_channel();
+vac-rs/crates/capabilities/code-mode/src/runtime/timers.rs:40:        thread::sleep(Duration::from_millis(delay_ms));
+vac-rs/crates/providers/vac-client/tests/ca_env.rs:352:                thread::sleep(Duration::from_millis(10));
+vac-rs/crates/capabilities/code-mode/src/runtime/mod.rs:383:        let (event_tx, mut event_rx) = mpsc::unbounded_channel();
+vac-rs/crates/capabilities/code-mode/src/service.rs:904:        let (runtime_event_tx, _runtime_event_rx) = mpsc::unbounded_channel();
+vac-rs/crates/integrations/rmcp-client/src/stdio_server_launcher.rs:24:use std::thread::sleep;
+vac-rs/crates/providers/login/src/server.rs:579:                    thread::sleep(RETRY_DELAY);
+vac-rs/crates/surfaces/tui/src/app/tests/model_catalog.rs:4:use tokio::sync::mpsc::unbounded_channel;
+vac-rs/crates/surfaces/tui/src/app/tests/model_catalog.rs:188:    let (tx_raw, mut rx) = unbounded_channel();
+vac-rs/crates/surfaces/tui/src/transcript_reflow.rs:193:        std::thread::sleep(Duration::from_millis(1));
+vac-rs/crates/surfaces/tui/src/keymap_setup.rs:781:    use tokio::sync::mpsc::UnboundedReceiver;
+vac-rs/crates/surfaces/tui/src/keymap_setup.rs:782:    use tokio::sync::mpsc::unbounded_channel;
+vac-rs/crates/surfaces/tui/src/keymap_setup.rs:785:        let (tx, _rx) = unbounded_channel();
+vac-rs/crates/surfaces/tui/src/keymap_setup.rs:829:    fn test_pane() -> (BottomPane, AppEventSender, UnboundedReceiver<AppEvent>) {
+vac-rs/crates/surfaces/tui/src/keymap_setup.rs:830:        let (tx_raw, rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/chatwidget/split_003_vacoptarget.rs:4:    Direct(UnboundedSender<AppCommand>),
+vac-rs/crates/surfaces/tui/src/status_indicator_widget.rs:301:    use tokio::sync::mpsc::unbounded_channel;
+vac-rs/crates/surfaces/tui/src/status_indicator_widget.rs:321:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/status_indicator_widget.rs:339:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/status_indicator_widget.rs:357:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/status_indicator_widget.rs:386:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/status_indicator_widget.rs:410:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/status_indicator_widget.rs:435:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/status_indicator_widget.rs:459:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/status_line_setup.rs:341:    use tokio::sync::mpsc::unbounded_channel;
+vac-rs/crates/surfaces/tui/src/bottom_pane/status_line_setup.rs:552:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/app_event_sender.rs:19:use tokio::sync::mpsc::UnboundedSender;
+vac-rs/crates/surfaces/tui/src/app_event_sender.rs:36:    Unbounded(UnboundedSender<AppEvent>),
+vac-rs/crates/surfaces/tui/src/app_event_sender.rs:46:impl From<UnboundedSender<AppEvent>> for AppEventChannelSender {
+vac-rs/crates/surfaces/tui/src/app_event_sender.rs:47:    fn from(sender: UnboundedSender<AppEvent>) -> Self {
+vac-rs/crates/surfaces/tui/src/bottom_pane/multi_select_picker.rs:881:    use tokio::sync::mpsc::unbounded_channel;
+vac-rs/crates/surfaces/tui/src/bottom_pane/multi_select_picker.rs:884:        let (tx, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/title_setup.rs:386:    use tokio::sync::mpsc::unbounded_channel;
+vac-rs/crates/surfaces/tui/src/bottom_pane/title_setup.rs:413:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/tests/suite/resize_reflow.rs:5:use std::thread::sleep;
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/goal_menu.rs:64:    rx: &mut tokio::sync::mpsc::UnboundedReceiver<crate::app_event::AppEvent>,
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/slash_commands.rs:38:fn next_add_to_history_op(op_rx: &mut tokio::sync::mpsc::UnboundedReceiver<Op>) -> String {
+vac-rs/crates/surfaces/cli/src/plan_cli.rs:102:        std::thread::sleep(Duration::from_millis(20));
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/helpers.rs:151:    tokio::sync::mpsc::UnboundedReceiver<AppEvent>,
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/helpers.rs:152:    tokio::sync::mpsc::UnboundedReceiver<Op>,
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/helpers.rs:154:    let (tx_raw, rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/helpers.rs:156:    let (op_tx, op_rx) = unbounded_channel::<Op>();
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/helpers.rs:349:pub(super) fn next_submit_op(op_rx: &mut tokio::sync::mpsc::UnboundedReceiver<Op>) -> Op {
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/helpers.rs:360:pub(super) fn next_interrupt_op(op_rx: &mut tokio::sync::mpsc::UnboundedReceiver<Op>) {
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/helpers.rs:371:pub(super) fn next_realtime_close_op(op_rx: &mut tokio::sync::mpsc::UnboundedReceiver<Op>) {
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/helpers.rs:386:pub(super) fn assert_no_submit_op(op_rx: &mut tokio::sync::mpsc::UnboundedReceiver<Op>) {
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/helpers.rs:458:    tokio::sync::mpsc::UnboundedReceiver<AppEvent>,
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/helpers.rs:459:    tokio::sync::mpsc::UnboundedReceiver<Op>,
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/helpers.rs:467:    rx: &mut tokio::sync::mpsc::UnboundedReceiver<AppEvent>,
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/side.rs:54:    rx: &mut tokio::sync::mpsc::UnboundedReceiver<AppEvent>,
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/side.rs:55:    op_rx: &mut tokio::sync::mpsc::UnboundedReceiver<Op>,
+vac-rs/crates/surfaces/tui/src/chatwidget/split_001_btreemap.rs:144:use tokio::sync::mpsc::UnboundedSender;
+vac-rs/crates/capabilities/core-plugins/src/marketplace_upgrade/git.rs:205:        std::thread::sleep(Duration::from_millis(100));
+vac-rs/crates/surfaces/tui/src/chatwidget/tests/plan_mode.rs:1546:        app_event_tx: AppEventSender::new(unbounded_channel::<AppEvent>().0),
+vac-rs/crates/capabilities/core-plugins/src/startup_sync.rs:587:        std::thread::sleep(Duration::from_millis(100));
+vac-rs/crates/surfaces/tui/src/chatwidget/tests.rs:137:pub(super) use tokio::sync::mpsc::unbounded_channel;
+vac-rs/crates/surfaces/tui/src/bottom_pane/skills_toggle_view.rs:387:    use tokio::sync::mpsc::unbounded_channel;
+vac-rs/crates/surfaces/tui/src/bottom_pane/skills_toggle_view.rs:414:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/feedback_view.rs:615:        let (tx_raw, _rx) = tokio::sync::mpsc::unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/feedback_view.rs:659:        let (tx_raw, _rx) = tokio::sync::mpsc::unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/feedback_view.rs:674:        let (tx_raw, mut rx) = tokio::sync::mpsc::unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/feedback_view.rs:701:        let (tx_raw, mut rx) = tokio::sync::mpsc::unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/app_link_view.rs:578:    use tokio::sync::mpsc::unbounded_channel;
+vac-rs/crates/surfaces/tui/src/bottom_pane/app_link_view.rs:613:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/app_link_view.rs:639:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/app_link_view.rs:662:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/app_link_view.rs:685:        let (tx_raw, mut rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/app_link_view.rs:722:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/app_link_view.rs:766:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/app_link_view.rs:816:        let (tx_raw, mut rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/app_link_view.rs:874:        let (tx_raw, mut rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/app_link_view.rs:916:        let (tx_raw, mut rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/app_link_view.rs:966:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/app_link_view.rs:995:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/app_link_view.rs:1024:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/app_link_view.rs:1053:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/hooks_browser_view.rs:669:    use tokio::sync::mpsc::unbounded_channel;
+vac-rs/crates/surfaces/tui/src/bottom_pane/hooks_browser_view.rs:727:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/hooks_browser_view.rs:775:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/hooks_browser_view.rs:812:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/hooks_browser_view.rs:850:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/hooks_browser_view.rs:879:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/hooks_browser_view.rs:906:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/hooks_browser_view.rs:923:        let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/hooks_browser_view.rs:951:        let (tx_raw, mut rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/hooks_browser_view.rs:988:        let (tx_raw, mut rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer_history.rs:795:    use tokio::sync::mpsc::unbounded_channel;
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer_history.rs:828:        let (tx, mut rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer_history.rs:892:        let (tx, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer_history.rs:958:        let (tx, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer_history.rs:1016:        let (tx, mut rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer_history.rs:1089:        let (tx, mut rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer_history.rs:1150:        let (tx, mut rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer_history.rs:1241:        let (tx, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer_history.rs:1269:        let (tx, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/capabilities/sessions/src/core_migrated/message_history.rs:149:                    std::thread::sleep(RETRY_SLEEP);
+vac-rs/crates/capabilities/sessions/src/core_migrated/message_history.rs:387:                std::thread::sleep(RETRY_SLEEP);
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_003.rs:11:    use tokio::sync::mpsc::unbounded_channel;
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_003.rs:16:        tokio::sync::mpsc::UnboundedReceiver<AppEvent>,
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_003.rs:18:        let (tx_raw, rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_parts/request_user_input_part_003.rs:22:    fn expect_interrupt_only(rx: &mut tokio::sync::mpsc::UnboundedReceiver<AppEvent>) {
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_003.rs:12:    use tokio::sync::mpsc::unbounded_channel;
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_003.rs:17:        tokio::sync::mpsc::UnboundedReceiver<AppEvent>,
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_003.rs:19:        let (tx_raw, rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/request_user_input/request_user_input_group_003.rs:23:    fn expect_interrupt_only(rx: &mut tokio::sync::mpsc::UnboundedReceiver<AppEvent>) {
+vac-rs/crates/integrations/otel/tests/suite/otlp_http_loopback.rs:46:                    thread::sleep(Duration::from_millis(5));
+vac-rs/crates/integrations/otel/tests/suite/otlp_http_loopback.rs:160:                    thread::sleep(Duration::from_millis(10));
+vac-rs/crates/integrations/otel/tests/suite/otlp_http_loopback.rs:246:                    thread::sleep(Duration::from_millis(10));
+vac-rs/crates/integrations/otel/tests/suite/otlp_http_loopback.rs:354:                    thread::sleep(Duration::from_millis(10));
+vac-rs/crates/integrations/otel/tests/suite/otlp_http_loopback.rs:462:                    thread::sleep(Duration::from_millis(10));
+vac-rs/crates/control-plane/control-plane/src/control_plane/approval_store.rs:92:                thread::sleep(interval);
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/history_search.rs:494:    use tokio::sync::mpsc::unbounded_channel;
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/history_search.rs:506:        let (tx, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/history_search.rs:542:        let (tx, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/history_search.rs:577:        let (tx, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/history_search.rs:603:        let (tx, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/history_search.rs:649:        let (tx, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/history_search.rs:710:        let (tx, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/history_search.rs:766:        let (tx, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/history_search.rs:795:            let (tx, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/history_search.rs:834:        let (tx, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/history_search.rs:865:        let (tx, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/history_search.rs:900:        let (tx, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/surfaces/tui/src/bottom_pane/chat_composer/history_search.rs:933:        let (tx, _rx) = unbounded_channel::<AppEvent>();
+vac-rs/crates/control-plane/control-plane/src/control_plane/build_check.rs:206:                thread::sleep(Duration::from_millis(50));
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/elevated/runner_client.rs:414:        std::thread::sleep(RUNNER_SPAWN_READY_POLL_INTERVAL);
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/unified_exec/tests.rs:105:        std::thread::sleep(Duration::from_millis(10));
+vac-rs/crates/runtime/sandbox/windows-sandbox-rs/src/helper_materialization.rs:389:        std::thread::sleep(std::time::Duration::from_secs(1));
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/linux_run_main.rs:567:                    thread::sleep(Duration::from_millis(1));
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/linux_run_main.rs:1120:                thread::sleep(Duration::from_millis(1));
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/linux_run_main.rs:1140:                thread::sleep(Duration::from_millis(1));
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/proxy_routing.rs:396:            std::thread::sleep(Duration::from_millis(100));
+vac-rs/crates/runtime/sandbox/linux-sandbox/src/proxy_routing.rs:412:            Err(_) => std::thread::sleep(Duration::from_millis(100)),
+vac-rs/crates/runtime/exec/exec-server/tests/common/mod.rs:120:        std::thread::sleep(Duration::from_millis(10));
+vac-rs/crates/foundation/utils/pty/src/pty.rs:183:                    std::thread::sleep(Duration::from_millis(5));
+vac-rs/crates/foundation/utils/pty/src/pty.rs:344:                    std::thread::sleep(Duration::from_millis(5));
+vac-rs/crates/runtime/exec/exec/tests/suite/resume.rs:257:    std::thread::sleep(std::time::Duration::from_millis(1100));
+vac-rs/crates/runtime/exec/exec/tests/suite/resume.rs:277:    std::thread::sleep(std::time::Duration::from_millis(1100));

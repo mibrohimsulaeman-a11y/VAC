@@ -513,6 +513,7 @@
             style_epoch: std::cell::Cell::new(1),
             transcript_scroll_top: std::cell::Cell::new(0),
             desired_height_cache: std::cell::RefCell::new(height_cache::DesiredHeightCache::default()),
+            rendered_lines_cache: std::cell::RefCell::new(height_cache::RenderedLinesCache::default()),
             feedback,
             current_rollout_path: None,
             current_cwd,
@@ -581,4 +582,3 @@
 
         widget
     }
-

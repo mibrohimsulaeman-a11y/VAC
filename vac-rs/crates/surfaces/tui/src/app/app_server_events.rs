@@ -89,10 +89,7 @@ impl App {
                         notification.plan_type,
                     ),
                     notification.plan_type,
-                    matches!(
-                        notification.auth_mode,
-                        Some(AuthMode::ProviderCredential)
-                    ),
+                    matches!(notification.auth_mode, Some(AuthMode::ProviderCredential)),
                 );
                 return;
             }

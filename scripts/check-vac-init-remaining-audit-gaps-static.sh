@@ -60,8 +60,8 @@ require_grep 'dependency_attribution: NotEvaluated' .vac/registry/legal-release-
 require_grep 'cargo_about_generate: NotEvaluated' .vac/registry/legal-release-blockers.yaml
 
 # Truthfulness: this slice must not mark TV/cargo as done.
-require_no_grep 'TV-Done|cargo_build_workspace_offline: PASS|cargo_test_workspace_offline: PASS|cargo_clippy_workspace_offline: PASS' .vac/registry/o5-o6-completion-state.yaml
-require_no_grep 'TV-Done|cargo_build_workspace_offline: PASS|cargo_test_workspace_offline: PASS|cargo_clippy_workspace_offline: PASS' .vac/registry/o5-o6-monolith-quality-state.yaml
+require_no_grep 'TV-Done|cargo_build_workspace: PASS|cargo_test_workspace: PASS|cargo_clippy_workspace: PASS' .vac/registry/o5-o6-completion-state.yaml
+require_no_grep 'TV-Done|cargo_build_workspace: PASS|cargo_test_workspace: PASS|cargo_clippy_workspace: PASS' .vac/registry/o5-o6-monolith-quality-state.yaml
 
 bash scripts/check-vac-init-approval-binding-contract.sh >/tmp/vac_approval_gate.out || { cat /tmp/vac_approval_gate.out >&2; exit 1; }
 bash scripts/check-vac-init-evidence-chain-contract.sh >/tmp/vac_evidence_gate.out || { cat /tmp/vac_evidence_gate.out >&2; exit 1; }

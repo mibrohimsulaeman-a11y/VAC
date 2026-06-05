@@ -228,6 +228,10 @@ impl Session {
         format!("auto-compact-{id}")
     }
 
+    #[expect(
+        dead_code,
+        reason = "retained for realtime compatibility while the transport bridge is unavailable"
+    )]
     pub(crate) async fn route_realtime_text_input(self: &Arc<Self>, text: String) {
         handlers::user_input_or_turn_inner(
             self,

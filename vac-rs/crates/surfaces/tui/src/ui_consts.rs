@@ -9,3 +9,7 @@
 /// - User history lines account for this many columns (e.g., "▌ ") when wrapping.
 pub(crate) const LIVE_PREFIX_COLS: u16 = 2;
 pub(crate) const FOOTER_INDENT_COLS: usize = LIVE_PREFIX_COLS as usize;
+
+pub(crate) const APP_BG_RGB: (u8, u8, u8) = (7, 13, 20);
+pub(crate) const APP_BG: ratatui::style::Color =
+    ratatui::style::Color::Rgb(APP_BG_RGB.0, APP_BG_RGB.1, APP_BG_RGB.2);

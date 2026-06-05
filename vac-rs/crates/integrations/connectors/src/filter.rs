@@ -24,10 +24,17 @@ pub fn filter_tool_suggest_discoverable_connectors(
         .filter(|connector| !accessible_connector_ids.contains(connector.id.as_str()))
         .filter(|connector| discoverable_connector_ids.contains(connector.id.as_str()))
         .collect::<Vec<_>>();
-    connectors.sort_by(|left, right| left.name.cmp(&right.name).then_with(|| left.id.cmp(&right.id)));
+    connectors.sort_by(|left, right| {
+        left.name
+            .cmp(&right.name)
+            .then_with(|| left.id.cmp(&right.id))
+    });
     connectors
 }
 
-pub fn filter_disallowed_connectors(connectors: Vec<AppInfo>, _originator_value: &str) -> Vec<AppInfo> {
+pub fn filter_disallowed_connectors(
+    connectors: Vec<AppInfo>,
+    _originator_value: &str,
+) -> Vec<AppInfo> {
     connectors
 }

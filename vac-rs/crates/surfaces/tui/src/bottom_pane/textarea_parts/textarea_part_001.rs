@@ -369,6 +369,11 @@ impl TextArea {
             return;
         }
 
+        if event.code == KeyCode::Enter && event.modifiers.is_empty() {
+            self.insert_str("\n");
+            return;
+        }
+
         if keymap.delete_backward_word.is_pressed(event) {
             self.delete_backward_word();
             return;

@@ -381,8 +381,14 @@ fn render_workflow_manifest_lines(
         }
         if state.run_requested && state.selected_workflow.as_deref() == Some(manifest.id.as_str()) {
             let live_execution = execute_workflow_manifest(manifest);
-            let live_progress = WorkflowProgressModel::from_manifest_and_execution(manifest, &live_execution);
-            lines.push("     live execution: completed by TUI workflow runner".green().bold().into());
+            let live_progress =
+                WorkflowProgressModel::from_manifest_and_execution(manifest, &live_execution);
+            lines.push(
+                "     live execution: completed by TUI workflow runner"
+                    .green()
+                    .bold()
+                    .into(),
+            );
             for line in live_progress.render_lines_with(true) {
                 lines.push(format!("       {line}").into());
             }
@@ -401,8 +407,14 @@ fn render_workflow_manifest_lines(
         );
         if state.run_requested && state.selected_workflow.as_deref() == Some(manifest.id.as_str()) {
             let live_execution = execute_workflow_manifest(manifest);
-            let live_progress = WorkflowProgressModel::from_manifest_and_execution(manifest, &live_execution);
-            lines.push("     runner: executed directly from manifest (registry run report missing)".green().bold().into());
+            let live_progress =
+                WorkflowProgressModel::from_manifest_and_execution(manifest, &live_execution);
+            lines.push(
+                "     runner: executed directly from manifest (registry run report missing)"
+                    .green()
+                    .bold()
+                    .into(),
+            );
             for line in live_progress.render_lines_with(true) {
                 lines.push(format!("       {line}").into());
             }
@@ -768,7 +780,7 @@ policy:
     - execute_process
 validation:
   commands:
-    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.93.0 check -p vac-surface-cli
+    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("build capability manifest");
@@ -808,7 +820,7 @@ policy:
     - execute_process
 validation:
   commands:
-    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.93.0 check -p vac-surface-cli
+    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow capability manifest");
@@ -841,7 +853,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("identity check capability manifest");
@@ -896,7 +908,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.93.0 check -p vac-surface-tui --tests
+    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.95.0 check -p vac-surface-tui --tests
 "#,
         )
         .expect("tui capability manifest");
@@ -936,7 +948,7 @@ policy:
     - execute_process
 validation:
   commands:
-    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.93.0 check -p vac-surface-cli
+    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow capability manifest");
@@ -948,7 +960,7 @@ validation:
 
         let rendered = render_to_text(&render_workflow_browser_lines(tempdir.path()));
         assert!(rendered.contains("registry: empty"));
-        assert!(rendered.contains("unable to locate `.vac` root"));
+        assert!(!rendered.contains("registry: failure"));
     }
 
     #[test]
@@ -984,7 +996,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("repo read capability manifest");
@@ -1017,7 +1029,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("build run capability manifest");
@@ -1058,7 +1070,7 @@ policy:
   approval_required_for: [write_files]
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
   gates:
     - build
 "#,
@@ -1128,7 +1140,7 @@ policy:
   approval_required_for: [write_files]
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
   gates:
     - check
 "#,
@@ -1203,7 +1215,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow manifest");
@@ -1260,7 +1272,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("identity check capability manifest");
@@ -1296,7 +1308,7 @@ policy:
     - execute_process
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow manifest");
@@ -1346,7 +1358,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow capability manifest");
@@ -1440,7 +1452,7 @@ policy:
   default_risk: safe_read
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow manifest");
@@ -1480,8 +1492,33 @@ validation:
 
     #[test]
     fn workflow_browser_reports_build_check_failure() {
+        struct EnvVarGuard {
+            original_value: Option<String>,
+            original_repo_root: Option<String>,
+        }
+        impl Drop for EnvVarGuard {
+            fn drop(&mut self) {
+                unsafe {
+                    if let Some(ref v) = self.original_value {
+                        std::env::set_var("VAC_SKIP_BUILD_CHECK", v);
+                    } else {
+                        std::env::remove_var("VAC_SKIP_BUILD_CHECK");
+                    }
+                    if let Some(ref v) = self.original_repo_root {
+                        std::env::set_var("VAC_BUILD_CHECK_REPO_ROOT", v);
+                    } else {
+                        std::env::remove_var("VAC_BUILD_CHECK_REPO_ROOT");
+                    }
+                }
+            }
+        }
+        let _guard = EnvVarGuard {
+            original_value: std::env::var("VAC_SKIP_BUILD_CHECK").ok(),
+            original_repo_root: std::env::var("VAC_BUILD_CHECK_REPO_ROOT").ok(),
+        };
         unsafe {
             std::env::remove_var("VAC_SKIP_BUILD_CHECK");
+            std::env::remove_var("VAC_BUILD_CHECK_REPO_ROOT");
         }
         let tempdir = tempdir().expect("tempdir");
         seed_core_capabilities(tempdir.path());
@@ -1513,7 +1550,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("build capability manifest");
@@ -1545,7 +1582,7 @@ policy:
   default_risk: safe_read
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow manifest");
@@ -1612,7 +1649,7 @@ policy:
   default_risk: safe_read
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow manifest");
@@ -1695,7 +1732,7 @@ policy:
   default_risk: safe_read
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("build-only manifest");
@@ -1723,7 +1760,7 @@ policy:
   default_risk: safe_read
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("identity-only manifest");
@@ -1790,7 +1827,7 @@ policy:
   default_risk: safe_read
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow manifest");

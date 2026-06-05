@@ -394,6 +394,9 @@ impl ChatWidget {
     /// stable project label.
     fn status_line_project_root_for_cwd(&self, cwd: &Path) -> Option<PathBuf> {
         if let Some(repo_root) = get_git_repo_root(cwd) {
+            if repo_root == std::env::temp_dir() {
+                return None;
+            }
             return Some(repo_root);
         }
 
@@ -435,6 +438,14 @@ impl ChatWidget {
             root_name: root_name.clone(),
         });
         root_name
+    }
+
+    fn cached_project_root_name_for_preview(&self) -> Option<String> {
+        let cwd = self.status_line_cwd();
+        self.status_line_project_root_name_cache
+            .as_ref()
+            .filter(|cache| cache.cwd == cwd)
+            .and_then(|cache| cache.root_name.clone())
     }
 
     /// Produces the terminal-title `project` value.
@@ -578,8 +589,14 @@ impl ChatWidget {
     ) -> Option<String> {
         let status_line_item = match item {
             StatusSurfacePreviewItem::AppName => return Some("vac".to_string()),
-            StatusSurfacePreviewItem::ProjectName => return self.terminal_title_project_name(),
-            StatusSurfacePreviewItem::ProjectRoot => StatusLineItem::ProjectRoot,
+            StatusSurfacePreviewItem::ProjectName => {
+                return self
+                    .cached_project_root_name_for_preview()
+                    .map(|name| Self::truncate_terminal_title_part(name, /*max_chars*/ 24));
+            }
+            StatusSurfacePreviewItem::ProjectRoot => {
+                return self.cached_project_root_name_for_preview();
+            }
             StatusSurfacePreviewItem::Status => return Some(self.run_state_status_text()),
             StatusSurfacePreviewItem::TaskProgress => return self.terminal_title_task_progress(),
             StatusSurfacePreviewItem::CurrentDir => StatusLineItem::CurrentDir,

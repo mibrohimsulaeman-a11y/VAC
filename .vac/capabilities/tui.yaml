@@ -345,7 +345,7 @@ ownership:
   - crate_name: vac-surface-tui
     module: operator_ui_snapshot_harness
 description: Root interactive frontend and operator cockpit for the VAC product.
-reason: 'Default TUI session ownership now uses the owner-native runtime protocol and local-runtime-owner surfaces. Legacy app-server compatibility is retired; local means no separate app-server process, not offline-only inference. Provider login/API access remains supported.
+reason: 'Default TUI session ownership now uses the owner-native runtime protocol and local-runtime-owner surfaces. Legacy app-server compatibility is retired; local means no separate app-server process. Provider login/API access remains supported.
 
   '
 depends_on:
@@ -357,7 +357,6 @@ surfaces:
   tui:
     routes:
     - /capabilities
-    - /evidence
 states:
 - empty
 - loading
@@ -373,7 +372,7 @@ validation:
   - id: vac.tui.validation.cmd001
     runner: cargo
     args:
-    - +1.93.0
+    - +1.95.0
     - check
     - -p
     - vac-surface-tui

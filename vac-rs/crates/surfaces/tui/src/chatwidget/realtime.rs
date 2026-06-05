@@ -34,17 +34,18 @@ impl RealtimeConversationUiState {
 
 impl ChatWidget {
     pub(super) fn stop_realtime_conversation_from_ui(&mut self) {
-        self.reset_realtime_conversation_state();
-        self.add_info_message(
-            "Realtime voice was removed from this local coding tool build.".to_string(),
-            None,
-        );
+        self.realtime_conversation.phase = RealtimeConversationPhase::Stopping;
+        if let Some(id) = self.realtime_conversation.meter_placeholder_id.take() {
+            self.remove_recording_meter_placeholder(&id);
+        }
+        self.submit_op(AppCommand::realtime_conversation_close());
     }
 
     pub(crate) fn stop_realtime_conversation_for_deleted_meter(&mut self, id: &str) -> bool {
         if self.realtime_conversation.meter_placeholder_id.as_deref() == Some(id) {
             self.realtime_conversation.meter_placeholder_id = None;
-            self.reset_realtime_conversation_state();
+            self.realtime_conversation.phase = RealtimeConversationPhase::Stopping;
+            self.submit_op(AppCommand::realtime_conversation_close());
             return true;
         }
         false
@@ -78,8 +79,12 @@ impl ChatWidget {
     pub(super) fn on_realtime_item_added(&mut self, _notification: ThreadRealtimeItemAddedNotification) {}
 
     pub(super) fn on_realtime_error(&mut self, notification: ThreadRealtimeErrorNotification) {
-        self.reset_realtime_conversation_state();
-        self.add_error_message(format!("Realtime voice removed: {}", notification.message));
+        self.realtime_conversation.phase = RealtimeConversationPhase::Stopping;
+        if let Some(id) = self.realtime_conversation.meter_placeholder_id.take() {
+            self.remove_recording_meter_placeholder(&id);
+        }
+        self.add_error_message(format!("Realtime voice error: {}", notification.message));
+        self.submit_op(AppCommand::realtime_conversation_close());
     }
 
     pub(super) fn on_realtime_conversation_closed(&mut self, _notification: ThreadRealtimeClosedNotification) {

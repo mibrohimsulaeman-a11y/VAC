@@ -14,11 +14,11 @@ else
   fail=1
 fi
 
-if grep -q 'Epic A App-Server Retirement' docs/monolith-quality/O5O6_EPIC_A_APP_SERVER_RETIREMENT_REPORT.md \
-  && grep -qi 'offline penuh' docs/monolith-quality/O5O6_EPIC_A_APP_SERVER_RETIREMENT_REPORT.md; then
-  echo "PASS: report documents local=in-process and archives offline-full scope"
+if grep -q 'local_semantics: in_process_without_separate_app_server_process' .vac/registry/o5-o6-monolith-quality-state.yaml \
+  && grep -q 'separate_local_runtime_scope: archived_not_requested' .vac/registry/o5-o6-monolith-quality-state.yaml; then
+  echo "PASS: state documents local=in-process and archives separate-runtime scope"
 else
-  echo "FAIL: report missing local/offline scope separation" >&2
+  echo "FAIL: state missing local/separate-runtime scope separation" >&2
   fail=1
 fi
 

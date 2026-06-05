@@ -17,7 +17,7 @@ if grep -q 'No third-party attributions are required' docs/legal/NOTICES.md; the
   exit 1
 fi
 grep -q 'dependency_attribution: NotEvaluated' .vac/registry/legal-release-blockers.yaml
-grep -q 'offline_build_status: NotEvaluated' .vac/registry/legal-release-blockers.yaml
+grep -q 'cargo_build_status: NotEvaluated' .vac/registry/legal-release-blockers.yaml
 grep -q 'cargo_deny_licenses: NotEvaluated' .vac/registry/legal-release-blockers.yaml
 grep -q 'cargo_about_generate: NotEvaluated' .vac/registry/legal-release-blockers.yaml
 

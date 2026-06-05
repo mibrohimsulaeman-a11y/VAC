@@ -268,12 +268,9 @@ impl App {
             .transcript_reflow
             .reflow_needed_for_width(transcript_width);
         let height_changed = size.height != last_known_screen_size.height;
-        let should_rebuild_transcript = reflow_needed;
+        let should_rebuild_transcript = reflow_needed || height_changed;
         if width.changed || width.initialized {
             self.chat_widget.on_terminal_resize(transcript_width);
-        }
-        if height_changed && !reflow_needed {
-            self.transcript_reflow.clear_pending_reflow();
         }
         if should_rebuild_transcript {
             if self.terminal_resize_reflow_enabled() {

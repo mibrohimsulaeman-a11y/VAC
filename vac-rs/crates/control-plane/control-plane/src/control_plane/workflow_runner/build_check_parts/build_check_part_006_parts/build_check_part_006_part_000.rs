@@ -181,7 +181,7 @@ mod tests {
             },
             compatibility_transport: Vec::new(),
             validation: CapabilityManifestValidation {
-                commands: vec!["cargo +1.93.0 check -p vac-surface-cli".to_string()],
+                commands: vec!["cargo +1.95.0 check -p vac-surface-cli".to_string()],
                 gates: Vec::new(),
             },
             description: Some(id.to_string()),
@@ -264,7 +264,7 @@ policy:
     - execute_process
 validation:
   commands:
-    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.93.0 check -p vac-surface-cli
+    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("build capability manifest");
@@ -304,7 +304,7 @@ policy:
     - execute_process
 validation:
   commands:
-    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.93.0 check -p vac-surface-cli
+    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow capability manifest");
@@ -337,7 +337,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("identity check capability manifest");
@@ -392,7 +392,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.93.0 check -p vac-surface-tui --tests
+    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.95.0 check -p vac-surface-tui --tests
 "#,
         )
         .expect("tui capability manifest");
@@ -432,7 +432,7 @@ policy:
     - execute_process
 validation:
   commands:
-    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.93.0 check -p vac-surface-cli
+    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow capability manifest");
@@ -784,7 +784,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("capability manifest");

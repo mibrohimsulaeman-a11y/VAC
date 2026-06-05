@@ -48,7 +48,7 @@ validation:
   - id: maintenance.build-check.validation.cmd001
     runner: cargo
     args:
-    - +1.93.0
+    - +1.95.0
     - check
     - -p
     - vac-cli
@@ -57,7 +57,7 @@ validation:
   - id: maintenance.build-check.validation.fmt
     runner: cargo
     args:
-    - +1.93.0
+    - +1.95.0
     - fmt
     - --all
     - --check
@@ -66,7 +66,7 @@ validation:
   - id: maintenance.build-check.validation.clippy
     runner: cargo
     args:
-    - +1.93.0
+    - +1.95.0
     - clippy
     - --workspace
     - --all-targets
@@ -78,7 +78,7 @@ validation:
   - id: maintenance.build-check.validation.deny
     runner: cargo
     args:
-    - +1.93.0
+    - +1.95.0
     - deny
     - check
     risk: execute_process
@@ -86,7 +86,7 @@ validation:
   - id: maintenance.build-check.validation.audit
     runner: cargo
     args:
-    - +1.93.0
+    - +1.95.0
     - audit
     risk: execute_process
     approval: policy

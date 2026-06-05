@@ -7,6 +7,9 @@ mod operator_ui;
 #[allow(dead_code)]
 #[path = "../src/operator_widget_render.rs"]
 mod operator_widget_render;
+#[allow(dead_code)]
+#[path = "../src/ui_consts.rs"]
+mod ui_consts;
 
 #[test]
 fn generated_operator_snapshots_are_bounded_widget_screens() {

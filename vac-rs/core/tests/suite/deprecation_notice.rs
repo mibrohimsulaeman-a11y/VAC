@@ -10,7 +10,6 @@ use core_test_support::wait_for_event_match;
 use pretty_assertions::assert_eq;
 use std::collections::BTreeMap;
 use toml::Value as TomlValue;
-use vac_runtime_protocol::ConfigLayerSource;
 use vac_config::ConfigLayerEntry;
 use vac_config::ConfigLayerStack;
 use vac_config::ConfigRequirements;
@@ -18,6 +17,7 @@ use vac_config::ConfigRequirementsToml;
 use vac_features::Feature;
 use vac_protocol::protocol::DeprecationNoticeEvent;
 use vac_protocol::protocol::EventMsg;
+use vac_runtime_protocol::ConfigLayerSource;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn emits_deprecation_notice_for_legacy_feature_flag() -> anyhow::Result<()> {

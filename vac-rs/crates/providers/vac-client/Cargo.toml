@@ -15,8 +15,7 @@ workspace = true
 [features]
 default = []
 provider-chatgpt = ["vac-provider-http/provider-chatgpt"]
-provider-realtime = ["vac-provider-http/provider-realtime"]
-provider-cloud-tests = ["provider-chatgpt", "provider-realtime"]
+provider-cloud-tests = ["provider-chatgpt"]
 telemetry = ["vac-provider-http/telemetry"]
 feedback = ["vac-provider-http/feedback"]
 

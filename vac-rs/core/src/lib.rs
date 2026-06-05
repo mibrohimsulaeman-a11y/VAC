@@ -20,7 +20,12 @@ pub mod config {
         }
         dirs::home_dir()
             .map(|home| home.join(".vac"))
-            .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "home directory is unavailable"))
+            .ok_or_else(|| {
+                std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "home directory is unavailable",
+                )
+            })
     }
 
     pub use crate::config_impl::edit;
@@ -36,77 +41,77 @@ pub use vac_capability_ownership::project_workspace;
 pub mod util_impl;
 
 pub mod util {
-    pub use crate::util_impl::resume_command;
     pub use crate::util_impl::backoff;
+    pub(crate) use crate::util_impl::emit_feedback_auth_recovery_tags;
     pub(crate) use crate::util_impl::error_or_panic;
     pub use crate::util_impl::normalize_thread_name;
     pub use crate::util_impl::resolve_path;
-    pub(crate) use crate::util_impl::emit_feedback_auth_recovery_tags;
+    pub use crate::util_impl::resume_command;
 }
 
 // Top-level compatibility re-exports
-pub use vac_thread::VACThread;
-pub use thread_manager::ThreadManager;
-pub use thread_manager::NewThread;
-pub use thread_manager::BranchSnapshot;
-pub use thread_manager::thread_store_from_config;
-pub use event_mapping::parse_turn_item;
 pub use client::ModelClient;
-pub use client_common::Prompt;
-pub use client_common::ResponseEvent;
-pub use client_common::REVIEW_PROMPT;
-pub use rollout::find_thread_path_by_id_str;
-pub use rollout::RolloutRecorder;
-pub use thread_manager::StartThreadOptions;
-pub use compact::content_items_to_text;
-pub use installation_id::resolve_installation_id;
-pub use turn_metadata::build_turn_metadata_header;
-pub use rollout::ThreadListLayout;
-pub use rollout::ThreadSortKey;
-pub use rollout::ThreadListConfig;
-pub use rollout::SESSIONS_SUBDIR;
-pub use rollout::get_threads_in_root;
-pub use rollout::find_thread_meta_by_name_str;
-pub use rollout::paths_match_after_normalization;
-pub use exec_policy::check_execpolicy_for_warnings;
-pub use exec_policy::format_exec_policy_error_with_source;
-pub(crate) use skills::maybe_emit_implicit_skill_invocation;
-pub(crate) use skills::skills_load_input_from_config;
-pub use skills::SkillsManager;
-pub use skills::SkillMetadata;
-pub use skills::build_skill_name_counts;
-pub use vac_rollout::StateDbHandle;
-pub use client::X_VAC_TURN_METADATA_HEADER;
 pub use client::ModelClientSession;
 pub use client::X_RESPONSESAPI_INCLUDE_TIMING_METRICS_HEADER;
+pub use client::X_VAC_TURN_METADATA_HEADER;
+pub use client_common::Prompt;
+pub use client_common::REVIEW_PROMPT;
+pub use client_common::ResponseEvent;
+pub use compact::content_items_to_text;
+pub use event_mapping::parse_turn_item;
+pub use exec_policy::check_execpolicy_for_warnings;
+pub use exec_policy::format_exec_policy_error_with_source;
 pub use exec_policy::load_exec_policy;
-pub use rollout::ARCHIVED_SESSIONS_SUBDIR;
-pub use prompt_debug::build_prompt_input;
-pub use rollout::EventPersistenceMode;
-pub use rollout::RolloutRecorderParams;
-pub use rollout::find_archived_thread_path_by_id_str;
-pub use vac_thread::ThreadConfigSnapshot;
+pub use installation_id::resolve_installation_id;
 pub use landlock::spawn_command_under_linux_sandbox;
+pub use prompt_debug::build_prompt_input;
+pub use rollout::ARCHIVED_SESSIONS_SUBDIR;
+pub use rollout::EventPersistenceMode;
+pub use rollout::RolloutRecorder;
+pub use rollout::RolloutRecorderParams;
+pub use rollout::SESSIONS_SUBDIR;
+pub use rollout::ThreadListConfig;
+pub use rollout::ThreadListLayout;
+pub use rollout::ThreadSortKey;
+pub use rollout::find_archived_thread_path_by_id_str;
+pub use rollout::find_thread_meta_by_name_str;
+pub use rollout::find_thread_path_by_id_str;
+pub use rollout::get_threads_in_root;
+pub use rollout::paths_match_after_normalization;
 pub use session::SteerInputError;
+pub use skills::SkillMetadata;
+pub use skills::SkillsManager;
+pub use skills::build_skill_name_counts;
+pub(crate) use skills::maybe_emit_implicit_skill_invocation;
+pub(crate) use skills::skills_load_input_from_config;
+pub use thread_manager::BranchSnapshot;
+pub use thread_manager::NewThread;
+pub use thread_manager::StartThreadOptions;
+pub use thread_manager::ThreadManager;
+pub use thread_manager::thread_store_from_config;
+pub use turn_metadata::build_turn_metadata_header;
+pub use vac_rollout::StateDbHandle;
+pub use vac_thread::ThreadConfigSnapshot;
+pub use vac_thread::VACThread;
 pub use vac_thread::VACThreadTurnContextOverrides;
 
 // Re-exports for skills submodules
-pub use skills::SkillLoadOutcome;
+pub use skills::SkillError;
 pub use skills::SkillInjections;
+pub use skills::SkillLoadOutcome;
+pub use skills::SkillsLoadInput;
+pub use skills::build_available_skills;
 pub(crate) use skills::build_skill_injections;
 pub(crate) use skills::collect_env_var_dependencies;
 pub(crate) use skills::collect_explicit_skill_mentions;
-pub(crate) use skills::resolve_skill_dependencies_for_turn;
-pub use skills::SkillsLoadInput;
-pub use skills::manager;
-pub use skills::build_available_skills;
 pub use skills::default_skill_metadata_budget;
-pub use skills::SkillError;
+pub use skills::manager;
+pub(crate) use skills::resolve_skill_dependencies_for_turn;
 
 // Re-exports for message history
 pub use message_history::append_entry as append_message_history_entry;
-pub use message_history::lookup as lookup_message_history_entry;
 pub use message_history::history_metadata as message_history_metadata;
+pub use message_history::lookup as lookup_message_history_entry;
 
 // Re-exports for plugins/mentions
 pub(crate) use plugins::mentions;
@@ -125,12 +130,12 @@ pub mod injection {
 }
 
 pub mod apply_patch {
-    pub use vac_apply_patch::*;
-    use crate::session::turn_context::TurnContext;
-    use vac_protocol::permissions::FileSystemSandboxPolicy;
-    use crate::tools::sandboxing::ExecApprovalRequirement;
-    use crate::safety::{assess_patch_safety, SafetyCheck};
     use crate::function_tool::FunctionCallError;
+    use crate::safety::{SafetyCheck, assess_patch_safety};
+    use crate::session::turn_context::TurnContext;
+    use crate::tools::sandboxing::ExecApprovalRequirement;
+    pub use vac_apply_patch::*;
+    use vac_protocol::permissions::FileSystemSandboxPolicy;
     use vac_sandboxing::SandboxType;
 
     #[derive(Debug)]
@@ -146,7 +151,9 @@ pub mod apply_patch {
         DelegateToRuntime(DelegateToRuntime),
     }
 
-    pub(crate) fn convert_apply_patch_to_protocol(action: &ApplyPatchAction) -> std::collections::HashMap<std::path::PathBuf, vac_protocol::protocol::FileChange> {
+    pub(crate) fn convert_apply_patch_to_protocol(
+        action: &ApplyPatchAction,
+    ) -> std::collections::HashMap<std::path::PathBuf, vac_protocol::protocol::FileChange> {
         use vac_protocol::protocol::FileChange;
         action
             .changes()
@@ -193,9 +200,9 @@ pub mod apply_patch {
         );
 
         match safety {
-            SafetyCheck::Reject { reason } => {
-                InternalApplyPatchInvocation::Output(Err(FunctionCallError::RespondToModel(format!("patch rejected: {reason}"))))
-            }
+            SafetyCheck::Reject { reason } => InternalApplyPatchInvocation::Output(Err(
+                FunctionCallError::RespondToModel(format!("patch rejected: {reason}")),
+            )),
             SafetyCheck::AutoApprove { sandbox_type, .. } => {
                 InternalApplyPatchInvocation::DelegateToRuntime(DelegateToRuntime {
                     action,

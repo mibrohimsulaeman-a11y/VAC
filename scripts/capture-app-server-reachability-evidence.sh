@@ -2,7 +2,7 @@
 # Capture Plan 33 app-server reachability evidence.
 #
 # Usage:
-#   ./scripts/capture-app-server-reachability-evidence.sh [--out DIR] [--include-validation] [--toolchain +1.93.0]
+#   ./scripts/capture-app-server-reachability-evidence.sh [--out DIR] [--include-validation] [--toolchain +1.95.0]
 #
 # Default mode captures lightweight reachability evidence only. Add
 # --include-validation after Plan 32 is green and the operator is ready to run
@@ -10,7 +10,7 @@
 
 set -uo pipefail
 
-TOOLCHAIN='+1.93.0'
+TOOLCHAIN='+1.95.0'
 INCLUDE_VALIDATION=0
 OUT_DIR=''
 
@@ -34,7 +34,7 @@ while [ "$#" -gt 0 ]; do
       ;;
     --toolchain)
       if [ "$#" -lt 2 ]; then
-        echo 'ERROR: --toolchain requires a value such as +1.93.0' >&2
+        echo 'ERROR: --toolchain requires a value such as +1.95.0' >&2
         exit 2
       fi
       TOOLCHAIN="$2"

@@ -17,13 +17,13 @@ use std::collections::BTreeSet;
 use std::path::Path;
 use std::sync::LazyLock;
 use toml::Value as TomlValue;
-use vac_runtime_protocol::ConfigLayerSource;
 use vac_config::ConfigLayerEntry;
 use vac_config::ConfigLayerStack;
 use vac_config::ConfigLayerStackOrdering;
 use vac_config::config_toml::ConfigToml;
 use vac_config::loader::resolve_relative_paths_in_config_toml;
 use vac_exec_server::LOCAL_FS;
+use vac_runtime_protocol::ConfigLayerSource;
 
 /// The role name used when a caller omits `agent_type`.
 pub const DEFAULT_ROLE_NAME: &str = "default";

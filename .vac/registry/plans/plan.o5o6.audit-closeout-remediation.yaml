@@ -26,9 +26,9 @@ acceptance:
     - Physical donor source tree and root doctor logs are absent from the source artifact.
     - Artifact hygiene gate fails closed on donor/, root logs, target/, .git/, and compiled Rust objects.
   tv_pending:
-    - cargo build --offline --workspace --locked
-    - cargo clippy --offline --workspace -- -D warnings
-    - cargo test --offline --workspace
+    - cargo build --workspace --locked
+    - cargo clippy --workspace -- -D warnings
+    - cargo test --workspace
 validation:
   commands:
     - id: vac.o5o6.closeout.static

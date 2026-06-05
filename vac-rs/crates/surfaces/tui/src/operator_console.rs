@@ -11,7 +11,10 @@ use ratatui::text::Line;
 use ratatui::widgets::Paragraph;
 use ratatui::widgets::Widget;
 use ratatui::widgets::Wrap;
+use std::collections::hash_map::DefaultHasher;
 use std::fs;
+use std::hash::Hash;
+use std::hash::Hasher;
 use std::path::Path;
 use std::path::PathBuf;
 use std::time::Duration;
@@ -27,7 +30,13 @@ pub(crate) enum OperatorConsoleTab {
 }
 
 impl OperatorConsoleTab {
-    const ALL: [Self; 5] = [Self::Chat, Self::Runtime, Self::Review, Self::Workbench, Self::Mcp];
+    const ALL: [Self; 5] = [
+        Self::Chat,
+        Self::Runtime,
+        Self::Review,
+        Self::Workbench,
+        Self::Mcp,
+    ];
 
     fn label(self) -> &'static str {
         match self {
@@ -70,7 +79,7 @@ pub(crate) struct OperatorConsoleView {
     last_action: Option<String>,
     last_refresh_epoch: u64,
     last_view_signature: String,
-    last_render_signature: String,
+    last_render_signature: Option<u64>,
     lines: Vec<Line<'static>>,
     complete: bool,
 }
@@ -84,7 +93,7 @@ impl OperatorConsoleView {
             last_action: None,
             last_refresh_epoch: 0,
             last_view_signature: String::new(),
-            last_render_signature: String::new(),
+            last_render_signature: None,
             lines: Vec::new(),
             complete: false,
         };
@@ -108,12 +117,12 @@ impl OperatorConsoleView {
         self.last_view_signature = signature;
         self.last_refresh_epoch = unix_epoch_seconds();
         let next_lines = self.render_active_tab_lines();
-        let render_signature = format!("{next_lines:?}");
-        if !force && render_signature == self.last_render_signature {
+        let render_signature = rendered_lines_signature(&next_lines);
+        if !force && Some(render_signature) == self.last_render_signature {
             return false;
         }
 
-        self.last_render_signature = render_signature;
+        self.last_render_signature = Some(render_signature);
         self.lines = next_lines;
         true
     }
@@ -144,30 +153,55 @@ impl OperatorConsoleView {
                 .dim()
                 .into(),
         );
-        lines.push(format!("live refresh: dirty-file poll only · last view update={}s", self.last_refresh_epoch).dim().into());
+        lines.push(
+            format!(
+                "live refresh: dirty-file poll only · last view update={}s",
+                self.last_refresh_epoch
+            )
+            .dim()
+            .into(),
+        );
         lines.push("".into());
 
         match self.active_tab {
             OperatorConsoleTab::Runtime => {
                 let state = crate::operator_ui::AutopilotSchedulerState::from_workspace(&self.cwd);
                 self.selected_job = state.selected_job.clone();
-                lines.extend(crate::operator_ui::render_autopilot_scheduler_visual_lines(&state, 120));
+                lines.extend(crate::operator_ui::render_autopilot_scheduler_visual_lines(
+                    &state, 120,
+                ));
             }
             OperatorConsoleTab::Chat => {
-                lines.push("chat pane: primary transcript remains above this operator console".cyan().into());
-                lines.push("runtime handoff: Default/Plan turns execute through OwnerNativeSession".into());
+                lines.push(
+                    "chat pane: primary transcript remains above this operator console"
+                        .cyan()
+                        .into(),
+                );
+                lines.push(
+                    "runtime handoff: Default/Plan turns execute through OwnerNativeSession".into(),
+                );
             }
             OperatorConsoleTab::Review => {
                 lines.push("review pane: approval and policy queues are surfaced by the live approval overlay".yellow().into());
                 lines.push("runtime note: destructive actions still fail closed until an approval decision is recorded".into());
             }
             OperatorConsoleTab::Workbench => {
-                lines.push("workbench pane: workflow manifests are executable through /workflow run <id>".green().into());
+                lines.push(
+                    "workbench pane: workflow manifests are executable through /workflow run <id>"
+                        .green()
+                        .into(),
+                );
                 lines.push("runtime note: scheduled workflow jobs are driven by the autopilot workflow_runner tick".into());
             }
             OperatorConsoleTab::Mcp => {
-                lines.push("mcp pane: connector/tool status remains owned by the app-server session".magenta().into());
-                lines.push("runtime note: this tab is navigable chrome, not a static header string".into());
+                lines.push(
+                    "mcp pane: connector/tool status remains owned by the app-server session"
+                        .magenta()
+                        .into(),
+                );
+                lines.push(
+                    "runtime note: this tab is navigable chrome, not a static header string".into(),
+                );
             }
         }
 
@@ -325,4 +359,32 @@ fn unix_epoch_seconds() -> u64 {
         .duration_since(std::time::UNIX_EPOCH)
         .map(|duration| duration.as_secs())
         .unwrap_or(0)
+}
+
+fn rendered_lines_signature(lines: &[Line<'static>]) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    lines.len().hash(&mut hasher);
+    for line in lines {
+        line.spans.len().hash(&mut hasher);
+        for span in &line.spans {
+            span.content.hash(&mut hasher);
+        }
+    }
+    hasher.finish()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn rendered_lines_signature_changes_with_content_without_debug_string() {
+        let left = vec![Line::from("runtime"), Line::from("queue 1")];
+        let right = vec![Line::from("runtime"), Line::from("queue 2")];
+
+        assert_ne!(
+            rendered_lines_signature(&left),
+            rendered_lines_signature(&right)
+        );
+    }
 }

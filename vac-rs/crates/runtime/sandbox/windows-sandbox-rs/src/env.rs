@@ -135,17 +135,8 @@ pub fn apply_no_network_to_env(env_map: &mut HashMap<String, String>) -> Result<
         .entry("NO_PROXY".into())
         .or_insert_with(|| "localhost,127.0.0.1,::1".into());
     env_map
-        .entry("PIP_NO_INDEX".into())
-        .or_insert_with(|| "1".into());
-    env_map
         .entry("PIP_DISABLE_PIP_VERSION_CHECK".into())
         .or_insert_with(|| "1".into());
-    env_map
-        .entry("NPM_CONFIG_OFFLINE".into())
-        .or_insert_with(|| "true".into());
-    env_map
-        .entry("CARGO_NET_OFFLINE".into())
-        .or_insert_with(|| "true".into());
     env_map
         .entry("GIT_HTTP_PROXY".into())
         .or_insert_with(|| "http://127.0.0.1:9".into());

@@ -3,14 +3,6 @@ use crate::events::GuardianReviewEventParams;
 use crate::events::VACRuntimeMetadata;
 use serde::Serialize;
 use std::path::PathBuf;
-use vac_runtime_protocol::ClientRequest;
-use vac_runtime_protocol::ClientResponsePayload;
-use vac_runtime_protocol::InitializeParams;
-use vac_runtime_protocol::JSONRPCErrorError;
-use vac_runtime_protocol::RequestId;
-use vac_runtime_protocol::ServerNotification;
-use vac_runtime_protocol::ServerRequest;
-use vac_runtime_protocol::ServerResponse;
 use vac_plugin::PluginTelemetryMetadata;
 use vac_protocol::config_types::ApprovalsReviewer;
 use vac_protocol::config_types::ModeKind;
@@ -27,6 +19,14 @@ use vac_protocol::protocol::SkillScope;
 use vac_protocol::protocol::SubAgentSource;
 use vac_protocol::protocol::TokenUsage;
 use vac_protocol::vastar_models::ReasoningEffort;
+use vac_runtime_protocol::ClientRequest;
+use vac_runtime_protocol::ClientResponsePayload;
+use vac_runtime_protocol::InitializeParams;
+use vac_runtime_protocol::JSONRPCErrorError;
+use vac_runtime_protocol::RequestId;
+use vac_runtime_protocol::ServerNotification;
+use vac_runtime_protocol::ServerRequest;
+use vac_runtime_protocol::ServerResponse;
 
 #[derive(Clone)]
 pub struct TrackEventsContext {

@@ -106,9 +106,9 @@ async fn build_uploaded_local_argument_value(
         Some(index) => format!("{field_name}[{index}]"),
         None => field_name.to_string(),
     };
-    Err(crate::cloud_account_disabled::disabled_feature_message(&format!(
-        "VAC Apps cloud file upload for `{target}` from `{file_path}`"
-    )))
+    Err(crate::cloud_account_disabled::disabled_feature_message(
+        &format!("VAC Apps cloud file upload for `{target}` from `{file_path}`"),
+    ))
 }
 
 #[cfg(test)]
@@ -243,6 +243,9 @@ mod tests {
             error.contains("legacy ChatGPT-account backend integration is disabled"),
             "error should mention disabled backend: {error}"
         );
-        assert!(error.contains("file"), "error should mention the field: {error}");
+        assert!(
+            error.contains("file"),
+            "error should mention the field: {error}"
+        );
     }
 }

@@ -155,6 +155,13 @@ pub(super) async fn make_chatwidget_manual(
     let app_event_tx = AppEventSender::new(tx_raw);
     let (op_tx, op_rx) = unbounded_channel::<Op>();
     let mut cfg = test_config().await;
+    let project_dir = PathBuf::from(test_path_display("/tmp/project"));
+    let vac_dir = project_dir.join(".vac");
+    if !vac_dir.exists() {
+        let _ = std::fs::create_dir_all(&project_dir);
+        let repo_vac = PathBuf::from(test_path_display("/home/emp/Documents/VAC/vastar-agentic-cli/.vac"));
+        let _ = std::os::unix::fs::symlink(repo_vac, vac_dir);
+    }
     let resolved_model = model_override.map(str::to_owned).unwrap_or_else(|| {
         crate::legacy_core::test_support::get_model_offline(cfg.model.as_deref())
     });
@@ -306,6 +313,7 @@ pub(super) async fn make_chatwidget_manual(
         style_epoch: std::cell::Cell::new(1),
         transcript_scroll_top: std::cell::Cell::new(0),
         desired_height_cache: std::cell::RefCell::new(height_cache::DesiredHeightCache::default()),
+        rendered_lines_cache: std::cell::RefCell::new(height_cache::RenderedLinesCache::default()),
         feedback: vac_feedback::VACFeedback::new(),
         current_rollout_path: None,
         current_cwd: None,

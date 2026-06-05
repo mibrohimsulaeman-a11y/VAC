@@ -13,6 +13,7 @@ pub(super) async fn make_test_app() -> App {
     let file_search = FileSearchManager::new(config.cwd.to_path_buf(), app_event_tx.clone());
     let model = crate::legacy_core::test_support::get_model_offline(config.model.as_deref());
     let session_telemetry = test_session_telemetry(&config, model.as_str());
+    let startup_metrics = test_startup_metrics(&config);
 
     App {
         model_catalog: chat_widget.model_catalog(),
@@ -56,9 +57,21 @@ pub(super) async fn make_test_app() -> App {
         primary_session_configured: None,
         pending_primary_events: VecDeque::new(),
         pending_app_server_requests: PendingAppServerRequests::default(),
+        startup_metrics,
         pending_plugin_enabled_writes: HashMap::new(),
         pending_hook_enabled_writes: HashMap::new(),
     }
+}
+
+fn test_startup_metrics(config: &Config) -> crate::startup_task_graph::StartupMetricsRecorder {
+    let started_at = std::time::Instant::now();
+    crate::startup_task_graph::StartupMetricsRecorder::new(
+        config.cwd.to_path_buf(),
+        started_at,
+        crate::startup_task_graph::StartupTaskGraphMetrics::from_skeleton_frame(
+            started_at, started_at,
+        ),
+    )
 }
 
 fn test_session_telemetry(config: &Config, model: &str) -> SessionTelemetry {

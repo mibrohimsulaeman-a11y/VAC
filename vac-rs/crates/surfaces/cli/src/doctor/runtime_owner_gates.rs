@@ -45,7 +45,6 @@ const REQUIRED_FIELDS: &[&str] = &[
     "validation",
 ];
 
-
 const OWNER_NATIVE_SUPPORT_MANIFEST: &str = ".vac/registry/runtime/owner-native-support.yaml";
 
 const CRITICAL_OWNER_NATIVE_METHODS: &[&str] = &[
@@ -90,7 +89,6 @@ const APP_SERVER_IMPORT_PATTERNS: &[&str] = &[
     "vac_app_server_client",
     "AppServerSession",
 ];
-
 
 const MESSAGE_PROCESSOR_SCAN_PATHS: &[&str] = &[
     "vac-rs/local-runtime-owner/src",
@@ -254,16 +252,16 @@ impl RuntimeOwnerGateReport {
     }
 }
 
-pub(super) fn run_external_subcommand(args: Vec<OsString>) {
+pub(super) fn run_external_subcommand(args: Vec<OsString>) -> anyhow::Result<i32> {
     let mut args = args.into_iter();
     let Some(command) = args.next() else {
         eprintln!("missing doctor subcommand");
-        std::process::exit(2);
+        return Ok(2);
     };
 
     if command.to_string_lossy() != RUNTIME_OWNER_SUBCOMMAND {
         eprintln!("unknown doctor subcommand `{}`", command.to_string_lossy());
-        std::process::exit(2);
+        return Ok(2);
     }
 
     let root = args
@@ -275,12 +273,12 @@ pub(super) fn run_external_subcommand(args: Vec<OsString>) {
             "unexpected extra argument for `vac doctor runtime-owner-gates`: {}",
             extra.to_string_lossy()
         );
-        std::process::exit(2);
+        return Ok(2);
     }
 
     let report = load_runtime_owner_gate_report(&root);
     println!("{}", report.render_text());
-    std::process::exit(report.cli_exit_code());
+    Ok(report.cli_exit_code())
 }
 
 fn load_runtime_owner_gate_report(root: &Path) -> RuntimeOwnerGateReport {
@@ -355,7 +353,9 @@ fn validate_owner_native_support_manifest(report: &mut RuntimeOwnerGateReport) {
         );
         return;
     }
-    report.checked_manifests.push(OWNER_NATIVE_SUPPORT_MANIFEST.to_string());
+    report
+        .checked_manifests
+        .push(OWNER_NATIVE_SUPPORT_MANIFEST.to_string());
     let Ok(raw) = fs::read_to_string(&path) else {
         report.push(
             FindingLevel::Error,
@@ -398,9 +398,9 @@ fn validate_owner_native_support_manifest(report: &mut RuntimeOwnerGateReport) {
         .cloned()
         .unwrap_or_default();
     for method in CRITICAL_OWNER_NATIVE_METHODS {
-        let entry = methods.iter().find(|entry| {
-            map_get(entry, "name").and_then(Value::as_str) == Some(*method)
-        });
+        let entry = methods
+            .iter()
+            .find(|entry| map_get(entry, "name").and_then(Value::as_str) == Some(*method));
         match entry {
             Some(entry) => {
                 if map_get(entry, "status").and_then(Value::as_str) != Some("implemented") {
@@ -408,7 +408,9 @@ fn validate_owner_native_support_manifest(report: &mut RuntimeOwnerGateReport) {
                         FindingLevel::Error,
                         "owner_native_method_not_implemented",
                         Some(OWNER_NATIVE_SUPPORT_MANIFEST),
-                        format!("critical owner-native method `{method}` must be status: implemented"),
+                        format!(
+                            "critical owner-native method `{method}` must be status: implemented"
+                        ),
                     );
                 }
                 if map_get(entry, "release_blocking").and_then(Value::as_bool) != Some(true) {
@@ -416,7 +418,9 @@ fn validate_owner_native_support_manifest(report: &mut RuntimeOwnerGateReport) {
                         FindingLevel::Error,
                         "owner_native_method_not_release_blocking",
                         Some(OWNER_NATIVE_SUPPORT_MANIFEST),
-                        format!("critical owner-native method `{method}` must be release_blocking: true"),
+                        format!(
+                            "critical owner-native method `{method}` must be release_blocking: true"
+                        ),
                     );
                 }
             }
@@ -424,7 +428,9 @@ fn validate_owner_native_support_manifest(report: &mut RuntimeOwnerGateReport) {
                 FindingLevel::Error,
                 "owner_native_method_missing",
                 Some(OWNER_NATIVE_SUPPORT_MANIFEST),
-                format!("critical owner-native method `{method}` is missing from the support manifest"),
+                format!(
+                    "critical owner-native method `{method}` is missing from the support manifest"
+                ),
             ),
         }
     }
@@ -501,7 +507,6 @@ fn validate_owner_native_support_manifest(report: &mut RuntimeOwnerGateReport) {
             }
         }
     }
-
 }
 
 fn validate_app_server_dependency_regressions(report: &mut RuntimeOwnerGateReport) {
@@ -648,7 +653,6 @@ fn manifest_mentions_optional_dependency(raw: &str, crate_name: &str) -> bool {
         .map(|line| line.contains("optional = true"))
         .unwrap_or(false)
 }
-
 
 fn visit_rs_files(path: &Path, visit: &mut impl FnMut(&Path)) {
     let Ok(entries) = fs::read_dir(path) else {

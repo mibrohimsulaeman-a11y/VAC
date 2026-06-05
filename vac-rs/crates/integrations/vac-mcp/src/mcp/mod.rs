@@ -12,11 +12,7 @@ pub use auth::should_retry_without_scopes;
 pub(crate) mod auth;
 
 use std::collections::HashMap;
-#[cfg(test)]
-use std::env;
 use std::path::PathBuf;
-#[cfg(test)]
-use std::time::Duration;
 
 use async_channel::unbounded;
 use rmcp::model::ReadResourceRequestParams;
@@ -46,8 +42,6 @@ use crate::vac_apps::vac_apps_tools_cache_key;
 pub const VAC_APPS_MCP_SERVER_NAME: &str = "vac_apps";
 const MCP_TOOL_NAME_PREFIX: &str = "mcp";
 const MCP_TOOL_NAME_DELIMITER: &str = "__";
-#[cfg(test)]
-const VAC_CONNECTORS_TOKEN_ENV_VAR: &str = "VAC_CONNECTORS_TOKEN";
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum McpSnapshotDetail {
@@ -214,7 +208,6 @@ pub fn with_vac_apps_mcp(
     // Local coding build: do not inject the cloud ChatGPT Apps MCP directory server.
     servers
 }
-
 
 pub fn configured_mcp_servers(config: &McpConfig) -> HashMap<String, McpServerConfig> {
     config.configured_mcp_servers.clone()
@@ -383,16 +376,6 @@ pub(crate) fn sanitize_responses_api_tool_name(name: &str) -> String {
 }
 
 #[cfg(test)]
-fn vac_apps_mcp_bearer_token_env_var() -> Option<String> {
-    match env::var(VAC_CONNECTORS_TOKEN_ENV_VAR) {
-        Ok(value) if !value.trim().is_empty() => Some(VAC_CONNECTORS_TOKEN_ENV_VAR.to_string()),
-        Ok(_) => None,
-        Err(env::VarError::NotPresent) => None,
-        Err(env::VarError::NotUnicode(_)) => Some(VAC_CONNECTORS_TOKEN_ENV_VAR.to_string()),
-    }
-}
-
-#[cfg(test)]
 fn normalize_vac_apps_base_url(base_url: &str) -> String {
     base_url.trim_end_matches('/').to_string()
 }
@@ -405,35 +388,10 @@ fn vac_apps_mcp_url_for_base_url(base_url: &str, apps_mcp_path_override: Option<
     } else {
         format!("{base_url}/api/vac")
     };
-    let path = apps_mcp_path_override.unwrap_or("apps").trim_start_matches('/');
+    let path = apps_mcp_path_override
+        .unwrap_or("apps")
+        .trim_start_matches('/');
     format!("{base_url}/{path}")
-}
-
-#[cfg(test)]
-fn vac_apps_mcp_server_config(config: &McpConfig) -> McpServerConfig {
-    let url = vac_apps_mcp_url(config);
-
-    McpServerConfig {
-        transport: McpServerTransportConfig::StreamableHttp {
-            url,
-            bearer_token_env_var: vac_apps_mcp_bearer_token_env_var(),
-            http_headers: None,
-            env_http_headers: None,
-        },
-        experimental_environment: None,
-        enabled: true,
-        required: false,
-        supports_parallel_tool_calls: false,
-        disabled_reason: None,
-        startup_timeout_sec: Some(Duration::from_secs(30)),
-        tool_timeout_sec: None,
-        default_tools_approval_mode: None,
-        enabled_tools: None,
-        disabled_tools: None,
-        scopes: None,
-        oauth_resource: None,
-        tools: HashMap::new(),
-    }
 }
 
 fn protocol_tool_from_rmcp_tool(name: &str, tool: &rmcp::model::Tool) -> Option<Tool> {

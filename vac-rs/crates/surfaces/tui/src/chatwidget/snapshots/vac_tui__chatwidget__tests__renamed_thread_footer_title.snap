@@ -1,5 +1,5 @@
 ---
-source: tui/src/chatwidget/tests/status_and_layout.rs
+source: crates/surfaces/tui/src/chatwidget/tests/status_and_layout.rs.inc
 assertion_line: 1531
 expression: normalized_backend_snapshot(terminal.backend())
 ---
@@ -7,4 +7,4 @@ expression: normalized_backend_snapshot(terminal.backend())
 "                                                                                "
 "› Ask VAC to do anything                                                        "
 "                                                                                "
-"  gpt-5.3-vac High · Roadmap cleanup                                            "
+"  gpt-5.3-vac high · Roadmap cleanup                                            "

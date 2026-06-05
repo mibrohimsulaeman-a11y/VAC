@@ -1,4 +1,7 @@
-#![allow(clippy::unwrap_used)]
+#![allow(
+    clippy::unwrap_used,
+    reason = "vendored Windows PTY handle clone paths still need a follow-up trait-compatible migration"
+)]
 
 // This file is copied from https://github.com/wezterm/wezterm (MIT license).
 // Copyright (c) 2018-Present Wez Furlong
@@ -34,6 +37,7 @@ use std::os::windows::io::AsRawHandle;
 use std::os::windows::io::RawHandle;
 use std::sync::Arc;
 use std::sync::Mutex;
+use std::sync::MutexGuard;
 use winapi::um::wincon::COORD;
 
 #[derive(Default)]
@@ -154,26 +158,34 @@ pub struct ConPtySlavePty {
     inner: Arc<Mutex<Inner>>,
 }
 
+fn lock_inner(inner: &Mutex<Inner>) -> MutexGuard<'_, Inner> {
+    match inner.lock() {
+        Ok(guard) => guard,
+        Err(poisoned) => {
+            log::warn!("recovering poisoned Windows ConPTY mutex");
+            poisoned.into_inner()
+        }
+    }
+}
+
 impl MasterPty for ConPtyMasterPty {
     fn resize(&self, size: PtySize) -> anyhow::Result<()> {
-        let mut inner = self.inner.lock().unwrap();
+        let mut inner = lock_inner(&self.inner);
         inner.resize(size.rows, size.cols, size.pixel_width, size.pixel_height)
     }
 
     fn get_size(&self) -> Result<PtySize, Error> {
-        let inner = self.inner.lock().unwrap();
+        let inner = lock_inner(&self.inner);
         Ok(inner.size)
     }
 
     fn try_clone_reader(&self) -> anyhow::Result<Box<dyn std::io::Read + Send>> {
-        Ok(Box::new(self.inner.lock().unwrap().readable.try_clone()?))
+        Ok(Box::new(lock_inner(&self.inner).readable.try_clone()?))
     }
 
     fn take_writer(&self) -> anyhow::Result<Box<dyn std::io::Write + Send>> {
         Ok(Box::new(
-            self.inner
-                .lock()
-                .unwrap()
+            lock_inner(&self.inner)
                 .writable
                 .take()
                 .ok_or_else(|| anyhow::anyhow!("writer already taken"))?,
@@ -183,7 +195,7 @@ impl MasterPty for ConPtyMasterPty {
 
 impl SlavePty for ConPtySlavePty {
     fn spawn_command(&self, cmd: CommandBuilder) -> anyhow::Result<Box<dyn Child + Send + Sync>> {
-        let inner = self.inner.lock().unwrap();
+        let inner = lock_inner(&self.inner);
         let child = inner.con.spawn_command(cmd)?;
         Ok(Box::new(child))
     }

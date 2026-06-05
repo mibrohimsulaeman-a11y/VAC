@@ -1085,8 +1085,8 @@ impl Renderable for ListSelectionView {
             _,
             stacked_side_area,
         ] = Layout::vertical([
-            Constraint::Max(header_height),
-            Constraint::Max(1),
+            Constraint::Length(header_height),
+            Constraint::Length(1),
             Constraint::Length(tab_height),
             Constraint::Length(u16::from(tab_height > 0)),
             Constraint::Length(if self.is_searchable { 1 } else { 0 }),

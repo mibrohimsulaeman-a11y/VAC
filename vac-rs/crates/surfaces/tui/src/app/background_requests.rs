@@ -34,6 +34,25 @@ impl App {
         });
     }
 
+    /// Starts the startup MCP inventory probe without rendering any transcript UI.
+    ///
+    /// This gives the startup task graph a real app-server-backed completion signal while keeping the
+    /// first frame and normal idle screen free from background inventory noise.
+    pub(super) fn refresh_startup_mcp_inventory<S: LocalRuntimeSession>(&mut self, app_server: &S) {
+        let request_handle = app_server.request_handle();
+        let app_event_tx = self.app_event_tx.clone();
+        tokio::spawn(async move {
+            let result = fetch_all_mcp_server_statuses(
+                request_handle,
+                McpServerStatusDetail::ToolsAndAuthOnly,
+            )
+            .await
+            .map(|statuses| statuses.len())
+            .map_err(|err| err.to_string());
+            app_event_tx.send(AppEvent::StartupMcpInventoryLoaded { result });
+        });
+    }
+
     /// Spawns a background task to fetch account rate limits and deliver the
     /// result as a `RateLimitsLoaded` event.
     ///

@@ -1,0 +1,13 @@
+---
+source: crates/surfaces/tui/src/bottom_pane/chat_composer/footer_flash_parts/../split_002_footerflash_tests.rs.inc
+expression: terminal.backend()
+---
+"                          "
+"› Ask VAC to do anything  "
+"                          "
+"                          "
+"                          "
+"                          "
+"                          "
+"                          "
+"  Plan mode               "

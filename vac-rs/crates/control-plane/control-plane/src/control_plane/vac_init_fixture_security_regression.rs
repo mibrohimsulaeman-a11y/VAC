@@ -131,7 +131,6 @@ pub fn validate_security_regressions(cases: &[SecurityRegressionCase]) -> Result
 pub struct CargoGatePlan {
     pub full_workspace_required: bool,
     pub selected_package_gates: Vec<String>,
-    pub offline_vendor_available: bool,
 }
 
 impl CargoGatePlan {
@@ -139,12 +138,11 @@ impl CargoGatePlan {
         Self {
             full_workspace_required: false,
             selected_package_gates: vec![
-                "cargo test --manifest-path vac-rs/Cargo.toml -p vac-core schema_validation --offline".to_string(),
-                "cargo test --manifest-path vac-rs/Cargo.toml -p vac-core policy_evaluation --offline".to_string(),
-                "cargo test --manifest-path vac-rs/Cargo.toml -p vac-core evidence_chain --offline".to_string(),
-                "cargo test --manifest-path vac-rs/Cargo.toml -p vac-surface-cli doctor_integration --offline".to_string(),
+                "cargo test --manifest-path vac-rs/Cargo.toml -p vac-core schema_validation".to_string(),
+                "cargo test --manifest-path vac-rs/Cargo.toml -p vac-core policy_evaluation".to_string(),
+                "cargo test --manifest-path vac-rs/Cargo.toml -p vac-core evidence_chain".to_string(),
+                "cargo test --manifest-path vac-rs/Cargo.toml -p vac-surface-cli doctor_integration".to_string(),
             ],
-            offline_vendor_available: false,
         }
     }
 
@@ -208,6 +206,18 @@ mod tests {
         let plan = CargoGatePlan::production_sandbox_default();
         assert!(plan.validate().is_ok());
         assert!(!plan.full_workspace_required);
-        assert!(!plan.selected_package_gates.is_empty());
+        assert_eq!(
+            plan.selected_package_gates,
+            vec![
+                "cargo test --manifest-path vac-rs/Cargo.toml -p vac-core schema_validation"
+                    .to_string(),
+                "cargo test --manifest-path vac-rs/Cargo.toml -p vac-core policy_evaluation"
+                    .to_string(),
+                "cargo test --manifest-path vac-rs/Cargo.toml -p vac-core evidence_chain"
+                    .to_string(),
+                "cargo test --manifest-path vac-rs/Cargo.toml -p vac-surface-cli doctor_integration"
+                    .to_string(),
+            ]
+        );
     }
 }

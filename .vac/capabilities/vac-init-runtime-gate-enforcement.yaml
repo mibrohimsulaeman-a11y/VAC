@@ -15,9 +15,17 @@ ownership:
   - kind: module
     crate: vac-core
     module: control_plane::vac_init_runtime_enforcement
+  - kind: module
+    crate: vac-core
+    module: control_plane::enforcement_level
+  - kind: module
+    crate: vac-core
+    module: control_plane::enforcement_doctor
   - kind: path
     include:
     - vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_runtime_enforcement.rs
+    - vac-rs/crates/control-plane/control-plane/src/control_plane/enforcement_level.rs
+    - vac-rs/crates/control-plane/control-plane/src/control_plane/enforcement_doctor.rs
     - scripts/check-vac-init-runtime-gate-enforcement-contract.sh
     - .vac/capabilities/vac-init-runtime-gate-enforcement.yaml
     - .vac/workflows/maintenance.vac-init-runtime-gate-enforcement.yaml
@@ -35,6 +43,8 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-vac-init-runtime-gate-enforcement-contract.sh
+    - vac doctor enforcement
+    - vac enforcement status
 policy:
   risk: safe_read
   mutates_files: false

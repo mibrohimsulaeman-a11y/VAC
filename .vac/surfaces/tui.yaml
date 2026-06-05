@@ -69,6 +69,30 @@ routes:
   visible: true
   status: ready
 - kind: tui
+  path: /session
+  capability: vac.sessions
+  owner: vac-capability-sessions/contract
+  visible: true
+  status: ready
+- kind: tui
+  path: /spec
+  capability: vac.sessions
+  owner: vac-capability-sessions/contract
+  visible: true
+  status: ready
+- kind: tui
+  path: /tasks
+  capability: vac.sessions
+  owner: vac-capability-sessions/contract
+  visible: true
+  status: ready
+- kind: tui
+  path: /todo
+  capability: vac.sessions
+  owner: vac-capability-sessions/contract
+  visible: true
+  status: ready
+- kind: tui
   path: /approvals
   capability: vac.approvals
   owner: vac-control-plane/control_plane.approval_lifecycle
@@ -76,8 +100,8 @@ routes:
   status: ready
 - kind: tui
   path: /evidence
-  capability: vac.tui
-  owner: vac-surface-tui/lib
+  capability: vac.init.evidence-chain
+  owner: vac-core/control_plane::vac_init_evidence_chain
   visible: true
   status: ready
 - kind: tui

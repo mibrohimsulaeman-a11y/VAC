@@ -46,5 +46,5 @@ require_file .vac/registry/capability-readiness-matrix.yaml
 require_file .vac/registry/panic-risk-governance.yaml
 require_file .vac/registry/unbounded-channel-allowlist.yaml
 require_file docs/monolith-quality/O5O6_ACTUAL_CODE_CLOSURE_REPORT.md
-VAC_STATIC_ONLY=1 bash scripts/bench-vac-tui-performance.sh >/dev/null
+bash scripts/bench-vac-tui-performance.sh >/dev/null
 echo "actual-code closure gate: PASS"

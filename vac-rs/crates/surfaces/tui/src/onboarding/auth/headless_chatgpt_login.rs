@@ -23,7 +23,9 @@ use super::onboarding_request_id;
 pub(super) fn start_headless_chatgpt_login(widget: &mut AuthModeWidget) {
     let request_id = Uuid::new_v4().to_string();
     let Ok(mut sign_in_state) = widget.sign_in_state.write() else {
-        tracing::warn!("sign-in state lock poisoned while starting legacy ChatGPT device-code login");
+        tracing::warn!(
+            "sign-in state lock poisoned while starting legacy ChatGPT device-code login"
+        );
         return;
     };
     *sign_in_state =
@@ -173,7 +175,9 @@ fn set_device_code_state_for_active_attempt(
     next_state: ContinueWithDeviceCodeState,
 ) -> bool {
     let Ok(mut guard) = sign_in_state.write() else {
-        tracing::warn!("sign-in state lock poisoned while updating legacy ChatGPT device-code state");
+        tracing::warn!(
+            "sign-in state lock poisoned while updating legacy ChatGPT device-code state"
+        );
         return false;
     };
     if !device_code_attempt_matches(&guard, request_id) {
@@ -194,7 +198,9 @@ fn set_device_code_error_for_active_attempt(
     message: String,
 ) -> bool {
     let Ok(mut guard) = sign_in_state.write() else {
-        tracing::warn!("sign-in state lock poisoned while updating legacy ChatGPT device-code state");
+        tracing::warn!(
+            "sign-in state lock poisoned while updating legacy ChatGPT device-code state"
+        );
         return false;
     };
     if !device_code_attempt_matches(&guard, request_id) {

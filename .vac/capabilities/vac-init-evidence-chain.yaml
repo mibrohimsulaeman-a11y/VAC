@@ -14,6 +14,8 @@ ownership:
   targets:
   - crate_name: vac-core
     module: control_plane::vac_init_evidence_chain
+  - crate_name: vac-surface-cli
+    module: doctor_cli
 description: Evidence contract provides canonical payload hashing, SHA-256 implementation, self-hash verification, and previous-link chain validation.
 depends_on:
 - vac.init.patch-guard
@@ -23,9 +25,16 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-vac-init-evidence-chain-contract.sh
+    - vac doctor evidence
+    - vac doctor evidence --v2
+    - vac doctor evidence-signing
+  slash:
+    commands:
+    - /evidence
   palette: true
   tui:
     routes:
+    - /evidence
     - /init/evidence-chain
 policy:
   risk: safe_read

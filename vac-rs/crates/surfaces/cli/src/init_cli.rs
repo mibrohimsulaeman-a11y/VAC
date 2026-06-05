@@ -66,13 +66,9 @@ impl InitCommand {
             "uninitialized".to_string()
         };
         let doctor_report = build_init_doctor_report(&root, &timestamp);
-        let state_record = build_lifecycle_state_record(
-            mode,
-            &previous_state,
-            &timestamp,
-            doctor_report.passed,
-        )
-        .map_err(anyhow::Error::msg)?;
+        let state_record =
+            build_lifecycle_state_record(mode, &previous_state, &timestamp, doctor_report.passed)
+                .map_err(anyhow::Error::msg)?;
         let current_state = state_record.current_state.as_str();
 
         let state_yaml = state_record.render_yaml();
@@ -122,7 +118,6 @@ impl InitCommand {
     }
 }
 
-
 fn write_interactive_init_choices(root: &Path) -> anyhow::Result<()> {
     let mut stdout = io::stdout();
     let strategy = prompt_with_default(
@@ -149,7 +144,11 @@ fn write_interactive_init_choices(root: &Path) -> anyhow::Result<()> {
     write_store(root, ".vac/.init/operator_choices.yaml", &choices)
 }
 
-fn prompt_with_default(stdout: &mut io::Stdout, prompt: &str, default: &str) -> anyhow::Result<String> {
+fn prompt_with_default(
+    stdout: &mut io::Stdout,
+    prompt: &str,
+    default: &str,
+) -> anyhow::Result<String> {
     write!(stdout, "{prompt} ({default}): ")?;
     stdout.flush()?;
     let mut input = String::new();
@@ -235,10 +234,18 @@ fn next_lifecycle_state(
             S::PartitionSelected | S::PolicyConflict => S::PolicyInferred,
             S::PolicyInferred => S::ManifestsSynthesized,
             S::ManifestsSynthesized | S::DoctorFailed => {
-                if doctor_passed { S::DoctorVerified } else { S::DoctorFailed }
+                if doctor_passed {
+                    S::DoctorVerified
+                } else {
+                    S::DoctorFailed
+                }
             }
             S::DoctorVerified => {
-                if doctor_passed { S::Ready } else { S::DoctorFailed }
+                if doctor_passed {
+                    S::Ready
+                } else {
+                    S::DoctorFailed
+                }
             }
             S::OwnershipMissing => S::Discovered,
             S::Ready | S::OperatorCancelled => previous,
@@ -277,7 +284,11 @@ fn attach_lifecycle_artifacts(record: &mut vac_core::control_plane::VacInitState
     }
 }
 
-fn write_init_lifecycle_evidence(root: &Path, current_state: &str, timestamp: &str) -> anyhow::Result<()> {
+fn write_init_lifecycle_evidence(
+    root: &Path,
+    current_state: &str,
+    timestamp: &str,
+) -> anyhow::Result<()> {
     let request = vac_core::control_plane::VacInitLiveEvidenceWriteRequest {
         evidence_id: format!("evidence.init.lifecycle.{current_state}"),
         timestamp: timestamp.to_string(),
@@ -287,7 +298,9 @@ fn write_init_lifecycle_evidence(root: &Path, current_state: &str, timestamp: &s
         start_line: 1,
         end_line: 12,
         symbol: Some(current_state.to_string()),
-        rationale_summary: format!("vac init advanced through lifecycle engine into state {current_state}"),
+        rationale_summary: format!(
+            "vac init advanced through lifecycle engine into state {current_state}"
+        ),
         approval_content_hash: None,
     };
     vac_core::control_plane::write_vac_init_live_evidence_and_trajectory(root, &request)
@@ -352,7 +365,10 @@ fn load_operator_choices(root: &Path) -> std::collections::BTreeMap<String, Stri
         let key = key.trim();
         if matches!(
             key,
-            "partition_strategy" | "synthesize_missing_manifests" | "verify_after_synthesis" | "source"
+            "partition_strategy"
+                | "synthesize_missing_manifests"
+                | "verify_after_synthesis"
+                | "source"
         ) {
             choices.insert(key.to_string(), value.trim().trim_matches('"').to_string());
         }
@@ -452,12 +468,18 @@ fn build_init_doctor_report(root: &Path, timestamp: &str) -> InitDoctorReport {
         InitDoctorCheck {
             id: "command_gate_evidence",
             passed: command_gate_wired,
-            detail: format!("owner support manifest declares command pre/evidence gates; gate_anchor={}", gate_anchor.display()),
+            detail: format!(
+                "owner support manifest declares command pre/evidence gates; gate_anchor={}",
+                gate_anchor.display()
+            ),
         },
         InitDoctorCheck {
             id: "plan_mode_runtime_gate",
             passed: plan_mode_integrated,
-            detail: format!("runtime Plan Mode declares pre/post semantic gates; active_plan={}", active_plan.display()),
+            detail: format!(
+                "runtime Plan Mode declares pre/post semantic gates; active_plan={}",
+                active_plan.display()
+            ),
         },
     ];
     let passed = checks.iter().all(|check| check.passed);

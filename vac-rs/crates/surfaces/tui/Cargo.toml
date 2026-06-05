@@ -30,11 +30,10 @@ path = "src/lib.rs"
 workspace = true
 
 [features]
-default = []
+default = ["full-tui"]
 full-tui = []
 provider-chatgpt = ["vac-login/provider-chatgpt"]
-provider-realtime = []
-provider-cloud-tests = ["provider-chatgpt", "provider-realtime"]
+provider-cloud-tests = ["provider-chatgpt"]
 telemetry = ["vac-feedback/feedback-upload"]
 feedback = ["vac-feedback/feedback-upload"]
 

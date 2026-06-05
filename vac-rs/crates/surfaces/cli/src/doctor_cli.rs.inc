@@ -28,8 +28,12 @@ use vac_core::project_workspace::load_project_workspace_report_with_options;
 use vac_core::project_workspace::materialize_soft_workspace_bootstrap;
 use vac_core::project_workspace::materialize_strict_workspace_promotion;
 
+#[path = "doctor/enforcement_doctor.rs"]
+mod enforcement_doctor;
 #[path = "doctor/runtime_owner_gates.rs"]
 mod runtime_owner_gates;
+#[path = "doctor/session_doctor.rs"]
+mod session_doctor;
 
 #[derive(Debug, Parser)]
 pub struct DoctorCommand {
@@ -38,29 +42,33 @@ pub struct DoctorCommand {
 }
 
 impl DoctorCommand {
-    pub fn run(self) {
-        match self.command {
-            DoctorSubcommand::Registry(command) => command.run(),
-            DoctorSubcommand::Architecture(command) => command.run(),
-            DoctorSubcommand::Docs(command) => command.run(),
-            DoctorSubcommand::Workflow(command) => command.run(),
-            DoctorSubcommand::Ownership(command) => command.run(),
-            DoctorSubcommand::Policy(command) => command.run(),
-            DoctorSubcommand::ProjectWorkspace(command) => command.run(),
-            DoctorSubcommand::Surfaces(command) => command.run(),
-            DoctorSubcommand::Build(command) => command.run(),
-            DoctorSubcommand::Evidence(command) => command.run(),
-            DoctorSubcommand::EvidenceSigning(command) => command.run(),
-            DoctorSubcommand::Layering(command) => command.run(),
-            DoctorSubcommand::Memory(command) => command.run(),
-            DoctorSubcommand::Init(command) => command.run(),
-            DoctorSubcommand::Migrations(command) => command.run(),
-            DoctorSubcommand::Donor(command) => command.run(),
-            DoctorSubcommand::Release(command) => command.run(),
+    pub fn run(self) -> anyhow::Result<i32> {
+        let code = match self.command {
+            DoctorSubcommand::Registry(command) => command.run()?,
+            DoctorSubcommand::Architecture(command) => command.run()?,
+            DoctorSubcommand::Docs(command) => command.run()?,
+            DoctorSubcommand::Workflow(command) => command.run()?,
+            DoctorSubcommand::Ownership(command) => command.run()?,
+            DoctorSubcommand::Policy(command) => command.run()?,
+            DoctorSubcommand::Enforcement(command) => command.run()?,
+            DoctorSubcommand::ProjectWorkspace(command) => command.run()?,
+            DoctorSubcommand::Surfaces(command) => command.run()?,
+            DoctorSubcommand::Build(command) => command.run()?,
+            DoctorSubcommand::Evidence(command) => command.run()?,
+            DoctorSubcommand::EvidenceSigning(command) => command.run()?,
+            DoctorSubcommand::Layering(command) => command.run()?,
+            DoctorSubcommand::Memory(command) => command.run()?,
+            DoctorSubcommand::Init(command) => command.run()?,
+            DoctorSubcommand::Migrations(command) => command.run()?,
+            DoctorSubcommand::Donor(command) => command.run()?,
+            DoctorSubcommand::Release(command) => command.run()?,
+            DoctorSubcommand::SpecConformance(command) => command.run()?,
+            DoctorSubcommand::Sessions(command) => command.run()?,
             DoctorSubcommand::RuntimeOwnerGates(args) => {
-                runtime_owner_gates::run_external_subcommand(args)
+                runtime_owner_gates::run_external_subcommand(args)?
             }
-        }
+        };
+        Ok(code)
     }
 }
 
@@ -82,6 +90,8 @@ enum DoctorSubcommand {
     Surfaces(SurfacesDoctorCommand),
     /// Show loaded policy manifests, decisions, and coverage.
     Policy(PolicyDoctorCommand),
+    /// Validate claimed enforcement level against observed substrate.
+    Enforcement(enforcement_doctor::EnforcementDoctorCommand),
     /// Execute cargo check to verify root product compilation and warning checks.
     Build(BuildDoctorCommand),
     /// Validate hash-chain evidence records.
@@ -100,6 +110,10 @@ enum DoctorSubcommand {
     Donor(DonorDoctorCommand),
     /// Execute the release gate workflow and render a production readiness report.
     Release(ReleaseDoctorCommand),
+    /// Validate source/spec conformance ledger coverage and v1.4 addenda status.
+    SpecConformance(SpecConformanceDoctorCommand),
+    /// Validate session artifacts and completion-lock consistency.
+    Sessions(session_doctor::SessionsDoctorCommand),
     #[command(external_subcommand)]
     RuntimeOwnerGates(Vec<OsString>),
 }
@@ -112,10 +126,10 @@ struct RegistryDoctorCommand {
 }
 
 impl RegistryDoctorCommand {
-    fn run(self) {
+    fn run(self) -> anyhow::Result<i32> {
         let report = load_control_plane_registry_report(&self.path);
         println!("{}", report.render_text());
-        std::process::exit(report.cli_exit_code());
+        Ok(report.cli_exit_code())
     }
 }
 
@@ -128,11 +142,10 @@ struct ArchitectureDoctorCommand {
     /// Validate planned/partial/ready visibility contract.
     #[arg(long = "visibility-contract", default_value_t = false, hide = true)]
     visibility_contract: bool,
-
 }
 
 impl ArchitectureDoctorCommand {
-    fn run(self) {
+    fn run(self) -> anyhow::Result<i32> {
         let report = load_architecture_invariant_report(&self.path);
         println!("{}", report.render_text());
         if self.visibility_contract {
@@ -141,9 +154,7 @@ impl ArchitectureDoctorCommand {
             println!("  - ready + visible=false is rejected");
             println!("  - partial routes require reason/degraded guidance");
         }
-        if report.is_failure() {
-            std::process::exit(1);
-        }
+        return Ok(if report.is_failure() { 1 } else { 0 });
     }
 }
 
@@ -156,11 +167,10 @@ struct DocsDoctorCommand {
     /// Validate planned/partial/ready visibility contract.
     #[arg(long = "visibility-contract", default_value_t = false, hide = true)]
     visibility_contract: bool,
-
 }
 
 impl DocsDoctorCommand {
-    fn run(self) {
+    fn run(self) -> anyhow::Result<i32> {
         let report = load_docs_maintenance_report(&self.path);
         println!("{}", report.render_text());
         if self.visibility_contract {
@@ -169,9 +179,7 @@ impl DocsDoctorCommand {
             println!("  - ready + visible=false is rejected");
             println!("  - partial routes require reason/degraded guidance");
         }
-        if report.is_failure() {
-            std::process::exit(1);
-        }
+        return Ok(if report.is_failure() { 1 } else { 0 });
     }
 }
 
@@ -184,11 +192,10 @@ struct WorkflowDoctorCommand {
     /// Validate planned/partial/ready visibility contract.
     #[arg(long = "visibility-contract", default_value_t = false, hide = true)]
     visibility_contract: bool,
-
 }
 
 impl WorkflowDoctorCommand {
-    fn run(self) {
+    fn run(self) -> anyhow::Result<i32> {
         let report = load_workflow_run_report(&self.path);
         println!("{}", report.render_text());
         if self.visibility_contract {
@@ -207,11 +214,9 @@ impl WorkflowDoctorCommand {
             println!("  BLOCK: {reason}");
         }
         if aggregate.exit_code != 0 {
-            std::process::exit(aggregate.exit_code);
+            return Ok(aggregate.exit_code);
         }
-        if report.is_failure() {
-            std::process::exit(1);
-        }
+        return Ok(if report.is_failure() { 1 } else { 0 });
     }
 }
 
@@ -224,11 +229,10 @@ struct OwnershipDoctorCommand {
     /// Validate planned/partial/ready visibility contract.
     #[arg(long = "visibility-contract", default_value_t = false, hide = true)]
     visibility_contract: bool,
-
 }
 
 impl OwnershipDoctorCommand {
-    fn run(self) {
+    fn run(self) -> anyhow::Result<i32> {
         let report = load_ownership_scan_report(&self.path);
         println!("{}", report.render_text());
         if self.visibility_contract {
@@ -237,9 +241,7 @@ impl OwnershipDoctorCommand {
             println!("  - ready + visible=false is rejected");
             println!("  - partial routes require reason/degraded guidance");
         }
-        if report.is_failure() {
-            std::process::exit(1);
-        }
+        return Ok(if report.is_failure() { 1 } else { 0 });
     }
 }
 
@@ -255,7 +257,7 @@ struct SurfacesDoctorCommand {
 }
 
 impl SurfacesDoctorCommand {
-    fn run(self) {
+    fn run(self) -> anyhow::Result<i32> {
         let report = load_surface_doctor_report(&self.path);
         println!("{}", report.render_text());
         if self.visibility_contract {
@@ -264,9 +266,7 @@ impl SurfacesDoctorCommand {
             println!("  - ready + visible=false is rejected");
             println!("  - partial routes require reason/degraded guidance");
         }
-        if report.is_failure() {
-            std::process::exit(1);
-        }
+        return Ok(if report.is_failure() { 1 } else { 0 });
     }
 }
 
@@ -279,11 +279,10 @@ struct PolicyDoctorCommand {
     /// Validate planned/partial/ready visibility contract.
     #[arg(long = "visibility-contract", default_value_t = false, hide = true)]
     visibility_contract: bool,
-
 }
 
 impl PolicyDoctorCommand {
-    fn run(self) {
+    fn run(self) -> anyhow::Result<i32> {
         let report = load_policy_doctor_report_for_path(&self.path);
         println!("{}", report.render_text());
         if self.visibility_contract {
@@ -292,10 +291,105 @@ impl PolicyDoctorCommand {
             println!("  - ready + visible=false is rejected");
             println!("  - partial routes require reason/degraded guidance");
         }
-        if report.is_failure() {
-            std::process::exit(1);
-        }
+        return Ok(if report.is_failure() { 1 } else { 0 });
     }
+}
+
+#[derive(Debug, Parser)]
+struct SpecConformanceDoctorCommand {
+    /// Path to start discovery from.
+    #[arg(value_name = "PATH", default_value = ".")]
+    path: PathBuf,
+
+    /// Require Part V-VIII v1.4 addenda to be fully passing, not just tracked.
+    #[arg(long = "full-v1-4", default_value_t = false)]
+    full_v1_4: bool,
+}
+
+impl SpecConformanceDoctorCommand {
+    fn run(self) -> anyhow::Result<i32> {
+        let ledger_path = self
+            .path
+            .join(".vac")
+            .join("registry")
+            .join("spec-conformance-ledger.yaml");
+        let ledger = match fs::read_to_string(&ledger_path) {
+            Ok(contents) => contents,
+            Err(err) => {
+                eprintln!(
+                    "vac doctor spec-conformance: FAIL\n  missing ledger {}: {err}",
+                    ledger_path.display()
+                );
+                return Ok(1);
+            }
+        };
+        let yaml: Value = match serde_yaml::from_str(&ledger) {
+            Ok(yaml) => yaml,
+            Err(err) => {
+                eprintln!(
+                    "vac doctor spec-conformance: FAIL\n  invalid ledger {}: {err}",
+                    ledger_path.display()
+                );
+                return Ok(1);
+            }
+        };
+
+        let mut failures = Vec::new();
+        println!("vac doctor spec-conformance");
+        println!("ledger: {}", ledger_path.display());
+        if self.full_v1_4 {
+            println!("mode: full-v1.4");
+        } else {
+            println!("mode: ledger coverage");
+        }
+
+        for key in [
+            "part_v_bound_runtime",
+            "part_vi_enforcement_level",
+            "part_vii_signed_evidence_v2",
+            "part_viii_distributed_memory",
+        ] {
+            let status = mapping_get(&yaml, key)
+                .and_then(|section| mapping_get(section, "status"))
+                .and_then(Value::as_str)
+                .unwrap_or("missing");
+            println!("  {key}: {status}");
+            let acceptable = if self.full_v1_4 {
+                status == "pass"
+            } else {
+                !matches!(status, "missing" | "not_implemented")
+            };
+            if !acceptable {
+                failures.push(format!("{key} status is {status}"));
+            }
+        }
+
+        let untracked = mapping_get(&yaml, "untracked_normative_clauses")
+            .and_then(Value::as_sequence)
+            .map_or(0, Vec::len);
+        println!("  untracked_normative_clauses: {untracked}");
+        if untracked != 0 {
+            failures.push(format!(
+                "untracked_normative_clauses has {untracked} entries"
+            ));
+        }
+
+        if failures.is_empty() {
+            println!("vac doctor spec-conformance: PASS");
+            return Ok(0);
+        }
+
+        println!("vac doctor spec-conformance: FAIL");
+        for failure in failures {
+            println!("  - {failure}");
+        }
+        Ok(1)
+    }
+}
+
+fn mapping_get<'a>(value: &'a Value, key: &str) -> Option<&'a Value> {
+    let key = Value::String(key.to_string());
+    value.as_mapping()?.get(&key)
 }
 
 #[derive(Debug, Parser)]
@@ -331,11 +425,10 @@ struct ProjectWorkspaceDoctorCommand {
     /// Validate planned/partial/ready visibility contract.
     #[arg(long = "visibility-contract", default_value_t = false, hide = true)]
     visibility_contract: bool,
-
 }
 
 impl ProjectWorkspaceDoctorCommand {
-    fn run(self) {
+    fn run(self) -> anyhow::Result<i32> {
         if self.setup_dialog_preview {
             match build_project_workspace_confirmation_dialog(&self.path) {
                 Some(dialog) => println!("{}", dialog.render_text()),
@@ -343,7 +436,7 @@ impl ProjectWorkspaceDoctorCommand {
                     "setup_dialog: unavailable; project workspace is already explicit or strict-only"
                 ),
             }
-            return;
+            return Ok(0);
         }
 
         if self.promote_strict_preview {
@@ -351,7 +444,7 @@ impl ProjectWorkspaceDoctorCommand {
                 "{}",
                 build_strict_workspace_promotion_preview(&self.path).render_text()
             );
-            return;
+            return Ok(0);
         }
 
         if self.promote_strict {
@@ -363,7 +456,7 @@ impl ProjectWorkspaceDoctorCommand {
                 println!(
                     "approval_required: rerun with `--promote-strict --yes` after reviewing strict manifest migration"
                 );
-                std::process::exit(1);
+                return Ok(1);
             }
 
             match materialize_strict_workspace_promotion(&self.path, true) {
@@ -378,10 +471,10 @@ impl ProjectWorkspaceDoctorCommand {
                 }
                 Err(err) => {
                     println!("strict_promotion_failed: {}", err.as_str());
-                    std::process::exit(1);
+                    return Ok(1);
                 }
             }
-            return;
+            return Ok(0);
         }
 
         if self.bootstrap_soft {
@@ -389,7 +482,7 @@ impl ProjectWorkspaceDoctorCommand {
                 let plan = build_soft_workspace_bootstrap_plan(&self.path);
                 println!("{}", plan.render_text());
                 println!("approval_required: rerun with `--bootstrap-soft --yes` to create files");
-                std::process::exit(1);
+                return Ok(1);
             }
 
             match materialize_soft_workspace_bootstrap(&self.path, true) {
@@ -410,11 +503,11 @@ impl ProjectWorkspaceDoctorCommand {
                     println!(
                         "approval_required: rerun with `--bootstrap-soft --yes` to create files"
                     );
-                    std::process::exit(1);
+                    return Ok(1);
                 }
                 Err(err) => {
                     println!("bootstrap_failed: {}", err.as_str());
-                    std::process::exit(1);
+                    return Ok(1);
                 }
             }
         }
@@ -428,9 +521,7 @@ impl ProjectWorkspaceDoctorCommand {
             println!("  - ready + visible=false is rejected");
             println!("  - partial routes require reason/degraded guidance");
         }
-        if report.is_failure() {
-            std::process::exit(1);
-        }
+        return Ok(if report.is_failure() { 1 } else { 0 });
     }
 }
 
@@ -443,22 +534,35 @@ struct EvidenceDoctorCommand {
     /// Check canonical evidence field coverage in addition to hash-chain records.
     #[arg(long = "canonical-coverage", default_value_t = false)]
     canonical_coverage: bool,
+
+    /// Validate signed evidence v2 subchains and Merkle anchors.
+    #[arg(long = "v2", default_value_t = false)]
+    v2: bool,
 }
 
 impl EvidenceDoctorCommand {
-    fn run(self) {
+    fn run(self) -> anyhow::Result<i32> {
+        if self.v2 {
+            let report = vac_core::control_plane::load_evidence_v2_doctor_report(&self.path);
+            println!("{}", report.render_text());
+            return Ok(report.exit_code());
+        }
         if self.canonical_coverage {
             let coverage = vac_core::control_plane::vac_init_evidence_chain::canonical_evidence_field_coverage_report();
             println!("vac doctor evidence --canonical-coverage");
             println!("included: {}", coverage.included.len());
             println!("excluded: {}", coverage.excluded.join(","));
-            if !coverage.missing.is_empty() { println!("missing: {}", coverage.missing.join(",")); }
-            if !coverage.unexpected.is_empty() { println!("unexpected: {}", coverage.unexpected.join(",")); }
-            std::process::exit(if coverage.is_pass() { 0 } else { 1 });
+            if !coverage.missing.is_empty() {
+                println!("missing: {}", coverage.missing.join(","));
+            }
+            if !coverage.unexpected.is_empty() {
+                println!("unexpected: {}", coverage.unexpected.join(","));
+            }
+            return Ok(if coverage.is_pass() { 0 } else { 1 });
         }
         let report = inspect_evidence_records(&self.path);
         println!("{}", report.render_text("evidence"));
-        std::process::exit(report.exit_code());
+        Ok(report.exit_code())
     }
 }
 
@@ -470,7 +574,7 @@ struct EvidenceSigningDoctorCommand {
 }
 
 impl EvidenceSigningDoctorCommand {
-    fn run(self) {
+    fn run(self) -> anyhow::Result<i32> {
         let mut report = SimpleDoctorInspection::default();
         let signing_required = evidence_signing_required_for_workspace(&self.path);
         let key_present = std::env::var("VAC_EVIDENCE_ED25519_SIGNING_KEY_BASE64")
@@ -482,9 +586,13 @@ impl EvidenceSigningDoctorCommand {
                     .to_string(),
             );
         } else if signing_required {
-            report.infos.push("evidence signing required and key material is present".to_string());
+            report
+                .infos
+                .push("evidence signing required and key material is present".to_string());
         } else if key_present {
-            report.infos.push("evidence signing optional; key material is present".to_string());
+            report
+                .infos
+                .push("evidence signing optional; key material is present".to_string());
         } else {
             report.warnings.push(
                 "evidence signing optional and key missing; writer will emit unsigned governance warning"
@@ -492,7 +600,7 @@ impl EvidenceSigningDoctorCommand {
             );
         }
         println!("{}", report.render_text("evidence-signing"));
-        std::process::exit(report.exit_code());
+        Ok(report.exit_code())
     }
 }
 
@@ -536,7 +644,7 @@ struct LayeringDoctorCommand {
 }
 
 impl LayeringDoctorCommand {
-    fn run(self) {
+    fn run(self) -> anyhow::Result<i32> {
         let status_path = self.path.join(".vac/registry/layering-status.yaml");
         println!("VAC Doctor Layering");
         println!("===================");
@@ -545,14 +653,12 @@ impl LayeringDoctorCommand {
             Ok(contents) => {
                 let failed = contents.contains("status: failed");
                 print!("{contents}");
-                if failed {
-                    std::process::exit(1);
-                }
+                Ok(if failed { 1 } else { 0 })
             }
             Err(error) => {
                 println!("layering_status: missing");
                 println!("error: {error}");
-                std::process::exit(1);
+                Ok(1)
             }
         }
     }
@@ -566,10 +672,10 @@ struct MemoryDoctorCommand {
 }
 
 impl MemoryDoctorCommand {
-    fn run(self) {
+    fn run(self) -> anyhow::Result<i32> {
         let report = inspect_memory_records(&self.path);
         println!("{}", report.render_text("memory"));
-        std::process::exit(report.exit_code());
+        Ok(report.exit_code())
     }
 }
 
@@ -581,10 +687,10 @@ struct InitDoctorCommand {
 }
 
 impl InitDoctorCommand {
-    fn run(self) {
+    fn run(self) -> anyhow::Result<i32> {
         let report = inspect_init_state(&self.path);
         println!("{}", report.render_text("init"));
-        std::process::exit(report.exit_code());
+        Ok(report.exit_code())
     }
 }
 
@@ -710,7 +816,11 @@ fn build_not_evaluated_build_check(message: impl Into<String>) -> DoctorCheckRep
 
 fn build_artifact_doctor_check(path: &Path) -> DoctorCheckReport {
     let binary_name = if cfg!(windows) { "vac.exe" } else { "vac" };
-    let binary = path.join("vac-rs").join("target").join("debug").join(binary_name);
+    let binary = path
+        .join("vac-rs")
+        .join("target")
+        .join("debug")
+        .join(binary_name);
     let Ok(binary_meta) = fs::metadata(&binary) else {
         return build_not_evaluated_build_check(format!(
             "build artifact not found at {}; run cargo build for vac-cli",
@@ -902,18 +1012,21 @@ fn inspect_evidence_records(root: &PathBuf) -> SimpleDoctorInspection {
 }
 
 fn inspect_memory_records(root: &PathBuf) -> SimpleDoctorInspection {
+    let mut report = SimpleDoctorInspection::default();
+    let runtime_report = vac_core::control_plane::load_memory_doctor_report(root);
+    report.infos.extend(runtime_report.infos);
+    report.warnings.extend(runtime_report.warnings);
+    report.errors.extend(runtime_report.errors);
+
     let memory_dir = root.join(".vac/registry/memory");
     if !memory_dir.exists() {
-        return SimpleDoctorInspection {
-            warnings: vec![
-                "no memory registry directory yet; memory store lands in Production Hardening D"
-                    .to_string(),
-            ],
-            ..SimpleDoctorInspection::default()
-        };
+        report.warnings.push(
+            "no memory registry directory yet; YAML memory records are optional once SQLite memory store is active"
+                .to_string(),
+        );
+        return report;
     }
 
-    let mut report = SimpleDoctorInspection::default();
     let mut count = 0usize;
     collect_yaml_files(&memory_dir, &mut |path| {
         count += 1;
@@ -1057,7 +1170,7 @@ struct MigrationDoctorCommand {
 }
 
 impl MigrationDoctorCommand {
-    fn run(self) {
+    fn run(self) -> anyhow::Result<i32> {
         let migration_dir = self.path.join(".vac/registry/migrations");
         let mut checked = 0usize;
         let mut failures = Vec::new();
@@ -1123,8 +1236,9 @@ impl MigrationDoctorCommand {
         }
         if failures.is_empty() {
             println!("migration doctor: PASS");
+            Ok(0)
         } else {
-            std::process::exit(1);
+            Ok(1)
         }
     }
 }
@@ -1141,7 +1255,7 @@ struct DonorDoctorCommand {
 }
 
 impl DonorDoctorCommand {
-    fn run(self) {
+    fn run(self) -> anyhow::Result<i32> {
         let report = load_donor_status_report(&self.path);
         println!("{}", report.render_text());
         let mut failed = report.is_failure();
@@ -1152,9 +1266,7 @@ impl DonorDoctorCommand {
             failed |= contract_report.is_failure();
         }
 
-        if failed {
-            std::process::exit(1);
-        }
+        Ok(if failed { 1 } else { 0 })
     }
 }
 
@@ -1166,7 +1278,7 @@ struct BuildDoctorCommand {
 }
 
 impl BuildDoctorCommand {
-    fn run(self) {
+    fn run(self) -> anyhow::Result<i32> {
         let request = BuildCheckRequest::for_repo_root(&self.path);
         println!(
             "Executing real build gate command: {}",
@@ -1175,13 +1287,11 @@ impl BuildDoctorCommand {
         match run_build_check(&request) {
             Ok(report) => {
                 println!("{}", report.render_text());
-                if !report.success {
-                    std::process::exit(1);
-                }
+                Ok(if report.success { 0 } else { 1 })
             }
             Err(err) => {
                 eprintln!("Failed to execute build check: {err}");
-                std::process::exit(1);
+                Ok(1)
             }
         }
     }
@@ -1195,7 +1305,7 @@ struct ReleaseDoctorCommand {
 }
 
 impl ReleaseDoctorCommand {
-    fn run(self) {
+    fn run(self) -> anyhow::Result<i32> {
         let aggregate = build_real_doctor_aggregate(&self.path);
 
         println!("VAC Doctor Taxonomy Aggregate");
@@ -1205,14 +1315,14 @@ impl ReleaseDoctorCommand {
             println!("  BLOCK: {reason}");
         }
         if aggregate.exit_code != 0 {
-            std::process::exit(aggregate.exit_code);
+            return Ok(aggregate.exit_code);
         }
 
         let report = load_workflow_run_report(&self.path);
 
         if report.registry().is_failure() {
             println!("{}", report.registry().render_text());
-            std::process::exit(1);
+            return Ok(1);
         }
 
         let release_gate = report
@@ -1224,7 +1334,7 @@ impl ReleaseDoctorCommand {
             Some(entry) => entry,
             None => {
                 eprintln!("Error: 'maintenance.release-gate' workflow not found in registry.");
-                std::process::exit(1);
+                return Ok(1);
             }
         };
 
@@ -1278,10 +1388,10 @@ impl ReleaseDoctorCommand {
         println!("----------------------------------------");
         if entry.is_failure() || failed {
             println!("STATUS: RELEASE BLOCKED ❌");
-            std::process::exit(1);
+            Ok(1)
         } else {
             println!("STATUS: RELEASE READY ✅");
-            std::process::exit(0);
+            Ok(0)
         }
     }
 }
@@ -1300,7 +1410,7 @@ mod tests {
 
     fn load_cli_surface_manifest() -> String {
         let manifest_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../..")
+            .join("../../../..")
             .join(".vac/surfaces/cli.yaml");
         fs::read_to_string(&manifest_path)
             .unwrap_or_else(|err| panic!("read {}: {err}", manifest_path.display()))
@@ -1356,7 +1466,7 @@ policy:
     - execute_process
 validation:
   commands:
-    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.93.0 check -p vac-surface-cli
+    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("build capability manifest");
@@ -1389,7 +1499,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("identity check capability manifest");
@@ -1425,7 +1535,7 @@ policy:
     - execute_process
 validation:
   commands:
-    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.93.0 check -p vac-surface-cli
+    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow capability manifest");
@@ -1529,7 +1639,7 @@ policy:
     - execute_process
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 {compatibility_block}
 "#,
                 id = id,
@@ -1609,7 +1719,7 @@ steps:
     uses: capability.activity.emit
 validation:
   commands:
-    - cargo +1.93.0 run -p vac-surface-cli -- doctor registry .
+    - cargo +1.95.0 run -p vac-surface-cli -- doctor registry .
 "#,
         )
         .expect("release gate workflow");
@@ -1865,7 +1975,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.93.0 check -p vac-surface-tui --tests
+    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.95.0 check -p vac-surface-tui --tests
 "#,
         )
         .expect("tui capability manifest");
@@ -1905,7 +2015,7 @@ policy:
     - execute_process
 validation:
   commands:
-    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.93.0 check -p vac-surface-cli
+    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow capability manifest");
@@ -1940,7 +2050,7 @@ policy:
     - execute_process
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow manifest");
@@ -1989,7 +2099,7 @@ policy:
     - execute_process
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow manifest");
@@ -2036,7 +2146,7 @@ policy:
   mutates_files: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("ownership capability manifest");
@@ -2062,7 +2172,7 @@ policy:
   mutates_files: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("build capability manifest");
@@ -2147,7 +2257,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow manifest");
@@ -2223,7 +2333,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow manifest");
@@ -2441,7 +2551,7 @@ policy:
   mutates_files: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .unwrap();
@@ -2475,7 +2585,7 @@ policy:
   mutates_files: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .unwrap();

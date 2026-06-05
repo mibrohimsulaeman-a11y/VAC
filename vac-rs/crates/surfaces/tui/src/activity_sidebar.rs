@@ -15,7 +15,6 @@ use ratatui::style::Modifier;
 use ratatui::style::Style;
 use ratatui::text::Line;
 use ratatui::text::Span;
-use ratatui::widgets::Clear;
 use ratatui::widgets::Paragraph;
 use ratatui::widgets::Widget;
 use ratatui::widgets::Wrap;
@@ -94,11 +93,6 @@ impl<'a> ActivitySidebar<'a> {
         if area.width == 0 || area.height == 0 {
             return;
         }
-
-        // Always clear the sidebar area first so stale cells from previous
-        // frames (e.g. after a window resize or partial repaint) cannot
-        // ghost through, even when the sidebar is collapsed. P1.9 / §E.4.
-        Clear.render(area, buf);
 
         if !self.state.is_expanded() {
             return;
@@ -324,10 +318,23 @@ mod tests {
         let sidebar = ActivitySidebar::new(&state);
         let area = Rect::new(0, 0, 40, 12);
         let mut buf = Buffer::empty(area);
+        for y in 0..area.height {
+            for x in 0..area.width {
+                buf[(x, y)]
+                    .set_symbol(".")
+                    .set_style(Style::default().bg(crate::ui_consts::APP_BG));
+            }
+        }
+
         sidebar.render(area, &mut buf);
         assert!(
-            (0..area.height).all(|y| (0..area.width).all(|x| buf[(x, y)].symbol() == " ")),
-            "collapsed sidebar should not paint"
+            (0..area.height).all(|y| {
+                (0..area.width).all(|x| {
+                    let cell = &buf[(x, y)];
+                    cell.symbol() == "." && cell.style().bg == Some(crate::ui_consts::APP_BG)
+                })
+            }),
+            "collapsed sidebar should preserve the underlying frame"
         );
     }
 

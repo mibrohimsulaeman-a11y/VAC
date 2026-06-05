@@ -104,28 +104,83 @@ pub(crate) const OWNER_RUNTIME_METHOD_SUPPORT: &[OwnerRuntimeMethodSupport] = &[
     OwnerRuntimeMethodSupport::implemented("thread_goal_get", "local runtime goal facade", false),
     OwnerRuntimeMethodSupport::implemented("thread_goal_set", "local runtime goal facade", false),
     OwnerRuntimeMethodSupport::implemented("thread_goal_clear", "local runtime goal facade", false),
-    OwnerRuntimeMethodSupport::implemented("thread_loaded_list", "ThreadManager::list_thread_ids", false),
-    OwnerRuntimeMethodSupport::implemented("thread_compact_start", "RuntimeWriteCommand::StartCompact / Op::Compact", false),
+    OwnerRuntimeMethodSupport::implemented(
+        "thread_loaded_list",
+        "ThreadManager::list_thread_ids",
+        false,
+    ),
+    OwnerRuntimeMethodSupport::implemented(
+        "thread_compact_start",
+        "RuntimeWriteCommand::StartCompact / Op::Compact",
+        false,
+    ),
     OwnerRuntimeMethodSupport::implemented("thread_set_name", "metadata facade", false),
-    OwnerRuntimeMethodSupport::implemented("thread_unsubscribe", "TUI local listener lifecycle", false),
-    OwnerRuntimeMethodSupport::implemented("thread_inject_items", "local runtime item injection facade", false),
+    OwnerRuntimeMethodSupport::implemented(
+        "thread_unsubscribe",
+        "TUI local listener lifecycle",
+        false,
+    ),
+    OwnerRuntimeMethodSupport::implemented(
+        "thread_inject_items",
+        "local runtime item injection facade",
+        false,
+    ),
     OwnerRuntimeMethodSupport::implemented("review_start", "safe deferred review facade", false),
     OwnerRuntimeMethodSupport::implemented("skills_list", "local empty skills facade", false),
-    OwnerRuntimeMethodSupport::implemented("thread_realtime_audio", "realtime no-op until transport promotion", false),
-    OwnerRuntimeMethodSupport::implemented("thread_realtime_stop", "realtime no-op until transport promotion", false),
-    OwnerRuntimeMethodSupport::implemented("memory_reset", "safe no-op until memory runtime promotion", false),
-    OwnerRuntimeMethodSupport::implemented("logout_account", "safe no-op until account runtime promotion", false),
-    OwnerRuntimeMethodSupport::implemented("reload_user_config", "local config reload facade", false),
-    OwnerRuntimeMethodSupport::implemented("thread_memory_mode_set", "local thread memory-mode facade", false),
-    OwnerRuntimeMethodSupport::implemented("thread_approve_guardian_denied_action", "guardian approval facade", false),
-    OwnerRuntimeMethodSupport::implemented("thread_background_terminals_clean", "RuntimeWriteCommand::CleanBackgroundTerminals", false),
+    OwnerRuntimeMethodSupport::implemented(
+        "thread_realtime_audio",
+        "realtime no-op until transport promotion",
+        false,
+    ),
+    OwnerRuntimeMethodSupport::implemented(
+        "thread_realtime_stop",
+        "realtime no-op until transport promotion",
+        false,
+    ),
+    OwnerRuntimeMethodSupport::implemented(
+        "memory_reset",
+        "safe no-op until memory runtime promotion",
+        false,
+    ),
+    OwnerRuntimeMethodSupport::implemented(
+        "logout_account",
+        "safe no-op until account runtime promotion",
+        false,
+    ),
+    OwnerRuntimeMethodSupport::implemented(
+        "reload_user_config",
+        "local config reload facade",
+        false,
+    ),
+    OwnerRuntimeMethodSupport::implemented(
+        "thread_memory_mode_set",
+        "local thread memory-mode facade",
+        false,
+    ),
+    OwnerRuntimeMethodSupport::implemented(
+        "thread_approve_guardian_denied_action",
+        "guardian approval facade",
+        false,
+    ),
+    OwnerRuntimeMethodSupport::implemented(
+        "thread_background_terminals_clean",
+        "RuntimeWriteCommand::CleanBackgroundTerminals",
+        false,
+    ),
     OwnerRuntimeMethodSupport::fail_closed("thread_rollback", "ThreadStore rollback snapshot"),
     OwnerRuntimeMethodSupport::fail_closed("thread_realtime_start", "realtime transport promotion"),
-    OwnerRuntimeMethodSupport::fail_closed("resolve_server_request", "legacy app-server server-request registry fallback"),
-    OwnerRuntimeMethodSupport::fail_closed("reject_server_request", "legacy app-server server-request registry fallback"),
+    OwnerRuntimeMethodSupport::fail_closed(
+        "resolve_server_request",
+        "legacy app-server server-request registry fallback",
+    ),
+    OwnerRuntimeMethodSupport::fail_closed(
+        "reject_server_request",
+        "legacy app-server server-request registry fallback",
+    ),
 ];
 
-pub(crate) fn release_blocking_owner_runtime_methods() -> impl Iterator<Item = OwnerRuntimeMethodSupport> {
+pub(crate) fn release_blocking_owner_runtime_methods()
+-> impl Iterator<Item = OwnerRuntimeMethodSupport> {
     OWNER_RUNTIME_METHOD_SUPPORT
         .iter()
         .copied()

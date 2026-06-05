@@ -20,7 +20,6 @@ use crate::facts::TurnSubmissionType;
 use crate::facts::VACCompactionEvent;
 use crate::now_unix_seconds;
 use serde::Serialize;
-use vac_runtime_protocol::VACErrorInfo;
 use vac_login::default_client::originator;
 use vac_plugin::PluginTelemetryMetadata;
 use vac_protocol::approvals::NetworkApprovalProtocol;
@@ -35,6 +34,7 @@ use vac_protocol::protocol::HookRunStatus;
 use vac_protocol::protocol::HookSource;
 use vac_protocol::protocol::SubAgentSource;
 use vac_protocol::protocol::TokenUsage;
+use vac_runtime_protocol::VACErrorInfo;
 
 #[derive(Clone, Copy, Debug, Serialize)]
 #[serde(rename_all = "snake_case")]

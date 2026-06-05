@@ -638,6 +638,8 @@ impl RunReporter {
 
 #[cfg(test)]
 mod tests {
+    // Test setup still uses unwraps for temporary files and assertion fixtures; production file-search
+    // paths are audited separately and do not rely on this module-level suppression.
     #![allow(clippy::unwrap_used)]
 
     use super::*;
@@ -646,11 +648,31 @@ mod tests {
     use std::sync::Arc;
     use std::sync::Condvar;
     use std::sync::Mutex;
+    use std::sync::MutexGuard;
+    use std::sync::WaitTimeoutResult;
     use std::sync::atomic::AtomicBool;
     use std::thread;
     use std::time::Duration;
     use std::time::Instant;
     use tempfile::TempDir;
+
+    fn lock_state<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
+        match mutex.lock() {
+            Ok(guard) => guard,
+            Err(poisoned) => poisoned.into_inner(),
+        }
+    }
+
+    fn wait_timeout_state<'a, T>(
+        cv: &Condvar,
+        state: MutexGuard<'a, T>,
+        timeout: Duration,
+    ) -> (MutexGuard<'a, T>, WaitTimeoutResult) {
+        match cv.wait_timeout(state, timeout) {
+            Ok(result) => result,
+            Err(poisoned) => poisoned.into_inner(),
+        }
+    }
 
     #[test]
     fn verify_score_is_none_for_non_match() {
@@ -713,7 +735,7 @@ mod tests {
             F: FnMut(&T) -> bool,
         {
             let deadline = Instant::now() + timeout;
-            let mut state = mutex.lock().unwrap();
+            let mut state = lock_state(mutex);
             loop {
                 if predicate(&state) {
                     return true;
@@ -722,7 +744,7 @@ mod tests {
                 if remaining.is_zero() {
                     return false;
                 }
-                let (next_state, wait_result) = cv.wait_timeout(state, remaining).unwrap();
+                let (next_state, wait_result) = wait_timeout_state(cv, state, remaining);
                 state = next_state;
                 if wait_result.timed_out() {
                     return predicate(&state);
@@ -739,12 +761,12 @@ mod tests {
             )
         }
         fn clear(&self) {
-            self.updates.lock().unwrap().clear();
-            self.complete_times.lock().unwrap().clear();
+            lock_state(&self.updates).clear();
+            lock_state(&self.complete_times).clear();
         }
 
         fn updates(&self) -> Vec<FileSearchSnapshot> {
-            self.updates.lock().unwrap().clone()
+            lock_state(&self.updates).clone()
         }
 
         fn wait_for_updates_at_least(&self, min_len: usize, timeout: Duration) -> bool {
@@ -754,9 +776,7 @@ mod tests {
         }
 
         fn snapshot(&self) -> FileSearchSnapshot {
-            self.updates
-                .lock()
-                .unwrap()
+            lock_state(&self.updates)
                 .last()
                 .cloned()
                 .unwrap_or_default()
@@ -765,14 +785,14 @@ mod tests {
 
     impl SessionReporter for RecordingReporter {
         fn on_update(&self, snapshot: &FileSearchSnapshot) {
-            let mut updates = self.updates.lock().unwrap();
+            let mut updates = lock_state(&self.updates);
             updates.push(snapshot.clone());
             self.update_cv.notify_all();
         }
 
         fn on_complete(&self) {
             {
-                let mut complete_times = self.complete_times.lock().unwrap();
+                let mut complete_times = lock_state(&self.complete_times);
                 complete_times.push(Instant::now());
             }
             self.complete_cv.notify_all();

@@ -2877,3 +2877,22 @@ async fn chatwidget_tall() {
         normalize_snapshot_paths(term.backend().vt100().screen().contents())
     );
 }
+
+#[tokio::test]
+async fn test_chatwidget_idle_operator_view() {
+    let (chat, _rx, _op_rx) = make_chatwidget_manual(Some("claude-sonnet-4.5")).await;
+    let width: u16 = 120;
+    let height: u16 = 40;
+    let backend = VT100Backend::new(width, height);
+    let mut term = crate::custom_terminal::Terminal::with_options(backend).expect("terminal");
+    term.set_viewport_area(Rect::new(0, 0, width, height));
+    term.draw(|f| {
+        chat.render(f.area(), f.buffer_mut());
+    })
+    .unwrap();
+    let contents = term.backend().vt100().screen().contents();
+
+    assert!(contents.contains("recent tasks"), "Expected 'recent tasks' in screen contents, got: {}", contents);
+    assert!(contents.contains("no persisted recent task loaded"), "Expected 'no persisted recent task loaded' in screen contents");
+    assert!(contents.contains("Ask VAC to do anything"), "Expected composer placeholder 'Ask VAC to do anything' in screen contents, got: {}", contents);
+}

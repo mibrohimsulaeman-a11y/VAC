@@ -1,34 +1,33 @@
 ---
 source: crates/surfaces/tui/src/app/tests.rs.inc
-assertion_line: 3772
 expression: rendered
 ---
 ● ● ●     vac · interactive   first launch 
 
 
-hydrating startup snapshot ─
-╭Vastar Agentic CLI──────────────────╮╭Runtime─────────────────────────────╮
-│●  version        <VERSION> control-││●  runtime        host      in-proce│
-│●  provider       default   runtime ││●  isolation      policy    executio│
-│●  model          gpt-5.4   runtime ││●  autopilot      runtime   schedule│
-│●  fallback       configure loaded f││●  mcp            runtime   configur│
-│●  profile        runtime   tool pol││●  sessions       runtime   history │
-│●  rulebook       runtime   control-││●  workspace      registry  inventor│
-│●  reasoning      xhigh     active e││                                    │
-│●  tier           fast      low-late││                                    │
-│                                    ││                                    │
-│                                    ││                                    │
-│                                    ││                                    │
-│                                    ││                                    │
-│                                    ││                                    │
-│                                    ││                                    │
-│                                    ││                                    │
-│                                    ││                                    │
-│                                    ││                                    │
-╰────────────────────────────────────╯╰────────────────────────────────────╯
-ready
- VAC           type / for commands, /help to explore, or start typing a task
+  V A C  Vastar Agentic CLI  <VERSION>
+         VAC operator console · local runtime · control-plane hardening acti
+         cwd /tmp/project · session local
+
+hydrating startup snapshot ─────────────────────────────────────────────────
+VAC                                   Runtime
+● version   <VERSION> · control-plane ● runtime   host · in-process owner-na
+● provider  default · runtime selected● isolation policy · execution gates a
+● model     gpt-5.4 · runtime selected● autopilot runtime · scheduler state
+● fallback  configured · loaded from p● mcp       runtime · configured conne
+● profile   :read-only · resolved from● sessions  runtime · history loaded i
+● rulebook  on-request · resolved from● workspace registry · inventory resol
+● reasoning xhigh · active effort
+● tier      fast · low-latency inferen
+
+ready ─────────────────────────────────────────────────
+ VAC    type / for commands, /help to explore, or start typing a task.
 recent   no recent task loaded
 
+▸ /help · /model · /resume · /runtime · shift+tab plan mode
 
- INPUT  │ model claude-sonnet-4.5 │ 0 tok │ manual │ valid 100% │ profile ru
+
+
+
+
+ INPUT  │ model gpt-5.4 │ 0 tok │ manual │ valid runtime

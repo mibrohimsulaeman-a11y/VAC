@@ -118,9 +118,7 @@ pub enum VACErr {
     ConnectionFailed(ConnectionFailedError),
     #[error("Quota exceeded. Check your plan and billing details.")]
     QuotaExceeded,
-    #[error(
-        "Configure a supported local or provider API key to continue using VAC."
-    )]
+    #[error("Configure a supported local or provider API key to continue using VAC.")]
     UsageNotIncluded,
     #[error("We're currently experiencing high demand, which may cause temporary errors.")]
     InternalServerError,

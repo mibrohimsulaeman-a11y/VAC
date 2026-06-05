@@ -1,7 +1,7 @@
 schema_version: 1
 kind: capability
 id: vac.release.legal-build-blockers
-title: Legal and Offline Build Release Blockers
+title: Legal and Build Release Blockers
 status: ready
 owner:
   crate: vac-core
@@ -19,7 +19,7 @@ ownership:
     - .vac/registry/legal-release-blockers.yaml
     - scripts/check-legal-release-blockers.sh
     exclude: []
-description: Tracks P0 release blockers for legal attribution and offline build truth without converting unrun gates to Pass.
+description: Tracks P0 release blockers for legal attribution and build truth without converting unrun gates to Pass.
 depends_on:
 - vac.init.registry-strictness
 policy:

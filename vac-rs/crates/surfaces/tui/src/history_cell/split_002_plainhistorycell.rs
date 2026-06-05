@@ -95,7 +95,7 @@ impl HistoryCell for PrefixedWrappedHistoryCell {
         if width == 0 {
             return Vec::new();
         }
-        let opts = RtOptions::new(width.max(1) as usize)
+        let opts = RtOptions::new(usize::from(width.max(1)))
             .initial_indent(self.initial_prefix.clone())
             .subsequent_indent(self.subsequent_prefix.clone());
         adaptive_wrap_lines(&self.text, opts)
@@ -122,7 +122,7 @@ impl HistoryCell for UnifiedExecInteractionCell {
         if width == 0 {
             return Vec::new();
         }
-        let wrap_width = width as usize;
+        let wrap_width = usize::from(width);
         let waited_only = self.stdin.is_empty();
 
         let mut header_spans = if waited_only {
@@ -193,7 +193,7 @@ impl HistoryCell for UnifiedExecProcessesCell {
             return Vec::new();
         }
 
-        let wrap_width = width as usize;
+        let wrap_width = usize::from(width);
         let max_processes = 16usize;
         let mut out: Vec<Line<'static>> = Vec::new();
         out.push(vec!["Background terminals".bold()].into());
@@ -456,4 +456,3 @@ pub fn new_approval_decision_cell(
         "  ",
     ))
 }
-

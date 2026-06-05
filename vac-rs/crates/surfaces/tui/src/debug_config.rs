@@ -54,7 +54,6 @@ pub(crate) fn new_debug_config_output(
     PlainHistoryCell::new(lines)
 }
 
-
 fn format_rules_requirements(rules: &RequirementsExecPolicyToml) -> String {
     if rules.prefix_rules.is_empty() {
         return "prefix_rules=0".to_string();
@@ -577,7 +576,6 @@ mod tests {
     use vac_config::NetworkUnixSocketPermissionToml;
     use vac_config::NetworkUnixSocketPermissionsToml;
     use vac_config::RequirementSource;
-use vac_config::RequirementsExecPolicyToml;
     use vac_config::ResidencyRequirement;
     use vac_config::SandboxModeRequirement;
     use vac_config::Sourced;

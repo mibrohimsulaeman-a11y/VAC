@@ -192,10 +192,13 @@
             } else {
                 None
             };
-        let _ = self.bottom_pane.replace_selection_view_if_active(
+        if self.bottom_pane.replace_selection_view_if_active(
             CONNECTORS_SELECTION_VIEW_ID,
             self.connectors_popup_params(connectors, selected_connector_id),
-        );
+        ) {
+            // Clear the height cache so callers see the refreshed popup's updated height.
+            self.request_redraw();
+        }
     }
 
     fn connector_brief_description(connector: &AppInfo) -> String {

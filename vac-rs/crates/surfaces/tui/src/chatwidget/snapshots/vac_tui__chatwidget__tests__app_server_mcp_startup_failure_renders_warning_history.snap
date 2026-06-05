@@ -1,5 +1,5 @@
 ---
-source: tui/src/chatwidget/tests/mcp_startup.rs
+source: crates/surfaces/tui/src/chatwidget/tests/mcp_startup.rs
 assertion_line: 122
 expression: normalize_snapshot_paths(term.backend().vt100().screen().contents())
 ---
@@ -8,8 +8,8 @@ expression: normalize_snapshot_paths(term.backend().vt100().screen().contents())
 
 ⚠ MCP client for `alpha` failed to start: handshake failed
 ⚠ MCP startup incomplete (failed: alpha)
-
-
+ 
+ 
 › Ask VAC to do anything
-
+ 
   gpt-5.5 auto · /tmp/project

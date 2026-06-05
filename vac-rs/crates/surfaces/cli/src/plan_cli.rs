@@ -7,7 +7,6 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::{Duration, Instant};
 
-
 #[derive(Debug, Clone)]
 struct ExecutionSandboxProfile {
     cwd: PathBuf,
@@ -22,7 +21,11 @@ impl ExecutionSandboxProfile {
     fn local_plan(workspace: &Path) -> Self {
         Self {
             cwd: workspace.to_path_buf(),
-            env_allowlist: vec!["PATH".to_string(), "HOME".to_string(), "RUST_LOG".to_string()],
+            env_allowlist: vec![
+                "PATH".to_string(),
+                "HOME".to_string(),
+                "RUST_LOG".to_string(),
+            ],
             timeout: Duration::from_secs(30),
             max_stdout_bytes: 256 * 1024,
             max_stderr_bytes: 128 * 1024,
@@ -31,34 +34,70 @@ impl ExecutionSandboxProfile {
     }
 
     fn profile_hash(&self) -> String {
-        vac_core::control_plane::vac_init_evidence_chain::sha256_hex(format!(
-            "cwd={}\nenv={:?}\ntimeout_ms={}\nstdout={}\nstderr={}\nallow_network={}\n",
-            self.cwd.display(), self.env_allowlist, self.timeout.as_millis(), self.max_stdout_bytes, self.max_stderr_bytes, self.allow_network
-        ).as_bytes())
+        vac_core::control_plane::vac_init_evidence_chain::sha256_hex(
+            format!(
+                "cwd={}\nenv={:?}\ntimeout_ms={}\nstdout={}\nstderr={}\nallow_network={}\n",
+                self.cwd.display(),
+                self.env_allowlist,
+                self.timeout.as_millis(),
+                self.max_stdout_bytes,
+                self.max_stderr_bytes,
+                self.allow_network
+            )
+            .as_bytes(),
+        )
     }
 }
 
 #[derive(Debug, Clone)]
-struct SandboxedCommandOutput { exit_code: Option<i32>, stdout: String, stderr: String, timed_out: bool }
+struct SandboxedCommandOutput {
+    exit_code: Option<i32>,
+    stdout: String,
+    stderr: String,
+    timed_out: bool,
+}
 
-fn run_sandboxed_command(step: &PlanExecutionStep, profile: &ExecutionSandboxProfile) -> anyhow::Result<SandboxedCommandOutput> {
+fn run_sandboxed_command(
+    step: &PlanExecutionStep,
+    profile: &ExecutionSandboxProfile,
+) -> anyhow::Result<SandboxedCommandOutput> {
     let mut command = Command::new(&step.runner);
-    command.args(&step.args).current_dir(&profile.cwd).env_clear();
+    command
+        .args(&step.args)
+        .current_dir(&profile.cwd)
+        .env_clear();
     for key in &profile.env_allowlist {
-        if let Some(value) = std::env::var_os(key) { command.env(key, value); }
+        if let Some(value) = std::env::var_os(key) {
+            command.env(key, value);
+        }
     }
-    if !profile.allow_network { command.env("VAC_NETWORK_DISABLED", "1"); }
-    let mut child = command.stdout(std::process::Stdio::piped()).stderr(std::process::Stdio::piped()).spawn()?;
+    if !profile.allow_network {
+        command.env("VAC_NETWORK_DISABLED", "1");
+    }
+    let mut child = command
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()?;
     let started = Instant::now();
     loop {
         if started.elapsed() > profile.timeout {
             let _ = child.kill();
             let output = child.wait_with_output()?;
-            return Ok(SandboxedCommandOutput { exit_code: output.status.code(), stdout: truncate_bytes(&output.stdout, profile.max_stdout_bytes), stderr: truncate_bytes(&output.stderr, profile.max_stderr_bytes), timed_out: true });
+            return Ok(SandboxedCommandOutput {
+                exit_code: output.status.code(),
+                stdout: truncate_bytes(&output.stdout, profile.max_stdout_bytes),
+                stderr: truncate_bytes(&output.stderr, profile.max_stderr_bytes),
+                timed_out: true,
+            });
         }
         if child.try_wait()?.is_some() {
             let output = child.wait_with_output()?;
-            return Ok(SandboxedCommandOutput { exit_code: output.status.code(), stdout: truncate_bytes(&output.stdout, profile.max_stdout_bytes), stderr: truncate_bytes(&output.stderr, profile.max_stderr_bytes), timed_out: false });
+            return Ok(SandboxedCommandOutput {
+                exit_code: output.status.code(),
+                stdout: truncate_bytes(&output.stdout, profile.max_stdout_bytes),
+                stderr: truncate_bytes(&output.stderr, profile.max_stderr_bytes),
+                timed_out: false,
+            });
         }
         std::thread::sleep(Duration::from_millis(20));
     }
@@ -101,7 +140,6 @@ enum PlanSubcommand {
     /// Mark a semantic plan as abandoned with a reason.
     Abandon(PlanAbandonCommand),
 }
-
 
 #[derive(Debug, Parser)]
 struct PlanCreateCommand {
@@ -309,8 +347,7 @@ impl PlanValidateCommand {
 
         let mut issues = Vec::new();
         let engine_report = vac_core::control_plane::validate_vac_init_plan_yaml_with_engine(
-            &workspace,
-            &plan_path,
+            &workspace, &plan_path,
         )
         .map_err(anyhow::Error::msg)?;
         issues.extend(
@@ -355,7 +392,7 @@ impl PlanValidateCommand {
             for issue in issues {
                 println!("  - {issue}");
             }
-            std::process::exit(1);
+            anyhow::bail!("plan validation failed for {}", plan_path.display());
         }
     }
 }
@@ -524,7 +561,6 @@ fn mapping_get<'a>(value: &'a Value, key: &str) -> Option<&'a Value> {
         .and_then(|mapping| mapping.get(&Value::String(key.to_string())))
 }
 
-
 fn plan_path_from(workspace: &Path, plan: &Path) -> anyhow::Result<PathBuf> {
     if plan.is_absolute() {
         Ok(plan.to_path_buf())
@@ -597,7 +633,8 @@ fn execute_plan_steps(
     execute: bool,
     approved: bool,
 ) -> anyhow::Result<Vec<PlanExecutionOutcome>> {
-    let registry = vac_core::control_plane::vac_init_command_gate::CommandRunnerRegistry::with_defaults();
+    let registry =
+        vac_core::control_plane::vac_init_command_gate::CommandRunnerRegistry::with_defaults();
     let sandbox_profile = ExecutionSandboxProfile::local_plan(workspace);
     let sandbox_profile_hash = sandbox_profile.profile_hash();
     let mut out = Vec::with_capacity(steps.len());
@@ -610,8 +647,7 @@ fn execute_plan_steps(
             parse_command_approval(&step.approval),
         );
         let gate = vac_core::control_plane::vac_init_command_gate::evaluate_structured_command(
-            &command,
-            &registry,
+            &command, &registry,
         );
         let mut issues = gate
             .issues
@@ -629,11 +665,17 @@ fn execute_plan_steps(
         } else if decision == "ApprovalRequired" {
             issues.push("approval.required: command requires approved plan binding".to_string());
         }
-        let can_run = execute && (gate.is_allowed() || (decision == "ApprovalRequired" && approved));
+        let can_run =
+            execute && (gate.is_allowed() || (decision == "ApprovalRequired" && approved));
         let start = Instant::now();
         let (exit_code, stdout, stderr, timed_out) = if can_run {
             let output = run_sandboxed_command(step, &sandbox_profile)?;
-            (output.exit_code, output.stdout, output.stderr, output.timed_out)
+            (
+                output.exit_code,
+                output.stdout,
+                output.stderr,
+                output.timed_out,
+            )
         } else {
             (None, String::new(), String::new(), false)
         };
@@ -642,8 +684,10 @@ fn execute_plan_steps(
             issues.push("sandbox.timeout: command exceeded sandbox timeout".to_string());
             status = "timed_out".to_string();
         }
-        let stdout_hash = vac_core::control_plane::vac_init_evidence_chain::sha256_hex(stdout.as_bytes());
-        let stderr_hash = vac_core::control_plane::vac_init_evidence_chain::sha256_hex(stderr.as_bytes());
+        let stdout_hash =
+            vac_core::control_plane::vac_init_evidence_chain::sha256_hex(stdout.as_bytes());
+        let stderr_hash =
+            vac_core::control_plane::vac_init_evidence_chain::sha256_hex(stderr.as_bytes());
         let evidence_payload = format!(
             "id={}\nrunner={}\nargs={:?}\ndecision={}\nstatus={}\nexit_code={:?}\nstdout_hash={}\nstderr_hash={}\nduration_ms={}\nsandbox_profile_hash={}\ntimed_out={}\n",
             step.id,
@@ -658,7 +702,9 @@ fn execute_plan_steps(
             sandbox_profile_hash,
             timed_out,
         );
-        let evidence_hash = vac_core::control_plane::vac_init_evidence_chain::sha256_hex(evidence_payload.as_bytes());
+        let evidence_hash = vac_core::control_plane::vac_init_evidence_chain::sha256_hex(
+            evidence_payload.as_bytes(),
+        );
         out.push(PlanExecutionOutcome {
             step: step.clone(),
             decision,
@@ -682,15 +728,21 @@ fn parse_command_risk(value: &str) -> vac_core::control_plane::vac_init_command_
         "low" => vac_core::control_plane::vac_init_command_gate::CommandRisk::Low,
         "high" => vac_core::control_plane::vac_init_command_gate::CommandRisk::High,
         "critical" => vac_core::control_plane::vac_init_command_gate::CommandRisk::Critical,
-        "execute_process" => vac_core::control_plane::vac_init_command_gate::CommandRisk::ExecuteProcess,
+        "execute_process" => {
+            vac_core::control_plane::vac_init_command_gate::CommandRisk::ExecuteProcess
+        }
         _ => vac_core::control_plane::vac_init_command_gate::CommandRisk::Medium,
     }
 }
 
-fn parse_command_approval(value: &str) -> vac_core::control_plane::vac_init_command_gate::CommandApprovalMode {
+fn parse_command_approval(
+    value: &str,
+) -> vac_core::control_plane::vac_init_command_gate::CommandApprovalMode {
     match value {
         "always" => vac_core::control_plane::vac_init_command_gate::CommandApprovalMode::Always,
-        "never" | "not_required" => vac_core::control_plane::vac_init_command_gate::CommandApprovalMode::Never,
+        "never" | "not_required" => {
+            vac_core::control_plane::vac_init_command_gate::CommandApprovalMode::Never
+        }
         _ => vac_core::control_plane::vac_init_command_gate::CommandApprovalMode::Policy,
     }
 }
@@ -727,10 +779,17 @@ fn render_plan_execution_report(
 ",
             yaml_scalar(&outcome.step.id),
             yaml_scalar(&outcome.step.runner),
-            yaml_scalar(&vac_core::control_plane::vac_init_evidence_chain::sha256_hex(format!("{:?}", outcome.step.args).as_bytes())),
+            yaml_scalar(
+                &vac_core::control_plane::vac_init_evidence_chain::sha256_hex(
+                    format!("{:?}", outcome.step.args).as_bytes()
+                )
+            ),
             yaml_scalar(&outcome.decision),
             yaml_scalar(&outcome.status),
-            outcome.exit_code.map(|code| code.to_string()).unwrap_or_else(|| "null".to_string()),
+            outcome
+                .exit_code
+                .map(|code| code.to_string())
+                .unwrap_or_else(|| "null".to_string()),
             yaml_scalar(&outcome.stdout_hash),
             yaml_scalar(&outcome.stderr_hash),
             outcome.duration_ms,

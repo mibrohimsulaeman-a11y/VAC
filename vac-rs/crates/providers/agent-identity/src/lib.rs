@@ -33,12 +33,18 @@ use vac_protocol::protocol::SessionSource;
 const AGENT_TASK_REGISTRATION_TIMEOUT: Duration = Duration::from_secs(30);
 const AGENT_IDENTITY_JWKS_TIMEOUT: Duration = Duration::from_secs(10);
 const AGENT_IDENTITY_JWT_AUDIENCE: &str = "vac-app-server";
-const LEGACY_CHATGPT_AGENT_IDENTITY_JWKS_ENV: &str = "VAC_ENABLE_LEGACY_CHATGPT_AGENT_IDENTITY_JWKS";
+const LEGACY_CHATGPT_AGENT_IDENTITY_JWKS_ENV: &str =
+    "VAC_ENABLE_LEGACY_CHATGPT_AGENT_IDENTITY_JWKS";
 const AGENT_IDENTITY_JWT_ISSUER: &str = "legacy-chatgpt-agent-identity-disabled";
 
 fn legacy_chatgpt_agent_identity_jwks_enabled() -> bool {
     std::env::var(LEGACY_CHATGPT_AGENT_IDENTITY_JWKS_ENV)
-        .map(|value| matches!(value.trim().to_ascii_lowercase().as_str(), "1" | "true" | "yes" | "on"))
+        .map(|value| {
+            matches!(
+                value.trim().to_ascii_lowercase().as_str(),
+                "1" | "true" | "yes" | "on"
+            )
+        })
         .unwrap_or(false)
 }
 
@@ -331,7 +337,6 @@ pub fn agent_identity_jwks_url(base_url: &str) -> String {
         format!("{trimmed}/provider-api/wham/agent-identities/jwks")
     }
 }
-
 
 pub fn agent_identity_request_id() -> Result<String> {
     let mut request_id_bytes = [0u8; 16];

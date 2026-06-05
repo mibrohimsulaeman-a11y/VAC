@@ -23,7 +23,7 @@ use crate::operator_ui::{
     ToolTimelineState,
 };
 
-const BG: Color = Color::Rgb(7, 13, 20);
+const BG: Color = crate::ui_consts::APP_BG;
 const PANEL: Color = Color::Rgb(10, 20, 30);
 const CHROME: Color = Color::Rgb(74, 92, 110);
 const FG: Color = Color::Rgb(220, 235, 250);
@@ -134,7 +134,7 @@ pub(crate) fn render_startup_lines_with_height(
     width: u16,
     height: u16,
 ) -> Vec<Line<'static>> {
-    let width = width.clamp(72, 180);
+    let width = width.max(72);
     let height = height.max(30);
     render_to_lines(width, height, |area, buf| {
         render_startup(snapshot, area, buf)
@@ -150,7 +150,7 @@ pub(crate) fn render_idle_lines_with_height(
     width: u16,
     height: u16,
 ) -> Vec<Line<'static>> {
-    let width = width.clamp(72, 180);
+    let width = width.max(72);
     let height = height.max(24);
     render_to_lines(width, height, |area, buf| render_idle(state, area, buf))
 }
@@ -167,7 +167,7 @@ pub(crate) fn render_agent_streaming_lines_with_height(
     width: u16,
     height: u16,
 ) -> Vec<Line<'static>> {
-    let width = width.clamp(72, 180);
+    let width = width.max(72);
     let height = height.max(31);
     render_to_lines(width, height, |area, buf| {
         render_agent_streaming(state, area, buf)
@@ -183,7 +183,7 @@ pub(crate) fn render_approval_lines_with_height(
     width: u16,
     height: u16,
 ) -> Vec<Line<'static>> {
-    let width = width.clamp(72, 180);
+    let width = width.max(72);
     let height = height.max(24);
     render_to_lines(width, height, |area, buf| render_approval(state, area, buf))
 }
@@ -200,7 +200,7 @@ pub(crate) fn render_runtime_jobs_lines_with_height(
     width: u16,
     height: u16,
 ) -> Vec<Line<'static>> {
-    let width = width.clamp(72, 180);
+    let width = width.max(72);
     let height = height.max(27);
     render_to_lines(width, height, |area, buf| {
         render_runtime_jobs(state, area, buf)
@@ -219,7 +219,7 @@ pub(crate) fn render_capability_dashboard_lines_with_height(
     width: u16,
     height: u16,
 ) -> Vec<Line<'static>> {
-    let width = width.clamp(100, 220);
+    let width = width.max(100);
     let height = height.max(36);
     render_to_lines(width, height, |area, buf| {
         render_capability_dashboard(state, area, buf)
@@ -252,7 +252,7 @@ fn render_startup(snapshot: &StartupSnapshot, area: Rect, buf: &mut Buffer) {
             Constraint::Length(3),
             Constraint::Length(4),
             Constraint::Length(1),
-            Constraint::Length(8),
+            Constraint::Length(10),
             Constraint::Length(4),
             Constraint::Min(1),
             Constraint::Length(2),

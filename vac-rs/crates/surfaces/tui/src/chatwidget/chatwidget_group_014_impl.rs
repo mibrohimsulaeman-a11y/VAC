@@ -283,6 +283,7 @@ impl ChatWidget {
 
     fn request_redraw(&mut self) {
         self.desired_height_cache.borrow_mut().clear();
+        self.rendered_lines_cache.borrow_mut().clear();
         self.frame_requester.schedule_frame();
     }
 
@@ -293,10 +294,12 @@ impl ChatWidget {
     fn bump_style_epoch(&mut self) {
         self.style_epoch.set(self.style_epoch.get().wrapping_add(1));
         self.desired_height_cache.borrow_mut().clear();
+        self.rendered_lines_cache.borrow_mut().clear();
     }
 
     fn bump_active_cell_revision(&mut self) {
         self.desired_height_cache.borrow_mut().clear();
+        self.rendered_lines_cache.borrow_mut().clear();
         // Wrapping avoids overflow; wraparound would require 2^64 bumps and at
         // worst causes a one-time cache-key collision.
         self.active_cell_revision = self.active_cell_revision.wrapping_add(1);
@@ -377,7 +380,7 @@ impl ChatWidget {
     }
 
     pub(super) fn is_user_turn_pending_or_running(&self) -> bool {
-        self.user_turn_pending_start || self.bottom_pane.is_task_running()
+        self.user_turn_pending_start || self.agent_turn_running || self.bottom_pane.is_task_running()
     }
 
     fn only_user_shell_commands_running(&self) -> bool {

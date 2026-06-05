@@ -20,8 +20,7 @@ const GITHUB_API_ACCEPT_HEADER: &str = "application/vnd.github+json";
 const GITHUB_API_VERSION_HEADER: &str = "2022-11-28";
 const LEGACY_CHATGPT_CURATED_PLUGINS_BACKUP_ENV: &str =
     "VAC_ENABLE_LEGACY_CHATGPT_CURATED_PLUGINS_BACKUP";
-const CURATED_PLUGINS_BACKUP_ARCHIVE_API_URL: &str =
-    "about:blank#legacy-chatgpt-plugins-disabled";
+const CURATED_PLUGINS_BACKUP_ARCHIVE_API_URL: &str = "about:blank#legacy-chatgpt-plugins-disabled";
 const VASTAR_PLUGINS_OWNER: &str = "vastar";
 const VASTAR_PLUGINS_REPO: &str = "plugins";
 const CURATED_PLUGINS_RELATIVE_DIR: &str = ".tmp/plugins";
@@ -52,7 +51,6 @@ struct GitHubGitRefObject {
 struct CuratedPluginsBackupArchiveResponse {
     download_url: String,
 }
-
 
 fn legacy_chatgpt_curated_plugins_backup_enabled() -> bool {
     std::env::var(LEGACY_CHATGPT_CURATED_PLUGINS_BACKUP_ENV)
@@ -119,7 +117,10 @@ fn sync_vastar_plugins_repo_with_transport_overrides(
                         ))
                     } else {
                         if !legacy_chatgpt_curated_plugins_backup_enabled() {
-                            emit_curated_plugins_startup_sync_final_metric("export_archive", "disabled");
+                            emit_curated_plugins_startup_sync_final_metric(
+                                "export_archive",
+                                "disabled",
+                            );
                             return Err(format!(
                                 "git sync failed for curated plugin sync: {err}; GitHub HTTP sync failed for curated plugin sync: {http_err}; legacy ChatGPT curated plugin backup archive is disabled in the local coding-agent build"
                             ));

@@ -210,7 +210,7 @@ impl HistoryCell for ExecCell {
             let highlighted_script = highlight_bash_to_lines(&script);
             let cmd_display = adaptive_wrap_lines(
                 &highlighted_script,
-                RtOptions::new(width as usize)
+                RtOptions::new(usize::from(width))
                     .initial_indent("$ ".magenta().into())
                     .subsequent_indent("    ".into()),
             );
@@ -218,7 +218,7 @@ impl HistoryCell for ExecCell {
 
             if let Some(output) = call.output.as_ref() {
                 if !call.is_unified_exec_interaction() {
-                    let wrap_width = width.max(1) as usize;
+                    let wrap_width = usize::from(width.max(1));
                     let wrap_opts = RtOptions::new(wrap_width);
                     for unwrapped in output.formatted_output.lines().map(ansi_escape_line) {
                         let wrapped = adaptive_wrap_line(&unwrapped, wrap_opts.clone());
@@ -363,7 +363,7 @@ impl ExecCell {
                 let subsequent_indent = " ".repeat(initial_indent.width()).into();
                 let wrapped = adaptive_wrap_line(
                     &line,
-                    RtOptions::new(width as usize)
+                    RtOptions::new(usize::from(width))
                         .initial_indent(initial_indent)
                         .subsequent_indent(subsequent_indent),
                 );
@@ -418,7 +418,9 @@ impl ExecCell {
         let mut continuation_lines: Vec<Line<'static>> = Vec::new();
 
         if let Some((first, rest)) = highlighted_lines.split_first() {
-            let available_first_width = (width as usize).saturating_sub(header_prefix_width).max(1);
+            let available_first_width = usize::from(width)
+                .saturating_sub(header_prefix_width)
+                .max(1);
             let first_opts =
                 RtOptions::new(available_first_width).word_splitter(WordSplitter::NoHyphenation);
 
@@ -809,9 +811,11 @@ mod tests {
         let rendered_rows = Paragraph::new(Text::from(lines.clone()))
             .wrap(Wrap { trim: false })
             .line_count(width);
-        let header_rows = Paragraph::new(Text::from(vec![lines[0].clone()]))
-            .wrap(Wrap { trim: false })
-            .line_count(width);
+        let header_rows = Paragraph::new(Text::from(vec![
+            lines.first().cloned().unwrap_or_else(|| Line::from("")),
+        ]))
+        .wrap(Wrap { trim: false })
+        .line_count(width);
         let output_screen_rows = rendered_rows.saturating_sub(header_rows);
 
         let contains_ellipsis = lines

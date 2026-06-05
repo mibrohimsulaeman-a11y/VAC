@@ -23,9 +23,9 @@ acceptance:
     - TUI scheduler monitor fixture covers empty/loading/success/failure and no-bypass policy.
     - Legal notices explicitly track Codex Apache-2.0 and Ratatui MIT provenance.
   tv_pending:
-    - cargo build --offline --workspace --locked
-    - cargo clippy --offline --workspace -- -D warnings
-    - cargo test --offline --workspace
+    - cargo build --workspace --locked
+    - cargo clippy --workspace -- -D warnings
+    - cargo test --workspace
 validation:
   commands:
     - id: vac.remaining.audit.gaps.static

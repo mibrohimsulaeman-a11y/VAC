@@ -543,7 +543,7 @@ impl RuntimeKeymap {
                 edit_queued_message: default_bindings![alt(KeyCode::Up), shift(KeyCode::Left)],
             },
             composer: ComposerKeymap {
-                submit: default_bindings![plain(KeyCode::Enter)],
+                submit: default_bindings![plain(KeyCode::Enter), ctrl(KeyCode::Char('m'))],
                 queue: default_bindings![plain(KeyCode::Tab)],
                 toggle_shortcuts: default_bindings![
                     plain(KeyCode::Char('?')),
@@ -555,7 +555,6 @@ impl RuntimeKeymap {
             editor: EditorKeymap {
                 insert_newline: default_bindings![
                     ctrl(KeyCode::Char('j')),
-                    ctrl(KeyCode::Char('m')),
                     plain(KeyCode::Enter),
                     shift(KeyCode::Enter),
                     alt(KeyCode::Enter)
@@ -1805,10 +1804,21 @@ mod tests {
             runtime.editor.insert_newline,
             vec![
                 key_hint::ctrl(KeyCode::Char('j')),
-                key_hint::ctrl(KeyCode::Char('m')),
                 key_hint::plain(KeyCode::Enter),
                 key_hint::shift(KeyCode::Enter),
                 key_hint::alt(KeyCode::Enter),
+            ]
+        );
+    }
+
+    #[test]
+    fn default_composer_submit_accepts_enter_and_terminal_cr() {
+        let runtime = RuntimeKeymap::defaults();
+        assert_eq!(
+            runtime.composer.submit,
+            vec![
+                key_hint::plain(KeyCode::Enter),
+                key_hint::ctrl(KeyCode::Char('m')),
             ]
         );
     }

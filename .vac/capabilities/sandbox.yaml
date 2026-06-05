@@ -135,7 +135,7 @@ validation:
   - id: vac.sandbox.validation.cmd001
     runner: cargo
     args:
-    - +1.93.0
+    - +1.95.0
     - check
     - -p
     - vac-core

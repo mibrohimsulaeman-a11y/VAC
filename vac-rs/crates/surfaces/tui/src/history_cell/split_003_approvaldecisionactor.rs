@@ -336,7 +336,11 @@ pub(crate) fn operator_status_bar_for_config(
     config: &Config,
     model: impl Into<String>,
 ) -> crate::operator_ui::OperatorStatusBarState {
-    crate::operator_ui::OperatorStatusBarState::input(model)
+    let mut status_bar = crate::operator_ui::OperatorStatusBarState::input(model);
+    let validation = status_bar.validation.clone();
+    status_bar.validation =
+        crate::enforcement_banner::operator_status_validation_label(config, validation);
+    status_bar
         .with_profile_rulebook(operator_profile_label(config), operator_rulebook_label(config))
 }
 

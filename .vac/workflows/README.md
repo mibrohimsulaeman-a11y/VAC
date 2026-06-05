@@ -52,7 +52,7 @@ steps:
     uses: capability.activity.emit
 validation:
   commands:
-    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.93.0 check -p vac-surface-cli
+    - CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.95.0 check -p vac-surface-cli
 ```
 
 ## Active workflows

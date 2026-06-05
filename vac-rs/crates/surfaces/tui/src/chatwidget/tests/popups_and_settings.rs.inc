@@ -2754,6 +2754,9 @@ async fn feedback_good_result_consent_popup_includes_connectivity_diagnostics_fi
 #[tokio::test]
 async fn reasoning_popup_escape_returns_to_model_popup() {
     let (mut chat, _rx, _op_rx) = make_chatwidget_manual(Some("gpt-5.4")).await;
+    chat.config.model_provider_id = "vastar".to_string();
+    chat.config.model_provider.name = "vastar".to_string();
+    chat.config.model_provider.base_url = None;
     chat.thread_id = Some(ThreadId::new());
     chat.open_model_popup();
 

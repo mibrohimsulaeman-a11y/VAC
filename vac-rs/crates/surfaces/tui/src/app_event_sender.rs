@@ -4,6 +4,8 @@
 // without duplicating event construction or session logging behavior.
 
 use std::path::PathBuf;
+use std::sync::atomic::AtomicU64;
+use std::sync::atomic::Ordering;
 
 use crate::app_command::AppCommand;
 use crate::session_protocol::CommandExecutionApprovalDecision;
@@ -13,9 +15,9 @@ use crate::session_protocol::RequestId as AppServerRequestId;
 use crate::session_protocol::ThreadRealtimeAudioChunk;
 use crate::session_protocol::ToolRequestUserInputResponse;
 use tokio::sync::mpsc::Sender;
-use tokio::sync::mpsc::error::TrySendError;
 #[cfg(test)]
 use tokio::sync::mpsc::UnboundedSender;
+use tokio::sync::mpsc::error::TrySendError;
 use vac_protocol::ThreadId;
 use vac_protocol::protocol::ReviewTarget;
 use vac_protocol::request_permissions::RequestPermissionsResponse;
@@ -24,6 +26,8 @@ use crate::app_event::AppEvent;
 use crate::session_log;
 
 const APP_EVENT_QUEUE_CAPACITY: usize = 2048;
+static APP_EVENT_QUEUE_FULL_DROPS: AtomicU64 = AtomicU64::new(0);
+static APP_EVENT_QUEUE_CLOSED_SENDS: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Clone, Debug)]
 pub(crate) enum AppEventChannelSender {
@@ -76,13 +80,21 @@ impl AppEventSender {
                 if let Err(err) = sender.try_send(event) {
                     match err {
                         TrySendError::Full(_) => {
+                            let dropped_total =
+                                APP_EVENT_QUEUE_FULL_DROPS.fetch_add(1, Ordering::Relaxed) + 1;
                             tracing::warn!(
                                 capacity = Self::QUEUE_CAPACITY,
+                                dropped_total,
                                 "dropping app event because the bounded TUI event queue is full"
                             );
                         }
                         TrySendError::Closed(_) => {
-                            tracing::error!("failed to send event: bounded TUI event queue closed");
+                            let closed_total =
+                                APP_EVENT_QUEUE_CLOSED_SENDS.fetch_add(1, Ordering::Relaxed) + 1;
+                            tracing::error!(
+                                closed_total,
+                                "failed to send event: bounded TUI event queue closed"
+                            );
                         }
                     }
                 }

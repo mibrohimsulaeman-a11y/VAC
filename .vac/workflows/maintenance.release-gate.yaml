@@ -174,7 +174,7 @@ validation:
   - id: maintenance.release-gate.validation.cmd001
     runner: cargo
     args:
-    - +1.93.0
+    - +1.95.0
     - build
     - --manifest-path
     - vac-rs/Cargo.toml

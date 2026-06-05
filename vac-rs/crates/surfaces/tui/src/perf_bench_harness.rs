@@ -1,8 +1,7 @@
 // Dependency-free performance smoke harness for TUI hot paths.
 //
-// These are ordinary ignored tests so the sandbox can keep them static-only
-// when cargo is absent, while local/toolchain environments can produce real
-// timing numbers with:
+// These are ordinary ignored tests so local/toolchain environments can produce
+// real timing numbers with:
 //
 // ```text
 // cargo test --manifest-path vac-rs/Cargo.toml -p vac-surface-tui perf_bench_harness -- --ignored --nocapture
@@ -101,7 +100,8 @@ fn perf_bench_harness_shimmer_thresholds() {
 #[ignore = "benchmark harness; run explicitly with --ignored --nocapture"]
 fn perf_bench_harness_palette_theme_lifecycle_thresholds() {
     let started = Instant::now();
-    let contrast_valid = crate::theme_picker::contrast_ratio_for_benchmark((255, 255, 255), (0, 0, 0));
+    let contrast_valid =
+        crate::theme_picker::contrast_ratio_for_benchmark((255, 255, 255), (0, 0, 0));
     let elapsed = started.elapsed();
     println!(
         "metric=tui_theme_contrast contrast={contrast_valid:.2} validation_us={} invalid_theme_rejected=true",

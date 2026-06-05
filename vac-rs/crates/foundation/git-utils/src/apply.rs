@@ -604,6 +604,12 @@ mod tests {
         LOCK.get_or_init(|| Mutex::new(()))
     }
 
+    fn env_guard() -> std::sync::MutexGuard<'static, ()> {
+        env_lock()
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+    }
+
     fn run(cwd: &Path, args: &[&str]) -> (i32, String, String) {
         let out = std::process::Command::new(args[0])
             .args(&args[1..])
@@ -665,7 +671,7 @@ mod tests {
 
     #[test]
     fn apply_add_success() {
-        let _g = env_lock().lock().unwrap();
+        let _g = env_guard();
         let repo = init_repo();
         let root = repo.path();
 
@@ -684,7 +690,7 @@ mod tests {
 
     #[test]
     fn apply_modify_conflict() {
-        let _g = env_lock().lock().unwrap();
+        let _g = env_guard();
         let repo = init_repo();
         let root = repo.path();
         // seed file and commit
@@ -707,7 +713,7 @@ mod tests {
 
     #[test]
     fn apply_modify_skipped_missing_index() {
-        let _g = env_lock().lock().unwrap();
+        let _g = env_guard();
         let repo = init_repo();
         let root = repo.path();
         // Try to modify a file that is not in the index
@@ -724,7 +730,7 @@ mod tests {
 
     #[test]
     fn apply_then_revert_success() {
-        let _g = env_lock().lock().unwrap();
+        let _g = env_guard();
         let repo = init_repo();
         let root = repo.path();
         // Seed file and commit original content
@@ -760,7 +766,7 @@ mod tests {
 
     #[test]
     fn revert_preflight_does_not_stage_index() {
-        let _g = env_lock().lock().unwrap();
+        let _g = env_guard();
         let repo = init_repo();
         let root = repo.path();
         // Seed repo and apply forward patch so the working tree reflects the change.
@@ -805,7 +811,7 @@ mod tests {
 
     #[test]
     fn preflight_blocks_partial_changes() {
-        let _g = env_lock().lock().unwrap();
+        let _g = env_guard();
         let repo = init_repo();
         let root = repo.path();
         // Build a multi-file diff: one valid add (ok.txt) and one invalid modify (ghost.txt)

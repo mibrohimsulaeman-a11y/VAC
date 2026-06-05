@@ -1,9 +1,9 @@
 use super::*;
 use pretty_assertions::assert_eq;
 use vac_network_proxy::BlockedRequest;
-use vac_protocol::network_policy::NetworkDecisionSource;
 use vac_protocol::approvals::NetworkPolicyAmendment;
 use vac_protocol::approvals::NetworkPolicyRuleAction;
+use vac_protocol::network_policy::NetworkDecisionSource;
 
 #[test]
 fn network_approval_context_requires_ask_from_decider() {

@@ -1,0 +1,41 @@
+schema_version: 1
+kind: capability
+id: vac.memory.write_semantic
+title: Memory Write
+status: ready
+owner:
+  crate: vac-memories-write
+  module: episodic::semantic::anti_loop::redaction::reflection
+description: Writes redacted episodic traces and semantic project facts into SQLite-backed memory stores.
+depends_on:
+- vac.init.memory-governance
+- vac.memory.read_transient
+surfaces:
+  cli:
+    enabled: true
+    commands:
+    - vac doctor memory
+  tui:
+    routes:
+    - /memories
+policy:
+  risk: write_workspace
+  mutates_files: true
+  network: false
+  redaction: true
+  approval_required_for:
+  - persistent_memory_write
+states:
+- ready
+- blocked
+validation:
+  gates:
+  - memory_doctor
+  commands:
+  - id: capability.memory.write.validation.memory-doctor
+    runner: vac
+    args:
+    - doctor
+    - memory
+    risk: safe_read
+    approval: policy

@@ -12,22 +12,74 @@ pub(crate) struct PaletteSurfaceAction {
 
 pub(crate) const TOP_LEVEL_PALETTE_ACTIONS: &[PaletteSurfaceAction] = &[
     PaletteSurfaceAction {
-        action: "open_capabilities",
+        action: "open_approvals",
     },
+    PaletteSurfaceAction {
+        action: "open_architecture",
+    },
+    PaletteSurfaceAction {
+        action: "open_build",
+    },
+    PaletteSurfaceAction {
+        action: "open_chat",
+    },
+    PaletteSurfaceAction {
+        action: "open_donor_migration",
+    },
+    PaletteSurfaceAction {
+        action: "open_identity_check",
+    },
+    PaletteSurfaceAction {
+        action: "open_identity",
+    },
+    PaletteSurfaceAction {
+        action: "open_local_runtime_owner",
+    },
+    PaletteSurfaceAction {
+        action: "open_runtime_approval_bridge",
+    },
+    PaletteSurfaceAction {
+        action: "open_ownership",
+    },
+    PaletteSurfaceAction {
+        action: "open_release",
+    },
+    PaletteSurfaceAction {
+        action: "open_sandbox",
+    },
+    PaletteSurfaceAction {
+        action: "open_sessions",
+    },
+    PaletteSurfaceAction {
+        action: "open_tools",
+    },
+    PaletteSurfaceAction {
+        action: "open_tui_pty_gate",
+    },
+    PaletteSurfaceAction {
+        action: "open_tui_session_runtime",
+    },
+    PaletteSurfaceAction { action: "open_tui" },
     PaletteSurfaceAction {
         action: "open_workflow",
     },
     PaletteSurfaceAction {
-        action: "open_status",
+        action: "open_runtime_jobs",
     },
     PaletteSurfaceAction {
-        action: "open_activity",
+        action: "open_vac_init_schema_envelope",
     },
     PaletteSurfaceAction {
-        action: "open_debug_config",
+        action: "open_vac_init_manifest_contracts",
     },
     PaletteSurfaceAction {
-        action: "open_model",
+        action: "open_vac_init_registry_validator",
+    },
+    PaletteSurfaceAction {
+        action: "open_vac_init_lifecycle",
+    },
+    PaletteSurfaceAction {
+        action: "open_vac_init_ownership_scanner",
     },
 ];
 

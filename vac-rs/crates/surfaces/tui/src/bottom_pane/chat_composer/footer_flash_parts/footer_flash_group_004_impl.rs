@@ -684,7 +684,16 @@ impl ChatComposer {
             return self.handle_submission(self.is_task_running);
         }
 
-        if self.submit_keys.is_pressed(key_event) {
+        let raw_enter_byte = matches!(
+            key_event,
+            KeyEvent {
+                code: KeyCode::Char('\r' | '\n'),
+                modifiers: crossterm::event::KeyModifiers::NONE,
+                kind: KeyEventKind::Press | KeyEventKind::Repeat,
+                ..
+            }
+        );
+        if raw_enter_byte || self.submit_keys.is_pressed(key_event) {
             return self.handle_submission(/*should_queue*/ false);
         }
 

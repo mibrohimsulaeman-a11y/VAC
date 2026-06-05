@@ -20,7 +20,6 @@ use dunce::canonicalize as normalize_path;
 use std::io;
 use toml::Value as TomlValue;
 use tracing::error;
-use vac_runtime_protocol::ConfigLayerSource;
 use vac_config::ConfigLayerStackOrdering;
 use vac_config::default_project_root_markers;
 use vac_config::merge_toml_values;
@@ -28,6 +27,7 @@ use vac_config::project_root_markers_from_config;
 use vac_exec_server::Environment;
 use vac_exec_server::ExecutorFileSystem;
 use vac_features::Feature;
+use vac_runtime_protocol::ConfigLayerSource;
 use vac_utils_absolute_path::AbsolutePathBuf;
 
 pub(crate) const HIERARCHICAL_AGENTS_MESSAGE: &str =

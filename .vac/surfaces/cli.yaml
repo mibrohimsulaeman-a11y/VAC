@@ -3,6 +3,7 @@ kind: surface
 id: surface.cli
 title: CLI commands
 capabilities:
+- vac.memory.write_semantic
 - vac.approvals
 - vac.architecture
 - vac.build
@@ -67,6 +68,12 @@ routes:
   visible: true
   status: ready
 - kind: cli
+  command: vac approve
+  capability: vac.approvals
+  owner: vac-control-plane/control_plane.approval_lifecycle
+  visible: true
+  status: ready
+- kind: cli
   command: vac doctor architecture
   capability: vac.architecture
   owner: vac-control-plane/control_plane
@@ -79,6 +86,12 @@ routes:
   visible: true
   status: ready
 - kind: cli
+  command: vac doctor project-workspace
+  capability: vac.init.cli-runtime-foundation
+  owner: vac-surface-cli/init_cli::plan_cli::why_cli::doctor_cli
+  visible: true
+  status: ready
+- kind: cli
   command: vac
   capability: vac.chat
   owner: vac-capability-chat/contract
@@ -88,6 +101,42 @@ routes:
   command: vac doctor donor
   capability: vac.donor_migration
   owner: vac-surface-cli/doctor_cli
+  visible: true
+  status: ready
+- kind: cli
+  command: vac doctor evidence
+  capability: vac.init.evidence-chain
+  owner: vac-core/control_plane::vac_init_evidence_chain
+  visible: true
+  status: ready
+- kind: cli
+  command: vac doctor evidence --v2
+  capability: vac.init.evidence-chain
+  owner: vac-core/control_plane::vac_init_evidence_chain
+  visible: true
+  status: ready
+- kind: cli
+  command: vac doctor evidence-signing
+  capability: vac.init.evidence-chain
+  owner: vac-core/control_plane::vac_init_evidence_chain
+  visible: true
+  status: ready
+- kind: cli
+  command: vac doctor enforcement
+  capability: vac.init.runtime-gate-enforcement
+  owner: vac-core/control_plane::vac_init_runtime_enforcement
+  visible: true
+  status: ready
+- kind: cli
+  command: vac doctor layering
+  capability: vac.init.migration-runtime
+  owner: vac-core/control_plane::vac_init_migration_runtime
+  visible: true
+  status: ready
+- kind: cli
+  command: vac doctor migrations
+  capability: vac.init.migration-runtime
+  owner: vac-core/control_plane::vac_init_migration_runtime
   visible: true
   status: ready
 - kind: cli
@@ -121,6 +170,12 @@ routes:
   visible: true
   status: ready
 - kind: cli
+  command: vac session
+  capability: vac.sessions
+  owner: vac-capability-sessions/contract
+  visible: true
+  status: ready
+- kind: cli
   command: vac a
   capability: vac.tools
   owner: vac-capability-tools/contract
@@ -145,6 +200,12 @@ routes:
   visible: true
   status: ready
 - kind: cli
+  command: vac registry
+  capability: vac.init.migration-runtime
+  owner: vac-core/control_plane::vac_init_migration_runtime
+  visible: true
+  status: ready
+- kind: cli
   command: vac doctor
   capability: vac.workflow
   owner: vac-control-plane/control_plane
@@ -163,6 +224,12 @@ routes:
   visible: true
   status: ready
 - kind: cli
+  command: vac enforcement status
+  capability: vac.init.runtime-gate-enforcement
+  owner: vac-core/control_plane::vac_init_runtime_enforcement
+  visible: true
+  status: ready
+- kind: cli
   command: vac doctor registry
   capability: vac.workflow
   owner: vac-control-plane/control_plane
@@ -178,6 +245,12 @@ routes:
   command: vac doctor workflow
   capability: vac.workflow
   owner: vac-control-plane/control_plane
+  visible: true
+  status: ready
+- kind: cli
+  command: vac doctor sessions
+  capability: vac.sessions
+  owner: vac-capability-sessions/contract
   visible: true
   status: ready
 - kind: cli
@@ -321,15 +394,15 @@ routes:
   visible: true
   status: ready
 - kind: cli
-  command: vac doctor evidence
-  capability: vac.init.cli-runtime-foundation
-  owner: vac-surface-cli/init_cli::plan_cli::why_cli::doctor_cli
+  command: vac workflow
+  capability: vac.workflow
+  owner: vac-control-plane/control_plane
   visible: true
   status: ready
 - kind: cli
   command: vac doctor memory
-  capability: vac.init.cli-runtime-foundation
-  owner: vac-surface-cli/init_cli::plan_cli::why_cli::doctor_cli
+  capability: vac.memory.write_semantic
+  owner: vac-memories-write/episodic::semantic::anti_loop::redaction
   visible: true
   status: ready
 - kind: cli

@@ -145,10 +145,10 @@ impl Drop for ChatWidget {
 
 impl ChatWidget {
     fn transcript_cell_count_for_windowing(&self) -> usize {
-        // Three renderable regions participate in ChatWidget layout: active cell,
-        // active hook cell, and bottom pane. Keeping this count explicit prevents
-        // the previous bug where total_cells was derived from total row height.
-        3
+        // Only transcript-like regions participate in windowing. The bottom pane
+        // is anchored separately so fullscreen rendering keeps the composer at
+        // the bottom instead of treating it like another transcript cell.
+        2
     }
 
     fn transcript_cell_renderable(&self, idx: usize) -> RenderableItem<'_> {
@@ -158,12 +158,33 @@ impl ChatWidget {
                 None => RenderableItem::Owned(Box::new(())),
             },
             1 => match &self.active_hook_cell {
-                Some(cell) if cell.should_render() => RenderableItem::Borrowed(cell).inset(Insets::tlbr(1, 0, 0, 0)),
+                Some(cell) if cell.should_render() => {
+                    RenderableItem::Borrowed(cell).inset(Insets::tlbr(1, 0, 0, 0))
+                }
                 _ => RenderableItem::Owned(Box::new(())),
             },
-            2 => RenderableItem::Borrowed(&self.bottom_pane).inset(Insets::tlbr(1, 0, 0, 0)),
             _ => RenderableItem::Owned(Box::new(())),
         }
+    }
+
+    fn bottom_pane_renderable(&self) -> RenderableItem<'_> {
+        RenderableItem::Borrowed(&self.bottom_pane).inset(Insets::tlbr(1, 0, 0, 0))
+    }
+
+    fn fullscreen_layout(&self, area: Rect) -> (Rect, Rect) {
+        let bottom_height = self
+            .bottom_pane_renderable()
+            .desired_height(area.width)
+            .min(area.height);
+        let transcript_height = area.height.saturating_sub(bottom_height);
+        let transcript_area = Rect::new(area.x, area.y, area.width, transcript_height);
+        let bottom_area = Rect::new(
+            area.x,
+            area.y.saturating_add(transcript_height),
+            area.width,
+            bottom_height,
+        );
+        (transcript_area, bottom_area)
     }
 
     fn rebuild_windowed_height_prefix(&self, width: u16) -> Vec<u16> {
@@ -195,6 +216,65 @@ impl ChatWidget {
         self.transcript_scroll_top.get()
     }
 
+    fn rendered_lines_key_for_cell(&self, idx: usize, width: u16, cell: &dyn HistoryCell) -> height_cache::RenderedLinesKey {
+        let content_revision = self.active_cell_revision;
+        let active_revision = cell
+            .transcript_animation_tick()
+            .unwrap_or(content_revision);
+        height_cache::RenderedLinesKey {
+            cell_id: idx as u64,
+            width,
+            style_revision: self.style_revision(),
+            content_revision,
+            active_revision,
+        }
+    }
+
+    fn render_cached_history_cell(
+        &self,
+        idx: usize,
+        cell: &dyn HistoryCell,
+        area: Rect,
+        buf: &mut Buffer,
+    ) {
+        let render_area = area.inset(Insets::tlbr(1, 0, 0, 0));
+        if render_area.is_empty() {
+            return;
+        }
+        let key = self.rendered_lines_key_for_cell(idx, render_area.width, cell);
+        let value = self
+            .rendered_lines_cache
+            .borrow_mut()
+            .get_or_compute(key, || cell.display_lines(render_area.width));
+        let paragraph = Paragraph::new(Text::from(value.lines)).wrap(Wrap { trim: false });
+        let y = if render_area.height == 0 {
+            0
+        } else {
+            let overflow = paragraph
+                .line_count(render_area.width)
+                .saturating_sub(usize::from(render_area.height));
+            u16::try_from(overflow).unwrap_or(u16::MAX)
+        };
+        Clear.render(render_area, buf);
+        paragraph.scroll((y, 0)).render(render_area, buf);
+    }
+
+    fn render_cached_transcript_cell(&self, idx: usize, area: Rect, buf: &mut Buffer) {
+        match idx {
+            0 => {
+                if let Some(cell) = self.active_cell.as_ref() {
+                    self.render_cached_history_cell(idx, cell.as_ref(), area, buf);
+                }
+            }
+            1 => {
+                if let Some(cell) = self.active_hook_cell.as_ref().filter(|cell| cell.should_render()) {
+                    self.render_cached_history_cell(idx, cell, area, buf);
+                }
+            }
+            _ => {}
+        }
+    }
+
     #[cfg(test)]
     pub(crate) fn set_transcript_scroll_top_for_windowing(&self, scroll_top: u32) {
         self.transcript_scroll_top.set(scroll_top);
@@ -214,7 +294,7 @@ impl ChatWidget {
             if height == 0 { continue; }
             let child_area = Rect::new(area.x, y, area.width, height).intersection(area);
             if !child_area.is_empty() {
-                self.transcript_cell_renderable(idx).render(child_area, buf);
+                self.render_cached_transcript_cell(idx, child_area, buf);
             }
             y = y.saturating_add(height);
             if y >= area.bottom() { break; }
@@ -224,7 +304,9 @@ impl ChatWidget {
 
 impl Renderable for ChatWidget {
     fn render(&self, area: Rect, buf: &mut Buffer) {
-        self.render_windowed_transcript_cells(area, buf);
+        let (transcript_area, bottom_area) = self.fullscreen_layout(area);
+        self.render_windowed_transcript_cells(transcript_area, buf);
+        self.bottom_pane_renderable().render(bottom_area, buf);
         self.last_rendered_width.set(Some(area.width as usize));
     }
 
@@ -237,11 +319,13 @@ impl Renderable for ChatWidget {
     }
 
     fn cursor_pos(&self, area: Rect) -> Option<(u16, u16)> {
-        self.as_renderable().cursor_pos(area)
+        let (_, bottom_area) = self.fullscreen_layout(area);
+        self.bottom_pane_renderable().cursor_pos(bottom_area)
     }
 
     fn cursor_style(&self, area: Rect) -> crossterm::cursor::SetCursorStyle {
-        self.as_renderable().cursor_style(area)
+        let (_, bottom_area) = self.fullscreen_layout(area);
+        self.bottom_pane_renderable().cursor_style(bottom_area)
     }
 }
 
@@ -354,7 +438,7 @@ const AGENT_NOTIFICATION_PREVIEW_GRAPHEMES: usize = 200;
 const PLACEHOLDERS: [&str; 8] = [
     "Explain this codebase",
     "Summarize recent commits",
-    "Implement {feature}",
+    "Ask VAC to do anything",
     "Find and fix a bug in @filename",
     "Write tests for @filename",
     "Improve documentation in @filename",

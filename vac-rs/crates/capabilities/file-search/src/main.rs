@@ -37,7 +37,9 @@ impl Reporter for StdioReporter {
             println!("{json}");
         } else if self.show_indices {
             let Some(indices) = file_match.indices.as_ref() else {
-                eprintln!("file search match omitted indices even though --compute-indices was requested");
+                eprintln!(
+                    "file search match omitted indices even though --compute-indices was requested"
+                );
                 return;
             };
             // `indices` is guaranteed to be sorted in ascending order. Instead
@@ -71,7 +73,9 @@ impl Reporter for StdioReporter {
             let json = match serde_json::to_string(&value) {
                 Ok(json) => json,
                 Err(error) => {
-                    eprintln!("failed to serialize file search truncation warning as JSON: {error}");
+                    eprintln!(
+                        "failed to serialize file search truncation warning as JSON: {error}"
+                    );
                     return;
                 }
             };

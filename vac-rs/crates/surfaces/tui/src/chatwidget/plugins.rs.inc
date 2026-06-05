@@ -1005,10 +1005,13 @@ impl ChatWidget {
             .bottom_pane
             .selected_index_for_active_view(PLUGINS_SELECTION_VIEW_ID);
         self.plugins_active_tab_id = active_tab_id.clone();
-        let _ = self.bottom_pane.replace_selection_view_if_active(
+        if self.bottom_pane.replace_selection_view_if_active(
             PLUGINS_SELECTION_VIEW_ID,
             self.plugins_popup_params(response, active_tab_id, selected_idx),
-        );
+        ) {
+            // Clear the height cache so callers see the refreshed popup's updated height.
+            self.request_redraw();
+        }
     }
 
     fn plugins_loading_popup_params(&self) -> SelectionViewParams {

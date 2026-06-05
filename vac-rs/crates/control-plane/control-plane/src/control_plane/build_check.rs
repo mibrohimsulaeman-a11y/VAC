@@ -1,4 +1,5 @@
 use std::ffi::OsString;
+use std::fs;
 use std::io::Read;
 use std::path::Path;
 use std::path::PathBuf;
@@ -10,7 +11,7 @@ use std::time::Duration;
 use std::time::Instant;
 
 pub const DEFAULT_BUILD_CHECK_PACKAGE: &str = "vac-surface-cli";
-pub const DEFAULT_BUILD_CHECK_TOOLCHAIN: &str = "1.93.0";
+pub const DEFAULT_BUILD_CHECK_TOOLCHAIN: &str = "1.95.0";
 pub const DEFAULT_BUILD_CHECK_JOBS: u16 = 1;
 pub const DEFAULT_BUILD_CHECK_TIMEOUT_SECONDS: u64 = 600;
 pub const BUILD_CHECK_TOOLCHAIN_ENV: &str = "VAC_BUILD_TOOLCHAIN";
@@ -31,12 +32,14 @@ pub struct BuildCheckRequest {
 
 impl BuildCheckRequest {
     pub fn for_repo_root(repo_root: impl AsRef<Path>) -> Self {
+        let repo_root = repo_root.as_ref();
         Self {
             package: DEFAULT_BUILD_CHECK_PACKAGE.to_string(),
-            toolchain: DEFAULT_BUILD_CHECK_TOOLCHAIN.to_string(),
+            toolchain: discover_toolchain_channel(repo_root)
+                .unwrap_or_else(|| DEFAULT_BUILD_CHECK_TOOLCHAIN.to_string()),
             jobs: DEFAULT_BUILD_CHECK_JOBS,
             incremental: false,
-            repo_root: repo_root.as_ref().to_path_buf(),
+            repo_root: repo_root.to_path_buf(),
             cargo_program: PathBuf::from("cargo"),
             timeout: Duration::from_secs(DEFAULT_BUILD_CHECK_TIMEOUT_SECONDS),
         }
@@ -257,6 +260,28 @@ fn env_or_empty(key: &str) -> OsString {
     std::env::var_os(key).unwrap_or_default()
 }
 
+fn discover_toolchain_channel(repo_root: &Path) -> Option<String> {
+    let toolchain_path = repo_root.join("vac-rs/rust-toolchain.toml");
+    let text = fs::read_to_string(toolchain_path).ok()?;
+    parse_toolchain_channel(&text)
+}
+
+fn parse_toolchain_channel(text: &str) -> Option<String> {
+    text.lines().find_map(|line| {
+        let trimmed = line.trim();
+        let (key, value) = trimmed.split_once('=')?;
+        if key.trim() != "channel" {
+            return None;
+        }
+        let channel = value.trim().trim_matches('"').trim_matches('\'');
+        if channel.is_empty() {
+            None
+        } else {
+            Some(channel.to_string())
+        }
+    })
+}
+
 fn summarize_output(bytes: &[u8]) -> (Vec<String>, bool) {
     let text = String::from_utf8_lossy(bytes).replace('\r', "");
     let mut lines = text
@@ -347,6 +372,7 @@ mod tests {
     use super::*;
     use std::fs;
     use std::io::Write;
+    use std::time::{SystemTime, UNIX_EPOCH};
 
     #[cfg(unix)]
     fn make_fake_cargo(script: &str) -> (tempfile::TempDir, PathBuf) {
@@ -368,17 +394,44 @@ mod tests {
         let request = BuildCheckRequest::for_repo_root("/repo");
 
         assert_eq!(request.package, "vac-surface-cli");
-        assert_eq!(request.toolchain, "1.93.0");
+        assert_eq!(request.toolchain, "1.95.0");
         assert_eq!(request.jobs, 1);
         assert!(!request.incremental);
         assert_eq!(
             request.command_display(),
-            "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.93.0 check --manifest-path vac-rs/Cargo.toml -p vac-surface-cli"
+            "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 cargo +1.95.0 check --manifest-path vac-rs/Cargo.toml -p vac-surface-cli"
         );
         assert_eq!(
             request.manifest_path(),
             PathBuf::from("/repo/vac-rs/Cargo.toml")
         );
+    }
+
+    #[test]
+    fn request_uses_toolchain_from_repo_root_when_present() {
+        let root = std::env::temp_dir().join(format!(
+            "vac-build-check-toolchain-{}",
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .expect("clock")
+                .as_nanos()
+        ));
+        fs::create_dir_all(root.join("vac-rs")).expect("repo root");
+        fs::write(
+            root.join("vac-rs/rust-toolchain.toml"),
+            "[toolchain]\nchannel = \"1.99.0\"\n",
+        )
+        .expect("toolchain");
+
+        let request = BuildCheckRequest::for_repo_root(&root);
+        assert_eq!(request.toolchain, "1.99.0");
+        assert!(
+            request.command_display().contains("cargo +1.99.0 check"),
+            "{}",
+            request.command_display()
+        );
+
+        let _ = fs::remove_dir_all(root);
     }
 
     #[test]
@@ -460,7 +513,7 @@ mod tests {
         assert!(report.success, "{}", report.render_text());
         assert_eq!(report.exit_status, Some(0));
         assert!(report.stdout_summary.iter().any(|line| {
-            line.contains("+1.93.0 check --manifest-path vac-rs/Cargo.toml -p vac-surface-cli")
+            line.contains("+1.95.0 check --manifest-path vac-rs/Cargo.toml -p vac-surface-cli")
         }));
     }
 
@@ -541,9 +594,9 @@ mod tests {
 
     #[test]
     fn missing_toolchain_diagnostic_surfaces_hint() {
-        let stderr = b"error: toolchain '1.93.0' is not installed\n";
+        let stderr = b"error: toolchain '1.95.0' is not installed\n";
         let report = report_from_output(
-            "cargo +1.93.0 check".to_string(),
+            "cargo +1.95.0 check".to_string(),
             Duration::from_millis(5),
             Some(1),
             false,

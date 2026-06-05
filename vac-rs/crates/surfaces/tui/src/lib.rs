@@ -60,13 +60,12 @@ pub enum ExitReason {
     Fatal(String),
 }
 
-/// Default-off local surface entry point used by static/cargo validation.
+/// No-default local surface entry point used by static/cargo validation.
 ///
-/// The full historical TUI implementation is preserved behind the explicit
-/// `full-tui` feature. The default path stays provider-neutral and avoids
-/// compiling legacy cloud/realtime UI seams during local control-plane
-/// validation, while the CLI still gets a typed, fail-closed interactive
-/// surface contract instead of reaching into removed app-server paths.
+/// Product builds enable the full root TUI by default. This no-default path
+/// stays provider-neutral for static control-plane validation, while the CLI
+/// still gets a typed, fail-closed interactive surface contract instead of
+/// reaching into removed app-server paths.
 /// EXPLICIT_AUTH_STATE_NO_SILENT_SKIP: the local facade keeps authentication
 /// state explicit and fail-closed; it never silently falls back to cloud login.
 #[cfg(not(feature = "full-tui"))]
@@ -79,6 +78,6 @@ pub async fn run_main(
     _loader_overrides: LoaderOverrides,
 ) -> std::io::Result<AppExitInfo> {
     Ok(AppExitInfo::fatal(
-        "interactive TUI requires the explicit full-tui feature in this zero-residual local build",
+        "interactive TUI is unavailable in no-default validation builds; rebuild with default features or --features full-tui",
     ))
 }

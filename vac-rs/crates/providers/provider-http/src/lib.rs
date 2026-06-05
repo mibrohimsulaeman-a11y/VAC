@@ -1,7 +1,7 @@
 //! Provider HTTP transport crate.
 //!
 //! This crate is the physical source-of-record for provider-generic HTTP, SSE,
-//! websocket, responses, model, memory, realtime, and local file upload
+//! websocket, responses, model, memory, and local file upload
 //! transport. The legacy `vac-api` crate is now a compatibility re-export layer
 //! so existing call sites can migrate incrementally without keeping transport
 //! implementation in a cloud-account-named crate.
@@ -81,21 +81,10 @@ pub use crate::common::response_create_client_metadata;
 pub use crate::endpoint::CompactClient;
 pub use crate::endpoint::MemoriesClient;
 pub use crate::endpoint::ModelsClient;
-pub use crate::endpoint::RealtimeCallClient;
-pub use crate::endpoint::RealtimeCallResponse;
-pub use crate::endpoint::RealtimeEventParser;
-pub use crate::endpoint::RealtimeOutputModality;
-pub use crate::endpoint::RealtimeSessionConfig;
-pub use crate::endpoint::RealtimeSessionMode;
-pub use crate::endpoint::RealtimeWebsocketClient;
-pub use crate::endpoint::RealtimeWebsocketConnection;
-pub use crate::endpoint::RealtimeWebsocketEvents;
-pub use crate::endpoint::RealtimeWebsocketWriter;
 pub use crate::endpoint::ResponsesClient;
 pub use crate::endpoint::ResponsesOptions;
 pub use crate::endpoint::ResponsesWebsocketClient;
 pub use crate::endpoint::ResponsesWebsocketConnection;
-pub use crate::endpoint::session_update_session_json;
 pub use crate::error::ApiError;
 pub use crate::files::upload_local_file;
 pub use crate::provider::Provider;

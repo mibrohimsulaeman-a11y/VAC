@@ -25,7 +25,7 @@ impl WhyCommand {
         let Some(target) = self.target else {
             println!("vac why: missing query target");
             println!("usage: vac why <file>:<line> | <file>:<start>-<end> | <file>::<symbol>");
-            std::process::exit(1);
+            anyhow::bail!("missing query target");
         };
 
         let parsed = match parse_vac_init_why_target(&target) {
@@ -33,7 +33,7 @@ impl WhyCommand {
             Err(error) => {
                 println!("vac why: invalid query");
                 println!("  - {error}");
-                std::process::exit(1);
+                anyhow::bail!("invalid query target: {error}");
             }
         };
 
@@ -45,7 +45,7 @@ impl WhyCommand {
             println!(
                 "diagnostic: run a task that writes safe rationale evidence before querying why"
             );
-            std::process::exit(1);
+            anyhow::bail!("trajectory index not found at {}", index_path.display());
         }
 
         let engine_query = why_query_from_cli_target(&parsed, self.depth);
@@ -78,14 +78,17 @@ impl WhyCommand {
                 println!("  policy_refs: {}", result.rationale.policy_refs.join(", "));
             }
             if !result.rationale.evidence_refs.is_empty() {
-                println!("  evidence_refs: {}", result.rationale.evidence_refs.join(", "));
+                println!(
+                    "  evidence_refs: {}",
+                    result.rationale.evidence_refs.join(", ")
+                );
             }
             println!("  raw_chain_of_thought: excluded");
         }
 
         if rendered == 0 {
             println!("diagnostic: no matching safe rationale found");
-            std::process::exit(1);
+            anyhow::bail!("no matching safe rationale found for {target}");
         }
 
         Ok(())

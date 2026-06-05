@@ -1,6 +1,8 @@
 ---
 source: crates/surfaces/tui/src/chatwidget/tests/app_server.rs
-assertion_line: 519
 expression: combined
 ---
+• Waiting for agents...
 
+
+• Spawned Agent (gpt-5 high)

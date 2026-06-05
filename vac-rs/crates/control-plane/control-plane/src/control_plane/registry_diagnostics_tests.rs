@@ -178,7 +178,7 @@ policy:
   default_risk: safe_read
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
     )
     .expect("workflow manifest");

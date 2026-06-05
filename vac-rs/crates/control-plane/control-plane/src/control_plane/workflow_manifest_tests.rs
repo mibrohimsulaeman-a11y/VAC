@@ -142,6 +142,32 @@ fn accepts_validation_gate_that_is_not_a_step_id() {
     assert_eq!(manifest.validation.gates, vec!["ghost_step".to_string()]);
 }
 
+#[test]
+fn parses_structured_validation_metadata_without_changing_command_text() {
+    let yaml = sample_manifest_yaml().replace(
+        "validation:\n  commands:\n    - cargo nextest run -p vac-core --lib\n  gates:\n    - parse_intent\n",
+        "validation:\n  commands:\n    - id: cargo.nextest\n      runner: cargo\n      args: [\"nextest\", \"run\", \"-p\", \"vac-core\", \"--lib\"]\n      risk: safe_read\n      approval: none\n      evidence: evidence.workflow.metadata\n      note: metadata accepted\n      env_required: [RUST_BACKTRACE]\n      network: false\n  gates:\n    - parse_intent\n",
+    );
+    let manifest = parse_workflow_manifest(SAMPLE_PATH, &yaml).expect("structured validation");
+    assert_eq!(
+        manifest.validation.commands,
+        vec!["cargo nextest run -p vac-core --lib".to_string()]
+    );
+}
+
+#[test]
+fn rejects_blank_structured_validation_metadata() {
+    let yaml = sample_manifest_yaml().replace(
+        "validation:\n  commands:\n    - cargo nextest run -p vac-core --lib\n  gates:\n    - parse_intent\n",
+        "validation:\n  commands:\n    - runner: cargo\n      args: [\"check\"]\n      note: \" \"\n  gates:\n    - parse_intent\n",
+    );
+    let err = parse_workflow_manifest(SAMPLE_PATH, &yaml).expect_err("blank metadata");
+    assert!(
+        err.message()
+            .contains("validation entry 0 must not be empty")
+    );
+}
+
 // --- Plan 03 additions --------------------------------------------------------
 
 #[test]

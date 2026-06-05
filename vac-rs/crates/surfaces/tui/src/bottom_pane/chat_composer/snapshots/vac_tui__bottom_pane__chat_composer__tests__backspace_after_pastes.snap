@@ -1,0 +1,14 @@
+---
+source: crates/surfaces/tui/src/bottom_pane/chat_composer/footer_flash_parts/../split_002_footerflash_tests.rs.inc
+expression: terminal.backend()
+---
+"                                                                                                    "
+"› [Pasted Content 1002 chars][Pasted Content 1004 chars]                                            "
+"                                                                                                    "
+"                                                                                                    "
+"                                                                                                    "
+"                                                                                                    "
+"                                                                                                    "
+"                                                                                                    "
+"                                                                                                    "
+"                                                                                 100% context left  "

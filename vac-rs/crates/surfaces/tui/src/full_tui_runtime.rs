@@ -48,6 +48,7 @@ use tracing::error;
 use tracing::warn;
 const EXPLICIT_AUTH_STATE_NO_SILENT_SKIP: &str = "explicit_auth_state_no_silent_skip";
 mod auth_state_banner;
+mod enforcement_banner;
 use tracing_appender::non_blocking;
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::filter::Targets;
@@ -137,13 +138,8 @@ mod owner_native_operation_parity;
 mod owner_native_runtime_support;
 pub use live_wrap::RowBuilder;
 mod activity_sidebar;
-#[cfg(feature = "provider-chatgpt")]
-#[cfg(feature = "provider-chatgpt")]
-mod provider_credential_import;
 mod markdown;
 mod markdown_render;
-#[cfg(test)]
-mod perf_bench_harness;
 mod markdown_stream;
 mod mention_codec;
 mod model_catalog;
@@ -151,12 +147,11 @@ mod model_migration;
 mod motion;
 mod multi_agents;
 mod notifications;
-mod startup_task_graph;
 #[cfg(any(not(debug_assertions), test))]
 mod npm_registry;
 pub(crate) mod onboarding;
-mod operator_style;
 mod operator_console;
+mod operator_style;
 mod operator_ui;
 mod operator_ui_styles;
 mod operator_widget_render;
@@ -164,7 +159,12 @@ mod oss_selection;
 mod pager_overlay;
 #[cfg(test)]
 mod palette_surface;
+#[cfg(test)]
+mod perf_bench_harness;
 mod permission_compat;
+#[cfg(feature = "provider-chatgpt")]
+#[cfg(feature = "provider-chatgpt")]
+mod provider_credential_import;
 pub(crate) mod public_widgets;
 mod render;
 mod resize_reflow_cap;
@@ -175,9 +175,11 @@ mod session_log;
 mod session_protocol;
 mod session_resume;
 mod session_state;
+mod session_status;
 mod shimmer;
 mod skills_helpers;
 mod slash_command;
+mod startup_task_graph;
 mod status;
 mod status_indicator_widget;
 mod streaming;
@@ -220,18 +222,29 @@ mod voice {
             Err("voice input was removed from the local coding tool build".to_string())
         }
         pub fn stop(self) {}
-        pub fn stopped_flag(&self) -> Arc<AtomicBool> { Arc::new(AtomicBool::new(true)) }
-        pub fn last_peak_arc(&self) -> Arc<AtomicU16> { Arc::new(AtomicU16::new(0)) }
+        pub fn stopped_flag(&self) -> Arc<AtomicBool> {
+            Arc::new(AtomicBool::new(true))
+        }
+        pub fn last_peak_arc(&self) -> Arc<AtomicU16> {
+            Arc::new(AtomicU16::new(0))
+        }
     }
     impl RecordingMeterState {
-        pub(crate) fn new() -> Self { Self }
-        pub(crate) fn next_text(&mut self, _peak: u16) -> String { "voice removed".to_string() }
+        pub(crate) fn new() -> Self {
+            Self
+        }
+        pub(crate) fn next_text(&mut self, _peak: u16) -> String {
+            "voice removed".to_string()
+        }
     }
     impl RealtimeAudioPlayer {
         pub(crate) fn start(_config: &Config) -> Result<Self, String> {
             Err("voice output was removed from the local coding tool build".to_string())
         }
-        pub(crate) fn enqueue_frame(&self, _frame: &ThreadRealtimeAudioChunk) -> Result<(), String> {
+        pub(crate) fn enqueue_frame(
+            &self,
+            _frame: &ThreadRealtimeAudioChunk,
+        ) -> Result<(), String> {
             Err("voice output was removed from the local coding tool build".to_string())
         }
         pub(crate) fn clear(&self) {}
@@ -537,7 +550,6 @@ fn config_cwd_for_app_server_target(
     Ok(Some(cwd))
 }
 
-
 fn startup_profile_enabled() -> bool {
     std::env::var_os("VAC_TUI_PROFILE_STARTUP").is_some()
 }
@@ -596,20 +608,20 @@ pub async fn run_main(
     let cli_kv_overrides = match overrides_cli.parse_overrides() {
         // Parse `-c` overrides from the CLI.
         Ok(v) => v,
-        #[allow(clippy::print_stderr)]
         Err(e) => {
-            eprintln!("Error parsing -c overrides: {e}");
-            std::process::exit(1);
+            return Err(std::io::Error::other(format!(
+                "Error parsing -c overrides: {e}"
+            )));
         }
     };
 
     // we load config.toml here to determine project state.
-    #[allow(clippy::print_stderr)]
     let vac_home = match find_vac_home() {
         Ok(vac_home) => vac_home.to_path_buf(),
         Err(err) => {
-            eprintln!("Error finding vac home: {err}");
-            std::process::exit(1);
+            return Err(std::io::Error::other(format!(
+                "Error finding vac home: {err}"
+            )));
         }
     };
 
@@ -643,15 +655,15 @@ pub async fn run_main(
                 .get_ref()
                 .and_then(|err| err.downcast_ref::<ConfigLoadError>())
                 .map(ConfigLoadError::config_error);
-            if let Some(config_error) = config_error {
-                eprintln!(
+            let message = if let Some(config_error) = config_error {
+                format!(
                     "Error loading config.toml:\n{}",
                     format_config_error_with_source(config_error)
-                );
+                )
             } else {
-                eprintln!("Error loading config.toml: {err}");
-            }
-            std::process::exit(1);
+                format!("Error loading config.toml: {err}")
+            };
+            return Err(std::io::Error::other(message));
         }
     };
 
@@ -719,18 +731,17 @@ pub async fn run_main(
 
     log_startup_phase(startup_started_at, "config_toml_loaded");
 
-    let config = load_config_or_exit(cli_kv_overrides.clone(), overrides.clone()).await;
+    let config = load_config_checked(cli_kv_overrides.clone(), overrides.clone()).await?;
     log_startup_phase(startup_started_at, "config_resolved");
 
     #[allow(clippy::print_stderr)]
     match check_execpolicy_for_warnings(&config.config_layer_stack).await {
         Ok(None) => {}
         Ok(Some(err)) | Err(err) => {
-            eprintln!(
+            return Err(std::io::Error::other(format!(
                 "Error loading rules:\n{}",
                 format_exec_policy_error_with_source(&err)
-            );
-            std::process::exit(1);
+            )));
         }
     }
 
@@ -741,15 +752,12 @@ pub async fn run_main(
         &config.permissions.permission_profile(),
         config.cwd.as_path(),
     ) {
-        #[allow(clippy::print_stderr)]
-        {
-            eprintln!("Error adding directories: {warning}");
-            std::process::exit(1);
-        }
+        return Err(std::io::Error::other(format!(
+            "Error adding directories: {warning}"
+        )));
     }
 
     {
-        #[allow(clippy::print_stderr)]
         if let Err(err) = enforce_login_restrictions(&AuthConfig {
             vac_home: config.vac_home.to_path_buf(),
             auth_credentials_store_mode: config.cli_auth_credentials_store_mode,
@@ -759,8 +767,7 @@ pub async fn run_main(
         })
         .await
         {
-            eprintln!("{err}");
-            std::process::exit(1);
+            return Err(std::io::Error::other(err.to_string()));
         }
     }
 
@@ -887,13 +894,32 @@ pub async fn run_main(
 }
 
 fn render_startup_skeleton(tui: &mut Tui, message: &str) -> color_eyre::Result<()> {
+    use ratatui::style::Style;
+    use ratatui::widgets::Clear;
     use ratatui::widgets::Paragraph;
     use ratatui::widgets::Widget;
-    let text = format!("VAC starting… {message}\nLoading config, local runtime, MCP, and skills in background-safe phases.");
+    let text = format!(
+        "VAC starting… {message}\nLoading config, local runtime, MCP, and skills in background-safe phases."
+    );
     tui.draw(2, |frame| {
-        Paragraph::new(text.as_str()).render(frame.area(), frame.buffer);
+        Clear.render(frame.area(), frame.buffer);
+        let bg = crate::ui_consts::APP_BG;
+        for y in frame.area().y..frame.area().y.saturating_add(frame.area().height) {
+            for x in frame.area().x..frame.area().x.saturating_add(frame.area().width) {
+                frame.buffer[(x, y)].set_style(Style::default().bg(bg));
+            }
+        }
+        Paragraph::new(text.as_str())
+            .style(Style::default().bg(crate::ui_consts::APP_BG))
+            .render(frame.area(), frame.buffer);
     })?;
     Ok(())
+}
+
+fn missing_startup_app_server_error(context: &str) -> color_eyre::Report {
+    color_eyre::eyre::eyre!(
+        "TUI startup app server was not available during {context}; startup state was already consumed"
+    )
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -926,6 +952,9 @@ async fn run_ratatui_app(
     terminal.clear()?;
 
     let mut tui = Tui::new(terminal);
+    if !cli.no_alt_screen {
+        tui.enter_alt_screen()?;
+    }
     render_startup_skeleton(&mut tui, "initializing local VAC runtime")?;
     let skeleton_rendered_at = Instant::now();
     log_startup_phase(skeleton_rendered_at, "skeleton_first_frame_rendered");
@@ -939,6 +968,11 @@ async fn run_ratatui_app(
     ) {
         tracing::debug!(error = %err, "failed to persist TUI startup metrics registry");
     }
+    let startup_metrics_recorder = startup_task_graph::StartupMetricsRecorder::new(
+        initial_config.cwd.to_path_buf(),
+        startup_started_at,
+        startup_metrics,
+    );
     let mut terminal_restore_guard = TerminalRestoreGuard::new();
 
     #[cfg(not(debug_assertions))]
@@ -991,7 +1025,7 @@ async fn run_ratatui_app(
     let mut trust_decision_was_made = false;
     let login_status = if initial_config.model_provider.requires_vastar_auth {
         let Some(app_server) = app_server.as_mut() else {
-            unreachable!("app server should exist when auth is required");
+            return Err(missing_startup_app_server_error("auth status check"));
         };
         get_login_status(app_server, &initial_config).await?
     } else {
@@ -1041,7 +1075,7 @@ async fn run_ratatui_app(
         // If the user made an explicit trust decision, or we showed the login flow, reload config
         // so current process state reflects persisted trust/auth changes.
         if onboarding_result.directory_trust_decision.is_some() || show_login_screen {
-            load_config_or_exit(cli_kv_overrides.clone(), overrides.clone()).await
+            load_config_checked(cli_kv_overrides.clone(), overrides.clone()).await?
         } else {
             initial_config
         }
@@ -1069,7 +1103,7 @@ async fn run_ratatui_app(
     let session_selection = if use_branch {
         if let Some(id_str) = cli.branch_session_id.as_deref() {
             let Some(startup_app_server) = app_server.as_mut() else {
-                unreachable!("app server should be initialized for --branch <id>");
+                return Err(missing_startup_app_server_error("--branch <id> lookup"));
             };
             match lookup_session_target_with_app_server(startup_app_server, id_str).await? {
                 Some(target_session) => resume_picker::SessionSelection::Branch(target_session),
@@ -1081,7 +1115,7 @@ async fn run_ratatui_app(
         } else if cli.branch_last {
             let filter_cwd = None;
             let Some(app_server) = app_server.as_mut() else {
-                unreachable!("app server should be initialized for --branch --last");
+                return Err(missing_startup_app_server_error("--branch --last lookup"));
             };
             match lookup_latest_session_target_with_app_server(
                 app_server, &config, filter_cwd, /*include_non_interactive*/ false,
@@ -1093,7 +1127,7 @@ async fn run_ratatui_app(
             }
         } else if cli.branch_picker {
             let Some(app_server) = app_server.take() else {
-                unreachable!("app server should be initialized for --branch picker");
+                return Err(missing_startup_app_server_error("--branch picker"));
             };
             match resume_picker::run_branch_picker_with_app_server(
                 &mut tui,
@@ -1121,7 +1155,7 @@ async fn run_ratatui_app(
         }
     } else if let Some(id_str) = cli.resume_session_id.as_deref() {
         let Some(startup_app_server) = app_server.as_mut() else {
-            unreachable!("app server should be initialized for --resume <id>");
+            return Err(missing_startup_app_server_error("--resume <id> lookup"));
         };
         match lookup_session_target_with_app_server(startup_app_server, id_str).await? {
             Some(target_session) => resume_picker::SessionSelection::Resume(target_session),
@@ -1133,7 +1167,7 @@ async fn run_ratatui_app(
     } else if cli.resume_last {
         let filter_cwd = latest_session_cwd_filter(&config, cli.resume_show_all);
         let Some(app_server) = app_server.as_mut() else {
-            unreachable!("app server should be initialized for --resume --last");
+            return Err(missing_startup_app_server_error("--resume --last lookup"));
         };
         match lookup_latest_session_target_with_app_server(
             app_server,
@@ -1148,7 +1182,7 @@ async fn run_ratatui_app(
         }
     } else if cli.resume_picker {
         let Some(app_server) = app_server.take() else {
-            unreachable!("app server should be initialized for --resume picker");
+            return Err(missing_startup_app_server_error("--resume picker"));
         };
         match resume_picker::run_resume_picker_with_app_server(
             &mut tui,
@@ -1217,12 +1251,12 @@ async fn run_ratatui_app(
 
     let mut config = match &session_selection {
         resume_picker::SessionSelection::Resume(_) | resume_picker::SessionSelection::Branch(_) => {
-            load_config_or_exit_with_fallback_cwd(
+            load_config_checked_with_fallback_cwd(
                 cli_kv_overrides.clone(),
                 overrides.clone(),
                 fallback_cwd,
             )
-            .await
+            .await?
         }
         _ => config,
     };
@@ -1230,10 +1264,9 @@ async fn run_ratatui_app(
     // Configure syntax highlighting theme from the final config — onboarding
     // and resume/branch can both reload config with a different tui_theme, so
     // this must happen after the last possible reload.
-    if let Some(w) = crate::render::highlight::set_theme_override(
-        config.tui_theme.clone(),
-        find_vac_home().ok(),
-    ) {
+    if let Some(w) =
+        crate::render::highlight::set_theme_override(config.tui_theme.clone(), find_vac_home().ok())
+    {
         config.startup_warnings.push(w);
     }
 
@@ -1264,8 +1297,11 @@ async fn run_ratatui_app(
     let images = shared.into_inner().images;
 
     let use_alt_screen = determine_alt_screen_mode(no_alt_screen, config.tui_alternate_screen);
+    if !use_alt_screen && tui.is_alt_screen_active() {
+        tui.leave_alt_screen()?;
+    }
     tui.set_alt_screen_enabled(use_alt_screen);
-    if use_alt_screen {
+    if use_alt_screen && !tui.is_alt_screen_active() {
         tui.enter_alt_screen()?;
     }
     let app_server = match app_server {
@@ -1305,6 +1341,7 @@ async fn run_ratatui_app(
         should_show_trust_screen_flag, // Preserve the startup-time trust NUX signal before onboarding
         should_prompt_windows_sandbox_nux_at_startup,
         environment_manager,
+        startup_metrics_recorder,
     )
     .await;
 
@@ -1414,19 +1451,18 @@ where
     })
 }
 
-async fn load_config_or_exit(
+async fn load_config_checked(
     cli_kv_overrides: Vec<(String, toml::Value)>,
     overrides: ConfigOverrides,
-) -> Config {
-    load_config_or_exit_with_fallback_cwd(cli_kv_overrides, overrides, /*fallback_cwd*/ None).await
+) -> std::io::Result<Config> {
+    load_config_checked_with_fallback_cwd(cli_kv_overrides, overrides, /*fallback_cwd*/ None).await
 }
 
-async fn load_config_or_exit_with_fallback_cwd(
+async fn load_config_checked_with_fallback_cwd(
     cli_kv_overrides: Vec<(String, toml::Value)>,
     overrides: ConfigOverrides,
     fallback_cwd: Option<PathBuf>,
-) -> Config {
-    #[allow(clippy::print_stderr)]
+) -> std::io::Result<Config> {
     match ConfigBuilder::default()
         .cli_overrides(cli_kv_overrides)
         .harness_overrides(overrides)
@@ -1434,10 +1470,11 @@ async fn load_config_or_exit_with_fallback_cwd(
         .build()
         .await
     {
-        Ok(config) => config,
+        Ok(config) => Ok(config),
         Err(err) => {
-            eprintln!("Error loading configuration: {err}");
-            std::process::exit(1);
+            Err(std::io::Error::other(format!(
+                "Error loading configuration: {err}"
+            )))
         }
     }
 }
@@ -1472,9 +1509,9 @@ fn should_show_login_screen(login_status: LoginStatus, config: &Config) -> bool 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::local_runtime_session::LocalRuntimeStartedThread;
     use crate::legacy_core::config::ConfigBuilder;
     use crate::legacy_core::config::ConfigOverrides;
+    use crate::local_runtime_session::LocalRuntimeStartedThread;
     use crate::session_protocol::AskForApproval;
     use pretty_assertions::assert_eq;
     use serial_test::serial;

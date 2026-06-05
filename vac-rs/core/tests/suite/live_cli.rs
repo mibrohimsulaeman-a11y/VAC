@@ -110,7 +110,7 @@ fn run_live(prompt: &str) -> (assert_cmd::assert::Assert, TempDir) {
     (output.assert(), dir)
 }
 
-#[ignore]
+#[ignore = "requires VASTAR_API_KEY and live Vastar API access"]
 #[test]
 fn live_create_file_hello_txt() {
     if std::env::var("VASTAR_API_KEY").is_err() {
@@ -132,7 +132,7 @@ fn live_create_file_hello_txt() {
     assert_eq!(contents.trim(), "hello");
 }
 
-#[ignore]
+#[ignore = "requires VASTAR_API_KEY and live Vastar API access"]
 #[test]
 fn live_print_working_directory() {
     if std::env::var("VASTAR_API_KEY").is_err() {

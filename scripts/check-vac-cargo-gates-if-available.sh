@@ -6,14 +6,9 @@ cd "$ROOT"
 status="NotEvaluated"
 reason="cargo_or_rustc_missing"
 if command -v cargo >/dev/null 2>&1 && command -v rustc >/dev/null 2>&1; then
-  if [[ -d vac-rs/vendor ]]; then
-    cargo metadata --manifest-path vac-rs/Cargo.toml --offline --no-deps >/tmp/vac-cargo-metadata.json
-    status="Pass"
-    reason="cargo_metadata_offline_no_deps_passed"
-  else
-    status="NotEvaluated"
-    reason="vac-rs/vendor_absent"
-  fi
+  cargo metadata --manifest-path vac-rs/Cargo.toml --locked --no-deps >/tmp/vac-cargo-metadata.json
+  status="Pass"
+  reason="cargo_metadata_locked_no_deps_passed"
 fi
 
 printf 'cargo gate status: %s (%s)\n' "$status" "$reason"

@@ -70,8 +70,8 @@ pub fn load_build_readiness_report(repo_root: impl AsRef<Path>) -> BuildReadines
                 && text.contains("execute_process")
         })
         .unwrap_or(false);
-    let targeted_command_is_allowlisted = command.contains("cargo +1.93.0 check")
-        && command.contains("--manifest-path vac-rs/Cargo.toml")
+    let targeted_command_is_allowlisted = command.contains("cargo +")
+        && command.contains("check --manifest-path vac-rs/Cargo.toml")
         && command.contains("-p vac-surface-cli")
         && request.jobs == 1
         && !request.incremental;

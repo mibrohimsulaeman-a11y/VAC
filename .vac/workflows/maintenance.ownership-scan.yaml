@@ -39,7 +39,7 @@ validation:
   - id: maintenance.ownership-scan.validation.cmd001
     runner: cargo
     args:
-    - +1.93.0
+    - +1.95.0
     - run
     - -p
     - vac-cli

@@ -1,0 +1,16 @@
+schema_version: 1
+kind: migration
+id: migration.evidence-v1-to-v2
+from_version: 1
+to_version: 2
+changes:
+  - action: add_schema
+    target: evidence
+    schema_version: 2
+  - action: migrate_linear_chain_to_capability_subchains
+  - action: create_merkle_anchor
+verification:
+  command:
+    id: vac.doctor.evidence.v2
+    runner: vac
+    args: ["doctor", "evidence", "--v2"]

@@ -9,7 +9,12 @@ pub const LEGACY_CHATGPT_ACCOUNT_ENV: &str = "VAC_ENABLE_LEGACY_CHATGPT_ACCOUNT_
 
 fn legacy_chatgpt_account_enabled_from_env() -> bool {
     std::env::var(LEGACY_CHATGPT_ACCOUNT_ENV)
-        .map(|value| matches!(value.trim().to_ascii_lowercase().as_str(), "1" | "true" | "yes" | "on"))
+        .map(|value| {
+            matches!(
+                value.trim().to_ascii_lowercase().as_str(),
+                "1" | "true" | "yes" | "on"
+            )
+        })
         .unwrap_or(false)
 }
 

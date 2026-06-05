@@ -1061,8 +1061,36 @@ mod owner_native {
             thread_id: ThreadId,
             include_turns: bool,
         ) -> Result<Thread> {
-            let stored = self.stored_thread(thread_id, include_turns).await?;
-            Ok(Self::stored_thread_to_runtime_thread(stored, include_turns))
+            let stored_res = self.stored_thread(thread_id, include_turns).await;
+            match stored_res {
+                Ok(stored) => Ok(Self::stored_thread_to_runtime_thread(stored, include_turns)),
+                Err(err) => {
+                    if let Ok(vac_thread) = self.thread_manager().get_thread(thread_id).await {
+                        let config = vac_thread.config_snapshot().await;
+                        Ok(Thread {
+                            id: thread_id.to_string(),
+                            branched_from_id: None,
+                            preview: String::new(),
+                            ephemeral: config.ephemeral,
+                            model_provider: config.model_provider_id,
+                            created_at: 0,
+                            updated_at: 0,
+                            status: ThreadStatus::Idle,
+                            path: vac_thread.rollout_path(),
+                            cwd: config.cwd,
+                            cli_version: String::new(),
+                            source: config.session_source.into(),
+                            agent_nickname: None,
+                            agent_role: None,
+                            git_info: None,
+                            name: None,
+                            turns: Vec::new(),
+                        })
+                    } else {
+                        Err(err)
+                    }
+                }
+            }
         }
         async fn thread_loaded_list(
             &mut self,
@@ -1180,13 +1208,29 @@ mod owner_native {
         }
         async fn thread_memory_mode_set(
             &mut self,
-            _thread_id: ThreadId,
-            _mode: ThreadMemoryMode,
+            thread_id: ThreadId,
+            mode: ThreadMemoryMode,
         ) -> Result<()> {
+            let thread = self.thread_manager().get_thread(thread_id).await?;
+            thread.set_thread_memory_mode(mode).await.map_err(|err| {
+                color_eyre::eyre::eyre!("failed to set thread memory mode: {err}")
+            })?;
             Ok(())
         }
         async fn memory_reset(&mut self) -> Result<()> {
-            warn!("owner-native memory_reset is currently a safe no-op");
+            let memory_root = self.config().vac_home.join("memories");
+            if memory_root.exists() {
+                if let Ok(mut entries) = tokio::fs::read_dir(&memory_root).await {
+                    while let Ok(Some(entry)) = entries.next_entry().await {
+                        let path = entry.path();
+                        if path.is_dir() {
+                            let _ = tokio::fs::remove_dir_all(&path).await;
+                        } else {
+                            let _ = tokio::fs::remove_file(&path).await;
+                        }
+                    }
+                }
+            }
             Ok(())
         }
         async fn logout_account(&mut self) -> Result<()> {

@@ -1,10 +1,10 @@
 schema_version: 1
 kind: plan
 id: plan.o5o6.toolchain-gate-retry
-title: O5/O6 offline toolchain retry and include doc-comment build fix
+title: O5/O6 toolchain retry and include doc-comment build fix
 status: blocked_after_static_fix
 task:
-  description: Verify uploaded offline toolchain/vendor, run real cargo gates, and patch only compiler-proven staging breakage discovered by rustc.
+  description: Verify the restored toolchain, run real cargo gates, and patch only compiler-proven staging breakage discovered by rustc.
   requested_by: operator
   timestamp: '2026-05-30T09:05:00Z'
   capability: vac.o5o6.toolchain-verification
@@ -43,7 +43,7 @@ validation:
     result: pass_before_reset
   - id: o5o6.toolchain.protocol-build
     runner: cargo
-    args: [build, --offline, -p, vac-runtime-protocol, -p, vac-app-server-protocol]
+    args: [build, -p, vac-runtime-protocol, -p, vac-app-server-protocol]
     risk: execute_process
     approval: policy
     result: failed_once_rustc_E0753_then_reset_on_retry

@@ -9,12 +9,21 @@ owner:
 ownership:
   crates:
   - vac-core
+  - vac-surface-cli
   modules:
   - control_plane::vac_init_migration_runtime
+  - registry_cli
+  - doctor_cli
   targets:
   - kind: module
     crate: vac-core
     module: control_plane::vac_init_migration_runtime
+  - kind: module
+    crate: vac-surface-cli
+    module: registry_cli
+  - kind: module
+    crate: vac-surface-cli
+    module: doctor_cli
   - kind: path
     include:
     - vac-rs/crates/control-plane/control-plane/src/control_plane/vac_init_migration_runtime.rs
@@ -30,6 +39,9 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-vac-init-migration-runtime-contract.sh
+    - vac registry
+    - vac doctor layering
+    - vac doctor migrations
     - vac registry migrate
 policy:
   risk: safe_read

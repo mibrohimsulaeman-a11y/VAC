@@ -259,6 +259,8 @@ surfaces:
     - vac doctor registry
     - vac doctor surfaces
     - vac doctor workflow
+    - vac workflow
+    - vac workflow
   slash:
     commands:
     - /autoreview
@@ -290,7 +292,7 @@ validation:
   - id: vac.workflow.validation.cmd001
     runner: cargo
     args:
-    - +1.93.0
+    - +1.95.0
     - check
     - -p
     - vac-surface-cli

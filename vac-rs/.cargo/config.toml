@@ -1,3 +1,7 @@
 [env]
 RULES_RUST_RUNFILES_WORKSPACE_NAME = "vac"
 REPOSITORY_NAME = "vac"
+RUSTC_WRAPPER = "sccache"
+
+[build]
+rustc-wrapper = "sccache"

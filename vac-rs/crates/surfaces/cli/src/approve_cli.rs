@@ -64,21 +64,22 @@ impl ApproveCommand {
                 .join(format!("{id}.yaml"))
         });
         let request_record = load_approval_request_record(&request_path, self.decision)?;
-        let snapshot = vac_core::control_plane::vac_init_approval_binding::ApprovalBindingSnapshot {
-            plan_hash: self
-                .plan_hash
-                .clone()
-                .unwrap_or_else(|| request_record.binding.plan_hash.clone()),
-            diff_hash: self
-                .diff_hash
-                .clone()
-                .unwrap_or_else(|| request_record.binding.diff_hash.clone()),
-            policy_snapshot_hash: self
-                .policy_snapshot_hash
-                .clone()
-                .unwrap_or_else(|| request_record.binding.policy_snapshot_hash.clone()),
-            now: utc_timestamp_string(),
-        };
+        let snapshot =
+            vac_core::control_plane::vac_init_approval_binding::ApprovalBindingSnapshot {
+                plan_hash: self
+                    .plan_hash
+                    .clone()
+                    .unwrap_or_else(|| request_record.binding.plan_hash.clone()),
+                diff_hash: self
+                    .diff_hash
+                    .clone()
+                    .unwrap_or_else(|| request_record.binding.diff_hash.clone()),
+                policy_snapshot_hash: self
+                    .policy_snapshot_hash
+                    .clone()
+                    .unwrap_or_else(|| request_record.binding.policy_snapshot_hash.clone()),
+                now: utc_timestamp_string(),
+            };
         let replay_path = workspace
             .join(".vac/registry/approvals")
             .join("replay-store.yaml");
@@ -163,7 +164,9 @@ fn load_approval_request_record(
         diff_hash: nested_scalar(&value, &["binding", "diff_hash"])
             .ok_or_else(|| anyhow::anyhow!("approval request missing binding.diff_hash"))?,
         policy_snapshot_hash: nested_scalar(&value, &["binding", "policy_snapshot_hash"])
-            .ok_or_else(|| anyhow::anyhow!("approval request missing binding.policy_snapshot_hash"))?,
+            .ok_or_else(|| {
+                anyhow::anyhow!("approval request missing binding.policy_snapshot_hash")
+            })?,
         nonce: nested_scalar(&value, &["binding", "nonce"])
             .ok_or_else(|| anyhow::anyhow!("approval request missing binding.nonce"))?,
         expires_at: nested_scalar(&value, &["binding", "expires_at"])
@@ -214,7 +217,9 @@ fn build_response_for_validation(
                     )
                     .unwrap_or_default(),
                     signature_base64: nested_scalar(value, &["response", "signature", "value"])
-                        .or_else(|| nested_scalar(value, &["response", "signature", "signature_base64"]))
+                        .or_else(|| {
+                            nested_scalar(value, &["response", "signature", "signature_base64"])
+                        })
                         .unwrap_or_default(),
                 }
             })
@@ -275,7 +280,10 @@ fn approval_response_hash(
 ) -> String {
     let payload = format!(
         "approval_id={id}\ndecision={}\nreason={reason}\nnonce={nonce}\nplan_hash={}\ndiff_hash={}\npolicy_snapshot_hash={}\n",
-        decision.as_str(), snapshot.plan_hash, snapshot.diff_hash, snapshot.policy_snapshot_hash
+        decision.as_str(),
+        snapshot.plan_hash,
+        snapshot.diff_hash,
+        snapshot.policy_snapshot_hash
     );
     vac_core::control_plane::vac_init_evidence_chain::sha256_hex(payload.as_bytes())
 }
@@ -376,6 +384,5 @@ fn yaml_scalar(value: &str) -> String {
 }
 
 fn utc_timestamp_string() -> String {
-    std::env::var("VAC_APPROVAL_NOW")
-        .unwrap_or_else(|_| "2026-06-02T00:00:00Z".to_string())
+    std::env::var("VAC_APPROVAL_NOW").unwrap_or_else(|_| "2026-06-02T00:00:00Z".to_string())
 }

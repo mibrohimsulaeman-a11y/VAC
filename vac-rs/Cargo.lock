@@ -10710,6 +10710,8 @@ dependencies = [
 name = "vac-api"
 version = "0.0.0"
 dependencies = [
+ "http 1.4.0",
+ "vac-protocol",
  "vac-provider-http",
 ]
 
@@ -11553,6 +11555,7 @@ dependencies = [
  "pretty_assertions",
  "serde",
  "serde_json",
+ "sqlx",
  "tempfile",
  "tokio",
  "tracing",

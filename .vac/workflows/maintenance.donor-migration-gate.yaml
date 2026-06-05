@@ -107,7 +107,7 @@ validation:
   - id: maintenance.donor-migration-gate.validation.cmd003
     runner: cargo
     args:
-    - +1.93.0
+    - +1.95.0
     - run
     - -p
     - vac-cli

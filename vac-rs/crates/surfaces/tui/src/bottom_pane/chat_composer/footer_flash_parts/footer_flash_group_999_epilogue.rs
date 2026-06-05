@@ -405,7 +405,9 @@ impl ChatComposer {
         let is_zellij = self.is_zellij;
         let style = user_message_style();
         let textarea_style = style.fg(ratatui::style::Color::Reset);
-        Block::default().style(style).render_ref(composer_rect, buf);
+        Block::default()
+            .style(Style::default().bg(crate::ui_consts::APP_BG))
+            .render_ref(composer_rect, buf);
         if !remote_images_rect.is_empty() {
             Paragraph::new(self.remote_images_lines(remote_images_rect.width))
                 .style(style)

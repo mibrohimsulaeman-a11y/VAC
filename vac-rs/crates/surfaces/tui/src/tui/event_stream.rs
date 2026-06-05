@@ -69,7 +69,7 @@ impl<S: EventSource + Default> EventBrokerState<S> {
                 *self = EventBrokerState::Running(S::default());
                 match self {
                     EventBrokerState::Running(events) => Some(events),
-                    EventBrokerState::Paused | EventBrokerState::Start => unreachable!(),
+                    EventBrokerState::Paused | EventBrokerState::Start => None,
                 }
             }
             EventBrokerState::Running(events) => Some(events),
@@ -380,7 +380,10 @@ mod tests {
     fn setup() -> SetupState {
         let source = FakeEventSource::new();
         let broker = Arc::new(EventBroker::new());
-        *broker.state.lock().unwrap() = EventBrokerState::Running(source);
+        *broker
+            .state
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner) = EventBrokerState::Running(source);
         let handle = FakeEventSourceHandle::new(broker.clone());
 
         let (draw_tx, draw_rx) = broadcast::channel(1);

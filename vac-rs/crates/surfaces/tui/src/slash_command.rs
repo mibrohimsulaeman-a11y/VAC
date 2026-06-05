@@ -69,6 +69,11 @@ pub enum SlashCommand {
     Runtime,
     Capabilities,
     Workflow,
+    Session,
+    Spec,
+    Tasks,
+    Todo,
+    Evidence,
     DebugConfig,
     Title,
     Statusline,
@@ -103,7 +108,9 @@ impl SlashCommand {
         match self {
             SlashCommand::Realtime | SlashCommand::Settings => CommandAvailability::FeatureOff,
             SlashCommand::Collab | SlashCommand::Experimental => CommandAvailability::Experimental,
-            SlashCommand::MemoryDrop | SlashCommand::MemoryUpdate => CommandAvailability::Unavailable,
+            SlashCommand::MemoryDrop | SlashCommand::MemoryUpdate => {
+                CommandAvailability::Unavailable
+            }
             _ => CommandAvailability::Ready,
         }
     }
@@ -142,6 +149,11 @@ impl SlashCommand {
             SlashCommand::Runtime => "show autopilot scheduler and runtime jobs",
             SlashCommand::Capabilities => "show declared capabilities and registry state",
             SlashCommand::Workflow => "show declared workflows and registry state",
+            SlashCommand::Session => "show session artifacts and completion lock state",
+            SlashCommand::Spec => "show session spec artifacts",
+            SlashCommand::Tasks => "show session task artifacts",
+            SlashCommand::Todo => "show session todo artifacts",
+            SlashCommand::Evidence => "show evidence registry records",
             SlashCommand::DebugConfig => "show config layers and requirement sources for debugging",
             SlashCommand::Title => "configure which items appear in the terminal title",
             SlashCommand::Statusline => "configure which items appear in the status line",
@@ -256,6 +268,11 @@ impl SlashCommand {
             | SlashCommand::Runtime
             | SlashCommand::Capabilities
             | SlashCommand::Workflow
+            | SlashCommand::Session
+            | SlashCommand::Spec
+            | SlashCommand::Tasks
+            | SlashCommand::Todo
+            | SlashCommand::Evidence
             | SlashCommand::DebugConfig
             | SlashCommand::Ps
             | SlashCommand::Stop
@@ -368,7 +385,6 @@ mod tests {
         );
     }
 }
-
 
 #[cfg(test)]
 pub(crate) fn palette_badge_for_benchmark(command: &str, available: bool) -> String {

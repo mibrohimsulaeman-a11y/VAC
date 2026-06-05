@@ -22,6 +22,7 @@ surfaces:
     enabled: true
     commands:
     - bash scripts/check-vac-init-memory-governance-contract.sh
+    - vac doctor memory
 policy:
   risk: safe_read
   mutates_files: false

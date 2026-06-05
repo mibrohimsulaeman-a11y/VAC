@@ -36,6 +36,7 @@ surfaces:
     enabled: true
     commands:
     - vac review
+    - vac approve
   slash:
     commands:
     - /approvals

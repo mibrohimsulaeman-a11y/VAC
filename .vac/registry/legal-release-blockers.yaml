@@ -13,6 +13,6 @@ legal:
   cargo_deny_bans: NotEvaluated
   cargo_about_generate: NotEvaluated
 build:
-  offline_vendor_present: false
-  offline_build_status: NotEvaluated
+  source_vendor_present: false
+  cargo_build_status: NotEvaluated
   full_workspace_build_status: NotEvaluated

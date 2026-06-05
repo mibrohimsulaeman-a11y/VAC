@@ -11,13 +11,13 @@ use std::time::Instant;
 
 use rmcp::model::ToolAnnotations;
 use serde::Deserialize;
+use vac_connectors::merge::merge_connectors;
+use vac_connectors::merge::merge_plugin_connectors;
+use vac_plugin::AppConnectorId;
 pub use vac_runtime_protocol::AppBranding;
 pub use vac_runtime_protocol::AppInfo;
 pub use vac_runtime_protocol::AppMetadata;
 use vac_tools::DiscoverableTool;
-use vac_connectors::merge::merge_connectors;
-use vac_connectors::merge::merge_plugin_connectors;
-use vac_plugin::AppConnectorId;
 
 use crate::config::Config;
 use crate::plugins::list_tool_suggest_discoverable_plugins;
@@ -70,7 +70,6 @@ pub struct AccessibleConnectorsStatus {
     pub vac_apps_ready: bool,
 }
 
-
 /// List every locally known connector from installed MCP plugin metadata.
 ///
 /// Cloud ChatGPT Apps directory fetching is intentionally retired; this only
@@ -122,7 +121,9 @@ pub fn connectors_for_plugin_apps(
 
     merge_plugin_connectors(
         connectors,
-        plugin_apps.iter().map(|connector_id| connector_id.0.clone()),
+        plugin_apps
+            .iter()
+            .map(|connector_id| connector_id.0.clone()),
     )
     .into_iter()
     .filter(|connector| plugin_app_ids.contains(connector.id.as_str()))
@@ -152,12 +153,13 @@ pub fn merge_connectors_with_accessible(
 pub async fn list_accessible_connectors_from_mcp_tools(
     config: &Config,
 ) -> anyhow::Result<Vec<AppInfo>> {
-    Ok(list_accessible_connectors_from_mcp_tools_with_options_and_status(
-        config,
-        /*force_refetch*/ false,
+    Ok(
+        list_accessible_connectors_from_mcp_tools_with_options_and_status(
+            config, /*force_refetch*/ false,
+        )
+        .await?
+        .connectors,
     )
-    .await?
-    .connectors)
 }
 
 pub(crate) async fn list_accessible_and_enabled_connectors_from_manager(
@@ -186,7 +188,8 @@ pub(crate) async fn list_tool_suggest_discoverable_tools_with_auth(
 pub async fn list_cached_accessible_connectors_from_mcp_tools(
     config: &Config,
 ) -> Option<Vec<AppInfo>> {
-    let auth_manager = AuthManager::shared_from_config(config, /*enable_vac_api_key_env*/ false).await;
+    let auth_manager =
+        AuthManager::shared_from_config(config, /*enable_vac_api_key_env*/ false).await;
     let auth = auth_manager.auth().await;
     read_cached_accessible_connectors(&accessible_connectors_cache_key(config, auth.as_ref()))
 }
@@ -205,16 +208,19 @@ pub async fn list_accessible_connectors_from_mcp_tools_with_options(
     config: &Config,
     force_refetch: bool,
 ) -> anyhow::Result<Vec<AppInfo>> {
-    Ok(list_accessible_connectors_from_mcp_tools_with_options_and_status(config, force_refetch)
-        .await?
-        .connectors)
+    Ok(
+        list_accessible_connectors_from_mcp_tools_with_options_and_status(config, force_refetch)
+            .await?
+            .connectors,
+    )
 }
 
 pub async fn list_accessible_connectors_from_mcp_tools_with_options_and_status(
     config: &Config,
     _force_refetch: bool,
 ) -> anyhow::Result<AccessibleConnectorsStatus> {
-    let auth_manager = AuthManager::shared_from_config(config, /*enable_vac_api_key_env*/ false).await;
+    let auth_manager =
+        AuthManager::shared_from_config(config, /*enable_vac_api_key_env*/ false).await;
     let auth = auth_manager.auth().await;
     let cache_key = accessible_connectors_cache_key(config, auth.as_ref());
     Ok(AccessibleConnectorsStatus {
@@ -390,7 +396,9 @@ fn apply_requirements_apps_constraints(
     apps_config: &mut AppsConfigToml,
     requirements_apps_config: Option<&AppsRequirementsToml>,
 ) {
-    let Some(requirements_apps_config) = requirements_apps_config else { return; };
+    let Some(requirements_apps_config) = requirements_apps_config else {
+        return;
+    };
     for (app_id, requirement) in &requirements_apps_config.apps {
         if requirement.enabled == Some(false) {
             let app = apps_config.apps.entry(app_id.clone()).or_default();
@@ -418,7 +426,9 @@ fn app_tool_policy_from_apps_config(
     tool_title: Option<&str>,
     annotations: Option<&ToolAnnotations>,
 ) -> AppToolPolicy {
-    let Some(apps_config) = apps_config else { return AppToolPolicy::default(); };
+    let Some(apps_config) = apps_config else {
+        return AppToolPolicy::default();
+    };
     let app = connector_id.and_then(|connector_id| apps_config.apps.get(connector_id));
     let tools = app.and_then(|app| app.tools.as_ref());
     let tool_config = tools.and_then(|tools| {
@@ -433,7 +443,10 @@ fn app_tool_policy_from_apps_config(
         .unwrap_or(AppToolApproval::Auto);
 
     if !app_is_enabled(apps_config, connector_id) {
-        return AppToolPolicy { enabled: false, approval };
+        return AppToolPolicy {
+            enabled: false,
+            approval,
+        };
     }
     if let Some(enabled) = tool_config.and_then(|tool| tool.enabled) {
         return AppToolPolicy { enabled, approval };
@@ -445,12 +458,24 @@ fn app_tool_policy_from_apps_config(
     let app_defaults = apps_config.default.as_ref();
     let destructive_enabled = app
         .and_then(|app| app.destructive_enabled)
-        .unwrap_or_else(|| app_defaults.map(|defaults| defaults.destructive_enabled).unwrap_or(true));
+        .unwrap_or_else(|| {
+            app_defaults
+                .map(|defaults| defaults.destructive_enabled)
+                .unwrap_or(true)
+        });
     let open_world_enabled = app
         .and_then(|app| app.open_world_enabled)
-        .unwrap_or_else(|| app_defaults.map(|defaults| defaults.open_world_enabled).unwrap_or(true));
-    let destructive_hint = annotations.and_then(|annotations| annotations.destructive_hint).unwrap_or(true);
-    let open_world_hint = annotations.and_then(|annotations| annotations.open_world_hint).unwrap_or(true);
+        .unwrap_or_else(|| {
+            app_defaults
+                .map(|defaults| defaults.open_world_enabled)
+                .unwrap_or(true)
+        });
+    let destructive_hint = annotations
+        .and_then(|annotations| annotations.destructive_hint)
+        .unwrap_or(true);
+    let open_world_hint = annotations
+        .and_then(|annotations| annotations.open_world_hint)
+        .unwrap_or(true);
     let enabled =
         (destructive_enabled || !destructive_hint) && (open_world_enabled || !open_world_hint);
     AppToolPolicy { enabled, approval }

@@ -1,0 +1,90 @@
+schema_version: 1
+kind: workflow
+id: maintenance.ignored-tests-lane
+title: Ignored tests explicit validation lane
+status: ready
+inputs: {}
+ui:
+  surface: /workflow
+  inspect_surface: /debug-config
+  progress_panel: true
+  activity_log: true
+  approval_surface: true
+  evidence_surface: true
+policy:
+  default_risk: safe_read
+  approval_required_for:
+    - execute_process
+  mutates_files: false
+  network: false
+  redaction: false
+steps:
+  - id: inventory
+    uses: capability.build.cargo_check
+    ui:
+      surface: /workflow
+      progress_panel: true
+      activity_log: true
+      approval_surface: false
+      evidence_surface: true
+  - id: run_offline_ignored
+    uses: capability.build.cargo_check
+    ui:
+      surface: /workflow
+      progress_panel: true
+      activity_log: true
+      approval_surface: true
+      evidence_surface: true
+  - id: run_env_dependent_ignored
+    uses: capability.build.cargo_check
+    ui:
+      surface: /workflow
+      progress_panel: true
+      activity_log: true
+      approval_surface: true
+      evidence_surface: true
+validation:
+  commands:
+    - id: maintenance.ignored-tests.inventory
+      runner: rg
+      args:
+        - "#\\[ignore"
+        - vac-rs
+        - --glob
+        - "*.rs"
+      risk: safe_read
+      approval: none
+      evidence: .vac/registry/evidence/ignored-tests-inventory.txt
+    - id: maintenance.ignored-tests.offline
+      runner: cargo
+      args:
+        - test
+        - --manifest-path
+        - vac-rs/Cargo.toml
+        - --workspace
+        - --
+        - --ignored
+      risk: execute_process
+      approval: policy
+      evidence: .vac/registry/evidence/ignored-tests-offline.log
+      note: Exclude live API tests unless required secrets are present.
+    - id: maintenance.ignored-tests.live-cli
+      runner: cargo
+      args:
+        - test
+        - --manifest-path
+        - vac-rs/Cargo.toml
+        - --test
+        - live_cli
+        - --
+        - --ignored
+      env_required:
+        - VASTAR_API_KEY
+      risk: execute_process
+      approval: policy
+      network: true
+      evidence: .vac/registry/evidence/ignored-tests-live-cli.log
+  gates:
+    - inventory
+    - run_offline_ignored
+    - run_env_dependent_ignored

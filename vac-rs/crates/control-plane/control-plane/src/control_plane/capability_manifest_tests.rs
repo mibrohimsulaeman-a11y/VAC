@@ -126,6 +126,71 @@ validation:
 }
 
 #[test]
+fn parses_structured_validation_metadata_without_changing_command_text() {
+    let manifest = parse_ok(
+        r#"
+schema_version: 1
+kind: capability
+id: vac.validation_metadata
+title: Validation Metadata
+status: planned
+reason: "Plan metadata"
+owner: vac-rs/control-plane
+states:
+  - ready
+surfaces:
+  palette: true
+policy:
+  risk: safe_read
+validation:
+  commands:
+    - id: cargo.check
+      runner: cargo
+      args: ["check", "-p", "vac-control-plane"]
+      risk: safe_read
+      approval: none
+      evidence: evidence.validation.metadata
+      note: "metadata accepted"
+      env_required: ["RUST_BACKTRACE"]
+      network: false
+"#,
+    );
+
+    assert_eq!(
+        manifest.validation.commands,
+        vec!["cargo check -p vac-control-plane".to_string()]
+    );
+}
+
+#[test]
+fn rejects_blank_structured_validation_metadata() {
+    let err = parse_err(
+        r#"
+schema_version: 1
+kind: capability
+id: vac.validation_metadata
+title: Validation Metadata
+status: planned
+reason: "Plan metadata"
+owner: vac-rs/control-plane
+states:
+  - ready
+surfaces:
+  palette: true
+policy:
+  risk: safe_read
+validation:
+  commands:
+    - runner: cargo
+      args: ["check"]
+      evidence: " "
+"#,
+    );
+
+    assert!(err.contains("validation.commands[0].evidence"));
+}
+
+#[test]
 fn parses_legacy_owner_object_and_surface_shorthands() {
     let manifest = parse_ok(
         r#"

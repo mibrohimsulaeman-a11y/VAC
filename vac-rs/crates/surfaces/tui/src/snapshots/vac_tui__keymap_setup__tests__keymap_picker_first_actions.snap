@@ -1,5 +1,6 @@
 ---
-source: tui/src/keymap_setup.rs
+source: crates/surfaces/tui/src/keymap_setup.rs
+assertion_line: 1004
 expression: snapshot
 ---
 tab: All (85 selectable)
@@ -20,7 +21,7 @@ Toggle Vim Mode | unbound | Global toggle_vim_mode Toggle Vim Mode Turn Vim comp
 Decrease Reasoning Effort | alt-, | Chat decrease_reasoning_effort Decrease Reasoning Effort Decrease reasoning effort. alt-, Default
 Increase Reasoning Effort | alt-. | Chat increase_reasoning_effort Increase Reasoning Effort Increase reasoning effort. alt-. Default
 Edit Queued Message | alt-up, shift-left | Chat edit_queued_message Edit Queued Message Edit the most recently queued message. alt-up, shift-left Default
-Submit | enter | Composer submit Submit Submit the current composer draft. enter Default
+Submit | enter, ctrl-m | Composer submit Submit Submit the current composer draft. enter, ctrl-m Default
 Queue | tab | Composer queue Queue Queue the draft while a task is running. tab Default
 Toggle Shortcuts | ?, shift-? | Composer toggle_shortcuts Toggle Shortcuts Show or hide the composer shortcut overlay. ?, shift-? Default
 History Search Previous | ctrl-r | Composer history_search_previous History Search Previous Open history search or move to the previous match. ctrl-r Default

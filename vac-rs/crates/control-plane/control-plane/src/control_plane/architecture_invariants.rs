@@ -1109,7 +1109,7 @@ policy:
 {approval_required_for}
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 {tui_compatibility}
 "#,
                 id = id,
@@ -1191,7 +1191,7 @@ steps:
     uses: capability.activity.emit
 validation:
   commands:
-    - cargo +1.93.0 run -p vac-surface-cli -- doctor registry .
+    - cargo +1.95.0 run -p vac-surface-cli -- doctor registry .
 "#,
         )
         .expect("release gate workflow");

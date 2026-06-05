@@ -1,95 +1,75 @@
-# VAC CLI
+# VAC (Vastar Agentic CLI)
 
-VAC is the product in this repository.
+VAC is the developer agent control plane and terminal user interface (TUI) for Vastar. It enables end-to-end execution of agentic workflows with granular policy control, validation gating, and approval workflows.
 
-## Product identity
+---
 
-- Product command: `vac`
-- Product TUI: `vac-rs/tui`
-- Product core: `vac-rs/core`
-- Product CLI: `vac-rs/cli`
-- Package launcher: `vac-cli/bin/vac.js`
-- Donor source: `donor/vac/`
+## 🚀 Product Structure & Topology
 
-Do not implement a second TUI. Do not revive the old donor TUI stacks as product code.
+The project is structured as a mono-repository with the following key components:
 
+- **Product Command / Entry Point:** `vac` (compiled from CLI surface)
+- **Terminal User Interface (TUI):** [vac-rs/crates/surfaces/tui](file:///home/emp/Documents/VAC/vastar-agentic-cli/vac-rs/crates/surfaces/tui)
+- **Command Line Interface (CLI):** [vac-rs/crates/surfaces/cli](file:///home/emp/Documents/VAC/vastar-agentic-cli/vac-rs/crates/surfaces/cli)
+- **Control Plane & Core Logic:** [vac-rs/crates/control-plane](file:///home/emp/Documents/VAC/vastar-agentic-cli/vac-rs/crates/control-plane)
+- **Package Launcher:** [vac-cli/bin/vac.js](file:///home/emp/Documents/VAC/vastar-agentic-cli/vac-cli/bin/vac.js)
 
-## Rust development loop
+---
 
-When validating Rust work, prefer a fast, cache-friendly loop:
+## 🛠️ Rust Development & Test Loop
 
-- For repeated CLI doctor/check commands, build the binary once and run it directly from `./vac-rs/target/debug/vac` instead of using repeated `cargo run` invocations.
-- For docs/manifest-only work, run the narrowest relevant `cargo test` filter first, then reuse the built binary for doctor commands.
-- Avoid `cargo clean` unless cache corruption or disk recovery requires it; it forces a full rebuild and slows follow-up development.
-- If a Rust validation step is expected to take more than a couple of minutes, report that expectation before polling for progress.
+> [!IMPORTANT]
+> **MANDATORY RULES FOR ALL DEVELOPERS AND AGENTIC WORKERS:**
+> 1. **NEVER use `cargo test`** unless absolutely necessary or explicitly instructed. Always use `cargo nextest run` (which runs tests in parallel and is significantly faster).
+> 2. **ALWAYS use sccache**. The project contains a `.cargo/config.toml` that forces `sccache`. Do not disable it or bypass it.
+> 3. **DO NOT use separate target directories** (such as `--target-dir /tmp/vac-validate-target` or any custom target folder outside the workspace). All builds and tests MUST run inside the standard workspace `target` directory to ensure full caching and prevent workspace littering.
 
-Example:
-
+### 1. Build and Run Directly
+Avoid using repeated `cargo run` invocations for CLI checks. Instead, build the binary once and invoke the built executable directly:
 ```bash
-cargo test --manifest-path vac-rs/Cargo.toml -p vac-core registry_diagnostics -- --nocapture
+# Build the CLI
 cargo build --manifest-path vac-rs/Cargo.toml -p vac-cli
+
+# Run doctor checks directly
 ./vac-rs/target/debug/vac doctor registry .
 ./vac-rs/target/debug/vac doctor policy .
 ./vac-rs/target/debug/vac doctor surfaces .
 ./vac-rs/target/debug/vac doctor workflow .
 ```
 
-This reuses the same Cargo artifacts that `cargo run` would create, but avoids repeated Cargo planning and rebuild checks for each doctor command.
-
-## Workflow control plane
-
-The declarative product control plane lives under [`docs/workflow-control-plane/`](docs/workflow-control-plane/INDEX.md) and `.vac/`.
-
-Rules of thumb:
-
-- add a capability manifest before adding a backend-only product feature,
-- surface every capability in the root TUI or CLI,
-- keep the plan docs aligned with the manifests and dashboard output,
-- treat donor code as source material, not product code.
-
-Contribution gate: do not land backend-only product work. Add or update the capability manifest, root CLI/TUI surface, and validation command in the same change that introduces product behavior.
-
-Self-check before opening a change: run `./vac-rs/target/debug/vac doctor docs .` to verify the docs index links, README/AGENTS pointers, and `.vac/` manifest directories are aligned.
-
-Legal notices and third-party attributions are tracked separately from VAC product identity in [`docs/legal/NOTICES.md`](docs/legal/NOTICES.md).
-
-## Current migration rule
-
-All new work must target the root VAC architecture and the root `vac` command. Donor code may be ported only when it is wired into the root product flow.
-
-```text
-root product: /home/emp/Documents/VAC/vastar-agentic-cli
-source donor: donor/vac
-forbidden: donor/vac TUI as product frontend
+### 2. Targeted Unit Testing
+Run the narrowest relevant test filter to avoid long recompilations:
+```bash
+cargo nextest run --manifest-path vac-rs/Cargo.toml -p vac-surface-tui surface_route_catalog::tests
 ```
 
-## What to port from donor/vac
+### 3. Key Environment Variables
+- **`VAC_BUILD_CHECK_REPO_ROOT`**: Points the workflow runner to the repository root directory (necessary for cargo build-checks inside tests to locate the main workspace).
+  ```bash
+  VAC_BUILD_CHECK_REPO_ROOT=$(pwd) cargo nextest run --manifest-path vac-rs/Cargo.toml -p vac-surface-tui
+  ```
+- **`VAC_SKIP_BUILD_CHECK`**: Set to `true`/`1` to bypass cargo compilation checks in workflow runner tests.
 
-Prioritize backend/domain code that makes VAC unique:
+### 4. Interactive Snapshot Testing
+VAC uses `insta` for TUI assertion snapshots. If layout changes occur, review and accept snapshots via:
+```bash
+cd vac-rs
+cargo insta accept
+```
 
-- workflow and manifest/profile domain logic
-- VIL/VWFD parser, validator, and workflow tooling
-- approval/policy enhancements that improve the VAC approval flow
-- memory/RAG/context modules if they integrate into the VAC TUI
-- signal/trajectory/evidence modules if they become visible in the VAC TUI
+---
 
-Do not port old frontend stacks as product code:
+## 🎛️ Control Plane & Declarative Registry
 
-- `donor/vac/crates/vac_shell_*`
-- `donor/vac/crates/vac_tui_runtime`
-- old VAC command aliases and duplicate TUI registries
-- duplicate approval bars, task panels, render loops, or slash registries
+The declarative product control plane lives under [docs/workflow-control-plane/INDEX.md](file:///home/emp/Documents/VAC/vastar-agentic-cli/docs/workflow-control-plane/INDEX.md) and the `.vac/` folder.
 
-## Definition of done for donor migration
+All features must follow these core guidelines:
+1. **Capability Manifest First:** Add/update capability manifests under `.vac/capabilities/` before introducing backend-only behavior.
+2. **TUI/CLI Reachability:** Every capability must be exposed or visible in either the CLI commands or TUI routes.
+3. **Reasoning & Status Alignment:** Maintain clear `status` mappings (`ready`, `partial`, `planned`). `partial` statuses must specify a `reason` (e.g., `"Under development"`).
 
-A donor feature is not migrated until it is visible and usable from the root `vac` command.
-
-Required for every feature:
-
-1. It is wired into the root VAC CLI/TUI path.
-2. It has a clear operator flow.
-3. It has visible empty/loading/success/failure states.
-4. It does not create duplicate TUI infrastructure.
-5. The old donor copy is deleted, quarantined, or explicitly marked as donor-only after porting.
-
-Backend-only ports are not accepted.
+### Self-Check Validation
+Before opening a pull request, verify index links and manifest integrity:
+```bash
+./vac-rs/target/debug/vac doctor docs .
+```

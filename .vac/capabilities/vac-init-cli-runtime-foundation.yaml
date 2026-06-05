@@ -61,6 +61,7 @@ surfaces:
     - vac plan
     - vac plan validate
     - vac why
+    - vac doctor project-workspace
     - vac doctor evidence
     - vac doctor memory
     - vac doctor init

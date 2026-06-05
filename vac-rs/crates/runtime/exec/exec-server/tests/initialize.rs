@@ -5,10 +5,10 @@ mod common;
 use common::exec_server::exec_server;
 use pretty_assertions::assert_eq;
 use uuid::Uuid;
-use vac_runtime_protocol::JSONRPCMessage;
-use vac_runtime_protocol::JSONRPCResponse;
 use vac_exec_server::InitializeParams;
 use vac_exec_server::InitializeResponse;
+use vac_runtime_protocol::JSONRPCMessage;
+use vac_runtime_protocol::JSONRPCResponse;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn exec_server_accepts_initialize() -> anyhow::Result<()> {

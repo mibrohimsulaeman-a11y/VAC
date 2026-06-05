@@ -137,7 +137,9 @@ pub fn arg0_dispatch() -> Option<Arg0PathEntryGuard> {
                     }
                 }
                 None => {
-                    eprintln!("Error: {VAC_CORE_APPLY_PATCH_ARG1} requires a UTF-8 PATCH argument.");
+                    eprintln!(
+                        "Error: {VAC_CORE_APPLY_PATCH_ARG1} requires a UTF-8 PATCH argument."
+                    );
                     1
                 }
             };

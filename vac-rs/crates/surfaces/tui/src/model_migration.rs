@@ -322,7 +322,7 @@ impl ModelMigrationScreen {
     ) {
         let horizontal_inset = 2;
         let content_width = area_width.saturating_sub(horizontal_inset);
-        let wrap_width = (content_width > 0).then_some(content_width as usize);
+        let wrap_width = (content_width > 0).then_some(usize::from(content_width));
         let rendered = render_markdown_text_with_width(markdown, wrap_width);
         for line in rendered.lines {
             column.push(

@@ -61,16 +61,23 @@ impl WorkflowListCommand {
         let manifests = workflow_manifest_paths(&workspace)?;
         println!("vac workflow list: {} workflow(s)", manifests.len());
         for path in manifests {
-            let manifest = vac_core::control_plane::workflow_manifest::load_workflow_manifest(&path)
-                .map_err(|err| anyhow::anyhow!(err.to_string()))?;
-            println!("- {} — {} ({})", manifest.id, manifest.title, path.display());
+            let manifest =
+                vac_core::control_plane::workflow_manifest::load_workflow_manifest(&path)
+                    .map_err(|err| anyhow::anyhow!(err.to_string()))?;
+            println!(
+                "- {} — {} ({})",
+                manifest.id,
+                manifest.title,
+                path.display()
+            );
         }
         Ok(())
     }
 }
 
-
-fn render_workflow_preview(preview: &vac_core::control_plane::workflow_runner::WorkflowRunPreview) -> String {
+fn render_workflow_preview(
+    preview: &vac_core::control_plane::workflow_runner::WorkflowRunPreview,
+) -> String {
     if preview.supported {
         return "supported by initial safe runner".to_string();
     }
@@ -89,8 +96,10 @@ impl WorkflowInspectCommand {
         let path = find_workflow_manifest(&workspace, &self.workflow_id)?;
         let manifest = vac_core::control_plane::workflow_manifest::load_workflow_manifest(&path)
             .map_err(|err| anyhow::anyhow!(err.to_string()))?;
-        let preview = vac_core::control_plane::workflow_runner::preview_workflow_manifest(&manifest);
-        let dry_run = vac_core::control_plane::workflow_runner::dry_run_workflow_manifest(&manifest);
+        let preview =
+            vac_core::control_plane::workflow_runner::preview_workflow_manifest(&manifest);
+        let dry_run =
+            vac_core::control_plane::workflow_runner::dry_run_workflow_manifest(&manifest);
         println!("vac workflow inspect: PASS");
         println!("id: {}", manifest.id);
         println!("title: {}", manifest.title);
@@ -119,7 +128,10 @@ impl WorkflowRunCommand {
             if let Some(parent) = report_path.parent() {
                 fs::create_dir_all(parent)?;
             }
-            fs::write(&report_path, render_workflow_run_yaml(&manifest.id, &report.render_text()))?;
+            fs::write(
+                &report_path,
+                render_workflow_run_yaml(&manifest.id, &report.render_text()),
+            )?;
             println!("report: {}", report_path.display());
         }
         Ok(())

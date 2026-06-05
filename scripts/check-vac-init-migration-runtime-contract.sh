@@ -42,7 +42,7 @@ for field in ('id', 'runner', 'args'):
 print('migration compatibility cleanup: PASS')
 PY
 if command -v cargo >/dev/null 2>&1; then
-  (cd vac-rs && cargo test --offline -p vac-core vac_init_migration_runtime --lib)
+  (cd vac-rs && cargo test -p vac-core vac_init_migration_runtime --lib)
   rc=$?
   [ "$rc" -eq 0 ] || exit "$rc"
   echo 'migration-runtime contract: PASS (cargo unit)'

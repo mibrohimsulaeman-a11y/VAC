@@ -5,19 +5,19 @@ chain:
   self_hash: 7acb342cd59a9c7b55172b39adcbc969b4684be31e24ea2e7a1fe3fa25b32146
 status: ready
 created_at: '2026-05-31T04:55:00Z'
-summary: Targeted offline cargo checks verified compiler-driven fixes for vac-core, vac-tui, and vac-cli after audit findings.
+summary: Targeted cargo checks verified compiler-driven fixes for vac-core, vac-tui, and vac-cli after audit findings.
 commands:
-  - command: cargo metadata --offline
+  - command: cargo metadata
     result: PASS
-  - command: cargo check --offline -p vac-protocol
+  - command: cargo check -p vac-protocol
     result: PASS
-  - command: cargo check --offline -p vac-core
+  - command: cargo check -p vac-core
     result: PASS
     log: docs/monolith-quality/logs/cargo-check-vac-core-2026-05-31.log
-  - command: cargo check --offline -p vac-surface-tui
+  - command: cargo check -p vac-surface-tui
     result: PASS
     log: docs/monolith-quality/logs/cargo-check-vac-tui-2026-05-31.log
-  - command: cargo check --offline -p vac-surface-cli
+  - command: cargo check -p vac-surface-cli
     result: PASS
     log: docs/monolith-quality/logs/cargo-check-vac-cli-2026-05-31.log
   - command: bash scripts/check-vac-o6-1-depanic-surface.sh

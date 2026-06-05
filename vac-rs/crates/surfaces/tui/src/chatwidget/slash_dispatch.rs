@@ -125,8 +125,14 @@ impl ChatWidget {
         match cmd.availability() {
             CommandAvailability::Unavailable => {
                 self.add_info_message(
-                    format!("'/{}' is unavailable in this local coding tool build.", cmd.command()),
-                    Some("Use the provider-neutral replacement or enable the feature explicitly.".to_string()),
+                    format!(
+                        "'/{}' is unavailable in this local coding tool build.",
+                        cmd.command()
+                    ),
+                    Some(
+                        "Use the provider-neutral replacement or enable the feature explicitly."
+                            .to_string(),
+                    ),
                 );
                 self.request_redraw();
                 return;
@@ -185,25 +191,23 @@ impl ChatWidget {
             SlashCommand::Branch => {
                 self.app_event_tx.send(AppEvent::BranchCurrentSession);
             }
-            SlashCommand::Init => {
-                match self.write_tui_vac_init_operator_choices() {
-                    Ok(path) => {
-                        self.add_info_message(
+            SlashCommand::Init => match self.write_tui_vac_init_operator_choices() {
+                Ok(path) => {
+                    self.add_info_message(
                             "VAC-Init guided setup is ready for this TUI session.".to_string(),
                             Some(format!(
                                 "Wrote {}. From the TUI/local command surface, run `vac init` without `--interactive`; the TUI already supplies operator choices.",
                                 path.display()
                             )),
                         );
-                    }
-                    Err(err) => {
-                        self.add_info_message(
-                            "VAC-Init guided setup could not prepare operator choices.".to_string(),
-                            Some(format!("{err}")),
-                        );
-                    }
                 }
-            }
+                Err(err) => {
+                    self.add_info_message(
+                        "VAC-Init guided setup could not prepare operator choices.".to_string(),
+                        Some(format!("{err}")),
+                    );
+                }
+            },
             SlashCommand::Compact => {
                 self.clear_token_usage();
                 if !self.bottom_pane.is_task_running() {
@@ -446,6 +450,25 @@ impl ChatWidget {
             SlashCommand::Workflow => {
                 self.add_workflow_browser_output();
             }
+            SlashCommand::Session => {
+                self.add_session_status_output(
+                    crate::session_status::SessionStatusSurface::Session,
+                );
+            }
+            SlashCommand::Spec => {
+                self.add_session_status_output(crate::session_status::SessionStatusSurface::Spec);
+            }
+            SlashCommand::Tasks => {
+                self.add_session_status_output(crate::session_status::SessionStatusSurface::Tasks);
+            }
+            SlashCommand::Todo => {
+                self.add_session_status_output(crate::session_status::SessionStatusSurface::Todo);
+            }
+            SlashCommand::Evidence => {
+                self.add_session_status_output(
+                    crate::session_status::SessionStatusSurface::Evidence,
+                );
+            }
             SlashCommand::Title => {
                 self.open_terminal_title_setup();
             }
@@ -463,7 +486,8 @@ impl ChatWidget {
             }
             SlashCommand::MemoryDrop | SlashCommand::MemoryUpdate => {
                 self.add_info_message(
-                    "Legacy debug memory maintenance commands are hidden from the command palette.".to_string(),
+                    "Legacy debug memory maintenance commands are hidden from the command palette."
+                        .to_string(),
                     Some("Use /memories for supported local memory settings.".to_string()),
                 );
             }
@@ -547,8 +571,14 @@ impl ChatWidget {
         match cmd.availability() {
             CommandAvailability::Unavailable => {
                 self.add_info_message(
-                    format!("'/{}' is unavailable in this local coding tool build.", cmd.command()),
-                    Some("Use the provider-neutral replacement or enable the feature explicitly.".to_string()),
+                    format!(
+                        "'/{}' is unavailable in this local coding tool build.",
+                        cmd.command()
+                    ),
+                    Some(
+                        "Use the provider-neutral replacement or enable the feature explicitly."
+                            .to_string(),
+                    ),
                 );
                 self.request_redraw();
                 return;
@@ -1020,6 +1050,11 @@ impl ChatWidget {
             | SlashCommand::Runtime
             | SlashCommand::Capabilities
             | SlashCommand::Workflow
+            | SlashCommand::Session
+            | SlashCommand::Spec
+            | SlashCommand::Tasks
+            | SlashCommand::Todo
+            | SlashCommand::Evidence
             | SlashCommand::DebugConfig
             | SlashCommand::Ps
             | SlashCommand::Stop

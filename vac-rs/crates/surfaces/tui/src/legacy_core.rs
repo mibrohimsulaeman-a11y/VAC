@@ -8,14 +8,14 @@
 
 pub use vac_core::agents_md::DEFAULT_AGENTS_MD_FILENAME;
 pub use vac_core::agents_md::LOCAL_AGENTS_MD_FILENAME;
-pub use vac_core::mcp::McpManager;
 pub use vac_core::append_message_history_entry;
 pub use vac_core::check_execpolicy_for_warnings;
 pub use vac_core::format_exec_policy_error_with_source;
-pub use vac_core::windows_sandbox_read_grants::grant_read_root_non_elevated;
 pub use vac_core::lookup_message_history_entry;
+pub use vac_core::mcp::McpManager;
 pub use vac_core::message_history_metadata;
 pub use vac_core::web_search::web_search_detail;
+pub use vac_core::windows_sandbox_read_grants::grant_read_root_non_elevated;
 
 pub mod config {
     pub use vac_core::config::*;

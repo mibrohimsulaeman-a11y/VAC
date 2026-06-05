@@ -77,7 +77,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow manifest");
@@ -136,7 +136,7 @@ policy:
     - execute_process
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow manifest");
@@ -216,7 +216,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow manifest");
@@ -294,7 +294,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow manifest");
@@ -403,7 +403,7 @@ policy:
   redaction: false
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-cli
+    - cargo +1.95.0 check -p vac-surface-cli
 "#,
         )
         .expect("workflow manifest");
@@ -710,7 +710,7 @@ validation:
         let mut machine = WorkflowExecutionMachine::new(&workflow)
             .with_approval_checks(approval_policy.checks().to_vec())
             .with_build_check_report(build_check::report_from_output(
-                "cargo +1.93.0 check --manifest-path vac-rs/Cargo.toml -p vac-surface-cli".to_string(),
+                "cargo +1.95.0 check --manifest-path vac-rs/Cargo.toml -p vac-surface-cli".to_string(),
                 std::time::Duration::from_millis(3),
                 Some(42),
                 false,
@@ -772,7 +772,7 @@ validation:
         let mut machine = WorkflowExecutionMachine::new(&workflow)
             .with_approval_checks(approval_policy.checks().to_vec())
             .with_build_check_report(build_check::report_from_output(
-                "cargo +1.93.0 check --manifest-path vac-rs/Cargo.toml -p vac-surface-cli".to_string(),
+                "cargo +1.95.0 check --manifest-path vac-rs/Cargo.toml -p vac-surface-cli".to_string(),
                 std::time::Duration::from_millis(3),
                 Some(0),
                 true,
@@ -853,7 +853,7 @@ validation:
         assert_eq!(report.blocked_step_count(), 0);
         let invoked = fs::read_to_string(fake_cargo.with_extension("invoked")).expect("invoked");
         assert!(
-            invoked.contains("+1.93.0 check --manifest-path vac-rs/Cargo.toml -p vac-surface-cli"),
+            invoked.contains("+1.95.0 check --manifest-path vac-rs/Cargo.toml -p vac-surface-cli"),
             "{invoked}"
         );
         assert!(report.render_text().contains(

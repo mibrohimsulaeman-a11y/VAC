@@ -14,7 +14,10 @@ pub mod metadata;
 pub const CONNECTORS_CACHE_TTL: Duration = Duration::from_secs(3600);
 
 pub fn normalize_connector_value(value: Option<&str>) -> Option<String> {
-    value.map(str::trim).filter(|value| !value.is_empty()).map(ToOwned::to_owned)
+    value
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(ToOwned::to_owned)
 }
 
 pub fn connector_name_slug(name: &str) -> String {

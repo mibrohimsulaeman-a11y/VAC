@@ -429,6 +429,14 @@ struct RawValidationCommand {
     risk: Option<String>,
     #[serde(default)]
     approval: Option<String>,
+    #[serde(default)]
+    evidence: Option<String>,
+    #[serde(default)]
+    note: Option<String>,
+    #[serde(default)]
+    env_required: Vec<String>,
+    #[serde(default)]
+    network: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -1328,6 +1336,22 @@ fn normalize_validation_command(
     if let Some(approval) = command.approval.as_deref() {
         validate_command_id(path, &format!("{field_path}.approval"), approval)?;
     }
+    let _evidence = command
+        .evidence
+        .map(|value| {
+            normalize_non_empty_string(Some(value), path, &format!("{field_path}.evidence"))
+        })
+        .transpose()?;
+    let _note = command
+        .note
+        .map(|value| normalize_non_empty_string(Some(value), path, &format!("{field_path}.note")))
+        .transpose()?;
+    let _env_required = normalize_list(
+        command.env_required,
+        path,
+        &format!("{field_path}.env_required"),
+    )?;
+    let _network = command.network.unwrap_or(false);
 
     let runner = command
         .runner

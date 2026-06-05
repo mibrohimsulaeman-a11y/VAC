@@ -6,6 +6,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::error::TryRecvError;
+use vac_protocol::models::PermissionProfile as CorePermissionProfile;
 use vac_runtime_protocol::ApprovalsReviewer as AppServerApprovalsReviewer;
 use vac_runtime_protocol::AskForApproval as AppServerAskForApproval;
 use vac_runtime_protocol::ClientRequest;
@@ -27,7 +28,6 @@ use vac_runtime_protocol::TurnStartResponse;
 use vac_runtime_protocol::TurnStatus as AppServerTurnStatus;
 use vac_runtime_protocol::TurnSteerParams;
 use vac_runtime_protocol::TurnSteerResponse;
-use vac_protocol::models::PermissionProfile as CorePermissionProfile;
 use vac_utils_absolute_path::test_support::PathBufExt;
 use vac_utils_absolute_path::test_support::test_path_buf;
 

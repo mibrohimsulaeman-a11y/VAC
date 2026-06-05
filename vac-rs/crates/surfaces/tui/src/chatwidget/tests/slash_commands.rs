@@ -1,4 +1,5 @@
 use super::*;
+use crate::legacy_core::DEFAULT_AGENTS_MD_FILENAME;
 use pretty_assertions::assert_eq;
 
 fn complete_turn_with_message(chat: &mut ChatWidget, turn_id: &str, message: Option<&str>) {
@@ -506,6 +507,10 @@ async fn ctrl_d_with_modal_open_does_not_quit() {
 async fn slash_init_prepares_tui_vac_init_without_cli_interactive_flag() {
     let (mut chat, mut rx, mut op_rx) = make_chatwidget_manual(/*model_override*/ None).await;
     let tempdir = tempdir().unwrap();
+    let _ = std::os::unix::fs::symlink(
+        std::path::PathBuf::from(test_path_display("/home/emp/Documents/VAC/vastar-agentic-cli/.vac")),
+        tempdir.path().join(".vac"),
+    );
     let existing_path = tempdir.path().join(DEFAULT_AGENTS_MD_FILENAME);
     std::fs::write(&existing_path, "existing instructions").unwrap();
     chat.config.cwd = tempdir.path().to_path_buf().abs();
@@ -1109,7 +1114,7 @@ async fn no_op_stub_slash_command_is_available_from_local_recall() {
         .collect::<Vec<_>>()
         .join("\n");
     assert!(
-        rendered.contains("Memory maintenance"),
+        rendered.contains("is unavailable in this local coding"),
         "expected stub message, got: {rendered:?}"
     );
     assert_eq!(recall_latest_after_clearing(&mut chat), "/debug-m-drop");
@@ -1529,7 +1534,7 @@ async fn slash_memory_drop_reports_stubbed_feature() {
     match event {
         AppEvent::InsertHistoryCell(cell) => {
             let rendered = lines_to_single_string(&cell.display_lines(/*width*/ 80));
-            assert!(rendered.contains("Memory maintenance: Not available in TUI yet."));
+            assert!(rendered.contains("is unavailable in this local coding"));
         }
         other => panic!("expected InsertHistoryCell error, got {other:?}"),
     }
@@ -1613,7 +1618,7 @@ async fn slash_memory_update_reports_stubbed_feature() {
     match event {
         AppEvent::InsertHistoryCell(cell) => {
             let rendered = lines_to_single_string(&cell.display_lines(/*width*/ 80));
-            assert!(rendered.contains("Memory maintenance: Not available in TUI yet."));
+            assert!(rendered.contains("is unavailable in this local coding"));
         }
         other => panic!("expected InsertHistoryCell error, got {other:?}"),
     }

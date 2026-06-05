@@ -9,12 +9,12 @@ use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
 use tracing::warn;
-use vac_runtime_protocol::PluginAuthPolicy;
-use vac_runtime_protocol::PluginInstallPolicy;
 use vac_git_utils::get_git_repo_root;
 use vac_plugin::PluginId;
 use vac_plugin::PluginIdError;
 use vac_protocol::protocol::Product;
+use vac_runtime_protocol::PluginAuthPolicy;
+use vac_runtime_protocol::PluginInstallPolicy;
 use vac_utils_absolute_path::AbsolutePathBuf;
 
 const MARKETPLACE_MANIFEST_RELATIVE_PATHS: &[&str] = &[

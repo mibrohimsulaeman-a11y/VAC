@@ -404,7 +404,7 @@ mod tests {
 
     #[cfg(unix)]
     #[test]
-    #[ignore]
+    #[ignore = "child-process helper; parent test invokes it explicitly with --ignored"]
     fn from_absolute_path_with_removed_current_dir_child() {
         if std::env::var_os("VAC_ABSOLUTE_PATH_REMOVED_CWD_CHILD").is_none() {
             return;

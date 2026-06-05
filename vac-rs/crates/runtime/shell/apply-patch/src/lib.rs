@@ -262,10 +262,7 @@ fn resolve_relative_patch_path_within_cwd(
 ) -> anyhow::Result<AbsolutePathBuf> {
     let resolved = AbsolutePathBuf::resolve_path_against_base(path, cwd);
     if path.is_relative() && !resolved.as_path().starts_with(cwd.as_path()) {
-        anyhow::bail!(
-            "patch path escapes working directory: {}",
-            path.display()
-        );
+        anyhow::bail!("patch path escapes working directory: {}", path.display());
     }
     Ok(resolved)
 }
@@ -761,7 +758,11 @@ mod tests {
     #[tokio::test]
     async fn test_apply_patch_rejects_relative_parent_escape() {
         let dir = tempdir().unwrap();
-        let outside = dir.path().parent().unwrap().join("vac-apply-patch-escape.txt");
+        let outside = dir
+            .path()
+            .parent()
+            .unwrap()
+            .join("vac-apply-patch-escape.txt");
         let _ = fs::remove_file(&outside);
         let patch = wrap_patch(
             r#"*** Add File: ../vac-apply-patch-escape.txt
@@ -782,7 +783,8 @@ mod tests {
         .expect_err("relative parent traversal should be rejected before write");
 
         assert!(
-            err.to_string().contains("patch path escapes working directory"),
+            err.to_string()
+                .contains("patch path escapes working directory"),
             "unexpected error: {err}"
         );
         assert!(!outside.exists());

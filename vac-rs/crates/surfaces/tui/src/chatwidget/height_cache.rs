@@ -10,8 +10,12 @@
 use std::collections::BTreeMap;
 use std::collections::VecDeque;
 
+use ratatui::text::Line;
+
 pub(crate) const HEIGHT_CACHE_MAX_ENTRIES: usize = 4096;
 pub(crate) const HEIGHT_CACHE_MAX_REVISIONS_PER_CELL: usize = 3;
+pub(crate) const RENDERED_LINES_CACHE_MAX_ENTRIES: usize = 2048;
+pub(crate) const RENDERED_LINES_CACHE_MAX_REVISIONS_PER_CELL: usize = 3;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub(crate) struct CellHeightKey {
@@ -43,6 +47,154 @@ pub(crate) struct HeightCacheMetrics {
     pub(crate) prefix_rebuild_skipped: u64,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub(crate) struct RenderedLinesKey {
+    pub(crate) cell_id: u64,
+    pub(crate) width: u16,
+    pub(crate) style_revision: u64,
+    pub(crate) content_revision: u64,
+    pub(crate) active_revision: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct RenderedLinesValue {
+    pub(crate) lines: Vec<Line<'static>>,
+    pub(crate) height: u16,
+    pub(crate) bytes_estimate: usize,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub(crate) struct RenderedLinesCacheMetrics {
+    pub(crate) hits: u64,
+    pub(crate) misses: u64,
+    pub(crate) evictions: u64,
+    pub(crate) entries: u64,
+    pub(crate) bytes_estimate: u64,
+    pub(crate) highlight_recomputes_avoided: u64,
+    pub(crate) stale_revision_pruned: u64,
+}
+
+#[derive(Debug, Default)]
+pub(crate) struct RenderedLinesCache {
+    lines: BTreeMap<RenderedLinesKey, RenderedLinesValue>,
+    order: VecDeque<RenderedLinesKey>,
+    metrics: RenderedLinesCacheMetrics,
+}
+
+impl RenderedLinesCache {
+    pub(crate) fn get_or_compute(
+        &mut self,
+        key: RenderedLinesKey,
+        compute: impl FnOnce() -> Vec<Line<'static>>,
+    ) -> RenderedLinesValue {
+        if let Some(value) = self.lines.get(&key).cloned() {
+            self.touch(key);
+            self.metrics.hits = self.metrics.hits.saturating_add(1);
+            self.metrics.highlight_recomputes_avoided =
+                self.metrics.highlight_recomputes_avoided.saturating_add(1);
+            return value;
+        }
+
+        self.metrics.misses = self.metrics.misses.saturating_add(1);
+        let lines = compute();
+        let value = RenderedLinesValue {
+            height: u16::try_from(lines.len()).unwrap_or(u16::MAX),
+            bytes_estimate: estimate_lines_bytes(&lines),
+            lines,
+        };
+        self.lines.insert(key, value.clone());
+        self.order.push_back(key);
+        self.prune_stale_revisions_for(key);
+        self.enforce_entry_cap();
+        self.refresh_entry_metrics();
+        value
+    }
+
+    pub(crate) fn metrics(&self) -> RenderedLinesCacheMetrics {
+        let mut metrics = self.metrics;
+        metrics.entries = u64::try_from(self.lines.len()).unwrap_or(u64::MAX);
+        metrics.bytes_estimate = self
+            .lines
+            .values()
+            .map(|value| u64::try_from(value.bytes_estimate).unwrap_or(u64::MAX))
+            .sum();
+        metrics
+    }
+
+    pub(crate) fn clear(&mut self) {
+        self.lines.clear();
+        self.order.clear();
+        self.metrics.entries = 0;
+        self.metrics.bytes_estimate = 0;
+    }
+
+    fn prune_stale_revisions_for(&mut self, inserted_key: RenderedLinesKey) {
+        let mut revisions = self
+            .lines
+            .keys()
+            .copied()
+            .filter(|key| key.cell_id == inserted_key.cell_id && key.width == inserted_key.width)
+            .collect::<Vec<_>>();
+        if revisions.len() <= RENDERED_LINES_CACHE_MAX_REVISIONS_PER_CELL {
+            return;
+        }
+        revisions.sort_by_key(|key| {
+            (
+                key.content_revision,
+                key.active_revision,
+                key.style_revision,
+            )
+        });
+        while revisions.len() > RENDERED_LINES_CACHE_MAX_REVISIONS_PER_CELL {
+            let stale = revisions.remove(0);
+            if self.lines.remove(&stale).is_some() {
+                self.metrics.stale_revision_pruned =
+                    self.metrics.stale_revision_pruned.saturating_add(1);
+            }
+        }
+        self.retain_live_order_keys();
+    }
+
+    fn enforce_entry_cap(&mut self) {
+        while self.lines.len() > RENDERED_LINES_CACHE_MAX_ENTRIES {
+            let Some(oldest) = self.order.pop_front() else {
+                break;
+            };
+            if self.lines.remove(&oldest).is_some() {
+                self.metrics.evictions = self.metrics.evictions.saturating_add(1);
+            }
+        }
+    }
+
+    fn retain_live_order_keys(&mut self) {
+        self.order.retain(|key| self.lines.contains_key(key));
+    }
+
+    fn touch(&mut self, key: RenderedLinesKey) {
+        if let Some(position) = self.order.iter().position(|existing| *existing == key) {
+            self.order.remove(position);
+        }
+        self.order.push_back(key);
+    }
+
+    fn refresh_entry_metrics(&mut self) {
+        self.metrics.entries = u64::try_from(self.lines.len()).unwrap_or(u64::MAX);
+        self.metrics.bytes_estimate = self
+            .lines
+            .values()
+            .map(|value| u64::try_from(value.bytes_estimate).unwrap_or(u64::MAX))
+            .sum();
+    }
+}
+
+fn estimate_lines_bytes(lines: &[Line<'static>]) -> usize {
+    lines
+        .iter()
+        .flat_map(|line| line.spans.iter())
+        .map(|span| span.content.len())
+        .sum()
+}
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct HeightPrefixIndex {
     heights: Vec<u16>,
@@ -61,7 +213,7 @@ impl HeightPrefixIndex {
                 .last()
                 .copied()
                 .unwrap_or_default()
-                .saturating_add(height as u32);
+                .saturating_add(u32::from(height));
             self.prefix.push(next);
         }
     }
@@ -75,7 +227,7 @@ impl HeightPrefixIndex {
         if self.heights.is_empty() || viewport_height == 0 {
             return 0..0;
         }
-        let scroll_bottom = scroll_top.saturating_add(viewport_height as u32);
+        let scroll_bottom = scroll_top.saturating_add(u32::from(viewport_height));
         let mut start = 0usize;
         while start + 1 < self.prefix.len() && self.prefix[start + 1] <= scroll_top {
             start += 1;
@@ -140,7 +292,8 @@ impl DesiredHeightCache {
         self.cell_height_order.push_back(key);
         self.prune_stale_revisions_for(key);
         self.enforce_entry_cap();
-        self.metrics.cell_height_entries = self.cell_heights.len() as u64;
+        self.metrics.cell_height_entries =
+            u64::try_from(self.cell_heights.len()).unwrap_or(u64::MAX);
         height
     }
 
@@ -150,7 +303,8 @@ impl DesiredHeightCache {
         heights: impl IntoIterator<Item = u16>,
     ) -> bool {
         if self.prefix_build_key == Some(key) {
-            self.metrics.prefix_rebuild_skipped = self.metrics.prefix_rebuild_skipped.saturating_add(1);
+            self.metrics.prefix_rebuild_skipped =
+                self.metrics.prefix_rebuild_skipped.saturating_add(1);
             return false;
         }
         self.prefix.rebuild(heights);
@@ -165,7 +319,8 @@ impl DesiredHeightCache {
         viewport_height: u16,
         overscan: usize,
     ) -> std::ops::Range<usize> {
-        self.prefix.visible_range(scroll_top, viewport_height, overscan)
+        self.prefix
+            .visible_range(scroll_top, viewport_height, overscan)
     }
 
     pub(crate) fn cell_top(&self, index: usize) -> u32 {
@@ -176,16 +331,16 @@ impl DesiredHeightCache {
         self.metrics.visible_cells_rendered = self
             .metrics
             .visible_cells_rendered
-            .saturating_add(visible as u64);
+            .saturating_add(u64::try_from(visible).unwrap_or(u64::MAX));
         self.metrics.full_transcript_cells_skipped = self
             .metrics
             .full_transcript_cells_skipped
-            .saturating_add(skipped as u64);
+            .saturating_add(u64::try_from(skipped).unwrap_or(u64::MAX));
     }
 
     pub(crate) fn metrics(&self) -> HeightCacheMetrics {
         let mut metrics = self.metrics;
-        metrics.cell_height_entries = self.cell_heights.len() as u64;
+        metrics.cell_height_entries = u64::try_from(self.cell_heights.len()).unwrap_or(u64::MAX);
         metrics
     }
 
@@ -213,7 +368,8 @@ impl DesiredHeightCache {
         while revisions.len() > HEIGHT_CACHE_MAX_REVISIONS_PER_CELL {
             let stale = revisions.remove(0);
             if self.cell_heights.remove(&stale).is_some() {
-                self.metrics.stale_revision_pruned = self.metrics.stale_revision_pruned.saturating_add(1);
+                self.metrics.stale_revision_pruned =
+                    self.metrics.stale_revision_pruned.saturating_add(1);
             }
         }
         self.retain_live_order_keys();
@@ -225,7 +381,8 @@ impl DesiredHeightCache {
                 break;
             };
             if self.cell_heights.remove(&oldest).is_some() {
-                self.metrics.cell_height_evictions = self.metrics.cell_height_evictions.saturating_add(1);
+                self.metrics.cell_height_evictions =
+                    self.metrics.cell_height_evictions.saturating_add(1);
             }
         }
     }
@@ -274,16 +431,123 @@ mod tests {
 
     #[test]
     fn theme_style_revision_is_part_of_cell_key() {
-        let first = CellHeightKey { cell_id: 1, width: 80, content_revision: 7, style_revision: 1 };
-        let second = CellHeightKey { style_revision: 2, ..first };
+        let first = CellHeightKey {
+            cell_id: 1,
+            width: 80,
+            content_revision: 7,
+            style_revision: 1,
+        };
+        let second = CellHeightKey {
+            style_revision: 2,
+            ..first
+        };
         assert_ne!(first, second);
+    }
+
+    #[test]
+    fn rendered_lines_key_tracks_style_and_active_revision() {
+        let first = RenderedLinesKey {
+            cell_id: 1,
+            width: 80,
+            style_revision: 1,
+            content_revision: 7,
+            active_revision: 7,
+        };
+        assert_ne!(
+            first,
+            RenderedLinesKey {
+                style_revision: 2,
+                ..first
+            }
+        );
+        assert_ne!(
+            first,
+            RenderedLinesKey {
+                active_revision: 8,
+                ..first
+            }
+        );
+    }
+
+    #[test]
+    fn rendered_lines_cache_hits_do_not_recompute_static_cells() {
+        let mut cache = RenderedLinesCache::default();
+        let key = RenderedLinesKey {
+            cell_id: 1,
+            width: 80,
+            style_revision: 1,
+            content_revision: 7,
+            active_revision: 7,
+        };
+        let mut computes = 0usize;
+        let first = cache.get_or_compute(key, || {
+            computes = computes.saturating_add(1);
+            vec![Line::from("first"), Line::from("second")]
+        });
+        let second = cache.get_or_compute(key, || {
+            computes = computes.saturating_add(1);
+            vec![Line::from("replacement")]
+        });
+        assert_eq!(computes, 1);
+        assert_eq!(first.lines, second.lines);
+        assert_eq!(second.height, 2);
+        assert!(second.bytes_estimate >= "firstsecond".len());
+        let metrics = cache.metrics();
+        assert_eq!(metrics.hits, 1);
+        assert_eq!(metrics.misses, 1);
+        assert_eq!(metrics.highlight_recomputes_avoided, 1);
+    }
+
+    #[test]
+    fn rendered_lines_cache_eviction_keeps_recent_hits() {
+        let mut cache = RenderedLinesCache::default();
+        for cell_id in 0..RENDERED_LINES_CACHE_MAX_ENTRIES {
+            let key = RenderedLinesKey {
+                cell_id: u64::try_from(cell_id).unwrap_or(u64::MAX),
+                width: 80,
+                style_revision: 1,
+                content_revision: 1,
+                active_revision: 1,
+            };
+            cache.get_or_compute(key, || vec![Line::from("cached")]);
+        }
+        let first_key = RenderedLinesKey {
+            cell_id: 0,
+            width: 80,
+            style_revision: 1,
+            content_revision: 1,
+            active_revision: 1,
+        };
+        let second_key = RenderedLinesKey {
+            cell_id: 1,
+            ..first_key
+        };
+        cache.get_or_compute(first_key, || vec![Line::from("recent")]);
+        let overflow_key = RenderedLinesKey {
+            cell_id: u64::try_from(RENDERED_LINES_CACHE_MAX_ENTRIES).unwrap_or(u64::MAX),
+            ..first_key
+        };
+        cache.get_or_compute(overflow_key, || vec![Line::from("overflow")]);
+
+        assert!(cache.lines.contains_key(&first_key));
+        assert!(!cache.lines.contains_key(&second_key));
+        assert_eq!(cache.metrics().evictions, 1);
+        assert_eq!(
+            cache.metrics().entries,
+            u64::try_from(RENDERED_LINES_CACHE_MAX_ENTRIES).unwrap_or(u64::MAX)
+        );
     }
 
     #[test]
     fn cell_height_cache_enforces_revision_cap() {
         let mut cache = DesiredHeightCache::default();
         for revision in 0..8 {
-            let key = CellHeightKey { cell_id: 1, width: 80, content_revision: revision, style_revision: 1 };
+            let key = CellHeightKey {
+                cell_id: 1,
+                width: 80,
+                content_revision: revision,
+                style_revision: 1,
+            };
             assert_eq!(cache.get_cell_or_compute(key, || 1), 1);
         }
         assert!(cache.cell_heights.len() <= HEIGHT_CACHE_MAX_REVISIONS_PER_CELL);
@@ -293,7 +557,12 @@ mod tests {
     #[test]
     fn identical_prefix_build_key_skips_rebuild() {
         let mut cache = DesiredHeightCache::default();
-        let key = HeightPrefixBuildKey { width: 80, transcript_revision: 1, style_revision: 1, cell_count: 3 };
+        let key = HeightPrefixBuildKey {
+            width: 80,
+            transcript_revision: 1,
+            style_revision: 1,
+            cell_count: 3,
+        };
         assert!(cache.rebuild_prefix_if_changed(key, [1, 2, 3]));
         assert!(!cache.rebuild_prefix_if_changed(key, [1, 2, 3]));
         assert_eq!(cache.metrics().prefix_rebuild_skipped, 1);
@@ -302,7 +571,12 @@ mod tests {
     #[test]
     fn non_zero_scroll_changes_visible_window() {
         let mut cache = DesiredHeightCache::default();
-        let key = HeightPrefixBuildKey { width: 80, transcript_revision: 1, style_revision: 1, cell_count: 5 };
+        let key = HeightPrefixBuildKey {
+            width: 80,
+            transcript_revision: 1,
+            style_revision: 1,
+            cell_count: 5,
+        };
         cache.rebuild_prefix_if_changed(key, [5, 5, 5, 5, 5]);
         let top = cache.windowed_render_plan(5, 0, 5, 0);
         let scrolled = cache.windowed_render_plan(5, 10, 5, 0);

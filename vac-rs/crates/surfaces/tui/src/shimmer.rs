@@ -33,7 +33,9 @@ pub(crate) fn shimmer_frame_metrics_snapshot() -> ShimmerFrameMetrics {
 }
 
 fn shimmer_animation_enabled() -> bool {
-    std::env::var("VAC_TUI_DISABLE_SHIMMER").map(|v| v != "1" && v != "true").unwrap_or(true)
+    std::env::var("VAC_TUI_DISABLE_SHIMMER")
+        .map(|v| v != "1" && v != "true")
+        .unwrap_or(true)
 }
 
 fn record_shimmer_frame(chars: usize, spans: usize, duration: Duration, enabled: bool) {
@@ -41,7 +43,9 @@ fn record_shimmer_frame(chars: usize, spans: usize, duration: Duration, enabled:
         guard.frames_rendered = guard.frames_rendered.saturating_add(1);
         guard.chars_processed = guard.chars_processed.saturating_add(chars as u64);
         guard.spans_emitted = guard.spans_emitted.saturating_add(spans as u64);
-        guard.duration_micros = guard.duration_micros.saturating_add(duration.as_micros() as u64);
+        guard.duration_micros = guard
+            .duration_micros
+            .saturating_add(duration.as_micros() as u64);
         guard.animation_enabled = enabled;
     }
 }
@@ -114,7 +118,10 @@ pub(crate) fn shimmer_spans(text: &str) -> Vec<Span<'static>> {
             continue;
         }
         if let Some(previous_style) = current_style {
-            spans.push(Span::styled(std::mem::take(&mut current_text), previous_style));
+            spans.push(Span::styled(
+                std::mem::take(&mut current_text),
+                previous_style,
+            ));
         }
         current_style = Some(style);
         current_text.push(ch);

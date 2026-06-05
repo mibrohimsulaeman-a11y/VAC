@@ -18,7 +18,9 @@ pub enum CliRuntimeCommandKind {
     DoctorPolicy,
     DoctorOwnership,
     DoctorWorkflow,
+    DoctorSessions,
     DoctorEvidence,
+    DoctorEnforcement,
     DoctorBuild,
     DoctorMemory,
     DoctorInit,
@@ -36,7 +38,9 @@ impl CliRuntimeCommandKind {
             Self::DoctorPolicy => "vac doctor policy",
             Self::DoctorOwnership => "vac doctor ownership",
             Self::DoctorWorkflow => "vac doctor workflow",
+            Self::DoctorSessions => "vac doctor sessions",
             Self::DoctorEvidence => "vac doctor evidence",
+            Self::DoctorEnforcement => "vac doctor enforcement",
             Self::DoctorBuild => "vac doctor build",
             Self::DoctorMemory => "vac doctor memory",
             Self::DoctorInit => "vac doctor init",
@@ -58,7 +62,9 @@ pub const REQUIRED_B_COMMANDS: &[CliRuntimeCommandKind] = &[
     CliRuntimeCommandKind::DoctorPolicy,
     CliRuntimeCommandKind::DoctorOwnership,
     CliRuntimeCommandKind::DoctorWorkflow,
+    CliRuntimeCommandKind::DoctorSessions,
     CliRuntimeCommandKind::DoctorEvidence,
+    CliRuntimeCommandKind::DoctorEnforcement,
     CliRuntimeCommandKind::DoctorBuild,
     CliRuntimeCommandKind::DoctorMemory,
     CliRuntimeCommandKind::DoctorInit,
@@ -390,6 +396,18 @@ mod tests {
                 .commands
                 .iter()
                 .any(|command| command.command() == "vac doctor evidence")
+        );
+        assert!(
+            taxonomy
+                .commands
+                .iter()
+                .any(|command| command.command() == "vac doctor enforcement")
+        );
+        assert!(
+            taxonomy
+                .commands
+                .iter()
+                .any(|command| command.command() == "vac doctor sessions")
         );
         assert!(
             taxonomy

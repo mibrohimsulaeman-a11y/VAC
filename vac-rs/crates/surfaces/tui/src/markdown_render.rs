@@ -35,7 +35,6 @@ use std::sync::Mutex;
 use url::Url;
 use vac_utils_string::normalize_markdown_hash_location_suffix;
 
-
 #[derive(Default)]
 struct MarkdownRenderCache {
     entries: HashMap<u64, Text<'static>>,
@@ -50,7 +49,8 @@ fn markdown_render_cache_key(input: &str, width: Option<usize>, cwd: Option<&Pat
     let mut hasher = DefaultHasher::new();
     input.hash(&mut hasher);
     width.hash(&mut hasher);
-    cwd.map(|path| path.to_string_lossy().into_owned()).hash(&mut hasher);
+    cwd.map(|path| path.to_string_lossy().into_owned())
+        .hash(&mut hasher);
     hasher.finish()
 }
 

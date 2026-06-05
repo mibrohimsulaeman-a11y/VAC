@@ -47,9 +47,9 @@ implemented_slices:
   status: SV-Done_TV-Pending
   summary: Source-runtime unsafe coverage is 491/491 with direct preceding SAFETY comments, cfg(test)/test paths excluded, and stale generic comments rejected; cargo/geiger verification remains TV-Pending.
 cargo_gates:
-  cargo_build_workspace_offline: NotEvaluated
-  cargo_clippy_workspace_offline: NotEvaluated
-  cargo_test_workspace_offline: NotEvaluated
+  cargo_build_workspace: NotEvaluated
+  cargo_clippy_workspace: NotEvaluated
+  cargo_test_workspace: NotEvaluated
 scanner_gate_toolchain_behavior: rustc_missing_reports_NotEvaluated_not_127
 registry_gate_toolchain_behavior: rustc_missing_reports_NotEvaluated_not_127
 overall_status: Implemented_NotEvaluated
@@ -135,9 +135,9 @@ audit_closeout_remediation_2026_05_30:
     - scripts/check-vac-o5-5-donor-delete-gate.sh
     - scripts/check-tui-source-artifact-hygiene.sh
   tv_pending:
-    - cargo build --offline --workspace --locked
-    - cargo clippy --offline --workspace -- -D warnings
-    - cargo test --offline --workspace
+    - cargo build --workspace --locked
+    - cargo clippy --workspace -- -D warnings
+    - cargo test --workspace
 
 runtime_engine_tui_parity_2026_05_31:
   status: SV-Done_TV-Pending
@@ -156,9 +156,9 @@ runtime_engine_tui_parity_2026_05_31:
     - scripts/check-vac-init-registry-strictness-contract.sh: PASS_static_rustc_NotEvaluated
     - scripts/check-vac-init-registry-validator-contract.sh: PASS_static_rustc_NotEvaluated
   tv_pending:
-    - cargo build --offline --workspace --locked
-    - cargo clippy --offline --workspace -- -D warnings
-    - cargo test --offline --workspace
+    - cargo build --workspace --locked
+    - cargo clippy --workspace -- -D warnings
+    - cargo test --workspace
     - live runtime negative tests for plan/patch/command approval failures
     - live TUI screenshot/pixel gate
 

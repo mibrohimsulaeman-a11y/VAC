@@ -20,6 +20,11 @@ use crossterm::event::DisableFocusChange;
 use crossterm::event::EnableBracketedPaste;
 use crossterm::event::EnableFocusChange;
 use crossterm::event::KeyEvent;
+use crossterm::style::Color as CrosstermColor;
+use crossterm::style::ResetColor;
+use crossterm::style::SetBackgroundColor;
+use crossterm::terminal::Clear;
+use crossterm::terminal::ClearType;
 use crossterm::terminal::EnterAlternateScreen;
 use crossterm::terminal::LeaveAlternateScreen;
 #[cfg(not(unix))]
@@ -485,7 +490,9 @@ impl Tui {
             match self.force_leave_alt_screen() {
                 Ok(depth) => depth,
                 Err(err) => {
-                    tracing::warn!("failed to leave alternate screen before external program: {err}");
+                    tracing::warn!(
+                        "failed to leave alternate screen before external program: {err}"
+                    );
                     0
                 }
             }
@@ -580,6 +587,14 @@ impl Tui {
 
     fn activate_alt_screen(&mut self) -> Result<()> {
         let _ = execute!(self.terminal.backend_mut(), EnterAlternateScreen);
+        let (r, g, b) = crate::ui_consts::APP_BG_RGB;
+        let _ = execute!(
+            self.terminal.backend_mut(),
+            SetBackgroundColor(CrosstermColor::Rgb { r, g, b }),
+            Clear(ClearType::All),
+            crossterm::cursor::MoveTo(0, 0)
+        );
+        let _ = std::io::Write::flush(self.terminal.backend_mut());
         // Enable "alternate scroll" so terminals may translate wheel to arrows
         let _ = execute!(self.terminal.backend_mut(), EnableAlternateScroll);
         if let Ok(size) = self.terminal.size() {
@@ -616,7 +631,10 @@ impl Tui {
     fn deactivate_alt_screen(&mut self) -> Result<()> {
         // Disable alternate scroll when leaving alt-screen
         let _ = execute!(self.terminal.backend_mut(), DisableAlternateScroll);
+        let _ = execute!(self.terminal.backend_mut(), ResetColor);
         let _ = execute!(self.terminal.backend_mut(), LeaveAlternateScreen);
+        let _ = execute!(self.terminal.backend_mut(), ResetColor);
+        let _ = std::io::Write::flush(self.terminal.backend_mut());
         if let Some(saved) = self.alt_saved_viewport.take() {
             self.terminal.set_viewport_area(saved);
         }

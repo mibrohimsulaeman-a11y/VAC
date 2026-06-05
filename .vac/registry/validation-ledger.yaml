@@ -1,9 +1,9 @@
 schema_version: 1
 kind: registry_status
 id: validation.o5o6.zero-residual-static
-updated_at: 2026-06-03T00:00:00Z
-mode: static_first_then_cargo_final
-status: static_pass_toolchain_blocked
+updated_at: 2026-06-04T18:59:49Z
+mode: runtime_validation_in_progress
+status: partial_runtime_validated
 static_batches:
   A1_provider_prune: pass
   A2_transport_consolidation: pass
@@ -26,7 +26,6 @@ static_batches:
 static_gates:
   - scripts/check-vac-o5o6-zero-residual-static.sh
   - scripts/check-vac-tui-perf-ux-findings-static.sh
-  - VAC_STATIC_ONLY=1 bash scripts/bench-vac-tui-performance.sh
 cargo_gates_queued_for_end:
   - cargo check --manifest-path vac-rs/Cargo.toml -p vac-control-plane
   - cargo check --manifest-path vac-rs/Cargo.toml -p vac-core
@@ -45,8 +44,8 @@ tv_pending: []
 not_evaluated: []
 
 toolchain_blocker:
-  status: TV-Blocked
-  reason: rustc/cargo unavailable and no valid Rust toolchain archive present in /mnt/data for this session.
+  status: superseded_historical
+  reason: retained from the older static audit track; this session has a working Rust toolchain.
   blocked_gates:
     - targeted cargo check
     - targeted cargo test
@@ -54,3 +53,72 @@ toolchain_blocker:
     - native vac doctor gates
     - runtime benchmark with compiled TUI harness
   evidence_log: .vac/validation-runs/toolchain-and-doctor-probe.log
+
+current_runtime_validation:
+  toolchain_available: true
+  vac_surface_cli_build: pass
+  session_cli_tests: pass
+  session_artifact_e2e: pass
+  session_close_discussion_state: pass
+  session_closeout_control_plane_discussion_state: pass
+  doctor_sessions_discussion_state: pass
+  doctor_sessions_close_state: pass
+  session_status_close_state: pass
+  doctor_sessions_cli_close_state: pass
+  doctor_sessions: pass
+  doctor_sessions_current_binary: pass
+  session_control_plane_artifact_tests: pass
+  session_completion_lock_tests: pass
+  session_slice_ledger_tests: pass
+  session_closeout_tests: pass
+  tui_session_status_slash_surfaces: pass
+  surface_route_catalog_session_slash: pass
+  doctor_surfaces_after_session_slash: pass
+  doctor_release: pass
+  tui_e2e_fullscreen_submit: pass
+  tui_submit_e2e_carriage_return: pass
+  stale_tmp_target_cache_removed: pass
+  evidence_v2_control_plane_tests: pass
+  doctor_evidence_v2: pass
+  evidence_v2_ed25519_sign_verify_tests: pass
+  evidence_v2_doctor_signed_path_tests: pass
+  evidence_v2_resign_existing_records_tests: pass
+  evidence_v2_registry_resign_current_seed: pass
+  doctor_evidence_v2_current_seed: pass
+  doctor_enforcement: pass
+  enforcement_level_control_plane_tests: pass
+  enforcement_doctor_control_plane_tests: pass
+  enforcement_sandboxing_landlock_tests: pass
+  enforcement_linux_sandbox_landlock_tests: pass
+  enforcement_cli_status: pass
+  memories_write_redaction_tests: pass
+  memories_write_episodic_tests: pass
+  memories_write_semantic_fts_tests: pass
+  memories_write_semantic_fts_update_delete_triggers: pass
+  memories_write_semantic_fts_10000_latency: pass
+  memories_write_anti_loop_tests: pass
+  memories_write_reflection_tests: pass
+  memory_doctor_control_plane_tests: pass
+  doctor_memory: pass
+  doctor_memory_current_binary: pass
+  tui_operator_console_dedup_p8: pass
+  static_only_benchmark_cleanup: pass
+  benchmark_script_streaming_log_parser: pass
+  windows_pty_lock_poisoning_source_hardening: pass
+  git_diff_check: pass
+  tui_rendered_lines_cache_p10_source: pass
+  tui_rendered_lines_cache_p10_runtime_test: pass
+  tui_startup_parallel_p6_runtime: pass
+  tui_startup_unreachable_panic_cleanup: pass
+  tui_benchmark_runtime: pass
+  targeted_cargo_check_control_plane: pass
+  targeted_cargo_check_memories_write: pass
+  targeted_cargo_check_surface_cli: pass
+  targeted_cargo_build_surface_cli: pass
+  doctor_spec_conformance_coverage: pass
+  doctor_spec_conformance_full_v1_4: expected_fail_partial_ledger
+  full_workspace_cargo_gates: pending_full_workspace_validation
+  runtime_validation_blocker_evidence: .vac/registry/evidence/runtime-validation-blockers-current.txt
+  doctor_release_note: release_status became Pass after rebuilding the cached vac binary; workflow diagnostics still enumerate pending steps, but the aggregate gate is release-ready
+  evidence: .vac/registry/evidence/local-agent-v2-session.md
+  note: historical toolchain-blocker entry is retained for the older static audit track; this repository session had a working Rust toolchain, a rebuilt vac binary, and a validated fullscreen submit path in the root TUI.

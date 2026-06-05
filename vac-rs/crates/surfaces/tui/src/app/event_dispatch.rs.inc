@@ -632,11 +632,20 @@ impl App {
             AppEvent::McpInventoryLoaded { result, detail } => {
                 self.handle_mcp_inventory_result(result, detail);
             }
+            AppEvent::StartupMcpInventoryLoaded { result } => {
+                if let Err(err) = result {
+                    tracing::warn!("mcpServerStatus/list failed during TUI startup probe: {err}");
+                }
+                self.startup_metrics
+                    .record_task_ready(crate::startup_task_graph::StartupTaskKind::SpawnMcpScan);
+            }
             AppEvent::SkillsListLoaded { result } => {
                 self.handle_skills_list_result(
                     result.map_err(|err| color_eyre::eyre::eyre!(err)),
                     "failed to load skills on startup",
                 );
+                self.startup_metrics
+                    .record_task_ready(crate::startup_task_graph::StartupTaskKind::SpawnSkillsScan);
             }
             AppEvent::StartFileSearch(query) => {
                 self.file_search.on_user_query(query);
@@ -684,6 +693,9 @@ impl App {
                     }
                     match origin {
                         RateLimitRefreshOrigin::StartupPrefetch => {
+                            self.startup_metrics.record_task_ready(
+                                crate::startup_task_graph::StartupTaskKind::SpawnRateLimitPrefetch,
+                            );
                             tui.frame_requester().schedule_frame();
                         }
                         RateLimitRefreshOrigin::StatusCommand { request_id } => {
@@ -694,6 +706,11 @@ impl App {
                 }
                 Err(err) => {
                     tracing::warn!("account/rateLimits/read failed during TUI refresh: {err}");
+                    if let RateLimitRefreshOrigin::StartupPrefetch = origin {
+                        self.startup_metrics.record_task_ready(
+                            crate::startup_task_graph::StartupTaskKind::SpawnRateLimitPrefetch,
+                        );
+                    }
                     if let RateLimitRefreshOrigin::StatusCommand { request_id } = origin {
                         self.chat_widget
                             .finish_status_rate_limit_refresh(request_id);

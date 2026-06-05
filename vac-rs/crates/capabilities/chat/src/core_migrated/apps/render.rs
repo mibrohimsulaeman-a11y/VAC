@@ -1,8 +1,8 @@
 use crate::context::AppsInstructions;
 use crate::context::ContextualUserFragment;
-use vac_runtime_protocol::AppInfo;
 use vac_protocol::protocol::APPS_INSTRUCTIONS_CLOSE_TAG;
 use vac_protocol::protocol::APPS_INSTRUCTIONS_OPEN_TAG;
+use vac_runtime_protocol::AppInfo;
 
 pub(crate) fn render_apps_section(connectors: &[AppInfo]) -> Option<String> {
     AppsInstructions::from_connectors(connectors).map(|instructions| instructions.render())

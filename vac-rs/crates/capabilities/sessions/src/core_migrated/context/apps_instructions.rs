@@ -1,7 +1,7 @@
-use vac_runtime_protocol::AppInfo;
 use vac_mcp::VAC_APPS_MCP_SERVER_NAME;
 use vac_protocol::protocol::APPS_INSTRUCTIONS_CLOSE_TAG;
 use vac_protocol::protocol::APPS_INSTRUCTIONS_OPEN_TAG;
+use vac_runtime_protocol::AppInfo;
 
 use super::ContextualUserFragment;
 

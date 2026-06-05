@@ -1188,7 +1188,7 @@ mod tests {
         let runtime = RuntimeKeymap::defaults();
         let params = build_keymap_action_menu_params(
             "composer".to_string(),
-            "submit".to_string(),
+            "history_search_previous".to_string(),
             &runtime,
             &TuiKeymap::default(),
         );
@@ -1241,7 +1241,7 @@ mod tests {
         pane.show_selection_view(build_keymap_picker_params(&runtime, &TuiKeymap::default()));
         pane.show_selection_view(build_keymap_action_menu_params(
             "composer".to_string(),
-            "submit".to_string(),
+            "history_search_previous".to_string(),
             &runtime,
             &TuiKeymap::default(),
         ));
@@ -1274,7 +1274,7 @@ mod tests {
             panic!("expected KeymapCaptured event");
         };
         assert_eq!(context, "composer");
-        assert_eq!(action, "submit");
+        assert_eq!(action, "history_search_previous");
         assert_eq!(key, "ctrl-shift-k");
         assert_eq!(intent, KeymapEditIntent::ReplaceAll);
         assert_eq!(pane.active_view_id(), Some(KEYMAP_ACTION_MENU_VIEW_ID));
@@ -1517,11 +1517,12 @@ mod tests {
         else {
             panic!("expected updated keymap");
         };
-        assert_eq!(bindings, vec!["enter", "ctrl-enter"]);
+        assert_eq!(bindings, vec!["enter", "ctrl-m", "ctrl-enter"]);
         assert_eq!(
             keymap_config.composer.submit,
             Some(KeybindingsSpec::Many(vec![
                 KeybindingSpec("enter".to_string()),
+                KeybindingSpec("ctrl-m".to_string()),
                 KeybindingSpec("ctrl-enter".to_string())
             ]))
         );

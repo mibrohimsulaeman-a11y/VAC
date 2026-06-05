@@ -186,6 +186,14 @@ struct RawWorkflowValidationCommand {
     risk: Option<String>,
     #[serde(default)]
     approval: Option<String>,
+    #[serde(default)]
+    evidence: Option<String>,
+    #[serde(default)]
+    note: Option<String>,
+    #[serde(default)]
+    env_required: Vec<String>,
+    #[serde(default)]
+    network: Option<bool>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
@@ -297,6 +305,15 @@ fn normalize_validation_entry_command(
     validate_structured_validation_metadata(command.id.as_deref(), index, "id")?;
     validate_structured_validation_metadata(command.risk.as_deref(), index, "risk")?;
     validate_structured_validation_metadata(command.approval.as_deref(), index, "approval")?;
+    validate_structured_validation_metadata(command.evidence.as_deref(), index, "evidence")?;
+    let _note = command
+        .note
+        .map(|value| normalize_validation_entry_value(value, index))
+        .transpose()?;
+    for env in command.env_required {
+        normalize_validation_entry_value(env, index)?;
+    }
+    let _network = command.network.unwrap_or(false);
 
     let runner = command.runner.map(|value| {
         if value.trim().is_empty() {

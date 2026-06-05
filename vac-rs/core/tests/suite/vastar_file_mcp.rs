@@ -10,6 +10,7 @@ use core_test_support::responses::mount_sse_sequence;
 use core_test_support::responses::sse;
 use core_test_support::responses::start_mock_server;
 use core_test_support::test_vac::test_vac;
+use core_test_support::wait_for_event_with_timeout;
 use serde_json::Value;
 use serde_json::json;
 use vac_core::config::Config;
@@ -17,7 +18,6 @@ use vac_features::Feature;
 use vac_login::VACAuth;
 use vac_protocol::models::PermissionProfile;
 use vac_protocol::protocol::{AskForApproval, EventMsg};
-use core_test_support::wait_for_event_with_timeout;
 
 const DOCUMENT_EXTRACT_NAMESPACE: &str = "mcp__vac_apps__calendar";
 const DOCUMENT_EXTRACT_TOOL: &str = "_extract_text";

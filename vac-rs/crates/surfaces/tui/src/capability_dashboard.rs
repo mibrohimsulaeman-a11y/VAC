@@ -1,3 +1,5 @@
+use crate::enforcement_banner::enforcement_banner_lines;
+use crate::enforcement_banner::enforcement_status_label;
 use crate::history_cell::PlainHistoryCell;
 use crate::legacy_core::config::Config;
 use crate::surface_route_catalog::SurfaceRouteCatalog;
@@ -25,7 +27,9 @@ pub(crate) fn new_capability_dashboard_output(config: &Config) -> PlainHistoryCe
     PlainHistoryCell::new(render_capability_dashboard_lines_for_config(config))
 }
 
-pub(crate) fn new_capability_dashboard_view(config: &Config) -> crate::bottom_pane::SelectionViewParams {
+pub(crate) fn new_capability_dashboard_view(
+    config: &Config,
+) -> crate::bottom_pane::SelectionViewParams {
     let cwd = config.cwd.as_path();
     let report = load_control_plane_registry_report(cwd);
     let mut items = Vec::new();
@@ -58,7 +62,9 @@ pub(crate) fn new_capability_dashboard_view(config: &Config) -> crate::bottom_pa
     if items.is_empty() {
         items.push(crate::bottom_pane::SelectionItem {
             name: "no capabilities loaded".to_string(),
-            description: Some("registry empty or still loading; run vac doctor registry".to_string()),
+            description: Some(
+                "registry empty or still loading; run vac doctor registry".to_string(),
+            ),
             is_disabled: true,
             ..Default::default()
         });
@@ -66,7 +72,9 @@ pub(crate) fn new_capability_dashboard_view(config: &Config) -> crate::bottom_pa
     crate::bottom_pane::SelectionViewParams {
         view_id: Some("capability-dashboard"),
         title: Some("VAC Capability Dashboard".to_string()),
-        subtitle: Some("↑/↓ navigate · Enter keeps drill-down open · Esc closes · type to filter".to_string()),
+        subtitle: Some(
+            "↑/↓ navigate · Enter keeps drill-down open · Esc closes · type to filter".to_string(),
+        ),
         items,
         is_searchable: true,
         search_placeholder: Some("filter capability, owner, or readiness".to_string()),
@@ -99,7 +107,7 @@ fn render_capability_dashboard_lines_with_report_and_config(
     config: Option<&Config>,
 ) -> Vec<Line<'static>> {
     let ownership_report = load_ownership_scan_report(cwd);
-    let shell_state = build_operator_dashboard_state(report, &ownership_report, config);
+    let shell_state = build_operator_dashboard_state(cwd, report, &ownership_report, config);
     let mut lines = crate::operator_ui::render_capability_dashboard_visual_lines(&shell_state, 156);
     lines.push("".into());
     lines.push("/capabilities".magenta().into());
@@ -117,6 +125,10 @@ fn render_capability_dashboard_lines_with_report_and_config(
         lines.push("Loading capability registry...".dim().into());
         return lines;
     }
+
+    lines.push("".into());
+    lines.push("Enforcement:".bold().into());
+    lines.extend(enforcement_banner_lines(cwd));
 
     if let Some(registry) = report.registry() {
         lines.push("".into());
@@ -182,6 +194,7 @@ fn strings_to_lines(lines: Vec<String>) -> Vec<Line<'static>> {
 }
 
 fn build_operator_dashboard_state(
+    cwd: &Path,
     report: &RegistryLoadReport,
     ownership_report: &vac_core::control_plane::OwnershipScanReport,
     config: Option<&Config>,
@@ -278,22 +291,21 @@ fn build_operator_dashboard_state(
         diagnostics,
         capability_records,
         diagnostic_records,
-        status_bar: capability_dashboard_status_bar(config, valid_percent),
+        status_bar: capability_dashboard_status_bar(cwd, config, valid_percent),
     }
 }
 
 fn capability_dashboard_status_bar(
+    cwd: &Path,
     config: Option<&Config>,
     valid_percent: u8,
 ) -> crate::operator_ui::OperatorStatusBarState {
     let model = config
         .and_then(|config| config.model.clone())
         .unwrap_or_else(|| "runtime".to_string());
-    let status_bar = crate::operator_ui::OperatorStatusBarState::conversation(
-        model,
-        "0 tok",
-        format!("valid {valid_percent}%"),
-    );
+    let validation = format!("valid {valid_percent}% · {}", enforcement_status_label(cwd));
+    let status_bar =
+        crate::operator_ui::OperatorStatusBarState::conversation(model, "0 tok", validation);
     if let Some(config) = config {
         status_bar.with_profile_rulebook(
             crate::history_cell::operator_profile_label(config),
@@ -619,6 +631,7 @@ kind: capability
 id: vac.chat
 title: Chat
 status: partial
+reason: capability coverage is still being expanded for the root dashboard
 owner:
   crate: vac-surface-tui
   module: chatwidget
@@ -650,7 +663,7 @@ validation:
         .expect("capability manifest");
 
         let report = load_control_plane_registry_report(tempdir.path());
-        assert!(report.registry().is_some());
+        assert!(report.registry().is_some(), "{}", report.render_tui_text());
 
         let rendered = render_to_text(&render_capability_dashboard_lines(tempdir.path()));
         assert!(rendered.contains("registry: loaded 1 manifests"));
@@ -661,7 +674,7 @@ validation:
         assert!(rendered.contains("vac.chat"));
         assert!(rendered.contains("Chat"));
         assert!(rendered.contains("status: partial"));
-        assert!(rendered.contains("owner: vac-tui/chatwidget"));
+        assert!(rendered.contains("owner: vac-surface-tui/chatwidget"));
         assert!(rendered.contains("surfaces:"));
         assert!(rendered.contains("policy:"));
         assert!(rendered.contains("validation:"));
@@ -767,7 +780,7 @@ capabilities: [vac.workflow]
 
         let rendered = render_to_text(&render_capability_dashboard_lines(tempdir.path()));
         assert!(rendered.contains("Surface routes:"));
-        assert!(rendered.contains("slash:"));
+        assert!(rendered.contains("slash:"), "rendered:\n{rendered}");
         assert!(rendered.contains("/workflow — ready / vac.workflow"));
         assert!(rendered.contains("palette:"));
         assert!(rendered.contains("open_workflow — ready / vac.workflow"));
@@ -846,6 +859,7 @@ kind: capability
 id: vac.ownership
 title: Ownership
 status: partial
+reason: ownership metadata drill-down is still being completed
 owner:
   crate: vac-core
   module: control_plane
@@ -1161,6 +1175,7 @@ routes:
     owner: "vac-tui::statusline"
     visible: true
     status: partial
+    reason: "statusline guidance still under development"
 capabilities: [vac.workflow]
 "#,
         )

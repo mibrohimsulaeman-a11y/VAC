@@ -31,8 +31,15 @@ pub(crate) fn load_provider_credential_import(
     let access_token = tokens.access_token;
     let provider_credential_account_id = tokens
         .account_id
-        .or_else(|| tokens.id_token.provider_credential_account_id().map(str::to_string))
-        .ok_or_else(|| "local provider credential auth is missing provider_credential account id".to_string())?;
+        .or_else(|| {
+            tokens
+                .id_token
+                .provider_credential_account_id()
+                .map(str::to_string)
+        })
+        .ok_or_else(|| {
+            "local provider credential auth is missing provider_credential account id".to_string()
+        })?;
     if let Some(expected_workspace) = forced_provider_credential_workspace_id
         && provider_credential_account_id != expected_workspace
     {
@@ -127,7 +134,10 @@ mod tests {
         .expect("provider_credential auth should load");
 
         assert_eq!(auth.provider_credential_account_id, "workspace-1");
-        assert_eq!(auth.provider_credential_plan_type.as_deref(), Some("business"));
+        assert_eq!(
+            auth.provider_credential_plan_type.as_deref(),
+            Some("business")
+        );
         assert!(!auth.access_token.is_empty());
     }
 
@@ -191,7 +201,10 @@ mod tests {
         .expect("managed auth should win");
 
         assert_eq!(auth.provider_credential_account_id, "workspace-1");
-        assert_eq!(auth.provider_credential_plan_type.as_deref(), Some("business"));
+        assert_eq!(
+            auth.provider_credential_plan_type.as_deref(),
+            Some("business")
+        );
     }
 
     #[test]

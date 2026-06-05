@@ -1,0 +1,50 @@
+schema_version: 1
+kind: registry_status
+id: production-grade.v2.parallel-safe-baseline
+title: Production-grade hygiene baseline for parallel-safe v2 audit track
+status: partial
+updated_at: 2026-06-04T17:54:46Z
+scope: local_agent_v2_production_grade
+findings:
+  panic_on_error: partial_source_hardened
+  lock_poisoning: partial_source_hardened
+  lint_suppression: inventory_recorded_pending_classification
+  async_blocking: partial_source_hardened
+  hard_exit: inventory_recorded_pending_boundary_refactor
+  ignored_tests: documented_lane_pending_execution
+  numeric_index: partial_source_hardened
+  structure: inventory_recorded_pending_refactor
+evidence:
+  panic_inventory: .vac/registry/evidence/panic-inventory.txt
+  cargo_manifests: .vac/registry/evidence/cargo-manifests.txt
+  static_only_cleanup: .vac/registry/evidence/local-agent-v2-session.md
+  windows_pty_lock_recovery: vac-rs/crates/foundation/utils/pty/src/win/
+  tui_event_stream_poison_recovery: vac-rs/crates/surfaces/tui/src/tui/event_stream.rs
+  auth_manager_lock_recovery: vac-rs/crates/providers/login/src/auth/manager.rs
+  exec_runtime_test_lock_recovery: vac-rs/crates/runtime/exec/exec/src/runtime_adapter.rs
+  file_search_test_lock_recovery: vac-rs/crates/capabilities/file-search/src/lib.rs
+  lock_poison_inventory: .vac/registry/evidence/lock-poison-inventory.txt
+  process_exit_inventory: .vac/registry/evidence/process-exit-inventory.txt
+  lint_suppression_inventory: .vac/registry/evidence/lint-suppression-inventory.txt
+  enforcement_cli_exit_boundary: vac-rs/crates/surfaces/cli/src/main.rs
+  tui_app_event_queue_metrics: vac-rs/crates/surfaces/tui/src/app_event_sender.rs
+  async_blocking_inventory: .vac/registry/evidence/async-blocking-inventory.txt
+  tui_render_cache_numeric_cast_cleanup: vac-rs/crates/surfaces/tui/src/chatwidget/height_cache.rs
+  tui_startup_unreachable_cleanup: vac-rs/crates/surfaces/tui/src/full_tui_runtime.rs
+  numeric_index_inventory: .vac/registry/evidence/numeric-index-risk-inventory.txt
+  large_rust_files_inventory: .vac/registry/evidence/large-rust-files-inventory.txt
+  ignored_tests_inventory: .vac/registry/evidence/ignored-tests-inventory.txt
+  ignored_tests_lane: .vac/workflows/maintenance.ignored-tests-lane.yaml
+residual_findings:
+  - panic_on_error_burndown_not_complete
+  - lock_poisoning_workspace_burndown_not_complete
+  - remaining_lock_unwraps_are_test_fixture_or_pending_classification
+  - lint_suppression_cleanup_not_complete
+  - lint_suppression_inventory_requires_test_vs_production_classification
+  - async_blocking_audit_not_complete
+  - hard_exit_cleanup_not_complete
+  - cli_exit_boundary_refactor_required_before_process_exit_zero
+  - ignored_tests_execution_blocked_by_concurrent_cargo
+  - numeric_index_audit_not_complete
+  - structure_cleanup_not_complete
+  - large_file_inventory_requires_responsibility_refactor

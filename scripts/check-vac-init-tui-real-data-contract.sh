@@ -31,7 +31,7 @@ for command in cap['validation']['commands'] + wf['validation']['commands']:
 print('tui-real-data manifest wiring: PASS')
 PY
 if command -v cargo >/dev/null 2>&1; then
-  (cd vac-rs && cargo test --offline -p vac-core vac_init_tui_real_data --lib)
+  (cd vac-rs && cargo test -p vac-core vac_init_tui_real_data --lib)
   rc=$?
   [ "$rc" -eq 0 ] || exit "$rc"
   echo 'vac-init tui-real-data contract: PASS (cargo unit)'

@@ -4,8 +4,6 @@ mod common;
 
 use common::exec_server::exec_server;
 use pretty_assertions::assert_eq;
-use vac_runtime_protocol::JSONRPCMessage;
-use vac_runtime_protocol::JSONRPCResponse;
 use vac_exec_server::ExecResponse;
 use vac_exec_server::InitializeParams;
 use vac_exec_server::InitializeResponse;
@@ -14,6 +12,8 @@ use vac_exec_server::ReadResponse;
 use vac_exec_server::TerminateResponse;
 use vac_exec_server::WriteResponse;
 use vac_exec_server::WriteStatus;
+use vac_runtime_protocol::JSONRPCMessage;
+use vac_runtime_protocol::JSONRPCResponse;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn exec_server_starts_process_over_websocket() -> anyhow::Result<()> {

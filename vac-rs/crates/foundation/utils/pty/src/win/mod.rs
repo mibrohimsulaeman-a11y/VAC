@@ -1,4 +1,7 @@
-#![allow(clippy::unwrap_used)]
+#![allow(
+    clippy::unwrap_used,
+    reason = "vendored Windows PTY handle clone paths still need a follow-up trait-compatible migration"
+)]
 
 // This file is copied from https://github.com/wezterm/wezterm (MIT license).
 // Copyright (c) 2018-Present Wez Furlong
@@ -36,6 +39,7 @@ use std::io::Result as IoResult;
 use std::os::windows::io::AsRawHandle;
 use std::pin::Pin;
 use std::sync::Mutex;
+use std::sync::MutexGuard;
 use std::task::Context;
 use std::task::Poll;
 use winapi::shared::minwindef::DWORD;
@@ -56,10 +60,20 @@ pub struct WinChild {
     proc: Mutex<OwnedHandle>,
 }
 
+fn lock_proc(proc: &Mutex<OwnedHandle>) -> MutexGuard<'_, OwnedHandle> {
+    match proc.lock() {
+        Ok(guard) => guard,
+        Err(poisoned) => {
+            log::warn!("recovering poisoned Windows child process mutex");
+            poisoned.into_inner()
+        }
+    }
+}
+
 impl WinChild {
     fn is_complete(&mut self) -> IoResult<Option<ExitStatus>> {
         let mut status: DWORD = 0;
-        let proc = self.proc.lock().unwrap().try_clone().unwrap();
+        let proc = lock_proc(&self.proc).try_clone().unwrap();
         // SAFETY: PTY process boundary: the surrounding pty setup owns the fd/handle through this child/session handoff; `GetExitCodeProcess(proc.as_raw_handle() as _, &mut status)` uses inputs that remain live for the duration of this block.
         let res = unsafe { GetExitCodeProcess(proc.as_raw_handle() as _, &mut status) };
         if res != 0 {
@@ -74,7 +88,7 @@ impl WinChild {
     }
 
     fn do_kill(&mut self) -> IoResult<()> {
-        let proc = self.proc.lock().unwrap().try_clone().unwrap();
+        let proc = lock_proc(&self.proc).try_clone().unwrap();
         // SAFETY: PTY process boundary: the surrounding pty setup owns the fd/handle through this child/session handoff; `TerminateProcess(proc.as_raw_handle() as _, 1)` uses inputs that remain live for the duration of this block.
         let res = unsafe { TerminateProcess(proc.as_raw_handle() as _, 1) };
         // VAC bug #13945: Win32 returns nonzero on success, so only `0` is an error.
@@ -93,7 +107,7 @@ impl ChildKiller for WinChild {
     }
 
     fn clone_killer(&self) -> Box<dyn ChildKiller + Send + Sync> {
-        let proc = self.proc.lock().unwrap().try_clone().unwrap();
+        let proc = lock_proc(&self.proc).try_clone().unwrap();
         Box::new(WinChildKiller { proc })
     }
 }
@@ -130,7 +144,7 @@ impl Child for WinChild {
         if let Ok(Some(status)) = self.try_wait() {
             return Ok(status);
         }
-        let proc = self.proc.lock().unwrap().try_clone().unwrap();
+        let proc = lock_proc(&self.proc).try_clone().unwrap();
         // SAFETY: PTY process boundary: the surrounding pty setup owns the fd/handle through this child/session handoff; the multi-line unsafe block below uses inputs that remain live until the block returns.
         unsafe {
             WaitForSingleObject(proc.as_raw_handle() as _, INFINITE);
@@ -146,13 +160,13 @@ impl Child for WinChild {
     }
 
     fn process_id(&self) -> Option<u32> {
-        // SAFETY: PTY process boundary: the surrounding pty setup owns the fd/handle through this child/session handoff; `GetProcessId(self.proc.lock().unwrap().as_raw_handle() as _)` uses inputs that remain live for the duration of this block.
-        let res = unsafe { GetProcessId(self.proc.lock().unwrap().as_raw_handle() as _) };
+        // SAFETY: PTY process boundary: the surrounding pty setup owns the fd/handle through this child/session handoff; `GetProcessId(lock_proc(&self.proc).as_raw_handle() as _)` uses inputs that remain live for the duration of this block.
+        let res = unsafe { GetProcessId(lock_proc(&self.proc).as_raw_handle() as _) };
         if res == 0 { None } else { Some(res) }
     }
 
     fn as_raw_handle(&self) -> Option<std::os::windows::io::RawHandle> {
-        let proc = self.proc.lock().unwrap();
+        let proc = lock_proc(&self.proc);
         Some(proc.as_raw_handle())
     }
 }
@@ -165,7 +179,7 @@ impl std::future::Future for WinChild {
             Ok(Some(status)) => Poll::Ready(Ok(status)),
             Err(err) => Poll::Ready(Err(err).context("Failed to retrieve process exit status")),
             Ok(None) => {
-                let proc = self.proc.lock().unwrap().try_clone()?;
+                let proc = lock_proc(&self.proc).try_clone()?;
                 let waker = cx.waker().clone();
                 std::thread::spawn(move || {
                     // SAFETY: PTY process boundary: the surrounding pty setup owns the fd/handle through this child/session handoff; the multi-line unsafe block below uses inputs that remain live until the block returns.

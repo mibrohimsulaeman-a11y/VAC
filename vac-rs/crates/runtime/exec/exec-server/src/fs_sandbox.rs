@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use tokio::io::AsyncWriteExt;
 use tokio::process::Command;
-use vac_runtime_protocol::JSONRPCErrorError;
 use vac_protocol::models::PermissionProfile;
 use vac_protocol::permissions::FileSystemAccessMode;
 use vac_protocol::permissions::FileSystemPath;
@@ -10,6 +9,7 @@ use vac_protocol::permissions::FileSystemSandboxEntry;
 use vac_protocol::permissions::FileSystemSandboxPolicy;
 use vac_protocol::permissions::FileSystemSpecialPath;
 use vac_protocol::permissions::NetworkSandboxPolicy;
+use vac_runtime_protocol::JSONRPCErrorError;
 use vac_sandboxing::SandboxCommand;
 use vac_sandboxing::SandboxExecRequest;
 use vac_sandboxing::SandboxManager;

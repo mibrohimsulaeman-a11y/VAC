@@ -1,3 +1,5 @@
+use crate::apply_cli::ApplyCommand;
+use crate::apply_cli::run_apply_command;
 use clap::CommandFactory;
 use clap::Parser;
 use clap_complete::Shell;
@@ -7,8 +9,6 @@ use std::io::IsTerminal;
 use supports_color::Stream;
 use vac_arg0::Arg0DispatchPaths;
 use vac_arg0::arg0_dispatch_or_else;
-use crate::apply_cli::ApplyCommand;
-use crate::apply_cli::run_apply_command;
 use vac_core::project_workspace::build_project_workspace_confirmation_dialog;
 use vac_core::project_workspace::project_workspace_startup_notice;
 #[cfg(feature = "exec-runtime")]
@@ -27,9 +27,11 @@ mod apply_cli;
 mod approve_cli;
 mod auth_cli;
 mod doctor_cli;
+mod enforcement_cli;
 mod init_cli;
 mod plan_cli;
 mod registry_cli;
+mod session_cli;
 mod why_cli;
 mod workflow_cli;
 
@@ -82,6 +84,9 @@ enum Subcommand {
     /// Inspect VAC control-plane manifests and diagnostics.
     Doctor(doctor_cli::DoctorCommand),
 
+    /// Inspect VAC enforcement claims and substrate observations.
+    Enforcement(enforcement_cli::EnforcementCommand),
+
     /// Bootstrap or inspect the VAC-Init workflow control plane.
     Init(init_cli::InitCommand),
 
@@ -99,6 +104,9 @@ enum Subcommand {
 
     /// Resume a previous interactive session (picker by default; use --last to continue the most recent).
     Resume(ResumeCommand),
+
+    /// Create, inspect, or close root VAC session artifacts.
+    Session(session_cli::SessionCommand),
 
     /// Generate shell completion scripts.
     Completion(CompletionCommand),
@@ -206,7 +214,13 @@ async fn cli_main(arg0_paths: Arg0DispatchPaths) -> anyhow::Result<()> {
             auth_cli::AuthAction::ConfiguredProvider => {}
         },
         Some(Subcommand::Doctor(doctor_cli)) => {
-            doctor_cli.run();
+            let code = doctor_cli.run()?;
+            if code != 0 {
+                std::process::exit(code);
+            }
+        }
+        Some(Subcommand::Enforcement(enforcement_cli)) => {
+            enforcement_cli.run()?;
         }
         Some(Subcommand::Init(init_cli)) => {
             init_cli.run()?;
@@ -241,6 +255,9 @@ async fn cli_main(arg0_paths: Arg0DispatchPaths) -> anyhow::Result<()> {
             );
             let exit_info = run_interactive_tui(interactive, arg0_paths.clone()).await?;
             handle_app_exit(exit_info)?;
+        }
+        Some(Subcommand::Session(session_cli)) => {
+            session_cli.run()?;
         }
         Some(Subcommand::Completion(completion_cli)) => {
             print_completion(completion_cli);
@@ -508,7 +525,7 @@ mod tests {
 
     fn load_cli_surface_manifest() -> String {
         let manifest_path = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../..")
+            .join("../../../..")
             .join(".vac/surfaces/cli.yaml");
         fs::read_to_string(&manifest_path)
             .unwrap_or_else(|err| panic!("read {}: {err}", manifest_path.display()))
@@ -633,15 +650,17 @@ mod tests {
         assert_eq!(
             commands,
             vec![
-                "exec",
-                "review",
                 "apply",
                 "auth",
+                "approve",
                 "doctor",
                 "init",
                 "plan",
+                "registry",
                 "why",
+                "workflow",
                 "resume",
+                "session",
                 "completion",
             ]
         );

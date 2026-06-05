@@ -150,11 +150,17 @@ pub(crate) struct ThemeContrastReport {
 
 fn srgb_channel_to_linear(channel: u8) -> f32 {
     let c = channel as f32 / 255.0;
-    if c <= 0.03928 { c / 12.92 } else { ((c + 0.055) / 1.055).powf(2.4) }
+    if c <= 0.03928 {
+        c / 12.92
+    } else {
+        ((c + 0.055) / 1.055).powf(2.4)
+    }
 }
 
 fn relative_luminance(rgb: (u8, u8, u8)) -> f32 {
-    0.2126 * srgb_channel_to_linear(rgb.0) + 0.7152 * srgb_channel_to_linear(rgb.1) + 0.0722 * srgb_channel_to_linear(rgb.2)
+    0.2126 * srgb_channel_to_linear(rgb.0)
+        + 0.7152 * srgb_channel_to_linear(rgb.1)
+        + 0.0722 * srgb_channel_to_linear(rgb.2)
 }
 
 fn contrast_ratio(fg: (u8, u8, u8), bg: (u8, u8, u8)) -> f32 {
@@ -175,19 +181,36 @@ pub(crate) fn validate_theme_contrast(
     let selected_row = contrast_ratio(selected, background);
     let muted_text = contrast_ratio(muted, background);
     let warning_text = contrast_ratio(warning, background);
-    let passes = [foreground_background, selected_row, muted_text, warning_text]
-        .into_iter()
-        .all(|ratio| ratio >= MIN_THEME_CONTRAST_RATIO);
-    ThemeContrastReport { foreground_background, selected_row, muted_text, warning_text, passes }
+    let passes = [
+        foreground_background,
+        selected_row,
+        muted_text,
+        warning_text,
+    ]
+    .into_iter()
+    .all(|ratio| ratio >= MIN_THEME_CONTRAST_RATIO);
+    ThemeContrastReport {
+        foreground_background,
+        selected_row,
+        muted_text,
+        warning_text,
+        passes,
+    }
 }
 
-pub(crate) fn enforce_contrast_for_custom_theme(theme_name: &str, report: ThemeContrastReport) -> Result<(), String> {
+pub(crate) fn enforce_contrast_for_custom_theme(
+    theme_name: &str,
+    report: ThemeContrastReport,
+) -> Result<(), String> {
     if report.passes {
         Ok(())
     } else {
         Err(format!(
             "Custom theme `{theme_name}` failed contrast validation: fg/bg={:.2}, selected={:.2}, muted={:.2}, warning={:.2}; falling back to readable theme",
-            report.foreground_background, report.selected_row, report.muted_text, report.warning_text
+            report.foreground_background,
+            report.selected_row,
+            report.muted_text,
+            report.warning_text
         ))
     }
 }
@@ -398,7 +421,13 @@ pub(crate) fn build_theme_picker_params(
             let display_name = if entry.is_custom {
                 let _ = enforce_contrast_for_custom_theme(
                     &entry.name,
-                    validate_theme_contrast((230,230,230), (20,20,20), (255,255,255), (170,170,170), (255,210,120)),
+                    validate_theme_contrast(
+                        (230, 230, 230),
+                        (20, 20, 20),
+                        (255, 255, 255),
+                        (170, 170, 170),
+                        (255, 210, 120),
+                    ),
                 );
                 format!("{} (custom)", entry.name)
             } else {
@@ -713,12 +742,15 @@ mod tests {
     }
 }
 
-
 #[cfg(test)]
 pub(crate) fn contrast_ratio_for_benchmark(fg: (u8, u8, u8), bg: (u8, u8, u8)) -> f64 {
     fn channel(v: u8) -> f64 {
         let v = f64::from(v) / 255.0;
-        if v <= 0.03928 { v / 12.92 } else { ((v + 0.055) / 1.055).powf(2.4) }
+        if v <= 0.03928 {
+            v / 12.92
+        } else {
+            ((v + 0.055) / 1.055).powf(2.4)
+        }
     }
     fn luminance(rgb: (u8, u8, u8)) -> f64 {
         0.2126 * channel(rgb.0) + 0.7152 * channel(rgb.1) + 0.0722 * channel(rgb.2)

@@ -50,14 +50,6 @@ use crate::now_unix_seconds;
 use sha1::Digest;
 use std::collections::HashMap;
 use std::path::Path;
-use vac_runtime_protocol::ClientRequest;
-use vac_runtime_protocol::ClientResponse;
-use vac_runtime_protocol::InitializeParams;
-use vac_runtime_protocol::RequestId;
-use vac_runtime_protocol::ServerNotification;
-use vac_runtime_protocol::TurnSteerResponse;
-use vac_runtime_protocol::UserInput;
-use vac_runtime_protocol::VACErrorInfo;
 use vac_git_utils::collect_git_info;
 use vac_git_utils::get_git_repo_root;
 use vac_login::default_client::originator;
@@ -68,6 +60,14 @@ use vac_protocol::models::PermissionProfile;
 use vac_protocol::protocol::SessionSource;
 use vac_protocol::protocol::SkillScope;
 use vac_protocol::protocol::TokenUsage;
+use vac_runtime_protocol::ClientRequest;
+use vac_runtime_protocol::ClientResponse;
+use vac_runtime_protocol::InitializeParams;
+use vac_runtime_protocol::RequestId;
+use vac_runtime_protocol::ServerNotification;
+use vac_runtime_protocol::TurnSteerResponse;
+use vac_runtime_protocol::UserInput;
+use vac_runtime_protocol::VACErrorInfo;
 
 #[derive(Default)]
 pub(crate) struct AnalyticsReducer {

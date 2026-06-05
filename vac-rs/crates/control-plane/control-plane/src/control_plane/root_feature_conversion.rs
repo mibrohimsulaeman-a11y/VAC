@@ -947,7 +947,7 @@ policy:
   risk: safe_read
 validation:
   commands:
-    - cargo +1.93.0 check -p vac-surface-tui --tests
+    - cargo +1.95.0 check -p vac-surface-tui --tests
 "#,
         );
 

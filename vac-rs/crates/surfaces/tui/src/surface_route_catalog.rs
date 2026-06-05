@@ -32,7 +32,7 @@ pub(crate) struct SurfaceRouteCatalog {
 impl SurfaceRouteCatalog {
     pub(crate) fn load(start: impl AsRef<Path>) -> Self {
         let report = load_control_plane_registry_report(start);
-        if report.is_failure() {
+        if report.state() == vac_core::control_plane::RegistryLoadState::Failure {
             return Self::default();
         }
         let mut slash_routes = HashMap::new();
@@ -210,6 +210,30 @@ mod tests {
     fn loads_slash_route_catalog() {
         let tempdir = tempdir().expect("tempdir");
         fs::create_dir_all(tempdir.path().join(".vac/surfaces")).expect("surfaces dir");
+        fs::create_dir_all(tempdir.path().join(".vac/capabilities")).expect("capabilities dir");
+        fs::write(
+            tempdir.path().join(".vac/capabilities/workflow.yaml"),
+            r#"
+schema_version: 1
+kind: capability
+id: vac.workflow
+title: Workflow
+status: deprecated
+owner:
+  crate: vac-tui
+  module: workflow
+surfaces:
+  palette: true
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+validation:
+  commands: []
+"#,
+        )
+        .expect("capability manifest");
         fs::write(
             tempdir.path().join(".vac/surfaces/slash.yaml"),
             r#"
@@ -230,6 +254,7 @@ routes:
     owner: "vac-tui::workflow_browser"
     visible: true
     status: partial
+    reason: "Under development"
 capabilities: [vac.workflow]
 "#,
         )
@@ -257,6 +282,53 @@ capabilities: [vac.workflow]
     fn loads_palette_and_cli_route_catalogs() {
         let tempdir = tempdir().expect("tempdir");
         fs::create_dir_all(tempdir.path().join(".vac/surfaces")).expect("surfaces dir");
+        fs::create_dir_all(tempdir.path().join(".vac/capabilities")).expect("capabilities dir");
+        fs::write(
+            tempdir.path().join(".vac/capabilities/workflow.yaml"),
+            r#"
+schema_version: 1
+kind: capability
+id: vac.workflow
+title: Workflow
+status: deprecated
+owner:
+  crate: vac-tui
+  module: workflow
+surfaces:
+  palette: true
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+validation:
+  commands: []
+"#,
+        )
+        .expect("capability manifest");
+        fs::write(
+            tempdir.path().join(".vac/capabilities/tools.yaml"),
+            r#"
+schema_version: 1
+kind: capability
+id: vac.tools
+title: Tools
+status: deprecated
+owner:
+  crate: vac-rs
+  module: tools
+surfaces:
+  palette: true
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+validation:
+  commands: []
+"#,
+        )
+        .expect("capability manifest");
         fs::write(
             tempdir.path().join(".vac/surfaces/palette.yaml"),
             r#"
@@ -277,6 +349,7 @@ routes:
     owner: "vac-tui::workflow_browser"
     visible: true
     status: partial
+    reason: "Under development"
 capabilities: [vac.workflow]
 "#,
         )
@@ -301,6 +374,7 @@ routes:
     owner: "vac-rs/cli"
     visible: true
     status: partial
+    reason: "Under development"
 capabilities: [vac.workflow, vac.tools]
 "#,
         )
@@ -324,6 +398,53 @@ capabilities: [vac.workflow, vac.tools]
     fn loads_tui_and_statusline_route_catalogs() {
         let tempdir = tempdir().expect("tempdir");
         fs::create_dir_all(tempdir.path().join(".vac/surfaces")).expect("surfaces dir");
+        fs::create_dir_all(tempdir.path().join(".vac/capabilities")).expect("capabilities dir");
+        fs::write(
+            tempdir.path().join(".vac/capabilities/workflow.yaml"),
+            r#"
+schema_version: 1
+kind: capability
+id: vac.workflow
+title: Workflow
+status: deprecated
+owner:
+  crate: vac-tui
+  module: workflow
+surfaces:
+  palette: true
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+validation:
+  commands: []
+"#,
+        )
+        .expect("capability manifest");
+        fs::write(
+            tempdir.path().join(".vac/capabilities/sessions.yaml"),
+            r#"
+schema_version: 1
+kind: capability
+id: vac.sessions
+title: Sessions
+status: deprecated
+owner:
+  crate: vac-core
+  module: sessions
+surfaces:
+  palette: true
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+validation:
+  commands: []
+"#,
+        )
+        .expect("capability manifest");
         fs::write(
             tempdir.path().join(".vac/surfaces/tui.yaml"),
             r#"
@@ -344,6 +465,7 @@ routes:
     owner: "vac-tui::chatwidget"
     visible: true
     status: partial
+    reason: "Under development"
 capabilities: [vac.workflow, vac.sessions]
 "#,
         )

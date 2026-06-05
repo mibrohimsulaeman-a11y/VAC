@@ -19,7 +19,7 @@ scope:
     - scripts/check-vac-o5-1c-app-server-protocol-consumer-migration.sh
     - scripts/check-vac-o5-o6-monolith-quality-slice.sh
   exclude:
-    - provider offline/default-local LLM changes
+    - provider default-local LLM changes
     - cloud/provider login removal
 risk: medium
 rationale: >
@@ -33,9 +33,9 @@ validation:
     - scripts/check-vac-o5-1c-app-server-protocol-consumer-migration.sh
     - scripts/check-vac-o5-o6-monolith-quality-slice.sh
   tv_gates:
-    - cargo build --offline --workspace --locked
-    - cargo clippy --offline --workspace -- -D warnings
-    - cargo test --offline --workspace
+    - cargo build --workspace --locked
+    - cargo clippy --workspace -- -D warnings
+    - cargo test --workspace
     - cargo tree -p vac-surface-tui --edges normal,build
 status_truth:
   sv: done

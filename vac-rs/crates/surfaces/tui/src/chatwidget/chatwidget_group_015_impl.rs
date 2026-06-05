@@ -105,16 +105,19 @@ impl ChatWidget {
     }
 
     pub(crate) fn add_capability_dashboard_output(&mut self) {
-        self.add_to_history(crate::capability_dashboard::new_capability_dashboard_output(
-            &self.config,
-        ));
-        self.bottom_pane
-            .show_selection_view(crate::capability_dashboard::new_capability_dashboard_view(&self.config));
+        self.add_to_history(
+            crate::capability_dashboard::new_capability_dashboard_output(&self.config),
+        );
+        self.bottom_pane.show_selection_view(
+            crate::capability_dashboard::new_capability_dashboard_view(&self.config),
+        );
         self.request_redraw();
     }
 
     pub(crate) fn add_runtime_jobs_output(&mut self) {
-        let view = Box::new(crate::operator_console::new_runtime_operator_console_view(&self.config));
+        let view = Box::new(crate::operator_console::new_runtime_operator_console_view(
+            &self.config,
+        ));
         if !self
             .bottom_pane
             .replace_active_view_if_active("operator-console", view)
@@ -148,6 +151,17 @@ impl ChatWidget {
                 crate::workflow_browser::new_workflow_browser_view(&self.config, state),
             ));
         }
+        self.request_redraw();
+    }
+
+    pub(crate) fn add_session_status_output(
+        &mut self,
+        surface: crate::session_status::SessionStatusSurface,
+    ) {
+        self.add_to_history(crate::session_status::new_session_status_output(
+            &self.config,
+            surface,
+        ));
         self.request_redraw();
     }
 

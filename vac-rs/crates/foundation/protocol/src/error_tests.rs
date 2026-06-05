@@ -318,7 +318,8 @@ fn usage_limit_reached_error_hides_upsell_for_non_vac_limit_name() {
                 ..rate_limit_snapshot()
             })),
             promo_message: Some(
-                "Visit https://provider.vac.invalid/vac/settings/usage to purchase more credits".to_string(),
+                "Visit https://provider.vac.invalid/vac/settings/usage to purchase more credits"
+                    .to_string(),
             ),
         };
         let expected = format!(

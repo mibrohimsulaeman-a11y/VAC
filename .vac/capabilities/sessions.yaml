@@ -10,10 +10,15 @@ ownership:
   crates:
   - vac-capability-sessions
   - vac-core
+  - vac-surface-cli
+  - vac-surface-tui
   - vac-protocol
   - vac-runtime-protocol
   modules:
   - session
+  - session_cli
+  - session_status
+  - control_plane.session_doctor
   targets:
   - crate_name: vac-core
     module: session
@@ -99,6 +104,12 @@ ownership:
     module: schema_fixtures
   - crate_name: vac-runtime-protocol
     module: write_schema_fixtures
+  - crate_name: vac-surface-cli
+    module: session_cli
+  - crate_name: vac-surface-tui
+    module: session_status
+  - crate_name: vac-control-plane
+    module: control_plane.session_doctor
 description: Interactive session lifecycle, resume, and thread state.
 reason: 'Session lifecycle surfaces, owner metadata, validation, and source-domain mapping are synchronized with the root capability catalog. Future session UX work is feature work, not a root-manifest readiness blocker.
 
@@ -110,6 +121,8 @@ surfaces:
     enabled: true
     commands:
     - vac resume
+    - vac session
+    - vac doctor sessions
   slash:
     commands:
     - /branch
@@ -124,15 +137,23 @@ surfaces:
     - /quit
     - /rename
     - /resume
+    - /session
     - /settings
+    - /spec
     - /statusline
+    - /tasks
     - /theme
     - /title
+    - /todo
     - /vim
   palette: true
   tui:
     routes:
     - /activity
+    - /session
+    - /spec
+    - /tasks
+    - /todo
 states:
 - empty
 - loading
@@ -151,7 +172,7 @@ validation:
   - id: vac.sessions.validation.cmd001
     runner: cargo
     args:
-    - +1.93.0
+    - +1.95.0
     - check
     - -p
     - vac-core

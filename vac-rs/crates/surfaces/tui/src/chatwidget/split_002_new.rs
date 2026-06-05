@@ -90,7 +90,7 @@ impl RateLimitWarningState {
                     .unwrap_or_else(|| "weekly".to_string());
                 let remaining_percent = 100.0 - threshold;
                 warnings.push(format!(
-                    "Heads up, you have less than {remaining_percent:.0}% of your {limit_label} limit left. Ambient status-line warnings will keep updating."
+                    "Heads up, you have less than {remaining_percent:.0}% of your {limit_label} limit left. Run /status for a breakdown."
                 ));
             }
         }
@@ -109,7 +109,7 @@ impl RateLimitWarningState {
                     .unwrap_or_else(|| "5h".to_string());
                 let remaining_percent = 100.0 - threshold;
                 warnings.push(format!(
-                    "Heads up, you have less than {remaining_percent:.0}% of your {limit_label} limit left. Ambient status-line warnings will keep updating."
+                    "Heads up, you have less than {remaining_percent:.0}% of your {limit_label} limit left. Run /status for a breakdown."
                 ));
             }
         }
@@ -575,6 +575,7 @@ pub(crate) struct ChatWidget {
     // TUI state instead of a hardcoded zero.
     transcript_scroll_top: std::cell::Cell<u32>,
     desired_height_cache: std::cell::RefCell<height_cache::DesiredHeightCache>,
+    rendered_lines_cache: std::cell::RefCell<height_cache::RenderedLinesCache>,
     // Feedback sink for /feedback
     feedback: vac_feedback::VACFeedback,
     // Current session rollout path (if known)
@@ -622,4 +623,3 @@ pub(crate) struct ChatWidget {
     last_rendered_user_message_display: Option<UserMessageDisplay>,
     last_non_retry_error: Option<(String, String)>,
 }
-

@@ -59,7 +59,8 @@ pub struct CodeModeService {
 
 impl CodeModeService {
     pub fn new() -> Self {
-        let (turn_message_tx, turn_message_rx) = async_channel::bounded(CODE_MODE_TURN_MESSAGE_QUEUE_CAPACITY);
+        let (turn_message_tx, turn_message_rx) =
+            async_channel::bounded(CODE_MODE_TURN_MESSAGE_QUEUE_CAPACITY);
 
         Self {
             inner: Arc::new(Inner {
@@ -520,9 +521,9 @@ mod tests {
     use crate::runtime::RuntimeEvent;
     use crate::runtime::spawn_runtime;
 
-const CODE_MODE_SESSION_CONTROL_QUEUE_CAPACITY: usize = 32;
-const CODE_MODE_RUNTIME_EVENT_QUEUE_CAPACITY: usize = 256;
-const CODE_MODE_TURN_MESSAGE_QUEUE_CAPACITY: usize = 256;
+    const CODE_MODE_SESSION_CONTROL_QUEUE_CAPACITY: usize = 32;
+    const CODE_MODE_RUNTIME_EVENT_QUEUE_CAPACITY: usize = 256;
+    const CODE_MODE_TURN_MESSAGE_QUEUE_CAPACITY: usize = 256;
 
     fn execute_request(source: &str) -> ExecuteRequest {
         ExecuteRequest {
@@ -537,7 +538,8 @@ const CODE_MODE_TURN_MESSAGE_QUEUE_CAPACITY: usize = 256;
     }
 
     fn test_inner() -> Arc<Inner> {
-        let (turn_message_tx, turn_message_rx) = async_channel::bounded(CODE_MODE_TURN_MESSAGE_QUEUE_CAPACITY);
+        let (turn_message_tx, turn_message_rx) =
+            async_channel::bounded(CODE_MODE_TURN_MESSAGE_QUEUE_CAPACITY);
         Arc::new(Inner {
             stored_values: Mutex::new(HashMap::new()),
             sessions: Mutex::new(HashMap::new()),

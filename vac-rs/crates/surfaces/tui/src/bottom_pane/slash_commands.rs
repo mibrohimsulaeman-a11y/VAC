@@ -56,6 +56,40 @@ pub(crate) fn builtins_for_input_with_catalog(
         .collect()
 }
 
+pub(crate) fn is_command_permitted(cmd: SlashCommand, flags: BuiltinCommandFlags) -> bool {
+    if !flags.allow_elevate_sandbox && cmd == SlashCommand::ElevateSandbox {
+        return false;
+    }
+    if !flags.collaboration_modes_enabled && matches!(cmd, SlashCommand::Collab | SlashCommand::Plan) {
+        return false;
+    }
+    if !flags.connectors_enabled && cmd == SlashCommand::Apps {
+        return false;
+    }
+    if !flags.plugins_command_enabled && cmd == SlashCommand::Plugins {
+        return false;
+    }
+    if !flags.fast_command_enabled && cmd == SlashCommand::Fast {
+        return false;
+    }
+    if !flags.goal_command_enabled && cmd == SlashCommand::Goal {
+        return false;
+    }
+    if !flags.personality_command_enabled && cmd == SlashCommand::Personality {
+        return false;
+    }
+    if !flags.realtime_conversation_enabled && cmd == SlashCommand::Realtime {
+        return false;
+    }
+    if !flags.audio_device_selection_enabled && cmd == SlashCommand::Settings {
+        return false;
+    }
+    if flags.side_conversation_active && !cmd.available_in_side_conversation() {
+        return false;
+    }
+    true
+}
+
 /// Find a single built-in command by exact typed name after applying feature gating
 /// and requiring a first-class slash surface route for that typed command.
 ///
@@ -69,12 +103,13 @@ pub(crate) fn find_builtin_command_with_catalog(
 ) -> Option<SlashCommand> {
     let cmd = SlashCommand::from_str(name).ok()?;
     catalog.slash_route(name)?;
-    builtins_for_input(BuiltinCommandFlags {
-        side_conversation_active: false,
-        ..flags
-    })
-    .into_iter()
-    .any(|(_, visible_cmd)| visible_cmd == cmd)
+    is_command_permitted(
+        cmd,
+        BuiltinCommandFlags {
+            side_conversation_active: false,
+            ..flags
+        },
+    )
     .then_some(cmd)
 }
 
@@ -84,12 +119,13 @@ pub(crate) fn find_builtin_command_with_catalog(
 /// typed command can produce a side-specific unavailable message while the popup still hides it.
 pub(crate) fn find_builtin_command(name: &str, flags: BuiltinCommandFlags) -> Option<SlashCommand> {
     let cmd = SlashCommand::from_str(name).ok()?;
-    builtins_for_input(BuiltinCommandFlags {
-        side_conversation_active: false,
-        ..flags
-    })
-    .into_iter()
-    .any(|(_, visible_cmd)| visible_cmd == cmd)
+    is_command_permitted(
+        cmd,
+        BuiltinCommandFlags {
+            side_conversation_active: false,
+            ..flags
+        },
+    )
     .then_some(cmd)
 }
 
@@ -125,6 +161,53 @@ mod tests {
     fn manifest_filters_hard_coded_commands_without_routes() {
         let tempdir = tempfile::tempdir().expect("tempdir");
         fs::create_dir_all(tempdir.path().join(".vac/surfaces")).expect("surfaces dir");
+        fs::create_dir_all(tempdir.path().join(".vac/capabilities")).expect("capabilities dir");
+        fs::write(
+            tempdir.path().join(".vac/capabilities/sessions.yaml"),
+            r#"
+schema_version: 1
+kind: capability
+id: vac.sessions
+title: Sessions
+status: deprecated
+owner:
+  crate: vac-core
+  module: sessions
+surfaces:
+  palette: true
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+validation:
+  commands: []
+"#,
+        )
+        .expect("capability manifest");
+        fs::write(
+            tempdir.path().join(".vac/capabilities/workflow.yaml"),
+            r#"
+schema_version: 1
+kind: capability
+id: vac.workflow
+title: Workflow
+status: deprecated
+owner:
+  crate: vac-tui
+  module: workflow
+surfaces:
+  palette: true
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+validation:
+  commands: []
+"#,
+        )
+        .expect("capability manifest");
         fs::write(
             tempdir.path().join(".vac/surfaces/slash.yaml"),
             r#"
@@ -163,6 +246,30 @@ routes:
     fn exact_lookup_requires_typed_command_route_when_catalog_is_used() {
         let tempdir = tempfile::tempdir().expect("tempdir");
         fs::create_dir_all(tempdir.path().join(".vac/surfaces")).expect("surfaces dir");
+        fs::create_dir_all(tempdir.path().join(".vac/capabilities")).expect("capabilities dir");
+        fs::write(
+            tempdir.path().join(".vac/capabilities/tools.yaml"),
+            r#"
+schema_version: 1
+kind: capability
+id: vac.tools
+title: Tools
+status: deprecated
+owner:
+  crate: vac-rs
+  module: tools
+surfaces:
+  palette: true
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: false
+validation:
+  commands: []
+"#,
+        )
+        .expect("capability manifest");
         fs::write(
             tempdir.path().join(".vac/surfaces/slash.yaml"),
             r#"
@@ -205,6 +312,12 @@ routes:
     fn capabilities_command_still_resolves_for_dispatch() {
         let cmd = find_builtin_command("capabilities", all_enabled_flags());
         assert_eq!(cmd, Some(SlashCommand::Capabilities));
+    }
+
+    #[test]
+    fn runtime_command_still_resolves_for_dispatch() {
+        let cmd = find_builtin_command("runtime", all_enabled_flags());
+        assert_eq!(cmd, Some(SlashCommand::Runtime));
     }
 
     #[test]

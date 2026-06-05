@@ -8,10 +8,10 @@ required_flows:
 - vac init lifecycle scan -> discovered
 - vac init --rescan-ast -> policy_inferred
 - scanner doctor exit 0 and exit 1 fixture
-- cargo build/test workspace offline
+- cargo build/test workspace
 - vac why evidence-backed rationale
 implemented_in_this_slice:
 - minimal shell fixture registration
 - cargo gate availability detector
 cargo_e2e_status: NotEvaluated
-reason: No usable cargo/rustc executable; source artifact excludes vac-rs/vendor/.
+reason: No usable cargo/rustc executable was available for this historical slice.

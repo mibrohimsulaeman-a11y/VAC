@@ -67,7 +67,6 @@ mod plugins;
 mod prompt_caching;
 mod prompt_debug_tests;
 mod quota_exceeded;
-mod realtime_conversation;
 mod remote_env;
 mod remote_models;
 mod request_compression;

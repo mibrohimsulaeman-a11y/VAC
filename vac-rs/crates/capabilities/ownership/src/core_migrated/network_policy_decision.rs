@@ -1,11 +1,11 @@
 use vac_execpolicy::Decision as ExecPolicyDecision;
 use vac_execpolicy::NetworkRuleProtocol as ExecPolicyNetworkRuleProtocol;
 use vac_network_proxy::BlockedRequest;
-use vac_protocol::network_policy::NetworkPolicyDecision;
 use vac_protocol::approvals::NetworkApprovalContext;
 use vac_protocol::approvals::NetworkApprovalProtocol;
 use vac_protocol::approvals::NetworkPolicyAmendment;
 use vac_protocol::approvals::NetworkPolicyRuleAction;
+use vac_protocol::network_policy::NetworkPolicyDecision;
 use vac_protocol::network_policy::NetworkPolicyDecisionPayload;
 
 #[derive(Debug, Clone, PartialEq, Eq)]

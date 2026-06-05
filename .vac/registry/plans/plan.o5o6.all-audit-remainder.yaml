@@ -29,9 +29,9 @@ acceptance:
     - App-server donor delete gate reflects source deletion and runtime-protocol schema bin relocation.
     - F5 protocol duplication gate proves canonical protocol/v2.rs is single-source after app-server retirement.
   tv_pending:
-    - cargo build --offline --workspace --locked
-    - cargo clippy --offline --workspace -- -D warnings
-    - cargo test --offline --workspace
+    - cargo build --workspace --locked
+    - cargo clippy --workspace -- -D warnings
+    - cargo test --workspace
     - cargo tree -p vac-surface-tui --edges normal,build
     - cargo geiger or equivalent unsafe audit
 validation:

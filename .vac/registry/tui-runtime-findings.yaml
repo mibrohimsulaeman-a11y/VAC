@@ -109,4 +109,5 @@ blocked_runtime_validation:
     - bash scripts/bench-vac-tui-performance.sh with compiled harness
 static_gates:
   - scripts/check-vac-tui-perf-ux-findings-static.sh
-  - VAC_STATIC_ONLY=1 scripts/bench-vac-tui-performance.sh
+runtime_gates:
+  - bash scripts/bench-vac-tui-performance.sh

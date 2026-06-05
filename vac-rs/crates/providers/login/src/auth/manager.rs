@@ -82,6 +82,16 @@ struct ChatgptAuthState {
     client: VACHttpClient,
 }
 
+fn auth_dot_json_snapshot(state: &ChatgptAuthState) -> Option<AuthDotJson> {
+    match state.auth_dot_json.lock() {
+        Ok(auth_dot_json) => auth_dot_json.clone(),
+        Err(poisoned) => {
+            tracing::warn!("recovering poisoned ChatGPT auth state lock");
+            poisoned.into_inner().clone()
+        }
+    }
+}
+
 const TOKEN_REFRESH_INTERVAL: i64 = 8;
 
 const REFRESH_TOKEN_EXPIRED_MESSAGE: &str = "Your access token could not be refreshed because your refresh token has expired. Please log out and sign in again.";
@@ -413,8 +423,7 @@ impl VACAuth {
             Self::ChatgptAuthTokens(auth) => &auth.state,
             Self::ApiKey(_) | Self::AgentIdentity(_) => return None,
         };
-        #[expect(clippy::unwrap_used)]
-        state.auth_dot_json.lock().unwrap().clone()
+        auth_dot_json_snapshot(state)
     }
 
     /// Returns `None` if token-backed ChatGPT auth is unavailable.
@@ -459,8 +468,7 @@ impl VACAuth {
 
 impl ChatgptAuth {
     fn current_auth_json(&self) -> Option<AuthDotJson> {
-        #[expect(clippy::unwrap_used)]
-        self.state.auth_dot_json.lock().unwrap().clone()
+        auth_dot_json_snapshot(&self.state)
     }
 
     fn current_token_data(&self) -> Option<TokenData> {

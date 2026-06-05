@@ -55,7 +55,6 @@ opentelemetry_sdk = { workspace = true }
 [features]
 default = []
 provider-chatgpt = []
-provider-realtime = []
-provider-cloud-tests = ["provider-chatgpt", "provider-realtime"]
+provider-cloud-tests = ["provider-chatgpt"]
 telemetry = []
 feedback = []

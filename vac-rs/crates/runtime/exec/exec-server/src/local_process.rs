@@ -9,10 +9,10 @@ use tokio::sync::Mutex;
 use tokio::sync::Notify;
 use tokio::sync::mpsc;
 use tokio::sync::watch;
-use vac_runtime_protocol::JSONRPCErrorError;
 use vac_protocol::config_types::EnvironmentVariablePattern;
 use vac_protocol::config_types::ShellEnvironmentPolicy;
 use vac_protocol::shell_environment;
+use vac_runtime_protocol::JSONRPCErrorError;
 use vac_utils_pty::ExecCommandSession;
 use vac_utils_pty::TerminalSize;
 

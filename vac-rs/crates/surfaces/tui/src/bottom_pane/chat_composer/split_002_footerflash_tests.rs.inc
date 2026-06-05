@@ -1120,6 +1120,61 @@
     }
 
     #[test]
+    fn terminal_cr_submits_and_ctrl_j_inserts_newline() {
+        use crossterm::event::KeyCode;
+        use crossterm::event::KeyEvent;
+        use crossterm::event::KeyModifiers;
+
+        let (tx, _rx) = unbounded_channel::<AppEvent>();
+        let sender = AppEventSender::new(tx);
+        let mut composer = ChatComposer::new(
+            /*has_input_focus*/ true,
+            sender,
+            /*enhanced_keys_supported*/ true,
+            "Ask VAC to do anything".to_string(),
+            /*disable_paste_burst*/ false,
+        );
+
+        composer.set_text_content("first".to_string(), Vec::new(), Vec::new());
+        composer.textarea.set_cursor(composer.textarea.text().len());
+        let (result, _) = composer.handle_key_event(KeyEvent::new(
+            KeyCode::Char('j'),
+            KeyModifiers::CONTROL,
+        ));
+        assert_eq!(result, InputResult::None);
+        assert_eq!(composer.current_text(), "first\n");
+
+        composer.set_text_content("hi".to_string(), Vec::new(), Vec::new());
+        let (result, _) = composer.handle_key_event(KeyEvent::new(
+            KeyCode::Char('m'),
+            KeyModifiers::CONTROL,
+        ));
+        let submitted = match result {
+            InputResult::Submitted { text, .. } => Some(text),
+            _ => None,
+        };
+        assert_eq!(submitted.as_deref(), Some("hi"));
+
+        composer.set_text_content("lf".to_string(), Vec::new(), Vec::new());
+        let (result, _) =
+            composer.handle_key_event(KeyEvent::new(KeyCode::Char('\n'), KeyModifiers::NONE));
+        let submitted = match result {
+            InputResult::Submitted { text, .. } => Some(text),
+            _ => None,
+        };
+        assert_eq!(submitted.as_deref(), Some("lf"));
+
+        composer.set_text_content("cr".to_string(), Vec::new(), Vec::new());
+        let (result, _) =
+            composer.handle_key_event(KeyEvent::new(KeyCode::Char('\r'), KeyModifiers::NONE));
+        let submitted = match result {
+            InputResult::Submitted { text, .. } => Some(text),
+            _ => None,
+        };
+        assert_eq!(submitted.as_deref(), Some("cr"));
+    }
+
+    #[test]
     fn vim_mode_resets_to_normal_after_queued_submission() {
         use crossterm::event::KeyCode;
         use crossterm::event::KeyEvent;

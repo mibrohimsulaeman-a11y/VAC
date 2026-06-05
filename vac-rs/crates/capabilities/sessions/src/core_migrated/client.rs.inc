@@ -271,6 +271,10 @@ enum WebsocketStreamOutcome {
 /// The SDP answer goes back to the client. The call id and auth headers stay on the server so the
 /// ordinary Realtime WebSocket machinery can join the same in-progress call as a sideband
 /// controller.
+#[expect(
+    dead_code,
+    reason = "retained for realtime compatibility while the transport bridge is unavailable"
+)]
 pub(crate) struct RealtimeWebrtcCallStart {
     pub(crate) sdp: String,
     pub(crate) call_id: String,
@@ -342,6 +346,10 @@ impl ModelClient {
         }
     }
 
+    #[expect(
+        dead_code,
+        reason = "retained for realtime compatibility while the transport bridge is unavailable"
+    )]
     pub(crate) fn auth_manager(&self) -> Option<Arc<AuthManager>> {
         self.state.provider.auth_manager()
     }
@@ -484,6 +492,10 @@ impl ModelClient {
         result
     }
 
+    #[expect(
+        dead_code,
+        reason = "retained for realtime compatibility while the transport bridge is unavailable"
+    )]
     pub(crate) async fn create_realtime_call_with_headers(
         &self,
         sdp: String,

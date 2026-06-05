@@ -9,15 +9,15 @@ use std::fs;
 use std::path::PathBuf;
 use std::time::Duration;
 use url::Url;
+use vac_login::VACAuth;
+use vac_login::default_client::build_reqwest_client;
+use vac_plugin::PluginId;
 use vac_runtime_protocol::JSONRPCErrorError;
 use vac_runtime_protocol::PluginAuthPolicy;
 use vac_runtime_protocol::PluginAvailability;
 use vac_runtime_protocol::PluginInstallPolicy;
 use vac_runtime_protocol::PluginInterface;
 use vac_runtime_protocol::SkillInterface;
-use vac_login::VACAuth;
-use vac_login::default_client::build_reqwest_client;
-use vac_plugin::PluginId;
 use vac_utils_absolute_path::AbsolutePathBuf;
 
 mod remote_installed_plugin_sync;
@@ -133,7 +133,9 @@ pub fn validate_remote_plugin_id(plugin_id: &str) -> Result<(), JSONRPCErrorErro
 
 #[derive(Debug, thiserror::Error)]
 pub enum RemotePluginCatalogError {
-    #[error("legacy ChatGPT remote plugin catalog is disabled in the local coding-agent build; set VAC_ENABLE_LEGACY_CHATGPT_CLOUD_PLUGINS=1 to opt in")]
+    #[error(
+        "legacy ChatGPT remote plugin catalog is disabled in the local coding-agent build; set VAC_ENABLE_LEGACY_CHATGPT_CLOUD_PLUGINS=1 to opt in"
+    )]
     LegacyCloudDisabled,
 
     #[error("chatgpt authentication required for remote plugin catalog")]

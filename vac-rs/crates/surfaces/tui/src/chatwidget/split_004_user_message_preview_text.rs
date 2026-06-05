@@ -560,10 +560,12 @@ impl ChatWidget {
     }
 
     fn status_line_context_remaining_percent(&self) -> Option<i64> {
-        self.token_info
-            .as_ref()
-            .and_then(|info| self.context_remaining_percent(info))
-            .map(|percent| percent.clamp(0, 100))
+        match self.token_info.as_ref() {
+            Some(info) => self
+                .context_remaining_percent(info)
+                .map(|percent| percent.clamp(0, 100)),
+            None => Some(100),
+        }
     }
 
     fn status_line_context_used_percent(&self) -> Option<i64> {
@@ -588,7 +590,14 @@ impl ChatWidget {
     }
 
     fn status_line_reasoning_effort_label(effort: Option<ReasoningEffortConfig>) -> &'static str {
-        effort.map(Self::reasoning_effort_label).unwrap_or("auto")
+        match effort {
+            Some(ReasoningEffortConfig::Minimal) => "minimal",
+            Some(ReasoningEffortConfig::Low) => "low",
+            Some(ReasoningEffortConfig::Medium) => "medium",
+            Some(ReasoningEffortConfig::High) => "high",
+            Some(ReasoningEffortConfig::XHigh) => "xhigh",
+            None | Some(ReasoningEffortConfig::None) => "auto",
+        }
     }
 
     /// Records that status-line setup was canceled.
@@ -1106,4 +1115,3 @@ impl ChatWidget {
         }
         self.request_redraw();
     }
-

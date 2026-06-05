@@ -485,6 +485,13 @@ pub(crate) enum AppEvent {
         detail: McpServerStatusDetail,
     },
 
+    /// Startup-only MCP readiness probe used for non-blocking startup metrics.
+    ///
+    /// Unlike `/mcp`, this event must not render inventory rows into the transcript.
+    StartupMcpInventoryLoaded {
+        result: Result<usize, String>,
+    },
+
     /// Result of the startup skills refresh that runs after the first frame is scheduled.
     ///
     /// This event is startup-only. Interactive skills refreshes are handled synchronously through the app

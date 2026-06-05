@@ -1,7 +1,7 @@
 schema_version: 1
 kind: registry_status
 id: spec-conformance.o5o6.zero-residual
-updated_at: 2026-06-02T00:00:00Z
+updated_at: 2026-06-04T18:59:49Z
 status: static_closed
 semantic_anchor:
   strict_backend: syn
@@ -40,3 +40,55 @@ spec_conformance:
   section_31: static_closed
   partial: []
   gaps: []
+part_v_bound_runtime:
+  status: pass
+  scope: source_implemented_runtime_validated
+  tracked_clauses:
+    completion_lock: source_implemented_and_tested
+    session_artifacts: source_implemented_and_tested
+    slice_ledger: source_implemented_and_tested
+    session_closeout: source_implemented_and_tested
+    cli_surface: source_implemented_and_tested
+    tui_slash_surfaces: session_spec_tasks_todo_activity_evidence_implemented_and_tested
+    doctor_sessions: pass
+  evidence: .vac/registry/evidence/local-agent-v2-session.md
+spec_conformance_doctor:
+  status: tracking_mode_pass_full_v1_4_expected_fail_until_partial_parts_close
+  cli: vac doctor spec-conformance --full-v1-4
+  behavior: fails_full_v1_4_until_part_v_to_viii_are_pass
+  evidence: .vac/registry/evidence/local-agent-v2-session.md
+part_vi_enforcement_level:
+  status: pass
+  scope: source_implemented_runtime_validated
+  tracked_clauses:
+    enforcement_level: source_implemented_and_tested
+    enforcement_doctor: source_implemented_and_tested
+    runtime_detection_honesty: l1_l2_claim_check_runtime_validated
+    sandbox_substrate_tests: vac_sandboxing_and_vac_linux_sandbox_landlock_pass
+    cli_surface: vac_doctor_enforcement_and_vac_enforcement_status_pass
+    surfaces_stamp_l1: advisory_stamp_rendered_in_doctor_output
+  evidence: .vac/registry/evidence/local-agent-v2-session.md
+part_vii_signed_evidence_v2:
+  status: pass
+  scope: source_implemented_runtime_validated
+  tracked_clauses:
+    schema_v2: source_implemented_and_tested
+    merkle_subchains: source_implemented_and_doctor_validated
+    broker_operator_signatures: ed25519_sign_verify_path_implemented_seed_resigned_and_doctor_verified
+    jcs_canonicalization: source_implemented_and_tested
+    registry_resign_command: vac_registry_evidence_v2_resign_apply_pass
+    doctor_evidence_v2: pass
+  evidence: .vac/registry/evidence/local-agent-v2-session.md
+part_viii_distributed_memory:
+  status: pass
+  scope: source_implemented_runtime_validated
+  tracked_clauses:
+    episodic_db: source_implemented_and_doctor_validated
+    semantic_db: source_implemented_and_doctor_validated
+    fts5: source_implemented_update_delete_triggered_and_10000_fact_latency_tested
+    anti_looping: source_implemented_and_tested
+    reflection_workflow: source_implemented_and_manifested
+    redaction: source_implemented_and_tested
+    doctor_memory: pass
+  evidence: .vac/registry/evidence/local-agent-v2-session.md
+untracked_normative_clauses: []

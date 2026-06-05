@@ -208,10 +208,8 @@ pub async fn run_main(cli: Cli, arg0_paths: Arg0DispatchPaths) -> anyhow::Result
 
     let cli_kv_overrides = match config_overrides.parse_overrides() {
         Ok(v) => v,
-        #[allow(clippy::print_stderr)]
         Err(e) => {
-            eprintln!("Error parsing -c overrides: {e}");
-            std::process::exit(1);
+            anyhow::bail!("Error parsing -c overrides: {e}");
         }
     };
 
@@ -223,12 +221,10 @@ pub async fn run_main(cli: Cli, arg0_paths: Arg0DispatchPaths) -> anyhow::Result
         None => AbsolutePathBuf::current_dir()?,
     };
 
-    #[allow(clippy::print_stderr)]
     let vac_home = match find_vac_home() {
         Ok(vac_home) => vac_home,
         Err(err) => {
-            eprintln!("Error finding vac home: {err}");
-            std::process::exit(1);
+            anyhow::bail!("Error finding vac home: {err}");
         }
     };
 
@@ -253,15 +249,15 @@ pub async fn run_main(cli: Cli, arg0_paths: Arg0DispatchPaths) -> anyhow::Result
                 .get_ref()
                 .and_then(|err| err.downcast_ref::<ConfigLoadError>())
                 .map(ConfigLoadError::config_error);
-            if let Some(config_error) = config_error {
-                eprintln!(
+            let message = if let Some(config_error) = config_error {
+                format!(
                     "Error loading config.toml:\n{}",
                     format_config_error_with_source(config_error)
-                );
+                )
             } else {
-                eprintln!("Error loading config.toml: {err}");
-            }
-            std::process::exit(1);
+                format!("Error loading config.toml: {err}")
+            };
+            anyhow::bail!("{message}");
         }
     };
 
@@ -332,11 +328,10 @@ pub async fn run_main(cli: Cli, arg0_paths: Arg0DispatchPaths) -> anyhow::Result
     match check_execpolicy_for_warnings(&config.config_layer_stack).await {
         Ok(None) => {}
         Ok(Some(err)) | Err(err) => {
-            eprintln!(
+            anyhow::bail!(
                 "Error loading rules:\n{}",
                 format_exec_policy_error_with_source(&err)
             );
-            std::process::exit(1);
         }
     }
 
@@ -351,8 +346,7 @@ pub async fn run_main(cli: Cli, arg0_paths: Arg0DispatchPaths) -> anyhow::Result
     })
     .await
     {
-        eprintln!("{err}");
-        std::process::exit(1);
+        anyhow::bail!("{err}");
     }
 
     let otel = match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
@@ -452,8 +446,9 @@ async fn run_exec_session(args: ExecRunArgs) -> anyhow::Result<()> {
         && !dangerously_bypass_approvals_and_sandbox
         && get_git_repo_root(&default_cwd).is_none()
     {
-        eprintln!("Not inside a trusted directory and --skip-git-repo-check was not specified.");
-        std::process::exit(1);
+        anyhow::bail!(
+            "Not inside a trusted directory and --skip-git-repo-check was not specified."
+        );
     }
 
     match (command, prompt, images) {
@@ -483,7 +478,7 @@ async fn run_exec_session(args: ExecRunArgs) -> anyhow::Result<()> {
                     }
                 })
                 .or(root_prompt);
-            let prompt_text = resolve_prompt(prompt_arg);
+            let prompt_text = resolve_prompt(prompt_arg)?;
             let mut items: Vec<UserInput> = imgs
                 .into_iter()
                 .chain(resume_args.images.iter().cloned())
@@ -494,7 +489,7 @@ async fn run_exec_session(args: ExecRunArgs) -> anyhow::Result<()> {
                 text_elements: Vec::new(),
             });
             log_local_runtime_start_task(&prompt_text, default_cwd.as_path());
-            let output_schema = load_output_schema(output_schema_path);
+            let output_schema = load_output_schema(output_schema_path)?;
             let rollout_path = match resolve_resume_rollout_path(&config, &resume_args).await? {
                 Some(path) => path,
                 None => return Err(anyhow::anyhow!("no matching session found to resume")),
@@ -513,7 +508,7 @@ async fn run_exec_session(args: ExecRunArgs) -> anyhow::Result<()> {
             .await
         }
         (None, root_prompt, imgs) => {
-            let prompt_text = resolve_root_prompt(root_prompt);
+            let prompt_text = resolve_root_prompt(root_prompt)?;
             let mut items: Vec<UserInput> = imgs
                 .into_iter()
                 .map(|path| UserInput::LocalImage { path })
@@ -523,7 +518,7 @@ async fn run_exec_session(args: ExecRunArgs) -> anyhow::Result<()> {
                 text_elements: Vec::new(),
             });
             log_local_runtime_start_task(&prompt_text, default_cwd.as_path());
-            let output_schema = load_output_schema(output_schema_path);
+            let output_schema = load_output_schema(output_schema_path)?;
             run_local_runtime_prompt(
                 &config,
                 environment_manager,
@@ -560,7 +555,7 @@ fn build_review_request(args: &ReviewArgs) -> anyhow::Result<ReviewRequest> {
             title: args.commit_title.clone(),
         }
     } else if let Some(prompt_arg) = args.prompt.clone() {
-        let prompt = resolve_prompt(Some(prompt_arg)).trim().to_string();
+        let prompt = resolve_prompt(Some(prompt_arg))?.trim().to_string();
         if prompt.is_empty() {
             anyhow::bail!("Review prompt cannot be empty");
         }
@@ -579,28 +574,28 @@ fn build_review_request(args: &ReviewArgs) -> anyhow::Result<ReviewRequest> {
     })
 }
 
-fn load_output_schema(path: Option<PathBuf>) -> Option<Value> {
-    let path = path?;
+fn load_output_schema(path: Option<PathBuf>) -> anyhow::Result<Option<Value>> {
+    let Some(path) = path else {
+        return Ok(None);
+    };
 
     let schema_str = match std::fs::read_to_string(&path) {
         Ok(contents) => contents,
         Err(err) => {
-            eprintln!(
+            anyhow::bail!(
                 "Failed to read output schema file {}: {err}",
                 path.display()
             );
-            std::process::exit(1);
         }
     };
 
     match serde_json::from_str::<Value>(&schema_str) {
-        Ok(value) => Some(value),
+        Ok(value) => Ok(Some(value)),
         Err(err) => {
-            eprintln!(
+            anyhow::bail!(
                 "Output schema file {} is not valid JSON: {err}",
                 path.display()
             );
-            std::process::exit(1);
         }
     }
 }
@@ -677,21 +672,20 @@ fn decode_utf16(
     String::from_utf16(&units).map_err(|_| PromptDecodeError::InvalidUtf16 { encoding })
 }
 
-fn read_prompt_from_stdin(behavior: StdinPromptBehavior) -> Option<String> {
+fn read_prompt_from_stdin(behavior: StdinPromptBehavior) -> anyhow::Result<Option<String>> {
     let stdin_is_terminal = std::io::stdin().is_terminal();
 
     match behavior {
         StdinPromptBehavior::RequiredIfPiped if stdin_is_terminal => {
-            eprintln!(
+            anyhow::bail!(
                 "No prompt provided. Either specify one as an argument or pipe the prompt into stdin."
             );
-            std::process::exit(1);
         }
         StdinPromptBehavior::RequiredIfPiped => {
             eprintln!("Reading prompt from stdin...");
         }
         StdinPromptBehavior::Forced => {}
-        StdinPromptBehavior::OptionalAppend if stdin_is_terminal => return None,
+        StdinPromptBehavior::OptionalAppend if stdin_is_terminal => return Ok(None),
         StdinPromptBehavior::OptionalAppend => {
             eprintln!("Reading additional input from stdin...");
         }
@@ -699,28 +693,25 @@ fn read_prompt_from_stdin(behavior: StdinPromptBehavior) -> Option<String> {
 
     let mut bytes = Vec::new();
     if let Err(e) = std::io::stdin().read_to_end(&mut bytes) {
-        eprintln!("Failed to read prompt from stdin: {e}");
-        std::process::exit(1);
+        anyhow::bail!("Failed to read prompt from stdin: {e}");
     }
 
     let buffer = match decode_prompt_bytes(&bytes) {
         Ok(s) => s,
         Err(e) => {
-            eprintln!("Failed to read prompt from stdin: {e}");
-            std::process::exit(1);
+            anyhow::bail!("Failed to read prompt from stdin: {e}");
         }
     };
 
     if buffer.trim().is_empty() {
         match behavior {
-            StdinPromptBehavior::OptionalAppend => None,
+            StdinPromptBehavior::OptionalAppend => Ok(None),
             StdinPromptBehavior::RequiredIfPiped | StdinPromptBehavior::Forced => {
-                eprintln!("No prompt provided via stdin.");
-                std::process::exit(1);
+                anyhow::bail!("No prompt provided via stdin.");
             }
         }
     } else {
-        Some(buffer)
+        Ok(Some(buffer))
     }
 }
 
@@ -733,30 +724,28 @@ fn prompt_with_stdin_context(prompt: &str, stdin_text: &str) -> String {
     combined
 }
 
-fn resolve_prompt(prompt_arg: Option<String>) -> String {
+fn resolve_prompt(prompt_arg: Option<String>) -> anyhow::Result<String> {
     match prompt_arg {
-        Some(p) if p != "-" => p,
+        Some(p) if p != "-" => Ok(p),
         maybe_dash => {
             let behavior = if matches!(maybe_dash.as_deref(), Some("-")) {
                 StdinPromptBehavior::Forced
             } else {
                 StdinPromptBehavior::RequiredIfPiped
             };
-            let Some(prompt) = read_prompt_from_stdin(behavior) else {
-                unreachable!("required stdin prompt should produce content");
-            };
-            prompt
+            read_prompt_from_stdin(behavior)?
+                .ok_or_else(|| anyhow::anyhow!("required stdin prompt should produce content"))
         }
     }
 }
 
-fn resolve_root_prompt(prompt_arg: Option<String>) -> String {
+fn resolve_root_prompt(prompt_arg: Option<String>) -> anyhow::Result<String> {
     match prompt_arg {
         Some(prompt) if prompt != "-" => {
-            if let Some(stdin_text) = read_prompt_from_stdin(StdinPromptBehavior::OptionalAppend) {
-                prompt_with_stdin_context(&prompt, &stdin_text)
+            if let Some(stdin_text) = read_prompt_from_stdin(StdinPromptBehavior::OptionalAppend)? {
+                Ok(prompt_with_stdin_context(&prompt, &stdin_text))
             } else {
-                prompt
+                Ok(prompt)
             }
         }
         maybe_dash => resolve_prompt(maybe_dash),
