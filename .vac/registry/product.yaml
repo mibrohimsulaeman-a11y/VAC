@@ -1,9 +1,0 @@
-schema_version: 1
-kind: product
-id: vac
-title: VAC
-command: vac
-status: ready
-control_plane: .vac
-runtime: vac-rs
-launcher: vac-cli/bin/vac.js

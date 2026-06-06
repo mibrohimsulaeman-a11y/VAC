@@ -1,0 +1,17 @@
+schema_version: 2
+kind: capability
+id: vac.architecture
+title: Architecture Invariants
+status: ready
+ownership:
+  annotation: vac.architecture
+  paths:
+    include:
+      - "vac-rs/crates/control-plane/control-plane/**"
+    exclude:
+      - "**/target/**"
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+depends_on: []

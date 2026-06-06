@@ -1,1 +1,0 @@
-vac-rs/core/tests/suite/live_cli.rs://! Optional smoke tests that hit the real Vastar /v1/responses endpoint. They are `#[ignore]` by

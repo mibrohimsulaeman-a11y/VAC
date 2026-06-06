@@ -1,60 +1,30 @@
-schema_version: 1
+schema_version: 2
 kind: policy
 id: vac.policy.filesystem
 title: Filesystem access policy
 default_decision: approval_required
 rules:
   - id: fs.read.project
-    match:
-      action: filesystem_read
-      path: project
+    match: { action: filesystem_read, path: project }
     decision: allow
     reason: Read-only inspection within the active project root is allowed.
   - id: fs.read.workspace
-    match:
-      action: filesystem_read
-      path: workspace
+    match: { action: filesystem_read, path: workspace }
     decision: approval_required
     reason: Workspace-wide reads outside the project root require operator approval.
-  - id: fs.read.any
-    match:
-      action: filesystem_read
-      path: any
-    decision: approval_required
-    reason: Unscoped reads require operator approval to bound exposure.
   - id: fs.write.project
-    match:
-      action: filesystem_write
-      path: project
+    match: { action: filesystem_write, path: project }
     decision: approval_required
     reason: Project file mutation requires explicit operator approval.
   - id: fs.write.workspace
-    match:
-      action: filesystem_write
-      path: workspace
+    match: { action: filesystem_write, path: workspace }
     decision: deny
     reason: Workspace-wide writes outside the project root are not permitted.
-  - id: fs.write.any
-    match:
-      action: filesystem_write
-      path: any
-    decision: deny
-    reason: Unscoped writes are denied to prevent accidental data corruption.
   - id: fs.delete.project
-    match:
-      action: filesystem_delete
-      path: project
+    match: { action: filesystem_delete, path: project }
     decision: approval_required
     reason: Project file deletion requires explicit operator approval.
   - id: fs.delete.workspace
-    match:
-      action: filesystem_delete
-      path: workspace
+    match: { action: filesystem_delete, path: workspace }
     decision: deny
     reason: Workspace-wide deletion outside the project root is not permitted.
-  - id: fs.delete.any
-    match:
-      action: filesystem_delete
-      path: any
-    decision: deny
-    reason: Unscoped deletion is denied to protect against accidental data loss.

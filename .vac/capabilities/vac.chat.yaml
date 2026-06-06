@@ -1,0 +1,21 @@
+schema_version: 2
+kind: capability
+id: vac.chat
+title: Chat
+status: ready
+# Ownership = intent. Crate package names are resolved by `vac scan` from in-source
+# annotations; only verifiable path globs + the annotation tag are authored here.
+ownership:
+  annotation: vac.chat
+  paths:
+    include:
+      - "vac-rs/crates/capabilities/chat/**"
+      - "vac-rs/crates/surfaces/tui/src/chatwidget/**"
+    exclude:
+      - "**/target/**"
+policy:
+  risk: low
+  mutates_files: false
+  network: true            # talks to configured model providers
+  approval_required_for: [network_access]
+depends_on: [vac.identity, vac.runtime]

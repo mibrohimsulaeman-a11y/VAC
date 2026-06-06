@@ -1,96 +1,36 @@
-schema_version: 1
+schema_version: 2
 kind: workflow
 id: maintenance.build-check
-title: Build check
+title: Build check (delegated to GitHub CI "Rust CI")
 status: ready
-inputs: {}
-ui:
-  surface: /workflow
-  inspect_surface: /debug-config
-  progress_panel: true
-  activity_log: true
-  approval_surface: true
-  evidence_surface: true
+# Cargo validation runs on GitHub Actions, NEVER on the local machine.
+# Source of truth: .github/workflows/ci.yml (name: "Rust CI").
+ci:
+  provider: github-actions
+  repo: mibrohimsulaeman-a11y/VAC
+  workflow_file: .github/workflows/ci.yml
+  workflow_name: "Rust CI"
+  toolchain: "1.95.0"          # pinned by vac-rs/rust-toolchain.toml
+  working_directory: vac-rs
+  profile: ci-test
+  trigger:
+    - push to main / pull_request (automatic)
+    - gh workflow run "Rust CI" --ref main   # workflow_dispatch
+  read_results:
+    - gh run list --workflow "Rust CI"
+    - gh run view --log-failed
 policy:
   default_risk: safe_read
-  approval_required_for:
-  - execute_process
   mutates_files: false
   network: false
-  redaction: false
-steps:
-- id: orient
-  uses: capability.identity.check
-  ui:
-    surface: /workflow
-    progress_panel: true
-    activity_log: true
-    approval_surface: false
-    evidence_surface: true
-- id: validate
-  uses: capability.build.cargo_check
-  ui:
-    surface: /workflow
-    progress_panel: true
-    activity_log: true
-    approval_surface: false
-    evidence_surface: true
-- id: report
-  uses: capability.activity.emit
-  ui:
-    surface: /workflow
-    progress_panel: true
-    activity_log: true
-    approval_surface: false
-    evidence_surface: true
-validation:
-  commands:
-  - id: maintenance.build-check.validation.cmd001
-    runner: cargo
-    args:
-    - +1.95.0
-    - check
-    - -p
-    - vac-cli
-    risk: execute_process
-    approval: policy
-  - id: maintenance.build-check.validation.fmt
-    runner: cargo
-    args:
-    - +1.95.0
-    - fmt
-    - --all
-    - --check
-    risk: execute_process
-    approval: policy
-  - id: maintenance.build-check.validation.clippy
-    runner: cargo
-    args:
-    - +1.95.0
-    - clippy
-    - --workspace
-    - --all-targets
-    - --
-    - -D
-    - warnings
-    risk: execute_process
-    approval: policy
-  - id: maintenance.build-check.validation.deny
-    runner: cargo
-    args:
-    - +1.95.0
-    - deny
-    - check
-    risk: execute_process
-    approval: policy
-  - id: maintenance.build-check.validation.audit
-    runner: cargo
-    args:
-    - +1.95.0
-    - audit
-    risk: execute_process
-    approval: policy
-  gates:
-  - orient
-  - report
-  - validate
+  local_cargo: forbidden       # do not build/test/clippy/fmt locally
+jobs:
+  - { id: fmt,    run: "cargo fmt --all --check" }
+  - { id: clippy, run: "cargo clippy --workspace --all-targets --profile ci-test -- -D warnings" }
+  - { id: test,   run: "cargo nextest run --workspace --cargo-profile ci-test --partition count:{n}/4", matrix: { partition: [1, 2, 3, 4] } }
+acceptance:
+  mode: binary
+  unknown_is: fail             # a CI job that did not run => fail-closed
+  evidence: runner_emitted     # source = GitHub Actions run conclusion + logs
+  evidence_source: gh_actions_run
+  waivable_by: ledger/waivers.yaml

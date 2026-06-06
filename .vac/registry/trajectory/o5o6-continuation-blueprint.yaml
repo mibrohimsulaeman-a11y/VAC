@@ -1,7 +1,0 @@
-schema_version: 1
-kind: trajectory
-id: trajectory.o5o6-continuation-blueprint
-status: completed_source_static
-summary: implemented continuation blueprint batches from uploaded plan
-excluded:
-  raw_chain_of_thought: true
