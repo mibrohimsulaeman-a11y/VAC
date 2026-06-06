@@ -607,7 +607,7 @@ mod tests {
     fn env_guard() -> std::sync::MutexGuard<'static, ()> {
         env_lock()
             .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
     }
 
     fn run(cwd: &Path, args: &[&str]) -> (i32, String, String) {
