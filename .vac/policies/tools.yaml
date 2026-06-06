@@ -1,4 +1,4 @@
-schema_version: 2
+schema_version: 1
 kind: policy
 id: vac.policy.tools
 title: Tool invocation policy

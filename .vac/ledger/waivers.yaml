@@ -1,4 +1,4 @@
-schema_version: 2
+schema_version: 1
 kind: waiver_ledger
 id: vac.ledger.waivers
 # A waiver MUST expire and MUST be owned. An expired waiver re-opens its finding (fail-closed).

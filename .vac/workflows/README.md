@@ -1,6 +1,6 @@
 # Workflows (authored)
 
-Ordered, typed gate definitions. v2 acceptance is BINARY:
+Ordered, typed gate definitions. acceptance is BINARY:
 
 - `acceptance.mode: binary` — only `pass` or `fail`.
 - `acceptance.unknown_is: fail` — a gate/command that did not run is failing (fail-closed).
