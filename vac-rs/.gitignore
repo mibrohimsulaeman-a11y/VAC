@@ -10,3 +10,6 @@
 # cargo-sweep timestamp (per-machine prune marker)
 /sweep.timestamp
 
+# transient test output logs (never commit)
+*.log
+
