@@ -291,7 +291,9 @@ fn record_runtime_patch_evidence(
 ) -> Option<String> {
     match write_vac_init_runtime_patch_evidence(workspace_root, changes, "allowed") {
         Ok(_) => None,
-        Err(err) => Some(format!("VAC-Init runtime patch evidence write failed: {err}")),
+        Err(err) => Some(format!(
+            "VAC-Init runtime patch evidence write failed: {err}"
+        )),
     }
 }
 
