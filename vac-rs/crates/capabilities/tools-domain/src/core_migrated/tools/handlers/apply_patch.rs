@@ -531,14 +531,12 @@ impl ToolHandler for ApplyPatchHandler {
                         );
                         let finish_res = emitter.finish(event_ctx, Ok(exec_output)).await;
                         let content = finish_res?;
-                        if exit_code == 0 {
-                            if let Some(changes) = governed_changes.as_deref() {
-                                if let Some(warning) =
-                                    record_runtime_patch_evidence(cwd.as_path(), changes)
-                                {
-                                    session.record_model_warning(warning, turn.as_ref()).await;
-                                }
-                            }
+                        if exit_code == 0
+                            && let Some(changes) = governed_changes.as_deref()
+                            && let Some(warning) =
+                                record_runtime_patch_evidence(cwd.as_path(), changes)
+                        {
+                            session.record_model_warning(warning, turn.as_ref()).await;
                         }
                         Ok(ApplyPatchToolOutput::from_text(content))
                     }
@@ -589,12 +587,11 @@ impl ToolHandler for ApplyPatchHandler {
                             Some(&tracker),
                         );
                         let content = emitter.finish(event_ctx, out).await?;
-                        if let Some(changes) = governed_changes.as_deref() {
-                            if let Some(warning) =
+                        if let Some(changes) = governed_changes.as_deref()
+                            && let Some(warning) =
                                 record_runtime_patch_evidence(cwd.as_path(), changes)
-                            {
-                                session.record_model_warning(warning, turn.as_ref()).await;
-                            }
+                        {
+                            session.record_model_warning(warning, turn.as_ref()).await;
                         }
                         Ok(ApplyPatchToolOutput::from_text(content))
                     }
@@ -647,6 +644,15 @@ pub(crate) async fn intercept_apply_patch(
                     turn.as_ref(),
                 )
                 .await;
+            let governed_changes = match evaluate_runtime_patch_gate(cwd.as_path(), &changes) {
+                RuntimePatchGateOutcome::Blocked(report) => {
+                    return Err(FunctionCallError::RespondToModel(format!(
+                        "apply_patch blocked by VAC-Init runtime patch contract (fail-closed):\n{report}"
+                    )));
+                }
+                RuntimePatchGateOutcome::Allowed(changes) => Some(changes),
+                RuntimePatchGateOutcome::Ungoverned => None,
+            };
             let (approval_keys, effective_additional_permissions, file_system_sandbox_policy) =
                 effective_patch_permissions(session.as_ref(), turn.as_ref(), &changes).await;
             let changes_protocol = convert_apply_patch_to_protocol(&changes);
@@ -697,6 +703,13 @@ pub(crate) async fn intercept_apply_patch(
                         tracker.as_ref().copied(),
                     );
                     let finish_res = emitter.finish(event_ctx, Ok(exec_output.clone())).await;
+
+                    if exit_code == 0
+                        && let Some(changes) = governed_changes.as_deref()
+                        && let Some(warning) = record_runtime_patch_evidence(cwd.as_path(), changes)
+                    {
+                        session.record_model_warning(warning, turn.as_ref()).await;
+                    }
 
                     match finish_res {
                         Ok(finished_content) => {
