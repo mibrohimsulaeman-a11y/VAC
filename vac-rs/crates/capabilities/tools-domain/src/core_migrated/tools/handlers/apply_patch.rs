@@ -9,6 +9,9 @@ use std::time::Instant;
 use crate::apply_patch;
 use crate::apply_patch::InternalApplyPatchInvocation;
 use crate::apply_patch::convert_apply_patch_to_protocol;
+use crate::control_plane::VacInitRuntimePatchFileChange;
+use crate::control_plane::evaluate_vac_init_runtime_patch_contract;
+use crate::control_plane::write_vac_init_runtime_patch_evidence;
 use crate::function_tool::FunctionCallError;
 use crate::session::session::Session;
 use crate::session::turn_context::TurnContext;
@@ -210,6 +213,88 @@ fn to_abs_path(cwd: &AbsolutePathBuf, path: &Path) -> Option<AbsolutePathBuf> {
     Some(AbsolutePathBuf::resolve_path_against_base(path, cwd))
 }
 
+/// Outcome of evaluating the VAC-Init runtime patch contract before applying a
+/// patch to disk.
+enum RuntimePatchGateOutcome {
+    /// No active VAC-Init runtime plan governs this workspace, so bounded-patch
+    /// enforcement is not engaged and the patch proceeds unchanged.
+    Ungoverned,
+    /// An active plan governs the workspace and the patch is within contract.
+    Allowed(Vec<VacInitRuntimePatchFileChange>),
+    /// An active plan governs the workspace and the patch violates the
+    /// contract; the rendered report explains why.
+    Blocked(String),
+}
+
+fn runtime_patch_changes(
+    action: &ApplyPatchAction,
+    workspace_root: &Path,
+) -> Vec<VacInitRuntimePatchFileChange> {
+    let mut changes = Vec::new();
+    for (path, change) in action.changes() {
+        let absolute = AbsolutePathBuf::resolve_path_against_base(path, &action.cwd);
+        let relative = absolute
+            .as_path()
+            .strip_prefix(workspace_root)
+            .map(Path::to_path_buf)
+            .unwrap_or_else(|_| path.clone())
+            .to_string_lossy()
+            .to_string();
+        let change = match change {
+            ApplyPatchFileChange::Add { content } => {
+                VacInitRuntimePatchFileChange::create(relative, content)
+            }
+            ApplyPatchFileChange::Delete { content } => {
+                VacInitRuntimePatchFileChange::delete(relative, content)
+            }
+            ApplyPatchFileChange::Update {
+                unified_diff,
+                new_content,
+                ..
+            } => VacInitRuntimePatchFileChange::modify(
+                relative,
+                unified_diff,
+                Some(new_content.clone()),
+            ),
+        };
+        changes.push(change);
+    }
+    changes
+}
+
+/// Evaluates the VAC-Init runtime patch contract before any bytes are written.
+///
+/// When an active plan governs the workspace the contract is fail-closed: any
+/// violation blocks the apply_patch. When no active plan is present the runtime
+/// is not in a governed bounded-patch session and the patch proceeds unchanged.
+fn evaluate_runtime_patch_gate(
+    workspace_root: &Path,
+    action: &ApplyPatchAction,
+) -> RuntimePatchGateOutcome {
+    let changes = runtime_patch_changes(action, workspace_root);
+    let report = match evaluate_vac_init_runtime_patch_contract(workspace_root, &changes) {
+        Ok(report) => report,
+        Err(_) => return RuntimePatchGateOutcome::Ungoverned,
+    };
+    if report.is_blocked() {
+        return RuntimePatchGateOutcome::Blocked(report.render_text());
+    }
+    RuntimePatchGateOutcome::Allowed(changes)
+}
+
+/// Writes runtime patch evidence after a governed apply_patch succeeds. Evidence
+/// write failures are returned for surfacing as a model warning but never roll
+/// back an applied patch.
+fn record_runtime_patch_evidence(
+    workspace_root: &Path,
+    changes: &[VacInitRuntimePatchFileChange],
+) -> Option<String> {
+    match write_vac_init_runtime_patch_evidence(workspace_root, changes, "allowed") {
+        Ok(_) => None,
+        Err(err) => Some(format!("VAC-Init runtime patch evidence write failed: {err}")),
+    }
+}
+
 fn write_permissions_for_paths(
     file_paths: &[AbsolutePathBuf],
     file_system_sandbox_policy: &vac_protocol::permissions::FileSystemSandboxPolicy,
@@ -384,6 +469,15 @@ impl ToolHandler for ApplyPatchHandler {
         .await
         {
             vac_apply_patch::MaybeApplyPatchVerified::Body(changes) => {
+                let governed_changes = match evaluate_runtime_patch_gate(cwd.as_path(), &changes) {
+                    RuntimePatchGateOutcome::Blocked(report) => {
+                        return Err(FunctionCallError::RespondToModel(format!(
+                            "apply_patch blocked by VAC-Init runtime patch contract (fail-closed):\n{report}"
+                        )));
+                    }
+                    RuntimePatchGateOutcome::Allowed(changes) => Some(changes),
+                    RuntimePatchGateOutcome::Ungoverned => None,
+                };
                 let (file_paths, effective_additional_permissions, file_system_sandbox_policy) =
                     effective_patch_permissions(session.as_ref(), turn.as_ref(), &changes).await;
                 let changes_protocol = convert_apply_patch_to_protocol(&changes);
@@ -435,6 +529,15 @@ impl ToolHandler for ApplyPatchHandler {
                         );
                         let finish_res = emitter.finish(event_ctx, Ok(exec_output)).await;
                         let content = finish_res?;
+                        if exit_code == 0 {
+                            if let Some(changes) = governed_changes.as_deref() {
+                                if let Some(warning) =
+                                    record_runtime_patch_evidence(cwd.as_path(), changes)
+                                {
+                                    session.record_model_warning(warning, turn.as_ref()).await;
+                                }
+                            }
+                        }
                         Ok(ApplyPatchToolOutput::from_text(content))
                     }
                     InternalApplyPatchInvocation::DelegateToRuntime(apply) => {
@@ -484,6 +587,13 @@ impl ToolHandler for ApplyPatchHandler {
                             Some(&tracker),
                         );
                         let content = emitter.finish(event_ctx, out).await?;
+                        if let Some(changes) = governed_changes.as_deref() {
+                            if let Some(warning) =
+                                record_runtime_patch_evidence(cwd.as_path(), changes)
+                            {
+                                session.record_model_warning(warning, turn.as_ref()).await;
+                            }
+                        }
                         Ok(ApplyPatchToolOutput::from_text(content))
                     }
                 }
