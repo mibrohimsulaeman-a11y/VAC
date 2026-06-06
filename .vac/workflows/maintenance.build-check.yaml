@@ -1,4 +1,4 @@
-schema_version: 2
+schema_version: 1
 kind: workflow
 id: maintenance.build-check
 title: Build check (delegated to GitHub CI "Rust CI")

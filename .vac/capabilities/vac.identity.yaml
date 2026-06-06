@@ -1,4 +1,4 @@
-schema_version: 2
+schema_version: 1
 kind: capability
 id: vac.identity
 title: Identity
@@ -13,7 +13,7 @@ ownership:
     exclude:
       - "**/target/**"
 notes:
-  - v1 mis-scoped all of provider-http under identity. In v2, HTTP/provider transport belongs to vac.runtime; identity owns auth/login only.
+  - Provider-http transport belongs to vac.runtime, not identity; identity owns auth/login only.
 policy:
   risk: low
   mutates_files: false

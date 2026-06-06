@@ -1,4 +1,4 @@
-# VAC Control Plane (v2 — lock + cache model)
+# VAC Control Plane (lock + cache model)
 
 `.vac/` is a THIN, declarative intent layer over the codebase — NOT a second codebase.
 
@@ -10,7 +10,7 @@ Mental model (borrowed from Cargo):
 | `Cargo.lock`| `derived/` (ownership, inventory, risk, surface-coverage)      | DERIVED — regenerated, never hand-edited |
 | `target/`   | `cache/`                                                       | transient, git-ignored                   |
 
-## Hard rules (v2)
+## Hard rules
 
 1. **Authored vs derived are separated.** Anything computable from code lives in `derived/` and is git-ignored. Never hand-maintain ownership maps, inventories, or risk findings.
 2. **Gates are binary.** A gate is `pass` or `fail`. "Not evaluated" is NOT a pass — it is fail-closed. There is no `pass_or_recorded_pending`.
