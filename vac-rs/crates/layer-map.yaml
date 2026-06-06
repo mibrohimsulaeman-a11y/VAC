@@ -1,7 +1,7 @@
 schema_version: 1
 kind: workspace_layer_map
 id: vac-rs.layer-map
-status: migrating
+status: complete
 layers:
   capabilities:
     - crate_path: crates/capabilities/code-mode
@@ -172,6 +172,9 @@ layers:
     - crate_path: crates/integrations/network-proxy
       previous_path: network-proxy
       relocation_status: migrated
+    - crate_path: crates/integrations/otel
+      previous_path: otel
+      relocation_status: migrated
     - crate_path: crates/integrations/plugin
       previous_path: plugin
       relocation_status: migrated
@@ -185,6 +188,9 @@ layers:
       previous_path: vac-mcp
       relocation_status: migrated
   providers:
+    - crate_path: crates/providers/agent-identity
+      previous_path: agent-identity
+      relocation_status: migrated
     - crate_path: crates/providers/analytics
       previous_path: analytics
       relocation_status: migrated
@@ -271,7 +277,11 @@ layers:
     - crate_path: crates/surfaces/tui
       previous_path: tui
       relocation_status: migrated
-residual_flat_crates:
-  - agent-identity
-  - core
-  - otel
+root_crates:
+  # Apex crate intentionally kept at the workspace root (vac-rs/core), not nested
+  # under crates/. It depends on control-plane and every lower layer and is
+  # consumed only by the surfaces layer; multiple static gates pin its path.
+  - crate_path: core
+    layer: control-plane
+    relocation_status: retained_root
+residual_flat_crates: []
