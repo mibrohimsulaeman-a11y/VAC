@@ -392,6 +392,7 @@ pub fn is_known_kind(value: &str) -> bool {
     validate_manifest_kind(value).is_ok()
 }
 
+#[allow(clippy::expect_used)] // every VacManifestKind variant is present in KIND_REGISTRY by construction
 pub fn kind_registry_entry(kind: VacManifestKind) -> &'static KindRegistryEntry {
     KIND_REGISTRY
         .iter()

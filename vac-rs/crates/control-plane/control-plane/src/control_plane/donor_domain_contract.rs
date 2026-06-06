@@ -567,11 +567,11 @@ mod tests {
     #[test]
     fn every_contract_has_owner_surface_gate_and_guardrail() {
         for contract in DONOR_DOMAIN_CONTRACTS {
-            assert!(!contract.owner.is_empty(), "{:?}", contract);
-            assert!(!contract.donor_sources.is_empty(), "{:?}", contract);
-            assert!(!contract.target_capabilities.is_empty(), "{:?}", contract);
-            assert!(!contract.surfaces.is_empty(), "{:?}", contract);
-            assert!(!contract.gates.is_empty(), "{:?}", contract);
+            assert!(!contract.owner.is_empty(), "{contract:?}");
+            assert!(!contract.donor_sources.is_empty(), "{contract:?}");
+            assert!(!contract.target_capabilities.is_empty(), "{contract:?}");
+            assert!(!contract.surfaces.is_empty(), "{contract:?}");
+            assert!(!contract.gates.is_empty(), "{contract:?}");
             assert!(
                 contract.blocked_runtime_claim.starts_with("No "),
                 "{}",

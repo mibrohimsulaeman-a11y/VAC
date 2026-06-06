@@ -131,7 +131,7 @@ pub fn load_donor_status_report(path: impl AsRef<Path>) -> DonorStatusReport {
     };
 
     let mut manifest_paths: Vec<PathBuf> = read_dir
-        .filter_map(|entry| entry.ok())
+        .filter_map(std::result::Result::ok)
         .map(|entry| entry.path())
         .filter(|path| path.extension().and_then(OsStr::to_str) == Some("yaml"))
         .collect();

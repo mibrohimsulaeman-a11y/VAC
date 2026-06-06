@@ -287,14 +287,10 @@ pub fn classify_live_path(path: &str) -> LiveSourceClass {
         LiveSourceClass::ProductTest
     } else if normalized.ends_with(".md") {
         LiveSourceClass::Documentation
-    } else if normalized.starts_with("vac-rs/")
-        && (normalized.contains("/src/") || normalized.ends_with("/Cargo.toml"))
-        && (normalized.ends_with(".rs") || normalized.ends_with(".toml"))
+    } else if (normalized.starts_with("scripts/") && normalized.ends_with(".sh"))
+        || normalized.ends_with(".rs")
+        || normalized.ends_with(".toml")
     {
-        LiveSourceClass::ProductRuntime
-    } else if normalized.starts_with("scripts/") && normalized.ends_with(".sh") {
-        LiveSourceClass::ProductRuntime
-    } else if normalized.ends_with(".rs") || normalized.ends_with(".toml") {
         LiveSourceClass::ProductRuntime
     } else {
         LiveSourceClass::Unknown
@@ -576,7 +572,7 @@ pub fn render_policy_inference_report_yaml(findings: &[LiveRiskFinding]) -> Stri
             out.push_str(&format!("  - risk: {}\n", action.as_str()));
             out.push_str(&format!("    scope: {}\n", scope.as_str()));
             out.push_str(&format!("    source_count: {}\n", scoped.len()));
-            out.push_str(&format!("    decision: {}\n", decision));
+            out.push_str(&format!("    decision: {decision}\n"));
             out.push_str(&format!(
                 "    confidence_label: {}\n",
                 max_confidence_label(&scoped).as_str()
@@ -713,27 +709,23 @@ pub fn render_scanner_doctor_report_yaml(
     out.push_str("schema_version: 1\nkind: registry_status\nid: init.scanner_doctor_report\ntitle: VAC init scanner doctor report\nstatus: ready\nsummary:\n");
     out.push_str(&format!("  source_files: {}\n", entries.len()));
     out.push_str(&format!("  risk_findings: {}\n", findings.len()));
-    out.push_str(&format!("  ownership_status: {}\n", ownership_status));
+    out.push_str(&format!("  ownership_status: {ownership_status}\n"));
     out.push_str(&format!(
-        "  ownership_not_evaluated_findings: {}\n",
-        not_evaluated
+        "  ownership_not_evaluated_findings: {not_evaluated}\n"
     ));
     out.push_str(&format!(
-        "  unowned_product_runtime_findings: {}\n",
-        unowned_runtime
+        "  unowned_product_runtime_findings: {unowned_runtime}\n"
     ));
     out.push_str(&format!(
-        "  overclaimed_product_runtime_findings: {}\n",
-        overclaimed_runtime
+        "  overclaimed_product_runtime_findings: {overclaimed_runtime}\n"
     ));
     out.push_str(&format!(
-        "  product_runtime_credential_without_deny: {}\n",
-        credential_without_deny
+        "  product_runtime_credential_without_deny: {credential_without_deny}\n"
     ));
     out.push_str("checks:\n");
     out.push_str("  full_storage: pass\n");
     out.push_str("  policy_fail_closed: pass\n");
-    out.push_str(&format!("  ownership: {}\n", ownership_status));
+    out.push_str(&format!("  ownership: {ownership_status}\n"));
     out.push_str("classes:\n");
     for class in LiveSourceClass::ALL_REPORT_CLASSES {
         out.push_str(&format!(
@@ -765,7 +757,7 @@ fn donor_inventory_marks_quarantined(root: &Path, relative_path: &str) -> bool {
     let Some(crate_name) = crate_name else {
         return false;
     };
-    let needle = format!("donor_source: {}", crate_name);
+    let needle = format!("donor_source: {crate_name}");
     let Some(start) = source.find(&needle) else {
         return false;
     };
@@ -1351,7 +1343,7 @@ fn yaml_scalar(value: &str) -> String {
     {
         value.to_string()
     } else {
-        format!("{:?}", value)
+        format!("{value:?}")
     }
 }
 

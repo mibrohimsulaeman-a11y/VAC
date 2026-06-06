@@ -148,6 +148,7 @@ impl LocalRuntimeBridge {
         }
     }
 
+    #[allow(clippy::expect_used)] // task.start() on a freshly-created Pending task is infallible
     pub fn map_core_event(&mut self, event: Event) -> BridgeOutput {
         if let Some(turn_id) = event_turn_id(&event.msg)
             && let Some(active_turn_id) = self.current_turn_id.as_deref()
@@ -220,7 +221,7 @@ impl LocalRuntimeBridge {
                 )));
                 if is_validation_command(&begin.command) {
                     self.validation_calls
-                        .insert(begin.call_id.clone(), command_display.clone());
+                        .insert(begin.call_id, command_display.clone());
                     events.push(RuntimeEvent::ValidationStarted(ValidationStarted::new(
                         self.task_id,
                         command_display,
@@ -386,7 +387,7 @@ impl LocalRuntimeBridge {
             EventMsg::TurnComplete(TurnCompleteEvent {
                 last_agent_message, ..
             }) => {
-                let summary = last_agent_message.clone().or_else(|| {
+                let summary = last_agent_message.or_else(|| {
                     (!self.assistant_buffer.trim().is_empty())
                         .then(|| self.assistant_buffer.trim().to_string())
                 });
@@ -471,7 +472,7 @@ impl LocalRuntimeBridge {
                 let affects_turn_status = error
                     .vac_error_info
                     .as_ref()
-                    .is_none_or(|info| info.affects_turn_status());
+                    .is_none_or(vac_protocol::protocol::VACErrorInfo::affects_turn_status);
                 if affects_turn_status {
                     self.push_evidence(format!("error: {}", error.message));
                 }
@@ -484,7 +485,7 @@ impl LocalRuntimeBridge {
             }) => {
                 let affects_turn_status = vac_error_info
                     .as_ref()
-                    .is_none_or(|info| info.affects_turn_status());
+                    .is_none_or(vac_protocol::protocol::VACErrorInfo::affects_turn_status);
                 if affects_turn_status {
                     self.push_evidence(format!("stream error: {message}"));
                 }
@@ -493,20 +494,20 @@ impl LocalRuntimeBridge {
                     self.push_evidence(details);
                 }
             }
-            EventMsg::UserMessage(UserMessageEvent { message, .. }) => {
-                if self.final_message.is_none() && !message.trim().is_empty() {
-                    self.final_message = Some(message);
-                }
+            EventMsg::UserMessage(UserMessageEvent { message, .. })
+                if self.final_message.is_none() && !message.trim().is_empty() =>
+            {
+                self.final_message = Some(message);
             }
             EventMsg::ItemStarted(ItemStartedEvent { item, .. }) => {
-                if let TurnItem::Plan(plan) = item {
-                    if !plan.text.trim().is_empty() {
-                        self.append_assistant_text(&plan.text);
-                        events.push(RuntimeEvent::AssistantDelta(AssistantDelta::new(
-                            self.task_id,
-                            plan.text,
-                        )));
-                    }
+                if let TurnItem::Plan(plan) = item
+                    && !plan.text.trim().is_empty()
+                {
+                    self.append_assistant_text(&plan.text);
+                    events.push(RuntimeEvent::AssistantDelta(AssistantDelta::new(
+                        self.task_id,
+                        plan.text,
+                    )));
                 }
             }
             EventMsg::ItemCompleted(ItemCompletedEvent { item, .. }) => {
@@ -514,10 +515,8 @@ impl LocalRuntimeBridge {
                     && let Some(text) = message
                         .content
                         .iter()
-                        .filter_map(|content| match content {
-                            vac_protocol::items::AgentMessageContent::Text { text } => {
-                                Some(text.clone())
-                            }
+                        .map(|content| match content {
+                            vac_protocol::items::AgentMessageContent::Text { text } => text.clone(),
                         })
                         .next()
                     && !text.trim().is_empty()
@@ -810,6 +809,12 @@ fn turn_abort_reason_label(reason: TurnAbortReason) -> &'static str {
     }
 }
 
+fn convert_protocol_review_target(
+    target: vac_protocol::protocol::ReviewTarget,
+) -> super::ReviewTarget {
+    target
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1072,10 +1077,4 @@ mod tests {
                 .any(|entry| entry.contains("additional evidence entries dropped"))
         );
     }
-}
-
-fn convert_protocol_review_target(
-    target: vac_protocol::protocol::ReviewTarget,
-) -> super::ReviewTarget {
-    target
 }

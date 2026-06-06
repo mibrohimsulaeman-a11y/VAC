@@ -327,7 +327,7 @@ pub fn load_workflow_run_report(start: impl AsRef<Path>) -> WorkflowRunReport {
     let registry = super::registry::load_control_plane_registry_report(start);
     let workflows = registry
         .registry()
-        .map(|registry| load_workflow_run_entries(registry))
+        .map(load_workflow_run_entries)
         .unwrap_or_default();
     WorkflowRunReport {
         registry,

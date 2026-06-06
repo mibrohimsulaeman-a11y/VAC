@@ -365,27 +365,27 @@ fn classify_root_feature(
             req.expected_source_roots
                 .iter()
                 .filter(|root| !expected_source_root_satisfied(repo_root, root))
-                .map(|root| root.to_string())
+                .map(std::string::ToString::to_string)
                 .collect::<Vec<_>>(),
             req.expected_surfaces
                 .iter()
                 .filter(|surface_id| !capability_satisfies_expected_surface(manifest, surface_id))
-                .map(|surface_id| surface_id.to_string())
+                .map(std::string::ToString::to_string)
                 .collect::<Vec<_>>(),
             req.expected_policy
                 .iter()
                 .filter(|policy_id| !capability_satisfies_expected_policy(manifest, policy_id))
-                .map(|policy_id| policy_id.to_string())
+                .map(std::string::ToString::to_string)
                 .collect::<Vec<_>>(),
             req.expected_validation
                 .iter()
                 .filter(|cmd| !capability_satisfies_expected_validation(manifest, cmd))
-                .map(|cmd| cmd.to_string())
+                .map(std::string::ToString::to_string)
                 .collect::<Vec<_>>(),
             req.expected_ownership
                 .iter()
                 .filter(|expected| !capability_satisfies_expected_ownership(manifest, expected))
-                .map(|expected| expected.to_string())
+                .map(std::string::ToString::to_string)
                 .collect::<Vec<_>>(),
         )
     } else {
@@ -875,7 +875,7 @@ edition = "2024"
         partial.state = ConversionState::Partial;
         assert_eq!(entry_severity(&partial), ConversionSeverity::Warning);
 
-        let mut complete = base.clone();
+        let mut complete = base;
         complete.state = ConversionState::Complete;
         assert_eq!(entry_severity(&complete), ConversionSeverity::Info);
     }

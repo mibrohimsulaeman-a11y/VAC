@@ -199,7 +199,7 @@ pub fn canonical_yaml_scalar(value: &str) -> String {
     {
         value.to_string()
     } else {
-        format!("{:?}", value)
+        format!("{value:?}")
     }
 }
 
@@ -337,13 +337,13 @@ pub fn verify_evidence_record(record: &EvidenceRecord) -> Result<(), EvidenceCha
             });
         }
     }
-    if let Some(previous_hash) = &record.chain.previous_hash {
-        if !is_sha256_hex(previous_hash) {
-            return Err(EvidenceChainError::InvalidHashFormat {
-                evidence_id: record.id.clone(),
-                field: "chain.previous_hash".to_string(),
-            });
-        }
+    if let Some(previous_hash) = &record.chain.previous_hash
+        && !is_sha256_hex(previous_hash)
+    {
+        return Err(EvidenceChainError::InvalidHashFormat {
+            evidence_id: record.id.clone(),
+            field: "chain.previous_hash".to_string(),
+        });
     }
     let expected = compute_evidence_self_hash(record);
     if expected != record.chain.self_hash {
@@ -736,7 +736,7 @@ mod tests {
         let mut changed = base.clone();
         changed.files_modified[0].lines_added += 1;
         assert_ne!(compute_evidence_self_hash(&changed), base_hash);
-        let mut changed = base.clone();
+        let mut changed = base;
         changed.commands_executed[0].duration_ms += 1;
         assert_ne!(compute_evidence_self_hash(&changed), base_hash);
     }

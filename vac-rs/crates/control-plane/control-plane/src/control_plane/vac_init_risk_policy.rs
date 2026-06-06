@@ -60,6 +60,7 @@ impl RiskDetectionMethod {
         }
     }
 
+    #[allow(clippy::should_implement_trait)] // inherent parser returns Option, not std FromStr
     pub fn from_str(value: &str) -> Option<Self> {
         match value {
             "ast_exact" => Some(Self::AstExact),

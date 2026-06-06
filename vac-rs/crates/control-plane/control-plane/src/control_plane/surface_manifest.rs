@@ -352,18 +352,17 @@ fn validate_surface_routes(
             ));
         }
 
-        if route.visible {
-            if route
+        if route.visible
+            && route
                 .owner
                 .as_ref()
                 .is_none_or(|owner| owner.trim().is_empty())
-            {
-                return Err(SurfaceManifestError::new(
-                    path,
-                    format!("{field_path}.owner"),
-                    "visible routes must declare a capability owner",
-                ));
-            }
+        {
+            return Err(SurfaceManifestError::new(
+                path,
+                format!("{field_path}.owner"),
+                "visible routes must declare a capability owner",
+            ));
         }
 
         if matches!(
@@ -404,14 +403,14 @@ fn validate_surface_routes(
             ));
         }
 
-        if let Some(known_capabilities) = known_capabilities {
-            if !known_capabilities.contains(&route.capability) {
-                return Err(SurfaceManifestError::new(
-                    path,
-                    format!("{field_path}.capability"),
-                    "surface references an unknown capability",
-                ));
-            }
+        if let Some(known_capabilities) = known_capabilities
+            && !known_capabilities.contains(&route.capability)
+        {
+            return Err(SurfaceManifestError::new(
+                path,
+                format!("{field_path}.capability"),
+                "surface references an unknown capability",
+            ));
         }
     }
 
@@ -428,6 +427,7 @@ fn validate_surface_routes(
     Ok(())
 }
 
+#[allow(clippy::expect_used)] // option fields are validated present before unwrap per route kind
 fn validate_route_kind(
     path: &Path,
     field_path: &str,

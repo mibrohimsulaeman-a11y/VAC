@@ -513,7 +513,7 @@ routes:
         "rendered:\n{rendered}"
     );
     assert!(
-        rendered.contains("surface route owner `vac-tui/chatwidget` differs from capability owner `vac-tui/chatwidget`") == false,
+        !rendered.contains("surface route owner `vac-tui/chatwidget` differs from capability owner `vac-tui/chatwidget`"),
         "matching owner should not warn:\n{rendered}"
     );
 }

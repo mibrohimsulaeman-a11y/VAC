@@ -39,24 +39,23 @@ impl WhyQuery {
 
     pub fn validate(&self) -> Result<(), SafeRationaleError> {
         validate_relative_file_path(&self.file)?;
-        if let Some((start, end)) = self.range {
-            if start == 0 || end < start {
-                return Err(SafeRationaleError::InvalidQuery(
-                    "range must be one-based and end >= start".to_string(),
-                ));
-            }
+        if let Some((start, end)) = self.range
+            && (start == 0 || end < start)
+        {
+            return Err(SafeRationaleError::InvalidQuery(
+                "range must be one-based and end >= start".to_string(),
+            ));
         }
-        if let Some(line) = self.line {
-            if line == 0 {
-                return Err(SafeRationaleError::InvalidQuery(
-                    "line must be one-based".to_string(),
-                ));
-            }
+        if let Some(line) = self.line
+            && line == 0
+        {
+            return Err(SafeRationaleError::InvalidQuery(
+                "line must be one-based".to_string(),
+            ));
         }
         if self.depth > MAX_WHY_DEPTH {
             return Err(SafeRationaleError::InvalidQuery(format!(
-                "depth exceeds maximum {}",
-                MAX_WHY_DEPTH
+                "depth exceeds maximum {MAX_WHY_DEPTH}"
             )));
         }
         Ok(())
@@ -165,8 +164,7 @@ pub fn validate_relative_file_path(path: &str) -> Result<(), SafeRationaleError>
     }
     if path.starts_with('/') || path.contains("..") || path.contains('\\') {
         return Err(SafeRationaleError::InvalidQuery(format!(
-            "file path must be workspace-relative and normalized: {}",
-            path
+            "file path must be workspace-relative and normalized: {path}"
         )));
     }
     Ok(())
@@ -175,8 +173,7 @@ pub fn validate_relative_file_path(path: &str) -> Result<(), SafeRationaleError>
 pub fn validate_safe_id(prefix: &str, id: &str) -> Result<(), SafeRationaleError> {
     if !id.starts_with(prefix) {
         return Err(SafeRationaleError::InvalidReference(format!(
-            "{} must start with {}",
-            id, prefix
+            "{id} must start with {prefix}"
         )));
     }
     if !id
@@ -184,8 +181,7 @@ pub fn validate_safe_id(prefix: &str, id: &str) -> Result<(), SafeRationaleError
         .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, '.' | '-' | '_'))
     {
         return Err(SafeRationaleError::InvalidReference(format!(
-            "id contains invalid characters: {}",
-            id
+            "id contains invalid characters: {id}"
         )));
     }
     Ok(())
@@ -228,8 +224,7 @@ pub fn validate_safe_rationale(result: &WhyResult) -> Result<(), SafeRationaleEr
     }
     if result.chain_depth > MAX_WHY_DEPTH {
         return Err(SafeRationaleError::UnsafeRationale(format!(
-            "chain depth exceeds maximum {}",
-            MAX_WHY_DEPTH
+            "chain depth exceeds maximum {MAX_WHY_DEPTH}"
         )));
     }
     for policy_ref in &result.rationale.policy_refs {
@@ -247,7 +242,7 @@ pub fn lookup_safe_rationale(index: &TrajectoryIndex, query: WhyQuery) -> WhyLoo
     let mut results = Vec::new();
 
     if let Err(err) = query.validate() {
-        diagnostics.push(format!("invalid query: {:?}", err));
+        diagnostics.push(format!("invalid query: {err:?}"));
         return WhyLookupReport {
             query,
             results,

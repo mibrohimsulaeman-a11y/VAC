@@ -103,7 +103,7 @@ impl SurfaceRouteCatalog {
     }
 
     pub fn len(&self) -> usize {
-        self.entries.values().map(|values| values.len()).sum()
+        self.entries.values().map(std::vec::Vec::len).sum()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -389,18 +389,19 @@ pub fn validate_surface_reverse_drift(
             }
         }
 
-        if let Some(cli_decl) = &cap.surfaces.cli {
-            if cli_decl.enabled && !cli_decl.commands.is_empty() {
-                let declared: BTreeSet<String> = cli_decl.commands.iter().cloned().collect();
-                let present = cli_routes.get(id).cloned().unwrap_or_default();
-                if declared != present {
-                    out.push(SurfaceCrossDiagnostic::SurfaceRouteDrift {
-                        capability: id.clone(),
-                        kind: SurfaceRouteKind::Cli,
-                        declared: declared.into_iter().collect(),
-                        present: present.into_iter().collect(),
-                    });
-                }
+        if let Some(cli_decl) = &cap.surfaces.cli
+            && cli_decl.enabled
+            && !cli_decl.commands.is_empty()
+        {
+            let declared: BTreeSet<String> = cli_decl.commands.iter().cloned().collect();
+            let present = cli_routes.get(id).cloned().unwrap_or_default();
+            if declared != present {
+                out.push(SurfaceCrossDiagnostic::SurfaceRouteDrift {
+                    capability: id.clone(),
+                    kind: SurfaceRouteKind::Cli,
+                    declared: declared.into_iter().collect(),
+                    present: present.into_iter().collect(),
+                });
             }
         }
     }

@@ -307,8 +307,6 @@ fn sanitize_path_segment(value: &str) -> String {
         .map(|ch| {
             if ch.is_ascii_alphanumeric() || matches!(ch, '-' | '_') {
                 ch
-            } else if ch == '/' {
-                '_'
             } else {
                 '_'
             }

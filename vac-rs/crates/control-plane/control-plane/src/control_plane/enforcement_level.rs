@@ -326,7 +326,7 @@ fn nested_scalar(value: &Value, keys: &[&str]) -> Option<String> {
     for key in keys {
         current = current
             .as_mapping()
-            .and_then(|mapping| mapping.get(&Value::String((*key).to_string())))?;
+            .and_then(|mapping| mapping.get(Value::String((*key).to_string())))?;
     }
     match current {
         Value::String(value) => Some(value.clone()),

@@ -183,7 +183,7 @@ pub fn evaluate_structured_command(
         if contains_shell_meta(arg) {
             issues.push(CommandGateIssue::new(
                 "command.arg.shell_meta",
-                format!("argument '{}' contains shell metacharacters", arg),
+                format!("argument '{arg}' contains shell metacharacters"),
             ));
         }
     }

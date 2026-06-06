@@ -77,11 +77,8 @@ fn local_runtime_task_started_event_keeps_task_snapshot() {
     };
     let event = RuntimeEvent::TaskStarted(TaskStarted::new(task.clone()));
 
-    assert_eq!(
-        event,
-        RuntimeEvent::TaskStarted(TaskStarted { task: task.clone() })
-    );
-    assert!(format!("{:?}", event).contains("TaskStarted"));
+    assert_eq!(event, RuntimeEvent::TaskStarted(TaskStarted { task }));
+    assert!(format!("{event:?}").contains("TaskStarted"));
 
     let session = RuntimeSession {
         id: session_id,
@@ -186,12 +183,12 @@ fn local_runtime_error_and_completion_types_are_operator_friendly() {
 
     assert_eq!(error.owner, RuntimeErrorOwner::Internal);
     assert_eq!(error.retry_safe, true);
-    assert!(format!("{:?}", failed).contains("TaskFailed"));
-    assert!(format!("{:?}", completed).contains("TaskCompleted"));
-    assert!(format!("{:?}", cancelled).contains("TaskCancelled"));
-    assert!(format!("{:?}", assistant_delta).contains("AssistantDelta"));
-    assert!(format!("{:?}", tool_started).contains("ToolCallStarted"));
-    assert!(format!("{:?}", tool_finished).contains("ToolCallFinished"));
+    assert!(format!("{failed:?}").contains("TaskFailed"));
+    assert!(format!("{completed:?}").contains("TaskCompleted"));
+    assert!(format!("{cancelled:?}").contains("TaskCancelled"));
+    assert!(format!("{assistant_delta:?}").contains("AssistantDelta"));
+    assert!(format!("{tool_started:?}").contains("ToolCallStarted"));
+    assert!(format!("{tool_finished:?}").contains("ToolCallFinished"));
     assert_eq!(RuntimeEntrypoint::Workflow.to_string(), "workflow");
     assert_eq!(AutonomyMode::Suggest.to_string(), "suggest");
 }

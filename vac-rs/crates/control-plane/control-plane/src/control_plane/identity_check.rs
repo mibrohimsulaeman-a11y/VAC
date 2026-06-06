@@ -512,7 +512,7 @@ impl IdentityCheckReport {
 
 fn normalize_for_comparison(s: &str) -> String {
     s.chars()
-        .filter(|c| c.is_ascii_alphanumeric())
+        .filter(char::is_ascii_alphanumeric)
         .collect::<String>()
         .to_ascii_lowercase()
 }
@@ -562,6 +562,92 @@ pub fn load_identity_check_report(root: impl AsRef<Path>) -> IdentityCheckReport
         scanned_file_count: files.len(),
         findings,
     }
+}
+
+fn collect_identity_check_files(root: &Path, dir: &Path, files: &mut Vec<PathBuf>) {
+    if !dir.exists() {
+        return;
+    }
+    if should_skip_path(root, dir) {
+        return;
+    }
+    if dir.is_file() {
+        if should_scan_file(dir) {
+            files.push(dir.to_path_buf());
+        }
+        return;
+    }
+    if !dir.is_dir() {
+        return;
+    }
+
+    let Ok(entries) = fs::read_dir(dir) else {
+        return;
+    };
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if should_skip_path(root, &path) {
+            continue;
+        }
+
+        let Ok(file_type) = entry.file_type() else {
+            continue;
+        };
+        if file_type.is_dir() {
+            collect_identity_check_files(root, &path, files);
+        } else if file_type.is_file() && should_scan_file(&path) {
+            files.push(path);
+        }
+    }
+}
+
+fn should_skip_path(root: &Path, path: &Path) -> bool {
+    let Ok(relative) = path.strip_prefix(root) else {
+        return false;
+    };
+
+    if identity_exemption_for_path(relative).is_some() {
+        return true;
+    }
+
+    relative.components().any(|component| {
+        matches!(
+            component.as_os_str(),
+            os if os == OsStr::new(".git")
+                || os == OsStr::new("donor")
+                || os == OsStr::new("target")
+        )
+    })
+}
+
+fn identity_exemption_for_path(relative: &Path) -> Option<&'static IdentityExemption> {
+    IDENTITY_CHECK_EXEMPTIONS
+        .iter()
+        .find(|exemption| identity_exemption_matches(relative, exemption.path))
+}
+
+fn identity_exemption_matches(relative: &Path, exemption_path: &str) -> bool {
+    if let Some(prefix) = exemption_path.strip_suffix("/**") {
+        return relative.starts_with(prefix);
+    }
+
+    relative == Path::new(exemption_path)
+}
+
+fn should_scan_file(path: &Path) -> bool {
+    let Some(file_name) = path.file_name() else {
+        return false;
+    };
+    if matches!(file_name, name if name == OsStr::new("Cargo.toml") || name == OsStr::new("Cargo.lock") || name == OsStr::new("package.json") || name == OsStr::new("README"))
+    {
+        return true;
+    }
+
+    matches!(
+        path.extension().and_then(|extension| extension.to_str()),
+        Some("rs" | "md" | "toml" | "yaml" | "yml" | "json" | "txt" | "lock")
+    )
 }
 
 #[cfg(test)]
@@ -672,90 +758,4 @@ mod tests {
         );
         assert_eq!(report.findings()[0].term, "duplicate TUI");
     }
-}
-
-fn collect_identity_check_files(root: &Path, dir: &Path, files: &mut Vec<PathBuf>) {
-    if !dir.exists() {
-        return;
-    }
-    if should_skip_path(root, dir) {
-        return;
-    }
-    if dir.is_file() {
-        if should_scan_file(dir) {
-            files.push(dir.to_path_buf());
-        }
-        return;
-    }
-    if !dir.is_dir() {
-        return;
-    }
-
-    let Ok(entries) = fs::read_dir(dir) else {
-        return;
-    };
-
-    for entry in entries.flatten() {
-        let path = entry.path();
-        if should_skip_path(root, &path) {
-            continue;
-        }
-
-        let Ok(file_type) = entry.file_type() else {
-            continue;
-        };
-        if file_type.is_dir() {
-            collect_identity_check_files(root, &path, files);
-        } else if file_type.is_file() && should_scan_file(&path) {
-            files.push(path);
-        }
-    }
-}
-
-fn should_skip_path(root: &Path, path: &Path) -> bool {
-    let Ok(relative) = path.strip_prefix(root) else {
-        return false;
-    };
-
-    if identity_exemption_for_path(relative).is_some() {
-        return true;
-    }
-
-    relative.components().any(|component| {
-        matches!(
-            component.as_os_str(),
-            os if os == OsStr::new(".git")
-                || os == OsStr::new("donor")
-                || os == OsStr::new("target")
-        )
-    })
-}
-
-fn identity_exemption_for_path(relative: &Path) -> Option<&'static IdentityExemption> {
-    IDENTITY_CHECK_EXEMPTIONS
-        .iter()
-        .find(|exemption| identity_exemption_matches(relative, exemption.path))
-}
-
-fn identity_exemption_matches(relative: &Path, exemption_path: &str) -> bool {
-    if let Some(prefix) = exemption_path.strip_suffix("/**") {
-        return relative.starts_with(prefix);
-    }
-
-    relative == Path::new(exemption_path)
-}
-
-fn should_scan_file(path: &Path) -> bool {
-    let Some(file_name) = path.file_name() else {
-        return false;
-    };
-    if matches!(file_name, name if name == OsStr::new("Cargo.toml") || name == OsStr::new("Cargo.lock") || name == OsStr::new("package.json") || name == OsStr::new("README"))
-    {
-        return true;
-    }
-
-    matches!(
-        path.extension().and_then(|extension| extension.to_str()),
-        Some("rs" | "md" | "toml" | "yaml" | "yml" | "json" | "txt" | "lock")
-    )
 }

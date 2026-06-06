@@ -58,7 +58,7 @@ pub fn close_session_artifacts(
         id: format!("close.{}", bundle.session_id),
         session: bundle.session_id.clone(),
         outcome: decision.outcome,
-        lock: decision.summary.clone(),
+        lock: decision.summary,
         state,
     };
     write_session_artifact_record(workspace_root.as_ref(), &paths.close, &close_record)?;

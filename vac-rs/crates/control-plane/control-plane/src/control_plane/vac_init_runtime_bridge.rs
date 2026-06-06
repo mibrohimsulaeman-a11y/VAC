@@ -401,7 +401,7 @@ pub fn write_runtime_patch_evidence(
         .join(", ");
     let request = LiveEvidenceWriteRequest {
         evidence_id: evidence_id.clone(),
-        timestamp: timestamp.clone(),
+        timestamp,
         plan_id: active_plan_id(workspace_root)
             .unwrap_or_else(|| "plan.runtime.unknown".to_string()),
         capability: "vac.runtime.patch".to_string(),
@@ -450,7 +450,7 @@ pub fn write_runtime_command_evidence(
     let approval_hash = latest_approval_content_hash(workspace_root);
     let request = LiveEvidenceWriteRequest {
         evidence_id: evidence_id.clone(),
-        timestamp: timestamp.clone(),
+        timestamp,
         plan_id: active_plan_id(workspace_root)
             .unwrap_or_else(|| "plan.runtime.unknown".to_string()),
         capability: "vac.runtime.command".to_string(),
@@ -494,8 +494,10 @@ pub fn validate_plan_yaml_with_engine(
     let source = fs::read_to_string(plan_path).map_err(|err| err.to_string())?;
     let value: Value = serde_yaml::from_str(&source).map_err(|err| err.to_string())?;
     let plan = semantic_plan_from_yaml(&value)?;
-    let mut ctx = PlanValidationContext::default();
-    ctx.capabilities = load_capabilities_for_plan_validation(workspace_root);
+    let mut ctx = PlanValidationContext {
+        capabilities: load_capabilities_for_plan_validation(workspace_root),
+        ..Default::default()
+    };
     for allowed in &plan.allowed_files {
         if workspace_root.join(&allowed.path).exists() {
             ctx.known_files.insert(allowed.path.clone());
@@ -1209,7 +1211,7 @@ fn semantic_anchor_string(value: &Value) -> Option<String> {
     }
     let symbol = nested_scalar(anchor, &["symbol"])?;
     let kind = nested_scalar(anchor, &["kind"]).unwrap_or_else(|| "function".to_string());
-    Some(format!("{}:{}", kind, symbol))
+    Some(format!("{kind}:{symbol}"))
 }
 
 fn string_sequence(value: &Value, keys: &[&str]) -> Vec<String> {
@@ -1282,7 +1284,7 @@ fn mapping_get_path<'a>(value: &'a Value, keys: &[&str]) -> Option<&'a Value> {
 fn mapping_get<'a>(value: &'a Value, key: &str) -> Option<&'a Value> {
     value
         .as_mapping()
-        .and_then(|mapping| mapping.get(&Value::String(key.to_string())))
+        .and_then(|mapping| mapping.get(Value::String(key.to_string())))
 }
 
 fn yaml_scalar_by_key(source: &str, key: &str) -> Option<String> {

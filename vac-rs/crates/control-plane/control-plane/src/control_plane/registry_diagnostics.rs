@@ -625,11 +625,12 @@ fn surface_capability_drift_diagnostics(
                 );
             }
 
-            if route.visible {
-                if let Some(route_owner) = route.owner.as_deref() {
-                    let capability_owner = capability_owner_label(&capability.manifest.owner);
-                    if !route_owner_matches_capability_owner(route_owner, &capability_owner) {
-                        diagnostics.push(
+            if route.visible
+                && let Some(route_owner) = route.owner.as_deref()
+            {
+                let capability_owner = capability_owner_label(&capability.manifest.owner);
+                if !route_owner_matches_capability_owner(route_owner, &capability_owner) {
+                    diagnostics.push(
                             RegistryDiagnostic::new(
                                 RegistryDiagnosticSeverity::Warning,
                                 &surface.path,
@@ -641,7 +642,6 @@ fn surface_capability_drift_diagnostics(
                             )
                             .with_hint("keep route owner and capability owner aligned, or move implementation ownership into the capability manifest"),
                         );
-                    }
                 }
             }
         }
@@ -745,15 +745,15 @@ fn declared_capability_surface_targets(
                 .map(|command| (SurfaceRouteKind::Slash, command)),
         );
     }
-    if let Some(cli) = surfaces.cli.as_ref() {
-        if cli.enabled {
-            targets.extend(
-                cli.commands
-                    .iter()
-                    .cloned()
-                    .map(|command| (SurfaceRouteKind::Cli, command)),
-            );
-        }
+    if let Some(cli) = surfaces.cli.as_ref()
+        && cli.enabled
+    {
+        targets.extend(
+            cli.commands
+                .iter()
+                .cloned()
+                .map(|command| (SurfaceRouteKind::Cli, command)),
+        );
     }
     targets
 }

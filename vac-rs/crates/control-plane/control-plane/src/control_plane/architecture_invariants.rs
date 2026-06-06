@@ -759,10 +759,9 @@ fn collect_dependency_names(
         if matches!(
             key.as_str(),
             "dependencies" | "dev-dependencies" | "build-dependencies"
-        ) {
-            if let Some(dep_table) = value.as_table() {
-                dependencies.extend(dep_table.keys().cloned());
-            }
+        ) && let Some(dep_table) = value.as_table()
+        {
+            dependencies.extend(dep_table.keys().cloned());
         }
         if let Some(child) = value.as_table() {
             collect_dependency_names(child, dependencies);
@@ -1111,14 +1110,7 @@ validation:
   commands:
     - cargo +1.95.0 check -p vac-surface-cli
 {tui_compatibility}
-"#,
-                id = id,
-                title = title,
-                owner_crate = owner_crate,
-                owner_module = owner_module,
-                tui_surface_routes = tui_surface_routes,
-                approval_required_for = approval_required_for,
-                tui_compatibility = tui_compatibility
+"#
             )
         };
 

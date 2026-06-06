@@ -85,14 +85,13 @@ validation:
             let has_duplicate = errors.iter().any(|e| matches!(e, RegistryLoadError::DuplicateManifestId { id, .. } if id == "vac.default-local"));
             assert!(
                 has_duplicate,
-                "expected duplicate error for vac.default-local, got: {:?}",
-                errors
+                "expected duplicate error for vac.default-local, got: {errors:?}"
             );
         }
         RegistryLoadError::DuplicateManifestId { id, .. } => {
             assert_eq!(id, "vac.default-local");
         }
-        other => panic!("expected aggregate or duplicate error, got: {:?}", other),
+        other => panic!("expected aggregate or duplicate error, got: {other:?}"),
     }
 }
 
@@ -155,8 +154,7 @@ rules: []
     // ApprovalRequired and Deny are gathered. Deny must take precedence globally.
     assert!(
         report.is_blocked(),
-        "expected block report due to global-fallback deny from deny-policy, got: {:?}",
-        report
+        "expected block report due to global-fallback deny from deny-policy, got: {report:?}"
     );
 }
 
@@ -228,13 +226,9 @@ rules:
                 reasons
                     .iter()
                     .any(|reason| reason.contains("[vac.default-deny] default")),
-                "expected default deny to contribute across manifests, got: {:?}",
-                reasons
+                "expected default deny to contribute across manifests, got: {reasons:?}"
             );
         }
-        other => panic!(
-            "expected block from per-manifest default deny fallback, got: {:?}",
-            other
-        ),
+        other => panic!("expected block from per-manifest default deny fallback, got: {other:?}"),
     }
 }

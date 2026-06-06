@@ -340,7 +340,7 @@ mod tests {
 
         let missing_policy = PlanValidateCliContract {
             requires_policy: false,
-            ..valid.clone()
+            ..valid
         };
         assert_eq!(
             missing_policy.validate(),

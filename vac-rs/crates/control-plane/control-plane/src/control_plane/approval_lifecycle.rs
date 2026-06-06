@@ -436,6 +436,8 @@ impl InMemoryApprovalStore {
         reason: impl Into<String>,
     ) -> Vec<ApprovalRequest> {
         let reason = reason.into();
+        // `resolve` below needs `&mut self`, so collect ids first to end the `&self` borrow.
+        #[allow(clippy::needless_collect)]
         let expired_ids = self
             .requests
             .values()

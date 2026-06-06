@@ -7,6 +7,7 @@ pub fn canonicalize_serializable(value: &impl Serialize) -> Result<String, Strin
     Ok(canonicalize_value(&value))
 }
 
+#[allow(clippy::expect_used)] // serde_json string/key serialization is infallible
 pub fn canonicalize_value(value: &Value) -> String {
     match value {
         Value::Null => "null".to_string(),
@@ -24,10 +25,7 @@ pub fn canonicalize_value(value: &Value) -> String {
             format!("[{inner}]")
         }
         Value::Object(values) => {
-            let sorted = values
-                .iter()
-                .map(|(key, value)| (key, value))
-                .collect::<BTreeMap<_, _>>();
+            let sorted = values.iter().collect::<BTreeMap<_, _>>();
             let inner = sorted
                 .into_iter()
                 .map(|(key, value)| {

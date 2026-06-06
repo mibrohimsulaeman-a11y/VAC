@@ -196,7 +196,7 @@ mod tests {
             .collect::<Vec<_>>();
         assert!(validate_security_regressions(&cases).is_ok());
 
-        let mut unsafe_cases = cases.clone();
+        let mut unsafe_cases = cases;
         unsafe_cases[0].rejected = false;
         assert!(validate_security_regressions(&unsafe_cases).is_err());
     }

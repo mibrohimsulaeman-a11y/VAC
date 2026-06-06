@@ -124,26 +124,25 @@ pub fn validate_patch_attempt_with_semantic_source(
 ) -> PatchGuardReport {
     let mut prepared_ctx = ctx.clone();
     let mut prepared = attempt.clone();
-    if let Some(scope) = prepared_ctx.scopes.get_mut(&attempt.path) {
-        if scope.line_range.is_none() {
-            if let Some(anchor) = &scope.semantic_anchor {
-                if let Some(source) = sources.get(&attempt.path) {
-                    match resolve_semantic_anchor_in_source(anchor, source) {
-                        Ok(resolved) => {
-                            prepared.semantic_anchor_resolved = true;
-                            scope.line_range = Some(resolved.line_range.clone());
-                            if prepared.line_range.is_none() {
-                                prepared.line_range = Some(resolved.line_range);
-                            }
-                        }
-                        Err(_) => {
-                            prepared.semantic_anchor_resolved = false;
-                        }
+    if let Some(scope) = prepared_ctx.scopes.get_mut(&attempt.path)
+        && scope.line_range.is_none()
+        && let Some(anchor) = &scope.semantic_anchor
+    {
+        if let Some(source) = sources.get(&attempt.path) {
+            match resolve_semantic_anchor_in_source(anchor, source) {
+                Ok(resolved) => {
+                    prepared.semantic_anchor_resolved = true;
+                    scope.line_range = Some(resolved.line_range.clone());
+                    if prepared.line_range.is_none() {
+                        prepared.line_range = Some(resolved.line_range);
                     }
-                } else {
+                }
+                Err(_) => {
                     prepared.semantic_anchor_resolved = false;
                 }
             }
+        } else {
+            prepared.semantic_anchor_resolved = false;
         }
     }
     validate_patch_attempt(&prepared_ctx, &prepared)
@@ -257,8 +256,8 @@ fn parse_anchor(anchor: &str) -> (Option<String>, String) {
         );
     }
     let mut parts = trimmed.split_whitespace();
-    if let (Some(kind), Some(name), None) = (parts.next(), parts.next(), parts.next()) {
-        if matches!(
+    if let (Some(kind), Some(name), None) = (parts.next(), parts.next(), parts.next())
+        && matches!(
             kind,
             "fn" | "method"
                 | "struct"
@@ -271,9 +270,9 @@ fn parse_anchor(anchor: &str) -> (Option<String>, String) {
                 | "const"
                 | "static"
                 | "symbol"
-        ) {
-            return (Some(kind.to_string()), name.to_string());
-        }
+        )
+    {
+        return (Some(kind.to_string()), name.to_string());
     }
     (None, trimmed.to_string())
 }

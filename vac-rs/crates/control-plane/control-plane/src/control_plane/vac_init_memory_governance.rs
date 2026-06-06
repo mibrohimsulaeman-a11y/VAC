@@ -110,7 +110,11 @@ pub enum MemoryGovernanceError {
 pub fn memory_record_size(record: &MemoryRecord) -> usize {
     record.id.len()
         + record.created_at.len()
-        + record.expires_at.as_ref().map(|v| v.len()).unwrap_or(0)
+        + record
+            .expires_at
+            .as_ref()
+            .map(std::string::String::len)
+            .unwrap_or(0)
         + record.content.text.len()
         + record.content.files.iter().map(String::len).sum::<usize>()
         + record
@@ -149,8 +153,7 @@ fn validate_mem_id(tier: MemoryTier, id: &str) -> Result<(), MemoryGovernanceErr
     let expected = format!("mem.{}.", tier.as_str());
     if !id.starts_with(&expected) {
         return Err(MemoryGovernanceError::InvalidId(format!(
-            "memory id must start with {}",
-            expected
+            "memory id must start with {expected}"
         )));
     }
     if !id
@@ -158,8 +161,7 @@ fn validate_mem_id(tier: MemoryTier, id: &str) -> Result<(), MemoryGovernanceErr
         .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, '.' | '-' | '_'))
     {
         return Err(MemoryGovernanceError::InvalidId(format!(
-            "memory id contains invalid characters: {}",
-            id
+            "memory id contains invalid characters: {id}"
         )));
     }
     Ok(())
@@ -169,24 +171,21 @@ fn validate_refs(record: &MemoryRecord) -> Result<(), MemoryGovernanceError> {
     for capability in &record.content.capabilities {
         if !capability.starts_with("vac.") {
             return Err(MemoryGovernanceError::InvalidReference(format!(
-                "capability ref must start with vac.: {}",
-                capability
+                "capability ref must start with vac.: {capability}"
             )));
         }
     }
     for evidence in &record.content.evidence {
         if !evidence.starts_with("evidence.") {
             return Err(MemoryGovernanceError::InvalidReference(format!(
-                "evidence ref must start with evidence.: {}",
-                evidence
+                "evidence ref must start with evidence.: {evidence}"
             )));
         }
     }
     for file in &record.content.files {
         if file.starts_with('/') || file.contains("..") || file.contains('\\') {
             return Err(MemoryGovernanceError::InvalidReference(format!(
-                "file ref must be normalized workspace-relative: {}",
-                file
+                "file ref must be normalized workspace-relative: {file}"
             )));
         }
     }

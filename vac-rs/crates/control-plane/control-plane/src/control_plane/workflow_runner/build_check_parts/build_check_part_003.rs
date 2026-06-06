@@ -687,7 +687,7 @@ impl WorkflowExecutionMachine {
                         let reason = report
                             .diagnostics()
                             .iter()
-                            .map(|d| d.render_text())
+                            .map(super::registry_diagnostics::RegistryDiagnostic::render_text)
                             .collect::<Vec<_>>()
                             .join("\n");
                         let reason = if reason.is_empty() {
@@ -728,7 +728,7 @@ impl WorkflowExecutionMachine {
                         let reason = report
                             .diagnostics()
                             .iter()
-                            .map(|d| d.render_text())
+                            .map(super::registry_diagnostics::RegistryDiagnostic::render_text)
                             .collect::<Vec<_>>()
                             .join("\n");
                         let reason = if reason.is_empty() {
@@ -1599,7 +1599,7 @@ impl WorkflowExecutionMachine {
                     let reason = report
                         .diagnostics()
                         .iter()
-                        .map(|d| d.render_text())
+                        .map(super::registry_diagnostics::RegistryDiagnostic::render_text)
                         .collect::<Vec<_>>()
                         .join("\n");
                     let reason = if reason.is_empty() {
@@ -1656,7 +1656,7 @@ impl WorkflowExecutionMachine {
                     let reason = report
                         .diagnostics()
                         .iter()
-                        .map(|d| d.render_text())
+                        .map(super::registry_diagnostics::RegistryDiagnostic::render_text)
                         .collect::<Vec<_>>()
                         .join("\n");
                     let reason = if reason.is_empty() {

@@ -148,6 +148,6 @@ fn format_workflow_run_preview(preview: &WorkflowRunPreview) -> String {
         .map(|step| format!("{}={}", step.id, step.uses))
         .collect::<Vec<_>>()
         .join(", ");
-    format!("blocked: unsupported steps=[{}]", blocked_steps)
+    format!("blocked: unsupported steps=[{blocked_steps}]")
 }
 

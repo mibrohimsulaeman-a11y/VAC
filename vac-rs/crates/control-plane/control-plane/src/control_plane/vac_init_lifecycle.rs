@@ -222,16 +222,15 @@ impl VacInitStateRecord {
             | VacInitLifecycleState::PolicyInferred
             | VacInitLifecycleState::ManifestsSynthesized
             | VacInitLifecycleState::DoctorVerified
-            | VacInitLifecycleState::Ready => {
+            | VacInitLifecycleState::Ready
                 if self
                     .scan_report
                     .as_deref()
                     .unwrap_or_default()
                     .trim()
-                    .is_empty()
-                {
-                    return Err(InitLifecycleError::MissingRequiredArtifact("scan_report"));
-                }
+                    .is_empty() =>
+            {
+                return Err(InitLifecycleError::MissingRequiredArtifact("scan_report"));
             }
             _ => {}
         }
@@ -288,7 +287,7 @@ impl VacInitStateRecord {
             format!(
                 "previous_state: {}",
                 self.previous_state
-                    .map(|state| state.as_str())
+                    .map(VacInitLifecycleState::as_str)
                     .unwrap_or("null")
             ),
             format!("timestamp: {}", self.timestamp),

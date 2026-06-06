@@ -499,14 +499,12 @@ fn validate_workflow_inputs(
         ensure_no_whitespace(path, &field_path, name)?;
         validate_non_empty(path, &format!("{field_path}.type"), spec.kind.as_str())?;
         match spec.kind {
-            WorkflowInputKind::Enum => {
-                if spec.values.is_empty() {
-                    return Err(WorkflowManifestError::new(
-                        path,
-                        format!("{field_path}.values"),
-                        "enum inputs must declare at least one allowed value",
-                    ));
-                }
+            WorkflowInputKind::Enum if spec.values.is_empty() => {
+                return Err(WorkflowManifestError::new(
+                    path,
+                    format!("{field_path}.values"),
+                    "enum inputs must declare at least one allowed value",
+                ));
             }
             _ if !spec.values.is_empty() => {
                 return Err(WorkflowManifestError::new(
@@ -604,14 +602,14 @@ fn validate_workflow_steps(
             validate_step_ui(path, &format!("{field_path}.ui"), ui)?;
         }
 
-        if let Some(known_capabilities) = known_capabilities {
-            if !workflow_step_use_resolves(&step.uses, known_capabilities) {
-                return Err(WorkflowManifestError::new(
-                    path,
-                    format!("{field_path}.uses"),
-                    "step references an unknown capability",
-                ));
-            }
+        if let Some(known_capabilities) = known_capabilities
+            && !workflow_step_use_resolves(&step.uses, known_capabilities)
+        {
+            return Err(WorkflowManifestError::new(
+                path,
+                format!("{field_path}.uses"),
+                "step references an unknown capability",
+            ));
         }
     }
     Ok(())
@@ -697,14 +695,15 @@ fn validate_workflow_validation(
     status: WorkflowStatus,
     _steps: &[WorkflowStep],
 ) -> Result<(), WorkflowManifestError> {
-    if validation.commands.is_empty() && validation.gates.is_empty() {
-        if matches!(status, WorkflowStatus::Ready) {
-            return Err(WorkflowManifestError::new(
-                path,
-                "validation",
-                "ready workflow lacks validation gate",
-            ));
-        }
+    if validation.commands.is_empty()
+        && validation.gates.is_empty()
+        && matches!(status, WorkflowStatus::Ready)
+    {
+        return Err(WorkflowManifestError::new(
+            path,
+            "validation",
+            "ready workflow lacks validation gate",
+        ));
     }
 
     for (index, gate) in validation.gates.iter().enumerate() {

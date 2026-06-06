@@ -186,7 +186,7 @@ impl SourceInventoryReport {
         ] {
             let count = self.category_count(category);
             if count > 0 {
-                lines.push(format!("  {}: {}", category, count));
+                lines.push(format!("  {category}: {count}"));
             }
         }
         lines.join("\n")
@@ -370,7 +370,7 @@ pub fn build_source_inventory_from_paths(paths: &[String]) -> SourceInventoryRep
             crate_name: infer_crate_name(&normalized),
             module: infer_module_name(&normalized),
             reason: if ignored {
-                Some(format!("{} is ignored for ownership scan", category))
+                Some(format!("{category} is ignored for ownership scan"))
             } else {
                 None
             },
@@ -497,8 +497,14 @@ pub fn ownership_targets_from_capability_paths(
 ) -> OwnershipTargetPattern {
     OwnershipTargetPattern {
         capability_id: capability_id.into(),
-        include: include.iter().map(|value| value.to_string()).collect(),
-        exclude: exclude.iter().map(|value| value.to_string()).collect(),
+        include: include
+            .iter()
+            .map(std::string::ToString::to_string)
+            .collect(),
+        exclude: exclude
+            .iter()
+            .map(std::string::ToString::to_string)
+            .collect(),
         partial: false,
     }
 }

@@ -489,7 +489,7 @@ fn parse_every_interval_secs(value: &str) -> Option<u64> {
         value[idx..].trim_start_matches(|ch: char| ch == ':' || ch == '=' || ch.is_whitespace());
     let digits = rest
         .chars()
-        .take_while(|ch| ch.is_ascii_digit())
+        .take_while(char::is_ascii_digit)
         .collect::<String>();
     if digits.is_empty() {
         return None;
@@ -515,7 +515,7 @@ fn format_duration(seconds: u64) -> String {
     } else if seconds >= 60 {
         format!("{}m", seconds / 60)
     } else {
-        format!("{}s", seconds)
+        format!("{seconds}s")
     }
 }
 
@@ -717,7 +717,7 @@ fn yaml_scalar(value: &str) -> String {
     {
         value.to_string()
     } else {
-        format!("{:?}", value)
+        format!("{value:?}")
     }
 }
 

@@ -123,14 +123,13 @@ validation:
             let has_duplicate = errors.iter().any(|e| matches!(e, RegistryLoadError::DuplicateManifestId { id, .. } if id == "vac.activity"));
             assert!(
                 has_duplicate,
-                "expected duplicate error for vac.activity, got: {:?}",
-                errors
+                "expected duplicate error for vac.activity, got: {errors:?}"
             );
         }
         RegistryLoadError::DuplicateManifestId { id, .. } => {
             assert_eq!(id, "vac.activity");
         }
-        other => panic!("expected aggregate or duplicate error, got: {:?}", other),
+        other => panic!("expected aggregate or duplicate error, got: {other:?}"),
     }
 }
 
@@ -167,13 +166,12 @@ rules: []
             let has_duplicate = errors.iter().any(|e| matches!(e, RegistryLoadError::DuplicateManifestId { id, .. } if id == "vac.activity"));
             assert!(
                 has_duplicate,
-                "expected duplicate error for vac.activity, got: {:?}",
-                errors
+                "expected duplicate error for vac.activity, got: {errors:?}"
             );
         }
         RegistryLoadError::DuplicateManifestId { id, .. } => {
             assert_eq!(id, "vac.activity");
         }
-        other => panic!("expected aggregate or duplicate error, got: {:?}", other),
+        other => panic!("expected aggregate or duplicate error, got: {other:?}"),
     }
 }

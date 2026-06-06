@@ -842,10 +842,10 @@ fn action_label(action: PolicyAction) -> &'static str {
 
 fn rule_matches_intent(rule: &PolicyRule, intent: &WorkflowStepExecutionIntent) -> bool {
     let m = &rule.match_;
-    if let Some(action) = m.action {
-        if action != intent.action {
-            return false;
-        }
+    if let Some(action) = m.action
+        && action != intent.action
+    {
+        return false;
     }
     if let Some(path_scope) = m.path {
         match intent.path_scope {

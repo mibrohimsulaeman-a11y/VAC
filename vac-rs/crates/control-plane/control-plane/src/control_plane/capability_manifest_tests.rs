@@ -813,7 +813,7 @@ validation:
     );
 
     let ownership = manifest.ownership.expect("ownership should exist");
-    assert_eq!(ownership.retired, true);
+    assert!(ownership.retired);
     assert_eq!(
         ownership.deletion_plan.as_deref(),
         Some("Plan 021 - cleanup old controller")
@@ -858,8 +858,8 @@ validation:
         ownership.targets[0].module.as_deref(),
         Some("control_plane")
     );
-    assert_eq!(ownership.targets[0].test_only, false);
-    assert_eq!(ownership.targets[0].retired, true);
+    assert!(!ownership.targets[0].test_only);
+    assert!(ownership.targets[0].retired);
     assert_eq!(ownership.deletion_plan.as_deref(), Some("Sunset checklist"));
 }
 

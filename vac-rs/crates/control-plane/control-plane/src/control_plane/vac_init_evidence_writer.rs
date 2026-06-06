@@ -297,10 +297,7 @@ fn stable_hash_hex(input: &str) -> String {
         state ^= u64::from(*byte);
         state = state.wrapping_mul(0x100000001b3);
     }
-    format!(
-        "{state:016x}{state:016x}{state:016x}{state:016x}",
-        state = state
-    )
+    format!("{state:016x}{state:016x}{state:016x}{state:016x}")
 }
 
 fn sanitize_file_name(value: &str) -> String {
@@ -319,9 +316,7 @@ fn sanitize_file_name(value: &str) -> String {
 }
 
 fn sanitize_id(value: &str) -> String {
-    sanitize_file_name(value)
-        .replace('-', ".")
-        .replace('/', ".")
+    sanitize_file_name(value).replace(['-', '/'], ".")
 }
 
 fn yaml_scalar(value: &str) -> String {
@@ -332,7 +327,7 @@ fn yaml_scalar(value: &str) -> String {
     {
         value.to_string()
     } else {
-        format!("{:?}", value)
+        format!("{value:?}")
     }
 }
 

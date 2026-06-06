@@ -71,10 +71,10 @@ impl BuildCheckRequest {
                 self.toolchain = trimmed.to_string();
             }
         }
-        if let Ok(seconds) = std::env::var(BUILD_CHECK_TIMEOUT_ENV) {
-            if let Ok(parsed) = seconds.trim().parse::<u64>() {
-                self.timeout = Duration::from_secs(parsed);
-            }
+        if let Ok(seconds) = std::env::var(BUILD_CHECK_TIMEOUT_ENV)
+            && let Ok(parsed) = seconds.trim().parse::<u64>()
+        {
+            self.timeout = Duration::from_secs(parsed);
         }
         self
     }
@@ -149,6 +149,7 @@ impl BuildCheckReport {
     }
 }
 
+#[allow(clippy::expect_used)] // child stdout/stderr are guaranteed `Some` by piped Stdio config
 pub fn run_build_check(request: &BuildCheckRequest) -> std::io::Result<BuildCheckReport> {
     let start = Instant::now();
     let mut command = Command::new(&request.cargo_program);
@@ -567,8 +568,7 @@ mod tests {
         assert!(report.exit_status.is_none());
         assert!(
             elapsed < Duration::from_secs(2),
-            "timeout enforcement should kill child quickly, elapsed={:?}",
-            elapsed
+            "timeout enforcement should kill child quickly, elapsed={elapsed:?}"
         );
         assert!(
             report

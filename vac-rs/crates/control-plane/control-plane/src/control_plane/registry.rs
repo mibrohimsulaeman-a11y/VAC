@@ -171,7 +171,7 @@ where
     manifests.sort_by(|left, right| left.path.cmp(&right.path));
     errors.extend(validate_unique_ids(&manifests, id_of));
     if !errors.is_empty() {
-        return Err(aggregate_registry_errors(manifest_dir.clone(), errors));
+        return Err(aggregate_registry_errors(manifest_dir, errors));
     }
     Ok(ManifestRegistry {
         vac_root,

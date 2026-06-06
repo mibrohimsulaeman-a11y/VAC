@@ -93,10 +93,10 @@ impl SourceInventoryReport {
             if target.retired {
                 continue;
             }
-            if let Some((crate_name, module)) = ownership_target_module_domain(target) {
-                if !self.contains_module(crate_name, module) {
-                    missing.push(format!("{crate_name}::{module}"));
-                }
+            if let Some((crate_name, module)) = ownership_target_module_domain(target)
+                && !self.contains_module(crate_name, module)
+            {
+                missing.push(format!("{crate_name}::{module}"));
             }
         }
         missing
@@ -624,14 +624,15 @@ fn parse_declared_bin_modules(contents: &str) -> Vec<String> {
             in_bin = line == "[[bin]]";
             continue;
         }
-        if in_bin && line.starts_with("path") {
-            if let Some((_, value)) = line.split_once('=') {
-                let path = value.trim().trim_matches('"');
-                if let Some(stem) = Path::new(path).file_stem().and_then(|stem| stem.to_str()) {
-                    if is_module_name(stem) {
-                        modules.push(stem.to_string());
-                    }
-                }
+        if in_bin
+            && line.starts_with("path")
+            && let Some((_, value)) = line.split_once('=')
+        {
+            let path = value.trim().trim_matches('"');
+            if let Some(stem) = Path::new(path).file_stem().and_then(|stem| stem.to_str())
+                && is_module_name(stem)
+            {
+                modules.push(stem.to_string());
             }
         }
     }
@@ -896,10 +897,10 @@ fn format_capability_owner(owner: &CapabilityOwner) -> String {
         CapabilityOwner::Path(path) => path.clone(),
         CapabilityOwner::Structured(object) => {
             let mut parts = vec![format!("{}/{}", object.crate_name, object.module)];
-            if let Some(team) = object.team.as_deref() {
-                if !team.trim().is_empty() {
-                    parts.push(format!("team={team}"));
-                }
+            if let Some(team) = object.team.as_deref()
+                && !team.trim().is_empty()
+            {
+                parts.push(format!("team={team}"));
             }
             parts.join(" ")
         }
