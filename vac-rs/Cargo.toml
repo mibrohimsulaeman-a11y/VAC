@@ -19,6 +19,7 @@ members = [
     "crates/capabilities/docs",
     "crates/capabilities/ownership",
     "crates/capabilities/identity",
+    "crates/capabilities/prompts",
     "crates/surfaces/cli",
     "crates/capabilities/collaboration-mode-templates",
     "crates/integrations/connectors",
@@ -113,6 +114,7 @@ license = "Apache-2.0"
 
 [workspace.dependencies]
 # Internal
+vac-capability-prompts = { path = "crates/capabilities/prompts" }
 vac-analytics = { path = "crates/providers/analytics" }
 vac-agent-identity = { path = "crates/providers/agent-identity" }
 vac-ansi-escape = { path = "crates/foundation/ansi-escape" }

@@ -16,7 +16,7 @@ use vac_protocol::models::ResponseItem;
 use vac_tools::ToolSpec;
 
 /// Review thread system prompt. Edit `core/src/review_prompt.md` to customize.
-pub const REVIEW_PROMPT: &str = include_str!("../review_prompt.md");
+pub const REVIEW_PROMPT: &str = vac_capability_prompts::REVIEW_PROMPT;
 
 // Centralized templates for review-related user messages
 pub const REVIEW_EXIT_SUCCESS_TMPL: &str = include_str!("../templates/review/exit_success.xml");

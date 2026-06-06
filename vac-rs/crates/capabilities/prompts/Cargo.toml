@@ -1,15 +1,12 @@
 [package]
 edition.workspace = true
 license.workspace = true
-name = "vac-capability-sessions"
+name = "vac-capability-prompts"
 version.workspace = true
 
 [lib]
-name = "vac_capability_sessions"
+name = "vac_capability_prompts"
 path = "src/lib.rs"
-
-[dependencies]
-vac-capability-prompts = { workspace = true }
 
 [lints]
 workspace = true
