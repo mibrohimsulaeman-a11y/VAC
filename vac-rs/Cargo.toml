@@ -479,9 +479,10 @@ strip = "symbols"
 codegen-units = 1
 
 [profile.ci-test]
-debug = 1         # Reduce debug symbol size
+debug = 0         # Tanpa debug info di CI: target lebih kecil & link lebih cepat
 inherits = "test"
 opt-level = 0
+incremental = false  # Runner ephemeral; incremental cuma numpukin cache
 
 [patch.crates-io]
 # Uncomment to debug local changes.
