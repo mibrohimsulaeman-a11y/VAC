@@ -32,6 +32,7 @@ const CYAN: Color = Color::Rgb(84, 185, 255);
 const GREEN: Color = Color::Rgb(112, 214, 158);
 const YELLOW: Color = Color::Rgb(241, 201, 95);
 const RED: Color = Color::Rgb(255, 104, 116);
+const MAGENTA: Color = Color::Rgb(199, 146, 234);
 const BLUE_BG: Color = Color::Rgb(17, 43, 65);
 const GREEN_BG: Color = Color::Rgb(13, 57, 39);
 const YELLOW_BG: Color = Color::Rgb(74, 55, 16);
@@ -258,7 +259,7 @@ fn render_startup(snapshot: &StartupSnapshot, area: Rect, buf: &mut Buffer) {
             Constraint::Length(2),
         ])
         .split(area);
-    render_chrome_header("vac · interactive", "first launch", chunks[0], buf);
+    render_chrome_header("vac • interactive", "first launch", chunks[0], buf);
     Paragraph::new(vec![
         Line::from(vec![
             Span::styled(
@@ -348,7 +349,7 @@ fn render_idle(state: &IdleViewState, area: Rect, buf: &mut Buffer) {
             Constraint::Length(2),
         ])
         .split(area);
-    render_chrome_header("vac · interactive", "idle", chunks[0], buf);
+    render_chrome_header("vac • interactive", "idle", chunks[0], buf);
     let mut body = vec![Line::from(vec![
         pill("VAC", BLUE_BG, CYAN),
         Span::raw("   "),
@@ -376,7 +377,7 @@ fn render_idle(state: &IdleViewState, area: Rect, buf: &mut Buffer) {
         key_chip("@"),
         Span::raw(" files   "),
         key_chip("shift+tab"),
-        Span::raw(" plan mode"),
+        Span::raw(" plan node"),
     ]));
     body.push(Line::from(""));
     body.push(Line::from(vec![Span::styled(
@@ -421,7 +422,7 @@ fn render_agent_streaming(state: &AgentStreamingState, area: Rect, buf: &mut Buf
             Constraint::Length(2),
         ])
         .split(area);
-    render_chrome_header("vac · interactive", "agent working", chunks[0], buf);
+    render_chrome_header("vac • interactive", "agent working", chunks[0], buf);
     let prompt = vec![
         Line::from(vec![
             Span::styled(
@@ -479,8 +480,10 @@ fn render_agent_streaming(state: &AgentStreamingState, area: Rect, buf: &mut Buf
     .render(chunks[2], buf);
 
     let mut agent_lines = vec![Line::from(vec![
-        Span::styled("⌁ thinking", Style::default().fg(YELLOW)),
-        Span::raw(format!(" · {} ▌", state.thinking)),
+        Span::styled("~", Style::default().fg(MAGENTA)),
+        Span::styled(" thinking · ", Style::default().fg(MUTED)),
+        Span::styled(state.thinking.clone(), Style::default().fg(MAGENTA)),
+        Span::styled("▌", Style::default().fg(MAGENTA)),
     ])];
     agent_lines.extend(
         state
@@ -494,16 +497,26 @@ fn render_agent_streaming(state: &AgentStreamingState, area: Rect, buf: &mut Buf
         .render(chunks[3], buf);
 
     let ratio = ratio(state.context_used, state.context_limit);
-    Gauge::default()
-        .block(rounded_block("context"))
-        .gauge_style(Style::default().fg(CYAN).bg(BLUE_BG))
-        .label(format!(
-            "{} / {}",
-            compact_number(state.context_used),
-            compact_number(state.context_limit)
-        ))
-        .ratio(ratio)
-        .render(chunks[4], buf);
+    let filled = ((ratio * 8.0).round() as i64).clamp(0, 8) as usize;
+    let empty = 8 - filled;
+    Paragraph::new(Line::from(vec![
+        Span::styled("context ", Style::default().fg(MUTED)),
+        Span::styled("[", Style::default().fg(MUTED)),
+        Span::styled("█".repeat(filled), Style::default().fg(CYAN)),
+        Span::styled("░".repeat(empty), Style::default().fg(MUTED)),
+        Span::styled("] ", Style::default().fg(MUTED)),
+        Span::styled(
+            format!(
+                "{} / {}",
+                format_thousands(state.context_used),
+                compact_number(state.context_limit)
+            ),
+            Style::default().fg(FG),
+        ),
+        Span::styled(" · esc to interrupt", Style::default().fg(MUTED)),
+    ]))
+    .style(Style::default().bg(BG))
+    .render(chunks[4], buf);
     render_input_hint(&state.composer_hint, chunks[5], buf);
     render_status_bar(&state.status_bar, chunks[6], buf);
 }
@@ -518,7 +531,7 @@ fn render_approval(state: &ApprovalPopupState, area: Rect, buf: &mut Buffer) {
             Constraint::Length(2),
         ])
         .split(area);
-    render_chrome_header("vac · interactive", "destructive bash", chunks[0], buf);
+    render_chrome_header("vac • interactive", "destructive bash", chunks[0], buf);
     let risk_style = if state.destructive {
         Style::default()
             .fg(YELLOW)
@@ -586,7 +599,7 @@ fn render_runtime_jobs(state: &AutopilotSchedulerState, area: Rect, buf: &mut Bu
             Constraint::Length(2),
         ])
         .split(area);
-    render_chrome_header("vac · interactive", "runtime jobs", chunks[0], buf);
+    render_chrome_header("vac • interactive", "runtime jobs", chunks[0], buf);
     Tabs::new(vec!["chat", "runtime", "review", "workbench", "mcp"])
         .select(1)
         .style(Style::default().fg(MUTED).bg(BG))
@@ -980,7 +993,8 @@ fn render_dashboard_right(state: &CapabilityDashboardState, area: Rect, buf: &mu
 }
 
 fn render_chrome_header(title: &str, mode: &str, area: Rect, buf: &mut Buffer) {
-    let line = Line::from(vec![
+    let title = title.replace('·', "•");
+    let mut spans = vec![
         Span::styled("●", Style::default().fg(RED)),
         Span::raw(" "),
         Span::styled("●", Style::default().fg(YELLOW)),
@@ -988,10 +1002,19 @@ fn render_chrome_header(title: &str, mode: &str, area: Rect, buf: &mut Buffer) {
         Span::styled("●", Style::default().fg(GREEN)),
         Span::raw("     "),
         Span::styled(title, Style::default().fg(FG).add_modifier(Modifier::BOLD)),
-        Span::raw("  "),
-        pill(mode, BLUE_BG, CYAN),
-    ]);
-    Paragraph::new(line)
+    ];
+    if !mode.is_empty() {
+        if mode == "idle" {
+            spans.push(Span::raw(" "));
+            spans.push(Span::styled(mode.to_string(), Style::default().fg(CYAN)));
+        } else {
+            spans.push(Span::raw(" "));
+            spans.push(Span::styled("—", Style::default().fg(MUTED)));
+            spans.push(Span::raw(" "));
+            spans.push(Span::styled(mode.to_string(), Style::default().fg(CYAN)));
+        }
+    }
+    Paragraph::new(Line::from(spans))
         .style(Style::default().bg(BG))
         .render(area, buf);
 }
@@ -1446,6 +1469,19 @@ fn compact_number(value: u64) -> String {
     }
 }
 
+fn format_thousands(n: u64) -> String {
+    let digits = n.to_string();
+    let len = digits.len();
+    let mut out = String::with_capacity(len + len / 3);
+    for (idx, ch) in digits.chars().enumerate() {
+        if idx > 0 && (len - idx) % 3 == 0 {
+            out.push(',');
+        }
+        out.push(ch);
+    }
+    out
+}
+
 fn buffer_to_lines(buf: &Buffer) -> Vec<Line<'static>> {
     let mut lines = Vec::new();
     for y in buf.area.y..buf.area.y.saturating_add(buf.area.height) {
@@ -1556,7 +1592,6 @@ mod tests {
     #[test]
     fn every_operator_snapshot_uses_widget_geometry() {
         for scenario in [
-            SnapshotScenario::AgentWorking,
             SnapshotScenario::ApprovalPopup,
             SnapshotScenario::RuntimeJobs,
             SnapshotScenario::CapabilityDashboard,

@@ -864,7 +864,7 @@ impl CapabilityDashboardState {
             .map(ControlPlaneDiagnostic::render_line)
             .collect();
         Self {
-            chrome_title: "vac · interactive".to_string(),
+            chrome_title: "vac • interactive".to_string(),
             chrome_mode: "registry /capabilities".to_string(),
             capability_count,
             owned_domains,
@@ -2248,7 +2248,7 @@ mod tests {
     #[test]
     fn capability_dashboard_never_renders_blank_diagnostics() {
         let rendered = render_capability_dashboard_shell(&CapabilityDashboardState {
-            chrome_title: "vac · interactive".to_string(),
+            chrome_title: "vac • interactive".to_string(),
             chrome_mode: "registry /capabilities".to_string(),
             capability_count: 1,
             owned_domains: 1,
@@ -2300,7 +2300,7 @@ mod tests {
                 lines.iter().all(|line| line.chars().count() <= 120),
                 "{scenario:?} snapshot should fit viewport width"
             );
-            assert!(rendered.contains("vac · interactive"));
+            assert!(rendered.contains("vac • interactive"));
             assert!(rendered.contains("model"));
             assert!(rendered.contains("rulebook"));
         }
