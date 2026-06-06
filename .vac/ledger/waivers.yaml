@@ -1,0 +1,14 @@
+schema_version: 2
+kind: waiver_ledger
+id: vac.ledger.waivers
+# A waiver MUST expire and MUST be owned. An expired waiver re-opens its finding (fail-closed).
+waivers:
+  - id: W-0001
+    finding_id: F-0002
+    reason: app-server retirement is staged; modules are quarantined and excluded from the runtime path.
+    owner: ibrohim
+    approved_at: 2026-06-02T00:00:00Z
+    expires_at: 2026-07-02T00:00:00Z
+    approval_hash: "<filled-by-approval-runner>"
+    scope:
+      capability: vac.tui

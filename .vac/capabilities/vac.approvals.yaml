@@ -1,0 +1,19 @@
+schema_version: 2
+kind: capability
+id: vac.approvals
+title: Approvals & Operator Gate
+status: ready
+ownership:
+  annotation: vac.approvals
+  paths:
+    include:
+      - "vac-rs/crates/control-plane/control-plane/**"
+      - "vac-rs/crates/providers/secrets/**"
+    exclude:
+      - "**/target/**"
+policy:
+  risk: medium
+  mutates_files: true
+  network: false
+  approval_required_for: [filesystem_write]
+depends_on: [vac.architecture]

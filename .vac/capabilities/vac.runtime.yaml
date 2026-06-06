@@ -1,0 +1,20 @@
+schema_version: 2
+kind: capability
+id: vac.runtime
+title: Agent Runtime & Loop
+status: ready
+ownership:
+  annotation: vac.runtime
+  paths:
+    include:
+      - "vac-rs/crates/runtime/**"
+      - "vac-rs/crates/providers/provider-http/**"
+      - "vac-rs/crates/providers/model-provider/**"
+    exclude:
+      - "**/target/**"
+policy:
+  risk: medium
+  mutates_files: true
+  network: true
+  approval_required_for: [execute_process, network_access, filesystem_write]
+depends_on: [vac.identity]

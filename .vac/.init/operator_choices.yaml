@@ -1,9 +1,0 @@
-schema_version: 1
-kind: init.operator_choices
-id: init.operator_choices
-surface: tui
-source: tui_slash_init
-partition_strategy: layered_control_plane
-synthesize_missing_manifests: yes
-verify_after_synthesis: yes
-requires_cli_interactive_flag: false

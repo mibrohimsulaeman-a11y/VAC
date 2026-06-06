@@ -1,21 +1,13 @@
-schema_version: 1
+schema_version: 2
 kind: policy
-id: vac.evidence-signing
+id: vac.policy.evidence-signing
 title: Evidence signing policy
-default_decision: approval_required
-owner: vac.control-plane.evidence
-status: ready
-rules:
-  - id: require-approval-for-evidence-signing-key
-    match:
-      action: credential_read
-      data_class: credential
-    decision: approval_required
-    reason: Evidence signing key access must remain operator-governed even when signing is optional.
+# Evidence is RUNNER-EMITTED only. Agent-authored evidence is rejected by `vac doctor evidence .`.
 evidence:
+  author: runner_only
   signing:
-    required: false
-    algorithm: ed25519
-    key_source: VAC_EVIDENCE_ED25519_SIGNING_KEY_BASE64
-    required_behavior: fail_closed_when_required_key_missing
-    optional_behavior: unsigned_with_governance_warning
+    key_env: VAC_EVIDENCE_ED25519_SIGNING_KEY_BASE64
+    required_env: VAC_EVIDENCE_SIGNING_REQUIRED
+    unsigned_behavior: warn_when_optional_fail_closed_when_required
+  # A gate that did not run produces NO evidence; absence is treated as failing.
+  absence_is: fail

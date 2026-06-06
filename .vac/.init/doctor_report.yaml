@@ -1,7 +1,0 @@
-schema_version: 1
-kind: init_state
-id: vac.init.doctor_report
-generated_at: '2026-06-01T22:58:00Z'
-status: source_static_ready
-cargo_status: NotEvaluated
-reason: cargo/rustc unavailable in sandbox; source/static projection regenerated.

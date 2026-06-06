@@ -1,23 +1,18 @@
-schema_version: 1
+schema_version: 2
 kind: policy
 id: vac.default-local
 title: Default local policy
 default_decision: approval_required
 rules:
   - id: read-project
-    match:
-      action: filesystem_read
-      path: project
+    match: { action: filesystem_read, path: project }
     decision: allow
     reason: Read-only project inspection is allowed.
   - id: write-project
-    match:
-      action: filesystem_write
-      path: project
+    match: { action: filesystem_write, path: project }
     decision: approval_required
     reason: File writes require operator approval.
   - id: deny-secrets
-    match:
-      data_class: secret_like
+    match: { data_class: secret_like }
     decision: deny
     reason: Secret-like values cannot be exposed.

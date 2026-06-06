@@ -1,24 +1,18 @@
-schema_version: 1
+schema_version: 2
 kind: policy
 id: vac.policy.tools
 title: Tool invocation policy
 default_decision: approval_required
 rules:
   - id: tools.invoke-default
-    match:
-      action: tool_call
-      tool: capability.tool.invoke
+    match: { action: tool_call, tool: capability.tool.invoke }
     decision: approval_required
     reason: Tool invocations require operator approval before execution.
   - id: tools.deny-credential-read
-    match:
-      action: tool_call
-      tool: capability.credential.read
+    match: { action: tool_call, tool: capability.credential.read }
     decision: deny
     reason: Credential-reading tools are not permitted under the local policy.
   - id: tools.deny-secret-export
-    match:
-      action: tool_call
-      tool: capability.secret.export
+    match: { action: tool_call, tool: capability.secret.export }
     decision: deny
     reason: Secret-exporting tools are denied without exception.

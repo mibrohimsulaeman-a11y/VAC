@@ -1,0 +1,37 @@
+schema_version: 2
+kind: finding_ledger
+id: vac.ledger.findings
+# One living ledger. Stable ids, append-only transitions. No per-cycle files.
+findings:
+  - id: F-0001
+    title: Runtime panic surface in vac-core agent loop
+    severity: high
+    state: open                 # open | waived | closed
+    capability: vac.runtime
+    detector: "vac doctor safety ."
+    opened_at: 2026-06-01T00:00:00Z
+    transitions:
+      - { at: 2026-06-01T00:00:00Z, to: open, by: "vac scan" }
+
+  - id: F-0002
+    title: Legacy vac-app-server modules pending physical deletion
+    severity: medium
+    state: waived
+    capability: vac.tui
+    waiver: W-0001
+    detector: "vac doctor ownership ."
+    opened_at: 2026-05-30T00:00:00Z
+    transitions:
+      - { at: 2026-05-30T00:00:00Z, to: open,   by: "vac scan" }
+      - { at: 2026-06-02T00:00:00Z, to: waived, by: "ibrohim", waiver: W-0001 }
+
+  - id: F-0003
+    title: Authored .vac exceeded size budget before v2 rebuild
+    severity: low
+    state: closed
+    capability: vac.workflow
+    detector: "vac doctor budget ."
+    opened_at: 2026-06-01T00:00:00Z
+    transitions:
+      - { at: 2026-06-01T00:00:00Z, to: open,   by: "vac scan" }
+      - { at: 2026-06-06T00:00:00Z, to: closed, by: "ibrohim", note: "v2 rebuild; authored tree under budget" }

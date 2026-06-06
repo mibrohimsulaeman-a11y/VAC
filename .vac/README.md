@@ -1,41 +1,30 @@
-# VAC control plane
+# VAC Control Plane (v2 — lock + cache model)
 
-Declarative root of the VAC product. YAML declares; Rust validates; the doctor inspects; policy gates; approval protects.
+`.vac/` is a THIN, declarative intent layer over the codebase — NOT a second codebase.
 
-Every manifest is typed, versioned (`schema_version: 1`), and validated by a loader in `vac-rs/crates/control-plane/control-plane/src/control_plane/`. Authoritative schema reference: [`docs/workflow-control-plane/schema/INDEX.md`](../docs/workflow-control-plane/schema/INDEX.md).
+Mental model (borrowed from Cargo):
 
-## Families
+| Cargo       | `.vac/`                                                        | Nature                                   |
+|-------------|----------------------------------------------------------------|------------------------------------------|
+| `Cargo.toml`| `capabilities/`, `policies/`, `surfaces/`, `workflows/`, `ledger/` | AUTHORED — small, human-reviewed         |
+| `Cargo.lock`| `derived/` (ownership, inventory, risk, surface-coverage)      | DERIVED — regenerated, never hand-edited |
+| `target/`   | `cache/`                                                       | transient, git-ignored                   |
 
-| Family | Directory | Schema source (Rust) | Schema doc | Doctor gate |
-|---|---|---|---|---|
-| Capabilities | [`capabilities/`](capabilities/README.md) | `vac-rs/crates/control-plane/control-plane/src/control_plane/capability_manifest.rs` | [`capability-manifest.schema.md`](../docs/workflow-control-plane/schema/capability-manifest.schema.md) | `vac doctor registry .` |
-| Workflows | [`workflows/`](workflows/README.md) | `vac-rs/crates/control-plane/control-plane/src/control_plane/workflow_manifest.rs` | [`workflow-manifest.schema.md`](../docs/workflow-control-plane/schema/workflow-manifest.schema.md) | `vac doctor workflow .` |
-| Policies | [`policies/`](policies/README.md) | `vac-rs/crates/control-plane/control-plane/src/control_plane/policy_manifest.rs` | [`policy-manifest.schema.md`](../docs/workflow-control-plane/schema/policy-manifest.schema.md) | `vac doctor policy .` |
-| Surfaces | [`surfaces/`](surfaces/README.md) | `vac-rs/crates/control-plane/control-plane/src/control_plane/surface_manifest.rs` | [`surface-manifest.schema.md`](../docs/workflow-control-plane/schema/surface-manifest.schema.md) | `vac doctor surfaces .` |
-| Registry | [`registry/`](registry/README.md) | loaders under `vac-rs/crates/control-plane/control-plane/src/control_plane/` | [`registry.schema.md`](../docs/workflow-control-plane/schema/registry.schema.md) | `vac doctor registry .` |
+## Hard rules (v2)
 
-## Naming conventions
+1. **Authored vs derived are separated.** Anything computable from code lives in `derived/` and is git-ignored. Never hand-maintain ownership maps, inventories, or risk findings.
+2. **Gates are binary.** A gate is `pass` or `fail`. "Not evaluated" is NOT a pass — it is fail-closed. There is no `pass_or_recorded_pending`.
+3. **Deferrals are Waivers.** To ship with a known gap, create an expiring, owned, signed Waiver in `ledger/waivers.yaml`. A waiver is the ONLY way a finding stops blocking, and it expires (then the finding re-opens automatically).
+4. **Evidence is emitted by the runner, never authored by the agent.** Agents propose plans; the gate runner records results with the real exit code + artifact hash. Self-graded evidence is rejected.
+5. **One living ledger per concern.** Findings live in a single `ledger/findings.yaml` keyed by a stable `finding_id` with append-only state transitions — not a new file per remediation cycle.
+6. **The control plane obeys its own anti-bloat rule.** Authored `.vac/` size is budgeted in `vac.toml` and enforced by `vac doctor budget .`.
 
-- Capability ids start with `vac.` (`vac.chat`, `vac.tui.pty_gate`).
-- Workflow ids start with `product.`, `maintenance.`, or `vac.` (`maintenance.build-check`).
-- Policy ids start with `vac.`, `product.`, or `maintenance.` (`vac.default-local`).
-- Surface ids start with `surface.` (`surface.cli`, `surface.tui`).
-- File names are kebab-case and reflect the id (`vac.identity.check` → `identity-check.yaml`; `maintenance.build-check` → `maintenance.build-check.yaml`). Workflows keep the dotted prefix; capabilities/policies drop the namespace prefix.
-
-## Schema versioning
-
-All manifests pin `schema_version: 1`. The loaders reject any other value. Schema-breaking changes require a parallel update to a schema doc under `docs/workflow-control-plane/schema/` and a coordinated runtime migration — do not bump the field unilaterally.
-
-## Executable gates
+## Commands
 
 ```bash
-vac doctor registry .
-vac doctor architecture .
-vac doctor ownership .
-vac doctor workflow .
-vac doctor policy .
-vac doctor surfaces .
-vac doctor docs .
+vac scan .     # rewrites derived/ (ownership, inventory, risk) from code + annotations
+vac doctor .   # runs all gates, fail-closed; absence of evidence == fail
+vac why <file>:<line>   # explain why a change is safe (policy + approval + evidence), no raw CoT
 ```
 
-Do not place legacy skill packs, ad-hoc scripts, or alternate frontend runtimes here.
+Do NOT place legacy skill packs, ad-hoc scripts, alternate runtimes, or generated inventories in the authored tree.

@@ -1,5 +1,0 @@
-schema_version: 1
-kind: trajectory
-id: trajectory.o5o6-actual-code-closure
-summary: closed marker-only readiness and implemented runtime-effective source hooks
-latest_artifact: vac-o5o6-actual-code-closure-final-source.zip
