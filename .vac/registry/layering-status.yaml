@@ -1,0 +1,16 @@
+# Finalized VAC crate-layering migration status.
+# Authoritative per-crate mapping lives in vac-rs/crates/layer-map.yaml.
+# Required (existence) by scripts/check-vac-layering-migration-static.sh.
+status: complete
+finalized: true
+layers:
+  - control-plane
+  - surfaces
+  - capabilities
+  - runtime
+  - providers
+  - integrations
+  - foundation
+root_crates:
+  - core
+residual_flat_crates: []

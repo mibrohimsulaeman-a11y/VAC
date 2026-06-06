@@ -1,0 +1,21 @@
+# Ledger for the VAC workspace crate-layering migration.
+# Authoritative per-crate mapping lives in vac-rs/crates/layer-map.yaml.
+migration: vac-crate-layering
+status: complete
+entries:
+  - crate: agent-identity
+    layer: providers
+    crate_path: crates/providers/agent-identity
+    relocation_status: migrated
+  - crate: otel
+    layer: integrations
+    crate_path: crates/integrations/otel
+    relocation_status: migrated
+  - crate: core
+    layer: control-plane
+    crate_path: core
+    relocation_status: retained_root
+notes:
+  - agent-identity relocated to crates/providers/agent-identity.
+  - otel relocated to crates/integrations/otel.
+  - core (vac-core) retained at the workspace root as the apex crate.
