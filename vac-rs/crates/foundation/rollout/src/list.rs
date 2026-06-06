@@ -1,4 +1,3 @@
-#![allow(warnings, clippy::all)]
 
 use async_trait::async_trait;
 use std::cmp::Reverse;
@@ -314,6 +313,7 @@ impl From<vac_state::Anchor> for Cursor {
 /// can be supplied on the next call to resume after the last returned item, resilient to
 /// concurrent new sessions being appended. Ordering is stable by the requested sort key
 /// (timestamp desc).
+#[allow(clippy::too_many_arguments)]
 pub async fn get_threads(
     vac_home: &Path,
     page_size: usize,
