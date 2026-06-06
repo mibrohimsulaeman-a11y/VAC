@@ -2182,7 +2182,8 @@ mod tests {
         assert!(!rendered.contains("tool_1"));
         assert!(rendered.contains("tool_2"));
         assert!(rendered.contains("tool_6"));
-        assert!(rendered.contains("last 5"));
+        assert!(rendered.contains("— tool timeline"));
+        assert!(rendered.contains("+2 earlier"));
     }
 
     #[test]
@@ -2305,7 +2306,6 @@ mod tests {
             assert!(rendered.contains("rulebook"));
         }
         for scenario in [
-            SnapshotScenario::AgentWorking,
             SnapshotScenario::ApprovalPopup,
             SnapshotScenario::RuntimeJobs,
         ] {
@@ -2340,8 +2340,8 @@ mod tests {
             OperatorViewport::new(120, 36),
         )
         .join("\n");
-        assert!(agent.contains("tool timeline"));
-        assert!(agent.contains("last 5"));
+        assert!(agent.contains("— tool timeline"));
+        assert!(agent.contains("+1 earlier"));
         assert!(agent.contains("thinking"));
 
         let approval = render_operator_snapshot(
@@ -2526,8 +2526,7 @@ mod tests {
                 );
                 if matches!(
                     scenario,
-                    SnapshotScenario::AgentWorking
-                        | SnapshotScenario::ApprovalPopup
+                    SnapshotScenario::ApprovalPopup
                         | SnapshotScenario::RuntimeJobs
                         | SnapshotScenario::CapabilityDashboard
                 ) {

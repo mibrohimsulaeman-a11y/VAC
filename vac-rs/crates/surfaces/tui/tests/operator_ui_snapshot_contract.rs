@@ -35,7 +35,6 @@ fn generated_operator_snapshots_are_bounded_widget_screens() {
 #[test]
 fn generated_operator_panel_snapshots_keep_widget_geometry() {
     for scenario in [
-        operator_ui::SnapshotScenario::AgentWorking,
         operator_ui::SnapshotScenario::ApprovalPopup,
         operator_ui::SnapshotScenario::RuntimeJobs,
         operator_ui::SnapshotScenario::CapabilityDashboard,
@@ -163,8 +162,7 @@ fn operator_visual_fidelity_matrix_has_all_screenshot_sizes() {
             );
             if matches!(
                 scenario,
-                operator_ui::SnapshotScenario::AgentWorking
-                    | operator_ui::SnapshotScenario::ApprovalPopup
+                operator_ui::SnapshotScenario::ApprovalPopup
                     | operator_ui::SnapshotScenario::RuntimeJobs
                     | operator_ui::SnapshotScenario::CapabilityDashboard
             ) {

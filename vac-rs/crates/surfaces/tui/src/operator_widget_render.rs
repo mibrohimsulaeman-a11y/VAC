@@ -448,40 +448,61 @@ fn render_agent_streaming(state: &AgentStreamingState, area: Rect, buf: &mut Buf
         .style(Style::default().fg(FG).bg(BG))
         .render(chunks[1], buf);
 
-    let tool_rows = state.visible_tools().iter().map(|tool| {
+    let omitted = state.tools.len().saturating_sub(state.visible_tools().len());
+    let timeline_width = chunks[2].width as usize;
+    let clip_pad = |text: &str, target_width: usize| -> String {
+        let chars: Vec<char> = text.chars().collect();
+        if target_width == 0 {
+            String::new()
+        } else if chars.len() <= target_width {
+            let mut padded = String::from(text);
+            padded.push_str(&" ".repeat(target_width - chars.len()));
+            padded
+        } else if target_width == 1 {
+            "…".to_string()
+        } else {
+            let mut clipped: String = chars[..target_width - 1].iter().collect();
+            clipped.push('…');
+            clipped
+        }
+    };
+    let mut timeline_lines: Vec<Line<'static>> = Vec::new();
+    let mut header_spans = vec![Span::styled("— tool timeline", Style::default().fg(MUTED))];
+    if omitted > 0 {
+        header_spans.push(Span::styled(
+            format!(" · +{omitted} earlier"),
+            Style::default().fg(MUTED),
+        ));
+    }
+    timeline_lines.push(Line::from(header_spans));
+    for tool in state.visible_tools() {
         let state_style = style_for_tool_state(tool.state);
-        Row::new(vec![
-            Cell::from(tool_state_glyph(tool.state)).style(state_style),
-            Cell::from(tool.name.clone()).style(Style::default().fg(FG)),
-            Cell::from(tool.target.clone()).style(Style::default().fg(MUTED)),
-            Cell::from(tool.state.as_str()).style(state_style),
-            Cell::from(tool.detail.clone()).style(Style::default().fg(MUTED)),
-        ])
-    });
-    Table::new(
-        tool_rows,
-        [
-            Constraint::Length(2),
-            Constraint::Length(14),
-            Constraint::Percentage(38),
-            Constraint::Length(12),
-            Constraint::Percentage(34),
-        ],
-    )
-    .header(
-        Row::new(vec!["", "tool", "target", "state", "detail"]).style(Style::default().fg(MUTED)),
-    )
-    .block(rounded_block(if state.tools.len() > 5 {
-        "tool timeline · last 5"
-    } else {
-        "tool timeline"
-    }))
-    .style(Style::default().bg(BG))
-    .render(chunks[2], buf);
+        let name = clip_pad(&tool.name, 14);
+        let detail = tool.detail.clone();
+        let detail_len = detail.chars().count();
+        let used = 2 + name.chars().count() + 1;
+        let target_avail = timeline_width.saturating_sub(used + detail_len + 2).max(8);
+        let target = clip_pad(&tool.target, target_avail);
+        let detail_style = match tool.state.as_str() {
+            "running" | "streaming" => state_style,
+            _ => Style::default().fg(MUTED),
+        };
+        timeline_lines.push(Line::from(vec![
+            Span::styled(format!("{} ", tool_state_glyph(tool.state)), state_style),
+            Span::styled(name, Style::default().fg(FG).add_modifier(Modifier::BOLD)),
+            Span::raw(" "),
+            Span::styled(target, Style::default().fg(MUTED)),
+            Span::raw("  "),
+            Span::styled(detail, detail_style),
+        ]));
+    }
+    Paragraph::new(timeline_lines)
+        .style(Style::default().fg(FG).bg(BG))
+        .render(chunks[2], buf);
 
     let mut agent_lines = vec![Line::from(vec![
-        Span::styled("~", Style::default().fg(MAGENTA)),
-        Span::styled(" thinking · ", Style::default().fg(MUTED)),
+        Span::styled("~ thinking", Style::default().fg(MAGENTA)),
+        Span::styled(" · ", Style::default().fg(MUTED)),
         Span::styled(state.thinking.clone(), Style::default().fg(MAGENTA)),
         Span::styled("▌", Style::default().fg(MAGENTA)),
     ])];
@@ -1008,10 +1029,11 @@ fn render_chrome_header(title: &str, mode: &str, area: Rect, buf: &mut Buffer) {
             spans.push(Span::raw(" "));
             spans.push(Span::styled(mode.to_string(), Style::default().fg(CYAN)));
         } else {
+            let mode_color = if mode == "agent working" { GREEN } else { CYAN };
             spans.push(Span::raw(" "));
             spans.push(Span::styled("—", Style::default().fg(MUTED)));
             spans.push(Span::raw(" "));
-            spans.push(Span::styled(mode.to_string(), Style::default().fg(CYAN)));
+            spans.push(Span::styled(mode.to_string(), Style::default().fg(mode_color)));
         }
     }
     Paragraph::new(Line::from(spans))
