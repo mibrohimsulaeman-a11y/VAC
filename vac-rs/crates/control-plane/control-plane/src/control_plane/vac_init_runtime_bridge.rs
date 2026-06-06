@@ -1087,6 +1087,13 @@ fn active_plan_id(workspace_root: &Path) -> Option<String> {
     yaml_scalar_by_key(&source, "id")
 }
 
+/// Returns true when a VAC-Init runtime plan governs this workspace. Command
+/// gating is fail-closed, so it must only engage for governed sessions; ungoverned
+/// workspaces (no active plan) are never subject to command enforcement.
+pub fn runtime_command_enforcement_active(workspace_root: &Path) -> bool {
+    active_plan_id(workspace_root).is_some()
+}
+
 fn classify_runtime_command_risk(runner: &str, args: &[String]) -> CommandRisk {
     if matches!(
         runner,
@@ -1402,6 +1409,44 @@ mod runtime_bridge_integration_tests {
         assert!(
             report.is_blocked(),
             "missing policy layer must be fail-closed: {}",
+            report.render_text()
+        );
+    }
+
+    #[test]
+    fn ungoverned_workspace_skips_command_enforcement() {
+        let dir = tempdir().unwrap();
+        assert!(
+            !runtime_command_enforcement_active(dir.path()),
+            "workspace without an active plan must not gate commands"
+        );
+    }
+
+    #[test]
+    fn governed_workspace_enables_command_enforcement() {
+        let dir = tempdir().unwrap();
+        write_active_plan(dir.path(), "approved");
+        assert!(
+            runtime_command_enforcement_active(dir.path()),
+            "workspace with an active plan must gate commands"
+        );
+    }
+
+    #[test]
+    fn governed_unknown_runner_command_is_blocked() {
+        let dir = tempdir().unwrap();
+        write_active_plan(dir.path(), "approved");
+        write_policy(dir.path());
+
+        let report = evaluate_runtime_command_contract(
+            dir.path(),
+            "totallybogusrunner --do-stuff",
+            "totallybogusrunner --do-stuff",
+        )
+        .expect("command contract always evaluates");
+        assert!(
+            report.is_blocked(),
+            "non-allowlisted runner must be fail-closed: {}",
             report.render_text()
         );
     }
