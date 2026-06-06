@@ -258,14 +258,42 @@ impl Renderable for ChatWidget {
                 )
             };
 
+            let elapsed_label = self
+                .goal_status_active_turn_started_at
+                .map(|start| {
+                    let secs = std::time::Instant::now()
+                        .saturating_duration_since(start)
+                        .as_secs_f64();
+                    if secs >= 60.0 {
+                        format!("{}m{:02}s", (secs / 60.0) as u64, (secs % 60.0) as u64)
+                    } else {
+                        format!("{secs:.1}s")
+                    }
+                })
+                .unwrap_or_else(|| "active".to_string());
+
             let mut tools = Vec::new();
             for (_, cmd) in &self.running_commands {
-                let cmd_str = cmd.command.join(" ");
+                let program = cmd
+                    .command
+                    .first()
+                    .map(|p| {
+                        p.rsplit(['/', '\\'])
+                            .next()
+                            .unwrap_or(p.as_str())
+                            .to_string()
+                    })
+                    .unwrap_or_else(|| "command".to_string());
+                let target = if cmd.command.len() > 1 {
+                    cmd.command[1..].join(" ")
+                } else {
+                    String::new()
+                };
                 tools.push(crate::operator_ui::ToolTimelineEntry::new(
-                    "command",
-                    cmd_str,
+                    program,
+                    target,
                     crate::operator_ui::ToolTimelineState::Running,
-                    "executing".to_string(),
+                    elapsed_label.clone(),
                 ));
             }
             if tools.is_empty() {
@@ -273,11 +301,16 @@ impl Renderable for ChatWidget {
                     let is_exec = cell.as_any().is::<crate::exec_cell::ExecCell>();
                     let is_mcp = cell.as_any().is::<crate::history_cell::McpToolCallCell>();
                     if is_exec || is_mcp {
+                        let (name, target) = if is_mcp {
+                            ("mcp", "tool call")
+                        } else {
+                            ("exec", "active command")
+                        };
                         tools.push(crate::operator_ui::ToolTimelineEntry::new(
-                            "tool",
-                            "active executor".to_string(),
+                            name,
+                            target.to_string(),
                             crate::operator_ui::ToolTimelineState::Running,
-                            "executing".to_string(),
+                            elapsed_label.clone(),
                         ));
                     }
                 }
