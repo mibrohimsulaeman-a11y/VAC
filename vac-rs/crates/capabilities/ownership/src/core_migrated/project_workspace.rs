@@ -882,12 +882,10 @@ pub fn load_project_workspace_report_with_options(
     }
 
     let strict_manifests_available = strict_manifest_dirs_exist(&vac_dir);
-    let mode = profile_mode(&vac_dir).unwrap_or_else(|| {
-        if strict_manifests_available {
-            ProjectWorkspaceMode::Strict
-        } else {
-            ProjectWorkspaceMode::Soft
-        }
+    let mode = profile_mode(&vac_dir).unwrap_or(if strict_manifests_available {
+        ProjectWorkspaceMode::Strict
+    } else {
+        ProjectWorkspaceMode::Soft
     });
 
     diagnostics.push(ProjectWorkspaceDiagnostic {
