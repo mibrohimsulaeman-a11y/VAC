@@ -411,4 +411,233 @@ mod tests {
             .expect("expected error");
         assert_eq!(OLLAMA_CONNECTION_ERROR, err.to_string());
     }
+
+    #[tokio::test]
+    async fn test_fetch_models_non_success_returns_empty() {
+        if std::env::var(vac_core::spawn::VAC_SANDBOX_NETWORK_DISABLED_ENV_VAR).is_ok() {
+            return;
+        }
+
+        let server = wiremock::MockServer::start().await;
+        wiremock::Mock::given(wiremock::matchers::method("GET"))
+            .and(wiremock::matchers::path("/api/tags"))
+            .respond_with(wiremock::ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let client = OllamaClient::from_host_root(server.uri());
+        let models = client.fetch_models().await.expect("fetch models");
+        assert!(models.is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_fetch_models_missing_models_field_returns_empty() {
+        if std::env::var(vac_core::spawn::VAC_SANDBOX_NETWORK_DISABLED_ENV_VAR).is_ok() {
+            return;
+        }
+
+        let server = wiremock::MockServer::start().await;
+        wiremock::Mock::given(wiremock::matchers::method("GET"))
+            .and(wiremock::matchers::path("/api/tags"))
+            .respond_with(wiremock::ResponseTemplate::new(200).set_body_raw(
+                serde_json::json!({ "not_models": [] }).to_string(),
+                "application/json",
+            ))
+            .mount(&server)
+            .await;
+
+        let client = OllamaClient::from_host_root(server.uri());
+        let models = client.fetch_models().await.expect("fetch models");
+        assert!(models.is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_fetch_version_non_success_returns_none() {
+        if std::env::var(vac_core::spawn::VAC_SANDBOX_NETWORK_DISABLED_ENV_VAR).is_ok() {
+            return;
+        }
+
+        let server = wiremock::MockServer::start().await;
+        wiremock::Mock::given(wiremock::matchers::method("GET"))
+            .and(wiremock::matchers::path("/api/version"))
+            .respond_with(wiremock::ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let client = OllamaClient::from_host_root(server.uri());
+        let version = client.fetch_version().await.expect("version fetch");
+        assert_eq!(version, None);
+    }
+
+    #[tokio::test]
+    async fn test_fetch_version_parse_behavior() {
+        if std::env::var(vac_core::spawn::VAC_SANDBOX_NETWORK_DISABLED_ENV_VAR).is_ok() {
+            return;
+        }
+
+        // Unparseable version string yields None.
+        let bad_server = wiremock::MockServer::start().await;
+        wiremock::Mock::given(wiremock::matchers::method("GET"))
+            .and(wiremock::matchers::path("/api/version"))
+            .respond_with(wiremock::ResponseTemplate::new(200).set_body_raw(
+                serde_json::json!({ "version": "not-a-version" }).to_string(),
+                "application/json",
+            ))
+            .mount(&bad_server)
+            .await;
+        let bad_client = OllamaClient::from_host_root(bad_server.uri());
+        let bad_version = bad_client.fetch_version().await.expect("version fetch");
+        assert_eq!(bad_version, None);
+
+        // Leading-v version string parses into the expected semver.
+        let good_server = wiremock::MockServer::start().await;
+        wiremock::Mock::given(wiremock::matchers::method("GET"))
+            .and(wiremock::matchers::path("/api/version"))
+            .respond_with(wiremock::ResponseTemplate::new(200).set_body_raw(
+                serde_json::json!({ "version": "v1.2.3" }).to_string(),
+                "application/json",
+            ))
+            .mount(&good_server)
+            .await;
+        let good_client = OllamaClient::from_host_root(good_server.uri());
+        let good_version = good_client.fetch_version().await.expect("version fetch");
+        assert_eq!(good_version, Some(Version::new(1, 2, 3)));
+    }
+
+    #[tokio::test]
+    async fn test_pull_model_stream_progress_then_success() {
+        if std::env::var(vac_core::spawn::VAC_SANDBOX_NETWORK_DISABLED_ENV_VAR).is_ok() {
+            return;
+        }
+
+        let server = wiremock::MockServer::start().await;
+        let body = format!(
+            "{}\n{}\n",
+            serde_json::json!({
+                "status": "pulling",
+                "digest": "sha256:x",
+                "total": 100,
+                "completed": 50
+            }),
+            serde_json::json!({ "status": "success" }),
+        );
+        wiremock::Mock::given(wiremock::matchers::method("POST"))
+            .and(wiremock::matchers::path("/api/pull"))
+            .respond_with(
+                wiremock::ResponseTemplate::new(200).set_body_raw(body, "application/json"),
+            )
+            .mount(&server)
+            .await;
+
+        let client = OllamaClient::from_host_root(server.uri());
+        let stream = client
+            .pull_model_stream("llama3.2:3b")
+            .await
+            .expect("pull stream");
+        let events: Vec<PullEvent> = stream.collect().await;
+
+        assert!(events.iter().any(|event| matches!(
+            event,
+            PullEvent::ChunkProgress { digest, total, completed }
+                if digest.as_str() == "sha256:x" && *total == Some(100) && *completed == Some(50)
+        )));
+        assert!(matches!(events.last(), Some(PullEvent::Success)));
+    }
+
+    #[tokio::test]
+    async fn test_pull_model_stream_error_event_stops_stream() {
+        if std::env::var(vac_core::spawn::VAC_SANDBOX_NETWORK_DISABLED_ENV_VAR).is_ok() {
+            return;
+        }
+
+        let server = wiremock::MockServer::start().await;
+        let body = format!(
+            "{}\n{}\n",
+            serde_json::json!({ "error": "boom" }),
+            serde_json::json!({ "status": "success" }),
+        );
+        wiremock::Mock::given(wiremock::matchers::method("POST"))
+            .and(wiremock::matchers::path("/api/pull"))
+            .respond_with(
+                wiremock::ResponseTemplate::new(200).set_body_raw(body, "application/json"),
+            )
+            .mount(&server)
+            .await;
+
+        let client = OllamaClient::from_host_root(server.uri());
+        let stream = client.pull_model_stream("m").await.expect("pull stream");
+        let events: Vec<PullEvent> = stream.collect().await;
+
+        assert_eq!(events.len(), 1);
+        assert!(matches!(&events[0], PullEvent::Error(msg) if msg.as_str() == "boom"));
+    }
+
+    #[tokio::test]
+    async fn test_pull_model_stream_non_success_status_errors() {
+        if std::env::var(vac_core::spawn::VAC_SANDBOX_NETWORK_DISABLED_ENV_VAR).is_ok() {
+            return;
+        }
+
+        let server = wiremock::MockServer::start().await;
+        wiremock::Mock::given(wiremock::matchers::method("POST"))
+            .and(wiremock::matchers::path("/api/pull"))
+            .respond_with(wiremock::ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let client = OllamaClient::from_host_root(server.uri());
+        let result = client.pull_model_stream("m").await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_pull_with_reporter_drives_to_success() {
+        if std::env::var(vac_core::spawn::VAC_SANDBOX_NETWORK_DISABLED_ENV_VAR).is_ok() {
+            return;
+        }
+
+        struct RecordingReporter {
+            events: Vec<PullEvent>,
+        }
+        impl PullProgressReporter for RecordingReporter {
+            fn on_event(&mut self, event: &PullEvent) -> io::Result<()> {
+                self.events.push(event.clone());
+                Ok(())
+            }
+        }
+
+        let server = wiremock::MockServer::start().await;
+        let body = format!(
+            "{}\n{}\n",
+            serde_json::json!({
+                "status": "pulling",
+                "digest": "sha256:x",
+                "total": 100,
+                "completed": 50
+            }),
+            serde_json::json!({ "status": "success" }),
+        );
+        wiremock::Mock::given(wiremock::matchers::method("POST"))
+            .and(wiremock::matchers::path("/api/pull"))
+            .respond_with(
+                wiremock::ResponseTemplate::new(200).set_body_raw(body, "application/json"),
+            )
+            .mount(&server)
+            .await;
+
+        let client = OllamaClient::from_host_root(server.uri());
+        let mut reporter = RecordingReporter { events: Vec::new() };
+        client
+            .pull_with_reporter("llama3.2:3b", &mut reporter)
+            .await
+            .expect("pull with reporter");
+
+        assert!(
+            reporter
+                .events
+                .iter()
+                .any(|event| matches!(event, PullEvent::ChunkProgress { .. }))
+        );
+        assert!(matches!(reporter.events.last(), Some(PullEvent::Success)));
+    }
 }

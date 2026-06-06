@@ -394,4 +394,51 @@ mod tests {
         let client = LMStudioClient::from_host_root("https://example.com:8080/api");
         assert_eq!(client.base_url, "https://example.com:8080/api");
     }
+
+    #[tokio::test]
+    async fn test_load_model_happy_path() {
+        if std::env::var(vac_core::spawn::VAC_SANDBOX_NETWORK_DISABLED_ENV_VAR).is_ok() {
+            return;
+        }
+
+        let server = wiremock::MockServer::start().await;
+        wiremock::Mock::given(wiremock::matchers::method("POST"))
+            .and(wiremock::matchers::path("/responses"))
+            .respond_with(wiremock::ResponseTemplate::new(200).set_body_raw(
+                serde_json::json!({ "id": "resp_1" }).to_string(),
+                "application/json",
+            ))
+            .mount(&server)
+            .await;
+
+        let client = LMStudioClient::from_host_root(server.uri());
+        client
+            .load_model("vastar/gpt-oss-20b")
+            .await
+            .expect("load model should succeed");
+    }
+
+    #[tokio::test]
+    async fn test_load_model_server_error() {
+        if std::env::var(vac_core::spawn::VAC_SANDBOX_NETWORK_DISABLED_ENV_VAR).is_ok() {
+            return;
+        }
+
+        let server = wiremock::MockServer::start().await;
+        wiremock::Mock::given(wiremock::matchers::method("POST"))
+            .and(wiremock::matchers::path("/responses"))
+            .respond_with(wiremock::ResponseTemplate::new(400))
+            .mount(&server)
+            .await;
+
+        let client = LMStudioClient::from_host_root(server.uri());
+        let result = client.load_model("vastar/gpt-oss-20b").await;
+        assert!(result.is_err());
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("Failed to load model: 400")
+        );
+    }
 }
