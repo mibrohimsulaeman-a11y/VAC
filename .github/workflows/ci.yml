@@ -110,6 +110,6 @@ jobs:
           restore-keys: |
             cargo-${{ runner.os }}-
       - name: cargo nextest run (partition ${{ matrix.partition }}/4)
-        run: cargo nextest run --workspace --cargo-profile ci-test --partition count:${{ matrix.partition }}/4
+        run: cargo nextest run --workspace --profile ci --cargo-profile ci-test --partition count:${{ matrix.partition }}/4
       - name: sccache stats
         run: sccache --show-stats

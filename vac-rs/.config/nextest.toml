@@ -1,0 +1,84 @@
+# Tiered test classification for the vac-rs Cargo workspace (cargo-nextest).
+#
+# `cargo nextest run` (profile `default`) runs only the fast Tier-0 core
+# capabilities. Heavier layers and snapshot/live/perf tests run on-demand via
+# the `ci`, `ui`, and `live` profiles.
+#
+# NOTE: command-line filtersets are INTERSECTED with a profile's
+# `default-filter`. Use `--ignore-default-filter` to bypass it.
+
+# Heavy tests (snapshot rendering, live network, perf benches) run serially to
+# limit resource contention wherever they are included (e.g. profile `ci`).
+[test-groups]
+heavy-serial = { max-threads = 1 }
+
+# ---------------------------------------------------------------------------
+# default - Tier 0 only: core + capabilities + foundation packages,
+# excluding snapshot/live/perf_bench tests. Fast inner-loop default.
+# ---------------------------------------------------------------------------
+[profile.default]
+default-filter = """
+    (
+        package(vac-core) or package(core_test_support)
+        or package(vac-capability-build) or package(vac-capability-chat)
+        or package(vac-code-mode) or package(vac-collaboration-mode-templates)
+        or package(vac-core-plugins) or package(vac-core-skills)
+        or package(vac-capability-docs) or package(vac-external-agent-migration)
+        or package(vac-external-agent-sessions) or package(vac-file-search)
+        or package(vac-capability-identity) or package(vac-local-runtime-owner)
+        or package(vac-memories-read) or package(vac-memories-write)
+        or package(vac-capability-ownership) or package(vac-capability-release)
+        or package(vac-response-debug-context) or package(vac-capability-sessions)
+        or package(vac-tools) or package(vac-capability-tools)
+        or package(vac-ansi-escape) or package(vac-arg0)
+        or package(vac-async-utils) or package(vac-config)
+        or package(vac-features) or package(vac-file-system)
+        or package(vac-git-utils) or package(vac-install-context)
+        or package(vac-protocol) or package(vac-rollout)
+        or package(vac-rollout-trace) or package(vac-runtime-protocol)
+        or package(vac-state) or package(vac-terminal-detection)
+        or package(vac-test-binary-support) or package(vac-thread-store)
+        or package(vac-uds) or package(vac-utils-absolute-path)
+        or package(vac-utils-approval-presets) or package(vac-utils-cache)
+        or package(vac-utils-cargo-bin) or package(vac-utils-cli)
+        or package(vac-utils-elapsed) or package(vac-utils-fuzzy-match)
+        or package(vac-utils-home-dir) or package(vac-utils-image)
+        or package(vac-utils-json-to-toml) or package(vac-utils-oss)
+        or package(vac-utils-output-truncation) or package(vac-utils-path)
+        or package(vac-utils-plugins) or package(vac-utils-pty)
+        or package(vac-utils-readiness) or package(vac-utils-rustls-provider)
+        or package(vac-utils-sandbox-summary) or package(vac-utils-sleep-inhibitor)
+        or package(vac-utils-stream-parser) or package(vac-utils-string)
+        or package(vac-utils-template) or package(vac-experimental-api-macros)
+    )
+    and not test(/snapshot|live_|perf_bench/)
+"""
+
+# Keep heavy/snapshot tests in a serial group. They are excluded from the
+# default set above; this grouping applies when they are invoked explicitly.
+[[profile.default.overrides]]
+filter = 'test(/snapshot|live_|perf_bench/)'
+test-group = 'heavy-serial'
+
+# ---------------------------------------------------------------------------
+# ci - everything except live tests. Used by .github/workflows/ci.yml.
+# ---------------------------------------------------------------------------
+[profile.ci]
+default-filter = 'not test(/live_/)'
+
+[[profile.ci.overrides]]
+filter = 'test(/snapshot|perf_bench/)'
+test-group = 'heavy-serial'
+
+# ---------------------------------------------------------------------------
+# ui - TUI surface crate only.
+# ---------------------------------------------------------------------------
+[profile.ui]
+default-filter = 'package(vac-surface-tui)'
+
+# ---------------------------------------------------------------------------
+# live - only live_ tests (ignored by default). Run explicitly with:
+#   cargo nextest run --profile live --run-ignored only
+# ---------------------------------------------------------------------------
+[profile.live]
+default-filter = 'test(/live_/)'

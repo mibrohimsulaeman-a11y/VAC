@@ -57,6 +57,21 @@ cd vac-rs
 cargo insta accept
 ```
 
+### 5. Tiered Test Profiles (cargo-nextest)
+Tests are classified by tier in `vac-rs/.config/nextest.toml` so the default loop stays fast:
+
+| Profile | Scope | Command |
+| --- | --- | --- |
+| `default` | Tier 0 only (core + capabilities + foundation), excludes snapshot/live | `cargo nextest run` |
+| `ci` | All tests except `test(/live_/)` | `cargo nextest run --profile ci` |
+| `ui` | `vac-surface-tui` only | `cargo nextest run --profile ui` |
+| `live` | Only `test(/live_/)` (ignored) | `cargo nextest run --profile live --run-ignored only` |
+
+- `default` is intentionally small/fast for the daily inner loop; heavier tiers (control-plane, runtime, providers, integrations, surfaces) run on-demand or via `ci`.
+- Snapshot/live/perf_bench tests are excluded from `default` via `default-filter` plus the `heavy-serial` test-group.
+- CI (`.github/workflows/ci.yml`) runs `--profile ci` across 4 partitions, so the full suite stays validated.
+- Note: command-line filtersets are intersected with a profile's `default-filter`; pass `--ignore-default-filter` to override.
+
 ---
 
 ## 🎛️ Control Plane & Declarative Registry
