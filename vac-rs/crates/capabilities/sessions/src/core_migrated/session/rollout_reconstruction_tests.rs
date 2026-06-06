@@ -71,7 +71,6 @@ async fn record_initial_history_resumed_bare_turn_context_does_not_hydrate_previ
         model: previous_model.to_string(),
         personality: turn_context.personality,
         collaboration_mode: Some(turn_context.collaboration_mode.clone()),
-        realtime_active: Some(turn_context.realtime_active),
         effort: turn_context.reasoning_effort,
         summary: turn_context.reasoning_summary,
         user_instructions: None,
@@ -112,7 +111,6 @@ async fn record_initial_history_resumed_hydrates_previous_turn_settings_from_lif
         model: previous_model.to_string(),
         personality: turn_context.personality,
         collaboration_mode: Some(turn_context.collaboration_mode.clone()),
-        realtime_active: Some(turn_context.realtime_active),
         effort: turn_context.reasoning_effort,
         summary: turn_context.reasoning_summary,
         user_instructions: None,
@@ -167,7 +165,6 @@ async fn record_initial_history_resumed_hydrates_previous_turn_settings_from_lif
         session.previous_turn_settings().await,
         Some(PreviousTurnSettings {
             model: previous_model.to_string(),
-            realtime_active: Some(turn_context.realtime_active),
         })
     );
 }
@@ -266,7 +263,6 @@ async fn reconstruct_history_rollback_keeps_history_and_metadata_in_sync_for_com
         reconstructed.previous_turn_settings,
         Some(PreviousTurnSettings {
             model: turn_context.model_info.slug.clone(),
-            realtime_active: Some(turn_context.realtime_active),
         })
     );
     assert_eq!(
@@ -353,7 +349,6 @@ async fn reconstruct_history_rollback_keeps_history_and_metadata_in_sync_for_inc
         reconstructed.previous_turn_settings,
         Some(PreviousTurnSettings {
             model: turn_context.model_info.slug.clone(),
-            realtime_active: Some(turn_context.realtime_active),
         })
     );
     assert_eq!(
@@ -471,7 +466,6 @@ async fn reconstruct_history_rollback_skips_non_user_turns_for_history_and_metad
         reconstructed.previous_turn_settings,
         Some(PreviousTurnSettings {
             model: turn_context.model_info.slug.clone(),
-            realtime_active: Some(turn_context.realtime_active),
         })
     );
     assert_eq!(
@@ -567,7 +561,6 @@ async fn reconstruct_history_rollback_counts_inter_agent_assistant_turns() {
         reconstructed.previous_turn_settings,
         Some(PreviousTurnSettings {
             model: turn_context.model_info.slug.clone(),
-            realtime_active: Some(turn_context.realtime_active),
         })
     );
     assert_eq!(
@@ -774,7 +767,6 @@ async fn record_initial_history_resumed_rollback_drops_incomplete_user_turn_comp
         session.previous_turn_settings().await,
         Some(PreviousTurnSettings {
             model: turn_context.model_info.slug.clone(),
-            realtime_active: Some(turn_context.realtime_active),
         })
     );
     assert_eq!(
@@ -922,7 +914,6 @@ async fn record_initial_history_resumed_turn_context_after_compaction_reestablis
         model: previous_model.to_string(),
         personality: turn_context.personality,
         collaboration_mode: Some(turn_context.collaboration_mode.clone()),
-        realtime_active: Some(turn_context.realtime_active),
         effort: turn_context.reasoning_effort,
         summary: turn_context.reasoning_summary,
         user_instructions: None,
@@ -980,7 +971,6 @@ async fn record_initial_history_resumed_turn_context_after_compaction_reestablis
         session.previous_turn_settings().await,
         Some(PreviousTurnSettings {
             model: previous_model.to_string(),
-            realtime_active: Some(turn_context.realtime_active),
         })
     );
     assert_eq!(
@@ -1000,7 +990,6 @@ async fn record_initial_history_resumed_turn_context_after_compaction_reestablis
             model: previous_model.to_string(),
             personality: turn_context.personality,
             collaboration_mode: Some(turn_context.collaboration_mode.clone()),
-            realtime_active: Some(turn_context.realtime_active),
             effort: turn_context.reasoning_effort,
             summary: turn_context.reasoning_summary,
             user_instructions: None,
@@ -1031,7 +1020,6 @@ async fn record_initial_history_resumed_aborted_turn_without_id_clears_active_tu
         model: previous_model.to_string(),
         personality: turn_context.personality,
         collaboration_mode: Some(turn_context.collaboration_mode.clone()),
-        realtime_active: Some(turn_context.realtime_active),
         effort: turn_context.reasoning_effort,
         summary: turn_context.reasoning_summary,
         user_instructions: None,
@@ -1114,7 +1102,6 @@ async fn record_initial_history_resumed_aborted_turn_without_id_clears_active_tu
         session.previous_turn_settings().await,
         Some(PreviousTurnSettings {
             model: previous_model.to_string(),
-            realtime_active: Some(turn_context.realtime_active),
         })
     );
     assert!(session.reference_context_item().await.is_none());
@@ -1146,7 +1133,6 @@ async fn record_initial_history_resumed_unmatched_abort_preserves_active_turn_fo
         model: current_model.to_string(),
         personality: turn_context.personality,
         collaboration_mode: Some(turn_context.collaboration_mode.clone()),
-        realtime_active: Some(turn_context.realtime_active),
         effort: turn_context.reasoning_effort,
         summary: turn_context.reasoning_summary,
         user_instructions: None,
@@ -1230,7 +1216,6 @@ async fn record_initial_history_resumed_unmatched_abort_preserves_active_turn_fo
         session.previous_turn_settings().await,
         Some(PreviousTurnSettings {
             model: current_model.to_string(),
-            realtime_active: Some(turn_context.realtime_active),
         })
     );
     assert_eq!(
@@ -1260,7 +1245,6 @@ async fn record_initial_history_resumed_trailing_incomplete_turn_compaction_clea
         model: previous_model.to_string(),
         personality: turn_context.personality,
         collaboration_mode: Some(turn_context.collaboration_mode.clone()),
-        realtime_active: Some(turn_context.realtime_active),
         effort: turn_context.reasoning_effort,
         summary: turn_context.reasoning_summary,
         user_instructions: None,
@@ -1335,7 +1319,6 @@ async fn record_initial_history_resumed_trailing_incomplete_turn_compaction_clea
         session.previous_turn_settings().await,
         Some(PreviousTurnSettings {
             model: previous_model.to_string(),
-            realtime_active: Some(turn_context.realtime_active),
         })
     );
     assert!(session.reference_context_item().await.is_none());
@@ -1382,7 +1365,6 @@ async fn record_initial_history_resumed_trailing_incomplete_turn_preserves_turn_
         session.previous_turn_settings().await,
         Some(PreviousTurnSettings {
             model: turn_context.model_info.slug.clone(),
-            realtime_active: Some(turn_context.realtime_active),
         })
     );
     assert_eq!(
@@ -1412,7 +1394,6 @@ async fn record_initial_history_resumed_replaced_incomplete_compacted_turn_clear
         model: previous_model.to_string(),
         personality: turn_context.personality,
         collaboration_mode: Some(turn_context.collaboration_mode.clone()),
-        realtime_active: Some(turn_context.realtime_active),
         effort: turn_context.reasoning_effort,
         summary: turn_context.reasoning_summary,
         user_instructions: None,
@@ -1498,7 +1479,6 @@ async fn record_initial_history_resumed_replaced_incomplete_compacted_turn_clear
         session.previous_turn_settings().await,
         Some(PreviousTurnSettings {
             model: previous_model.to_string(),
-            realtime_active: Some(turn_context.realtime_active),
         })
     );
     assert!(session.reference_context_item().await.is_none());

@@ -710,36 +710,6 @@ client_request_definitions! {
         serialization: thread_id(params.thread_id),
         response: v2::TurnInterruptResponse,
     },
-    #[experimental("thread/realtime/start")]
-    ThreadRealtimeStart => "thread/realtime/start" {
-        params: v2::ThreadRealtimeStartParams,
-        serialization: thread_id(params.thread_id),
-        response: v2::ThreadRealtimeStartResponse,
-    },
-    #[experimental("thread/realtime/appendAudio")]
-    ThreadRealtimeAppendAudio => "thread/realtime/appendAudio" {
-        params: v2::ThreadRealtimeAppendAudioParams,
-        serialization: thread_id(params.thread_id),
-        response: v2::ThreadRealtimeAppendAudioResponse,
-    },
-    #[experimental("thread/realtime/appendText")]
-    ThreadRealtimeAppendText => "thread/realtime/appendText" {
-        params: v2::ThreadRealtimeAppendTextParams,
-        serialization: thread_id(params.thread_id),
-        response: v2::ThreadRealtimeAppendTextResponse,
-    },
-    #[experimental("thread/realtime/stop")]
-    ThreadRealtimeStop => "thread/realtime/stop" {
-        params: v2::ThreadRealtimeStopParams,
-        serialization: thread_id(params.thread_id),
-        response: v2::ThreadRealtimeStopResponse,
-    },
-    #[experimental("thread/realtime/listVoices")]
-    ThreadRealtimeListVoices => "thread/realtime/listVoices" {
-        params: v2::ThreadRealtimeListVoicesParams,
-        serialization: None,
-        response: v2::ThreadRealtimeListVoicesResponse,
-    },
     ReviewStart => "review/start" {
         params: v2::ReviewStartParams,
         serialization: thread_id(params.thread_id),
@@ -1408,22 +1378,6 @@ server_notification_definitions! {
     ConfigWarning => "configWarning" (v2::ConfigWarningNotification),
     FuzzyFileSearchSessionUpdated => "fuzzyFileSearch/sessionUpdated" (FuzzyFileSearchSessionUpdatedNotification),
     FuzzyFileSearchSessionCompleted => "fuzzyFileSearch/sessionCompleted" (FuzzyFileSearchSessionCompletedNotification),
-    #[experimental("thread/realtime/started")]
-    ThreadRealtimeStarted => "thread/realtime/started" (v2::ThreadRealtimeStartedNotification),
-    #[experimental("thread/realtime/itemAdded")]
-    ThreadRealtimeItemAdded => "thread/realtime/itemAdded" (v2::ThreadRealtimeItemAddedNotification),
-    #[experimental("thread/realtime/transcript/delta")]
-    ThreadRealtimeTranscriptDelta => "thread/realtime/transcript/delta" (v2::ThreadRealtimeTranscriptDeltaNotification),
-    #[experimental("thread/realtime/transcript/done")]
-    ThreadRealtimeTranscriptDone => "thread/realtime/transcript/done" (v2::ThreadRealtimeTranscriptDoneNotification),
-    #[experimental("thread/realtime/outputAudio/delta")]
-    ThreadRealtimeOutputAudioDelta => "thread/realtime/outputAudio/delta" (v2::ThreadRealtimeOutputAudioDeltaNotification),
-    #[experimental("thread/realtime/sdp")]
-    ThreadRealtimeSdp => "thread/realtime/sdp" (v2::ThreadRealtimeSdpNotification),
-    #[experimental("thread/realtime/error")]
-    ThreadRealtimeError => "thread/realtime/error" (v2::ThreadRealtimeErrorNotification),
-    #[experimental("thread/realtime/closed")]
-    ThreadRealtimeClosed => "thread/realtime/closed" (v2::ThreadRealtimeClosedNotification),
 
     /// Notifies the user of world-writable directories on Windows, which cannot be protected by the sandbox.
     WindowsWorldWritableWarning => "windows/worldWritableWarning" (v2::WindowsWorldWritableWarningNotification),
@@ -1450,9 +1404,6 @@ mod tests {
     use vac_protocol::ThreadId;
     use vac_protocol::account::PlanType;
     use vac_protocol::parse_command::ParsedCommand;
-    use vac_protocol::protocol::RealtimeConversationVersion;
-    use vac_protocol::protocol::RealtimeOutputModality;
-    use vac_protocol::protocol::RealtimeVoice;
     use vac_utils_absolute_path::AbsolutePathBuf;
     use vac_utils_absolute_path::test_support::PathBufExt;
     use vac_utils_absolute_path::test_support::test_path_buf;
@@ -2537,128 +2488,6 @@ mod tests {
     }
 
     #[test]
-    fn serialize_thread_realtime_start() -> Result<()> {
-        let request = ClientRequest::ThreadRealtimeStart {
-            request_id: RequestId::Integer(9),
-            params: v2::ThreadRealtimeStartParams {
-                thread_id: "thr_123".to_string(),
-                output_modality: RealtimeOutputModality::Audio,
-                prompt: Some(Some("You are on a call".to_string())),
-                realtime_session_id: Some("sess_456".to_string()),
-                transport: None,
-                voice: Some(RealtimeVoice::Marin),
-            },
-        };
-        assert_eq!(
-            json!({
-                "method": "thread/realtime/start",
-                "id": 9,
-                "params": {
-                    "threadId": "thr_123",
-                    "outputModality": "audio",
-                    "prompt": "You are on a call",
-                    "realtimeSessionId": "sess_456",
-                    "transport": null,
-                    "voice": "marin"
-                }
-            }),
-            serde_json::to_value(&request)?,
-        );
-        Ok(())
-    }
-
-    #[test]
-    fn serialize_thread_realtime_start_prompt_default_and_null() -> Result<()> {
-        let default_prompt_request = ClientRequest::ThreadRealtimeStart {
-            request_id: RequestId::Integer(9),
-            params: v2::ThreadRealtimeStartParams {
-                thread_id: "thr_123".to_string(),
-                output_modality: RealtimeOutputModality::Audio,
-                prompt: None,
-                realtime_session_id: None,
-                transport: None,
-                voice: None,
-            },
-        };
-        assert_eq!(
-            json!({
-                "method": "thread/realtime/start",
-                "id": 9,
-                "params": {
-                    "threadId": "thr_123",
-                    "outputModality": "audio",
-                    "realtimeSessionId": null,
-                    "transport": null,
-                    "voice": null
-                }
-            }),
-            serde_json::to_value(&default_prompt_request)?,
-        );
-
-        let null_prompt_request = ClientRequest::ThreadRealtimeStart {
-            request_id: RequestId::Integer(9),
-            params: v2::ThreadRealtimeStartParams {
-                thread_id: "thr_123".to_string(),
-                output_modality: RealtimeOutputModality::Audio,
-                prompt: Some(None),
-                realtime_session_id: None,
-                transport: None,
-                voice: None,
-            },
-        };
-        assert_eq!(
-            json!({
-                "method": "thread/realtime/start",
-                "id": 9,
-                "params": {
-                    "threadId": "thr_123",
-                    "outputModality": "audio",
-                    "prompt": null,
-                    "realtimeSessionId": null,
-                    "transport": null,
-                    "voice": null
-                }
-            }),
-            serde_json::to_value(&null_prompt_request)?,
-        );
-
-        let default_prompt_value = json!({
-            "method": "thread/realtime/start",
-            "id": 9,
-            "params": {
-                "threadId": "thr_123",
-                "outputModality": "audio",
-                "realtimeSessionId": null,
-                "transport": null,
-                "voice": null
-            }
-        });
-        assert_eq!(
-            serde_json::from_value::<ClientRequest>(default_prompt_value)?,
-            default_prompt_request,
-        );
-
-        let null_prompt_value = json!({
-            "method": "thread/realtime/start",
-            "id": 9,
-            "params": {
-                "threadId": "thr_123",
-                "outputModality": "audio",
-                "prompt": null,
-                "realtimeSessionId": null,
-                "transport": null,
-                "voice": null
-            }
-        });
-        assert_eq!(
-            serde_json::from_value::<ClientRequest>(null_prompt_value)?,
-            null_prompt_request,
-        );
-
-        Ok(())
-    }
-
-    #[test]
     fn serialize_thread_status_changed_notification() -> Result<()> {
         let notification =
             ServerNotification::ThreadStatusChanged(v2::ThreadStatusChangedNotification {
@@ -2673,39 +2502,6 @@ mod tests {
                     "status": {
                         "type": "idle"
                     },
-                }
-            }),
-            serde_json::to_value(&notification)?,
-        );
-        Ok(())
-    }
-
-    #[test]
-    fn serialize_thread_realtime_output_audio_delta_notification() -> Result<()> {
-        let notification = ServerNotification::ThreadRealtimeOutputAudioDelta(
-            v2::ThreadRealtimeOutputAudioDeltaNotification {
-                thread_id: "thr_123".to_string(),
-                audio: v2::ThreadRealtimeAudioChunk {
-                    data: "AQID".to_string(),
-                    sample_rate: 24_000,
-                    num_channels: 1,
-                    samples_per_channel: Some(512),
-                    item_id: None,
-                },
-            },
-        );
-        assert_eq!(
-            json!({
-                "method": "thread/realtime/outputAudio/delta",
-                "params": {
-                    "threadId": "thr_123",
-                    "audio": {
-                        "data": "AQID",
-                        "sampleRate": 24000,
-                        "numChannels": 1,
-                        "samplesPerChannel": 512,
-                        "itemId": null
-                    }
                 }
             }),
             serde_json::to_value(&notification)?,
@@ -2747,23 +2543,6 @@ mod tests {
 
         let reason = crate::experimental_api::ExperimentalApi::experimental_reason(&request);
         assert_eq!(reason, Some("command/exec.permissionProfile"));
-    }
-
-    #[test]
-    fn thread_realtime_start_is_marked_experimental() {
-        let request = ClientRequest::ThreadRealtimeStart {
-            request_id: RequestId::Integer(1),
-            params: v2::ThreadRealtimeStartParams {
-                thread_id: "thr_123".to_string(),
-                output_modality: RealtimeOutputModality::Audio,
-                prompt: Some(Some("You are on a call".to_string())),
-                realtime_session_id: None,
-                transport: None,
-                voice: None,
-            },
-        };
-        let reason = crate::experimental_api::ExperimentalApi::experimental_reason(&request);
-        assert_eq!(reason, Some("thread/realtime/start"));
     }
 
     #[test]
@@ -2833,36 +2612,6 @@ mod tests {
             crate::experimental_api::ExperimentalApi::experimental_reason(&cleared),
             Some("thread/goal/cleared")
         );
-    }
-
-    #[test]
-    fn thread_realtime_started_notification_is_marked_experimental() {
-        let notification =
-            ServerNotification::ThreadRealtimeStarted(v2::ThreadRealtimeStartedNotification {
-                thread_id: "thr_123".to_string(),
-                realtime_session_id: Some("sess_456".to_string()),
-                version: RealtimeConversationVersion::V1,
-            });
-        let reason = crate::experimental_api::ExperimentalApi::experimental_reason(&notification);
-        assert_eq!(reason, Some("thread/realtime/started"));
-    }
-
-    #[test]
-    fn thread_realtime_output_audio_delta_notification_is_marked_experimental() {
-        let notification = ServerNotification::ThreadRealtimeOutputAudioDelta(
-            v2::ThreadRealtimeOutputAudioDeltaNotification {
-                thread_id: "thr_123".to_string(),
-                audio: v2::ThreadRealtimeAudioChunk {
-                    data: "AQID".to_string(),
-                    sample_rate: 24_000,
-                    num_channels: 1,
-                    samples_per_channel: Some(512),
-                    item_id: None,
-                },
-            },
-        );
-        let reason = crate::experimental_api::ExperimentalApi::experimental_reason(&notification);
-        assert_eq!(reason, Some("thread/realtime/outputAudio/delta"));
     }
 
     #[test]

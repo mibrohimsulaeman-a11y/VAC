@@ -3,7 +3,7 @@ source: crates/surfaces/tui/src/chatwidget/tests/side.rs
 expression: normalized_backend_snapshot(terminal.backend())
 ---
 "                                                                                "
-"• Working (9s • esc to interrupt)                                               "
+"◦ Working (5s • esc to interrupt)                                               "
 "                                                                                "
 "                                                                                "
 "› Ask VAC to do anything                                                        "

@@ -504,7 +504,7 @@
         {
           "description": "Path to a .vac/ folder within a project. There could be multiple of these between `cwd` and the project/repo root.",
           "properties": {
-            "dotVACFolder": {
+            "dotVacFolder": {
               "$ref": "#/definitions/AbsolutePathBuf"
             },
             "type": {
@@ -516,7 +516,7 @@
             }
           },
           "required": [
-            "dotVACFolder",
+            "dotVacFolder",
             "type"
           ],
           "title": "ProjectConfigLayerSource",

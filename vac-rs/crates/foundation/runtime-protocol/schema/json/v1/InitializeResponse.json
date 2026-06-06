@@ -7,14 +7,6 @@
     }
   },
   "properties": {
-    "vacHome": {
-      "allOf": [
-        {
-          "$ref": "#/definitions/AbsolutePathBuf"
-        }
-      ],
-      "description": "Absolute path to the server's $VAC_HOME directory."
-    },
     "platformFamily": {
       "description": "Platform family for the running app-server target, for example `\"unix\"` or `\"windows\"`.",
       "type": "string"
@@ -25,13 +17,21 @@
     },
     "userAgent": {
       "type": "string"
+    },
+    "vacHome": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/AbsolutePathBuf"
+        }
+      ],
+      "description": "Absolute path to the server's $VAC_HOME directory."
     }
   },
   "required": [
-    "vacHome",
     "platformFamily",
     "platformOs",
-    "userAgent"
+    "userAgent",
+    "vacHome"
   ],
   "title": "InitializeResponse",
   "type": "object"

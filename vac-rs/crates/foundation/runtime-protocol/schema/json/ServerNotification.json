@@ -426,7 +426,28 @@
           "type": "string"
         },
         {
-          "description": "ChatGPT OAuth managed by VAC (tokens persisted and refreshed by VAC).",
+          "description": "Bearer token supplied by a provider-neutral credential source.",
+          "enum": [
+            "bearer"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Local-only credential resolved by the runtime owner.",
+          "enum": [
+            "local"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Provider credential whose concrete account mode is owned by provider config.",
+          "enum": [
+            "providerCredential"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Legacy ChatGPT OAuth managed by VAC. Kept parseable only behind explicit opt-in gates.",
           "enum": [
             "chatgpt"
           ],
@@ -473,143 +494,6 @@
         "start"
       ],
       "type": "object"
-    },
-    "VACErrorInfo": {
-      "description": "This translation layer make sure that we expose vac error code in camel case.\n\nWhen an upstream HTTP status is available (for example, from the Responses API or a provider), it is forwarded in `httpStatusCode` on the relevant `vacErrorInfo` variant.",
-      "oneOf": [
-        {
-          "enum": [
-            "contextWindowExceeded",
-            "usageLimitExceeded",
-            "serverOverloaded",
-            "cyberPolicy",
-            "internalServerError",
-            "unauthorized",
-            "badRequest",
-            "threadRollbackFailed",
-            "sandboxError",
-            "other"
-          ],
-          "type": "string"
-        },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "httpConnectionFailed": {
-              "properties": {
-                "httpStatusCode": {
-                  "format": "uint16",
-                  "minimum": 0.0,
-                  "type": [
-                    "integer",
-                    "null"
-                  ]
-                }
-              },
-              "type": "object"
-            }
-          },
-          "required": [
-            "httpConnectionFailed"
-          ],
-          "title": "HttpConnectionFailedVACErrorInfo",
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "description": "Failed to connect to the response SSE stream.",
-          "properties": {
-            "responseStreamConnectionFailed": {
-              "properties": {
-                "httpStatusCode": {
-                  "format": "uint16",
-                  "minimum": 0.0,
-                  "type": [
-                    "integer",
-                    "null"
-                  ]
-                }
-              },
-              "type": "object"
-            }
-          },
-          "required": [
-            "responseStreamConnectionFailed"
-          ],
-          "title": "ResponseStreamConnectionFailedVACErrorInfo",
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "description": "The response SSE stream disconnected in the middle of a turn before completion.",
-          "properties": {
-            "responseStreamDisconnected": {
-              "properties": {
-                "httpStatusCode": {
-                  "format": "uint16",
-                  "minimum": 0.0,
-                  "type": [
-                    "integer",
-                    "null"
-                  ]
-                }
-              },
-              "type": "object"
-            }
-          },
-          "required": [
-            "responseStreamDisconnected"
-          ],
-          "title": "ResponseStreamDisconnectedVACErrorInfo",
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "description": "Reached the retry limit for responses.",
-          "properties": {
-            "responseTooManyFailedAttempts": {
-              "properties": {
-                "httpStatusCode": {
-                  "format": "uint16",
-                  "minimum": 0.0,
-                  "type": [
-                    "integer",
-                    "null"
-                  ]
-                }
-              },
-              "type": "object"
-            }
-          },
-          "required": [
-            "responseTooManyFailedAttempts"
-          ],
-          "title": "ResponseTooManyFailedAttemptsVACErrorInfo",
-          "type": "object"
-        },
-        {
-          "additionalProperties": false,
-          "description": "Returned when `turn/start` or `turn/steer` is submitted while the current active turn cannot accept same-turn steering, for example `/review` or manual `/compact`.",
-          "properties": {
-            "activeTurnNotSteerable": {
-              "properties": {
-                "turnKind": {
-                  "$ref": "#/definitions/NonSteerableTurnKind"
-                }
-              },
-              "required": [
-                "turnKind"
-              ],
-              "type": "object"
-            }
-          },
-          "required": [
-            "activeTurnNotSteerable"
-          ],
-          "title": "ActiveTurnNotSteerableVACErrorInfo",
-          "type": "object"
-        }
-      ]
     },
     "CollabAgentState": {
       "properties": {
@@ -1902,7 +1786,6 @@
         "mdm",
         "sessionFlags",
         "plugin",
-        "cloudRequirements",
         "legacyManagedConfigFile",
         "legacyManagedConfigMdm",
         "unknown"
@@ -2506,13 +2389,6 @@
       ],
       "type": "object"
     },
-    "RealtimeConversationVersion": {
-      "enum": [
-        "v1",
-        "v2"
-      ],
-      "type": "string"
-    },
     "ReasoningEffort": {
       "description": "See https://platform.vastar.com/docs/guides/reasoning?api-mode=responses#get-started-with-reasoning",
       "enum": [
@@ -2641,7 +2517,8 @@
           "format": "int64",
           "type": "integer"
         }
-      ]
+      ],
+      "description": "ID of a request, which can be either a string or an integer."
     },
     "RequestPermissionProfile": {
       "additionalProperties": false,
@@ -2906,6 +2783,13 @@
             "null"
           ]
         },
+        "branchedFromId": {
+          "description": "Source thread id when this thread was created by branching another thread.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "cliVersion": {
           "description": "Version of the CLI that created the thread.",
           "type": "string"
@@ -2926,13 +2810,6 @@
         "ephemeral": {
           "description": "Whether the thread is ephemeral and should not be materialized on disk.",
           "type": "boolean"
-        },
-        "derivedFromId": {
-          "description": "Source thread id when this thread was created by branching another thread.",
-          "type": [
-            "string",
-            "null"
-          ]
         },
         "gitInfo": {
           "anyOf": [
@@ -3810,188 +3687,6 @@
       ],
       "type": "object"
     },
-    "ThreadRealtimeAudioChunk": {
-      "description": "EXPERIMENTAL - thread realtime audio chunk.",
-      "properties": {
-        "data": {
-          "type": "string"
-        },
-        "itemId": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "numChannels": {
-          "format": "uint16",
-          "minimum": 0.0,
-          "type": "integer"
-        },
-        "sampleRate": {
-          "format": "uint32",
-          "minimum": 0.0,
-          "type": "integer"
-        },
-        "samplesPerChannel": {
-          "format": "uint32",
-          "minimum": 0.0,
-          "type": [
-            "integer",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "data",
-        "numChannels",
-        "sampleRate"
-      ],
-      "type": "object"
-    },
-    "ThreadRealtimeClosedNotification": {
-      "description": "EXPERIMENTAL - emitted when thread realtime transport closes.",
-      "properties": {
-        "reason": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "threadId": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "threadId"
-      ],
-      "type": "object"
-    },
-    "ThreadRealtimeErrorNotification": {
-      "description": "EXPERIMENTAL - emitted when thread realtime encounters an error.",
-      "properties": {
-        "message": {
-          "type": "string"
-        },
-        "threadId": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "message",
-        "threadId"
-      ],
-      "type": "object"
-    },
-    "ThreadRealtimeItemAddedNotification": {
-      "description": "EXPERIMENTAL - raw non-audio thread realtime item emitted by the backend.",
-      "properties": {
-        "item": true,
-        "threadId": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "item",
-        "threadId"
-      ],
-      "type": "object"
-    },
-    "ThreadRealtimeOutputAudioDeltaNotification": {
-      "description": "EXPERIMENTAL - streamed output audio emitted by thread realtime.",
-      "properties": {
-        "audio": {
-          "$ref": "#/definitions/ThreadRealtimeAudioChunk"
-        },
-        "threadId": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "audio",
-        "threadId"
-      ],
-      "type": "object"
-    },
-    "ThreadRealtimeSdpNotification": {
-      "description": "EXPERIMENTAL - emitted with the remote SDP for a WebRTC realtime session.",
-      "properties": {
-        "sdp": {
-          "type": "string"
-        },
-        "threadId": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "sdp",
-        "threadId"
-      ],
-      "type": "object"
-    },
-    "ThreadRealtimeStartedNotification": {
-      "description": "EXPERIMENTAL - emitted when thread realtime startup is accepted.",
-      "properties": {
-        "realtimeSessionId": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "threadId": {
-          "type": "string"
-        },
-        "version": {
-          "$ref": "#/definitions/RealtimeConversationVersion"
-        }
-      },
-      "required": [
-        "threadId",
-        "version"
-      ],
-      "type": "object"
-    },
-    "ThreadRealtimeTranscriptDeltaNotification": {
-      "description": "EXPERIMENTAL - flat transcript delta emitted whenever realtime transcript text changes.",
-      "properties": {
-        "delta": {
-          "description": "Live transcript delta from the realtime event.",
-          "type": "string"
-        },
-        "role": {
-          "type": "string"
-        },
-        "threadId": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "delta",
-        "role",
-        "threadId"
-      ],
-      "type": "object"
-    },
-    "ThreadRealtimeTranscriptDoneNotification": {
-      "description": "EXPERIMENTAL - final transcript text emitted when realtime completes a transcript part.",
-      "properties": {
-        "role": {
-          "type": "string"
-        },
-        "text": {
-          "description": "Final complete text for the transcript part.",
-          "type": "string"
-        },
-        "threadId": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "role",
-        "text",
-        "threadId"
-      ],
-      "type": "object"
-    },
     "ThreadStartedNotification": {
       "properties": {
         "thread": {
@@ -4279,6 +3974,9 @@
             "null"
           ]
         },
+        "message": {
+          "type": "string"
+        },
         "vacErrorInfo": {
           "anyOf": [
             {
@@ -4288,9 +3986,6 @@
               "type": "null"
             }
           ]
-        },
-        "message": {
-          "type": "string"
         }
       },
       "required": [
@@ -4489,6 +4184,143 @@
             "type"
           ],
           "title": "MentionUserInput",
+          "type": "object"
+        }
+      ]
+    },
+    "VACErrorInfo": {
+      "description": "This translation layer make sure that we expose vac error code in camel case.\n\nWhen an upstream HTTP status is available (for example, from the Responses API or a provider), it is forwarded in `httpStatusCode` on the relevant `vacErrorInfo` variant.",
+      "oneOf": [
+        {
+          "enum": [
+            "contextWindowExceeded",
+            "usageLimitExceeded",
+            "serverOverloaded",
+            "cyberPolicy",
+            "internalServerError",
+            "unauthorized",
+            "badRequest",
+            "threadRollbackFailed",
+            "sandboxError",
+            "other"
+          ],
+          "type": "string"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "httpConnectionFailed": {
+              "properties": {
+                "httpStatusCode": {
+                  "format": "uint16",
+                  "minimum": 0.0,
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "httpConnectionFailed"
+          ],
+          "title": "HttpConnectionFailedVACErrorInfo",
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Failed to connect to the response SSE stream.",
+          "properties": {
+            "responseStreamConnectionFailed": {
+              "properties": {
+                "httpStatusCode": {
+                  "format": "uint16",
+                  "minimum": 0.0,
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "responseStreamConnectionFailed"
+          ],
+          "title": "ResponseStreamConnectionFailedVACErrorInfo",
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The response SSE stream disconnected in the middle of a turn before completion.",
+          "properties": {
+            "responseStreamDisconnected": {
+              "properties": {
+                "httpStatusCode": {
+                  "format": "uint16",
+                  "minimum": 0.0,
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "responseStreamDisconnected"
+          ],
+          "title": "ResponseStreamDisconnectedVACErrorInfo",
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Reached the retry limit for responses.",
+          "properties": {
+            "responseTooManyFailedAttempts": {
+              "properties": {
+                "httpStatusCode": {
+                  "format": "uint16",
+                  "minimum": 0.0,
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "responseTooManyFailedAttempts"
+          ],
+          "title": "ResponseTooManyFailedAttemptsVACErrorInfo",
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Returned when `turn/start` or `turn/steer` is submitted while the current active turn cannot accept same-turn steering, for example `/review` or manual `/compact`.",
+          "properties": {
+            "activeTurnNotSteerable": {
+              "properties": {
+                "turnKind": {
+                  "$ref": "#/definitions/NonSteerableTurnKind"
+                }
+              },
+              "required": [
+                "turnKind"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "activeTurnNotSteerable"
+          ],
+          "title": "ActiveTurnNotSteerableVACErrorInfo",
           "type": "object"
         }
       ]
@@ -5671,166 +5503,6 @@
         "params"
       ],
       "title": "FuzzyFileSearch/sessionCompletedNotification",
-      "type": "object"
-    },
-    {
-      "properties": {
-        "method": {
-          "enum": [
-            "thread/realtime/started"
-          ],
-          "title": "Thread/realtime/startedNotificationMethod",
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/ThreadRealtimeStartedNotification"
-        }
-      },
-      "required": [
-        "method",
-        "params"
-      ],
-      "title": "Thread/realtime/startedNotification",
-      "type": "object"
-    },
-    {
-      "properties": {
-        "method": {
-          "enum": [
-            "thread/realtime/itemAdded"
-          ],
-          "title": "Thread/realtime/itemAddedNotificationMethod",
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/ThreadRealtimeItemAddedNotification"
-        }
-      },
-      "required": [
-        "method",
-        "params"
-      ],
-      "title": "Thread/realtime/itemAddedNotification",
-      "type": "object"
-    },
-    {
-      "properties": {
-        "method": {
-          "enum": [
-            "thread/realtime/transcript/delta"
-          ],
-          "title": "Thread/realtime/transcript/deltaNotificationMethod",
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/ThreadRealtimeTranscriptDeltaNotification"
-        }
-      },
-      "required": [
-        "method",
-        "params"
-      ],
-      "title": "Thread/realtime/transcript/deltaNotification",
-      "type": "object"
-    },
-    {
-      "properties": {
-        "method": {
-          "enum": [
-            "thread/realtime/transcript/done"
-          ],
-          "title": "Thread/realtime/transcript/doneNotificationMethod",
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/ThreadRealtimeTranscriptDoneNotification"
-        }
-      },
-      "required": [
-        "method",
-        "params"
-      ],
-      "title": "Thread/realtime/transcript/doneNotification",
-      "type": "object"
-    },
-    {
-      "properties": {
-        "method": {
-          "enum": [
-            "thread/realtime/outputAudio/delta"
-          ],
-          "title": "Thread/realtime/outputAudio/deltaNotificationMethod",
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/ThreadRealtimeOutputAudioDeltaNotification"
-        }
-      },
-      "required": [
-        "method",
-        "params"
-      ],
-      "title": "Thread/realtime/outputAudio/deltaNotification",
-      "type": "object"
-    },
-    {
-      "properties": {
-        "method": {
-          "enum": [
-            "thread/realtime/sdp"
-          ],
-          "title": "Thread/realtime/sdpNotificationMethod",
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/ThreadRealtimeSdpNotification"
-        }
-      },
-      "required": [
-        "method",
-        "params"
-      ],
-      "title": "Thread/realtime/sdpNotification",
-      "type": "object"
-    },
-    {
-      "properties": {
-        "method": {
-          "enum": [
-            "thread/realtime/error"
-          ],
-          "title": "Thread/realtime/errorNotificationMethod",
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/ThreadRealtimeErrorNotification"
-        }
-      },
-      "required": [
-        "method",
-        "params"
-      ],
-      "title": "Thread/realtime/errorNotification",
-      "type": "object"
-    },
-    {
-      "properties": {
-        "method": {
-          "enum": [
-            "thread/realtime/closed"
-          ],
-          "title": "Thread/realtime/closedNotificationMethod",
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/ThreadRealtimeClosedNotification"
-        }
-      },
-      "required": [
-        "method",
-        "params"
-      ],
-      "title": "Thread/realtime/closedNotification",
       "type": "object"
     },
     {

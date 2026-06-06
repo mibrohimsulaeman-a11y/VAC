@@ -72,11 +72,6 @@ impl Op {
         match self {
             Self::Interrupt => "interrupt",
             Self::CleanBackgroundTerminals => "clean_background_terminals",
-            Self::RealtimeConversationStart(_) => "realtime_conversation_start",
-            Self::RealtimeConversationAudio(_) => "realtime_conversation_audio",
-            Self::RealtimeConversationText(_) => "realtime_conversation_text",
-            Self::RealtimeConversationClose => "realtime_conversation_close",
-            Self::RealtimeConversationListVoices => "realtime_conversation_list_voices",
             Self::UserInput { .. } => "user_input",
             Self::UserInputWithTurnContext { .. } => "user_input_with_turn_context",
             Self::UserTurn { .. } => "user_turn",
@@ -509,18 +504,6 @@ pub enum EventMsg {
     /// Warning issued by the guardian automatic approval reviewer.
     GuardianWarning(WarningEvent),
 
-    /// Realtime conversation lifecycle start event.
-    RealtimeConversationStarted(RealtimeConversationStartedEvent),
-
-    /// Realtime conversation streaming payload event.
-    RealtimeConversationRealtime(RealtimeConversationRealtimeEvent),
-
-    /// Realtime conversation lifecycle close event.
-    RealtimeConversationClosed(RealtimeConversationClosedEvent),
-
-    /// Realtime session description protocol payload.
-    RealtimeConversationSdp(RealtimeConversationSdpEvent),
-
     /// Model routing changed from the requested model to a different model.
     ModelReroute(ModelRerouteEvent),
 
@@ -648,9 +631,6 @@ pub enum EventMsg {
 
     /// List of skills available to the agent.
     ListSkillsResponse(ListSkillsResponseEvent),
-
-    /// List of voices supported by realtime conversation streams.
-    RealtimeConversationListVoicesResponse(RealtimeConversationListVoicesResponseEvent),
 
     /// Notification that skill data may have been updated and clients may want to reload.
     SkillsUpdateAvailable,

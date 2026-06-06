@@ -191,7 +191,7 @@
       "type": "boolean"
     },
     "model": {
-      "description": "Configuration overrides for the derived thread, if any.",
+      "description": "Configuration overrides for the branched thread, if any.",
       "type": [
         "string",
         "null"

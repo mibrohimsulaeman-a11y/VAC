@@ -12,7 +12,28 @@
           "type": "string"
         },
         {
-          "description": "ChatGPT OAuth managed by VAC (tokens persisted and refreshed by VAC).",
+          "description": "Bearer token supplied by a provider-neutral credential source.",
+          "enum": [
+            "bearer"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Local-only credential resolved by the runtime owner.",
+          "enum": [
+            "local"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Provider credential whose concrete account mode is owned by provider config.",
+          "enum": [
+            "providerCredential"
+          ],
+          "type": "string"
+        },
+        {
+          "description": "Legacy ChatGPT OAuth managed by VAC. Kept parseable only behind explicit opt-in gates.",
           "enum": [
             "chatgpt"
           ],

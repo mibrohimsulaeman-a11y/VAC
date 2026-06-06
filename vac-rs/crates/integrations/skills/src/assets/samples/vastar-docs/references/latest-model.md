@@ -21,8 +21,6 @@ This file is a curated helper. Every recommendation here must be verified agains
 | `gpt-image-1-mini` | Cost-optimized image generation |
 | `gpt-4o-mini-tts` | Text-to-speech |
 | `gpt-4o-mini-transcribe` | Speech-to-text, fast and cost-efficient |
-| `gpt-realtime-1.5` | Realtime voice and multimodal sessions |
-| `gpt-realtime-mini` | Cheaper realtime sessions |
 | `gpt-audio` | Chat Completions audio input and output |
 | `gpt-audio-mini` | Cheaper Chat Completions audio workflows |
 | `sora-2` | Faster iteration and draft video generation |

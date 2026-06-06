@@ -8,18 +8,22 @@ autobins = false
 [[bin]]
 name = "vac-tui"
 path = "src/main.rs"
+test = false
 
 [[bin]]
 name = "md-events"
 path = "src/bin/md-events.rs"
+test = false
 
 [[bin]]
 name = "operator-style-snapshot-harness"
 path = "tools/operator_style_snapshot_harness.rs"
+test = false
 
 [[bin]]
 name = "operator-ui-snapshot-harness"
 path = "tools/operator_ui_snapshot_harness.rs"
+test = false
 
 [lib]
 name = "vac_tui"

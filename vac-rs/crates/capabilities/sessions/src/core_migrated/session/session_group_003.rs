@@ -467,13 +467,6 @@ impl Session {
         {
             developer_sections.push(collab_instructions.render());
         }
-        if let Some(realtime_update) = crate::context_manager::updates::build_initial_realtime_item(
-            reference_context_item.as_ref(),
-            previous_turn_settings.as_ref(),
-            turn_context,
-        ) {
-            developer_sections.push(realtime_update);
-        }
         if self.features.enabled(Feature::Personality)
             && let Some(personality) = turn_context.personality
         {

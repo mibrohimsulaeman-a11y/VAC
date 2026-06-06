@@ -210,8 +210,6 @@ pub enum Feature {
     Artifact,
     /// Enable Fast mode selection in the TUI and request layer.
     FastMode,
-    /// Enable experimental realtime voice conversation mode in the TUI.
-    RealtimeConversation,
     /// Connect app-server to the ChatGPT remote control service.
     RemoteControl,
     /// Removed compatibility flag retained as a no-op so old wrappers can
@@ -1060,12 +1058,6 @@ pub const FEATURES: &[FeatureSpec] = &[
         key: "fast_mode",
         stage: Stage::Stable,
         default_enabled: true,
-    },
-    FeatureSpec {
-        id: Feature::RealtimeConversation,
-        key: "realtime_conversation",
-        stage: Stage::UnderDevelopment,
-        default_enabled: false,
     },
     FeatureSpec {
         id: Feature::RemoteControl,

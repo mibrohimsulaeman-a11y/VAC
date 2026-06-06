@@ -42,8 +42,6 @@ pub enum RuntimeEventKind {
     ApprovalRequested,
     UserInputRequested,
     ThreadMetadataUpdated,
-    RealtimeStarted,
-    RealtimeClosed,
     TurnStarted,
     TurnCompleted,
     TurnInterrupted,
@@ -84,13 +82,6 @@ pub enum RuntimeOwnerEventPayload {
     ThreadGoalUpdated {
         thread_id: String,
         turn_id: Option<String>,
-    },
-    RealtimeStarted {
-        realtime_session_id: Option<String>,
-        version: String,
-    },
-    RealtimeClosed {
-        reason: Option<String>,
     },
     Failure {
         message: String,
@@ -160,8 +151,6 @@ impl RuntimeEventEnvelope {
             | RuntimeOwnerEventPayload::UserInputRequested { .. }
             | RuntimeOwnerEventPayload::ThreadNameUpdated { .. }
             | RuntimeOwnerEventPayload::ThreadGoalUpdated { .. }
-            | RuntimeOwnerEventPayload::RealtimeStarted { .. }
-            | RuntimeOwnerEventPayload::RealtimeClosed { .. }
             | RuntimeOwnerEventPayload::Failure { .. }
             | RuntimeOwnerEventPayload::Shutdown => {
                 RuntimeTuiCompatibilityEvent::NativeOwnerEvent {
@@ -575,20 +564,6 @@ pub fn classify_protocol_event(msg: &EventMsg) -> ProtocolEventMapping {
             true,
             None,
         ),
-        RealtimeConversationStarted(_) => mapping(
-            "RealtimeConversationStarted",
-            OwnerEventClassification::lossless(RuntimeEventKind::RealtimeStarted),
-            ProtocolProjection::OwnerPayload,
-            true,
-            None,
-        ),
-        RealtimeConversationClosed(_) => mapping(
-            "RealtimeConversationClosed",
-            OwnerEventClassification::lossless(RuntimeEventKind::RealtimeClosed),
-            ProtocolProjection::OwnerPayload,
-            true,
-            None,
-        ),
         ShutdownComplete => mapping(
             "ShutdownComplete",
             OwnerEventClassification::lossless(RuntimeEventKind::Shutdown),
@@ -638,15 +613,6 @@ pub fn classify_protocol_event(msg: &EventMsg) -> ProtocolEventMapping {
             ProtocolProjection::Unsupported,
             true,
             Some("owner-specific status/warning payloads are deferred to protocol retirement"),
-        ),
-        RealtimeConversationRealtime(_)
-        | RealtimeConversationSdp(_)
-        | RealtimeConversationListVoicesResponse(_) => mapping(
-            "RealtimePayload",
-            OwnerEventClassification::best_effort(RuntimeEventKind::Unsupported),
-            ProtocolProjection::Unsupported,
-            true,
-            Some("realtime payload DTOs remain behind the temporary TUI adapter"),
         ),
         ContextCompacted(_)
         | ThreadRolledBack(_)
@@ -810,17 +776,6 @@ fn owner_payload_for_protocol_event(msg: &EventMsg) -> Option<RuntimeOwnerEventP
             thread_id: event.thread_id.to_string(),
             turn_id: event.turn_id.clone(),
         }),
-        EventMsg::RealtimeConversationStarted(event) => {
-            Some(RuntimeOwnerEventPayload::RealtimeStarted {
-                realtime_session_id: event.realtime_session_id.clone(),
-                version: format!("{:?}", event.version),
-            })
-        }
-        EventMsg::RealtimeConversationClosed(event) => {
-            Some(RuntimeOwnerEventPayload::RealtimeClosed {
-                reason: event.reason.clone(),
-            })
-        }
         EventMsg::Error(event) if event.affects_turn_status() => {
             Some(RuntimeOwnerEventPayload::Failure {
                 message: event.message.clone(),
@@ -1168,7 +1123,7 @@ mod tests {
             RuntimeEventKind::Unsupported,
             RuntimeEventDelivery::BestEffort,
             RuntimeOwnerEventPayload::Unsupported {
-                event_type: "RealtimePayload".to_string(),
+                event_type: "UnsupportedPayload".to_string(),
                 reason: "temporary adapter".to_string(),
             },
         );

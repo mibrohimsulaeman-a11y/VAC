@@ -5,8 +5,6 @@ use crate::session_protocol::CommandExecutionApprovalDecision;
 use crate::session_protocol::FileChangeApprovalDecision;
 use crate::session_protocol::McpServerElicitationAction;
 use crate::session_protocol::RequestId as AppServerRequestId;
-use crate::session_protocol::ThreadRealtimeAudioChunk;
-use crate::session_protocol::ThreadRealtimeStartTransport;
 use crate::session_protocol::ToolRequestUserInputResponse;
 use crate::session_protocol::UserInput;
 use serde::Serialize;
@@ -28,12 +26,6 @@ use vac_protocol::vastar_models::ReasoningEffort as ReasoningEffortConfig;
 pub(crate) enum AppCommand {
     Interrupt,
     CleanBackgroundTerminals,
-    RealtimeConversationStart {
-        transport: Option<ThreadRealtimeStartTransport>,
-        voice: Option<Value>,
-    },
-    RealtimeConversationAudio(ThreadRealtimeAudioChunk),
-    RealtimeConversationClose,
     RunUserShellCommand {
         command: String,
     },
@@ -123,22 +115,6 @@ impl AppCommand {
 
     pub(crate) fn clean_background_terminals() -> Self {
         Self::CleanBackgroundTerminals
-    }
-
-    pub(crate) fn realtime_conversation_start(
-        transport: Option<ThreadRealtimeStartTransport>,
-        voice: Option<Value>,
-    ) -> Self {
-        Self::RealtimeConversationStart { transport, voice }
-    }
-
-    #[cfg_attr(target_os = "linux", allow(dead_code))]
-    pub(crate) fn realtime_conversation_audio(frame: ThreadRealtimeAudioChunk) -> Self {
-        Self::RealtimeConversationAudio(frame)
-    }
-
-    pub(crate) fn realtime_conversation_close() -> Self {
-        Self::RealtimeConversationClose
     }
 
     pub(crate) fn run_user_shell_command(command: String) -> Self {

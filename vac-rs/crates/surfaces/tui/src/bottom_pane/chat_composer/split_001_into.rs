@@ -391,8 +391,6 @@ pub(crate) struct ChatComposer {
     fast_command_enabled: bool,
     goal_command_enabled: bool,
     personality_command_enabled: bool,
-    realtime_conversation_enabled: bool,
-    audio_device_selection_enabled: bool,
     windows_degraded_sandbox_active: bool,
     side_conversation_active: bool,
     is_zellij: bool,

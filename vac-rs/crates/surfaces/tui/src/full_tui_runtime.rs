@@ -85,19 +85,6 @@ mod app_server_approval_conversions;
 mod approval_events;
 mod ascii_animation;
 mod runtime_owner_session;
-#[allow(dead_code)]
-mod audio_device {
-    use crate::app_event::RealtimeAudioDeviceKind;
-
-    pub(crate) fn list_realtime_audio_device_names(
-        kind: RealtimeAudioDeviceKind,
-    ) -> Result<Vec<String>, String> {
-        Err(format!(
-            "realtime {} selection is unavailable in the local coding tool build",
-            kind.noun()
-        ))
-    }
-}
 mod bottom_pane;
 mod chatwidget;
 mod cli;
@@ -205,51 +192,6 @@ mod update_versions;
 mod updates;
 mod version;
 mod width;
-#[allow(dead_code)]
-mod voice {
-    use crate::app_event_sender::AppEventSender;
-    use crate::legacy_core::config::Config;
-    use crate::session_protocol::ThreadRealtimeAudioChunk;
-    use std::sync::Arc;
-    use std::sync::atomic::{AtomicBool, AtomicU16};
-
-    pub struct VoiceCapture;
-    pub(crate) struct RecordingMeterState;
-    pub(crate) struct RealtimeAudioPlayer;
-
-    impl VoiceCapture {
-        pub fn start_realtime(_config: &Config, _tx: AppEventSender) -> Result<Self, String> {
-            Err("voice input was removed from the local coding tool build".to_string())
-        }
-        pub fn stop(self) {}
-        pub fn stopped_flag(&self) -> Arc<AtomicBool> {
-            Arc::new(AtomicBool::new(true))
-        }
-        pub fn last_peak_arc(&self) -> Arc<AtomicU16> {
-            Arc::new(AtomicU16::new(0))
-        }
-    }
-    impl RecordingMeterState {
-        pub(crate) fn new() -> Self {
-            Self
-        }
-        pub(crate) fn next_text(&mut self, _peak: u16) -> String {
-            "voice removed".to_string()
-        }
-    }
-    impl RealtimeAudioPlayer {
-        pub(crate) fn start(_config: &Config) -> Result<Self, String> {
-            Err("voice output was removed from the local coding tool build".to_string())
-        }
-        pub(crate) fn enqueue_frame(
-            &self,
-            _frame: &ThreadRealtimeAudioChunk,
-        ) -> Result<(), String> {
-            Err("voice output was removed from the local coding tool build".to_string())
-        }
-        pub(crate) fn clear(&self) {}
-    }
-}
 
 mod wrapping;
 

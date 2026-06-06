@@ -128,16 +128,6 @@ pub(crate) const OWNER_RUNTIME_METHOD_SUPPORT: &[OwnerRuntimeMethodSupport] = &[
     OwnerRuntimeMethodSupport::implemented("review_start", "safe deferred review facade", false),
     OwnerRuntimeMethodSupport::implemented("skills_list", "local empty skills facade", false),
     OwnerRuntimeMethodSupport::implemented(
-        "thread_realtime_audio",
-        "realtime no-op until transport promotion",
-        false,
-    ),
-    OwnerRuntimeMethodSupport::implemented(
-        "thread_realtime_stop",
-        "realtime no-op until transport promotion",
-        false,
-    ),
-    OwnerRuntimeMethodSupport::implemented(
         "memory_reset",
         "safe no-op until memory runtime promotion",
         false,
@@ -168,7 +158,6 @@ pub(crate) const OWNER_RUNTIME_METHOD_SUPPORT: &[OwnerRuntimeMethodSupport] = &[
         false,
     ),
     OwnerRuntimeMethodSupport::fail_closed("thread_rollback", "ThreadStore rollback snapshot"),
-    OwnerRuntimeMethodSupport::fail_closed("thread_realtime_start", "realtime transport promotion"),
     OwnerRuntimeMethodSupport::fail_closed(
         "resolve_server_request",
         "legacy app-server server-request registry fallback",
@@ -215,7 +204,6 @@ mod tests {
             methods,
             vec![
                 "thread_rollback",
-                "thread_realtime_start",
                 "resolve_server_request",
                 "reject_server_request",
             ]

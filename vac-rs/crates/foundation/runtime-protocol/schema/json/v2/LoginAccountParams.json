@@ -23,15 +23,15 @@
     },
     {
       "properties": {
-        "vacStreamlinedLogin": {
-          "type": "boolean"
-        },
         "type": {
           "enum": [
             "chatgpt"
           ],
           "title": "Chatgptv2::LoginAccountParamsType",
           "type": "string"
+        },
+        "vacStreamlinedLogin": {
+          "type": "boolean"
         }
       },
       "required": [

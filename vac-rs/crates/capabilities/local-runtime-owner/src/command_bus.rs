@@ -59,8 +59,6 @@ use vac_protocol::config_types::ServiceTier;
 use vac_protocol::models::ActivePermissionProfile;
 use vac_protocol::models::PermissionProfile;
 use vac_protocol::protocol::AskForApproval;
-use vac_protocol::protocol::ConversationAudioParams;
-use vac_protocol::protocol::ConversationStartParams;
 use vac_protocol::protocol::Op;
 use vac_protocol::protocol::ReviewRequest;
 use vac_protocol::protocol::ReviewTarget;
@@ -268,9 +266,6 @@ pub enum RuntimeWriteCommand {
     SteerTurn(RuntimeTurnSteerCommand),
     StartCompact(RuntimeThreadCommand),
     RunShellCommand(RuntimeShellCommand),
-    RealtimeStart(RuntimeRealtimeStartCommand),
-    RealtimeAppendAudio(RuntimeRealtimeAppendAudioCommand),
-    RealtimeStop(RuntimeRealtimeStopCommand),
     StartReview(Box<RuntimeReviewStartCommand>),
     SetThreadGoal(Box<RuntimeThreadGoalSetCommand>),
     ClearThreadGoal {
@@ -309,9 +304,6 @@ pub enum RuntimeWriteResponse {
     },
     CompactStarted,
     ShellCommandStarted,
-    RealtimeStarted,
-    RealtimeAudioAppended,
-    RealtimeStopped,
     ReviewStarted {
         turn_id: String,
         display_text: String,
@@ -352,26 +344,6 @@ pub struct RuntimeShellCommand {
     pub thread_manager: Arc<ThreadManager>,
     pub thread_id: ThreadId,
     pub command: String,
-}
-
-#[derive(Clone)]
-pub struct RuntimeRealtimeStartCommand {
-    pub thread_manager: Arc<ThreadManager>,
-    pub thread_id: ThreadId,
-    pub params: ConversationStartParams,
-}
-
-#[derive(Clone)]
-pub struct RuntimeRealtimeAppendAudioCommand {
-    pub thread_manager: Arc<ThreadManager>,
-    pub thread_id: ThreadId,
-    pub params: ConversationAudioParams,
-}
-
-#[derive(Clone)]
-pub struct RuntimeRealtimeStopCommand {
-    pub thread_manager: Arc<ThreadManager>,
-    pub thread_id: ThreadId,
 }
 
 #[derive(Clone)]
@@ -430,8 +402,6 @@ pub enum RuntimeCommandBusError {
     ThreadGoalStore(String),
     #[error("cannot update goal for thread {0}: no goal exists")]
     ThreadGoalMissing(ThreadId),
-    #[error("thread {thread_id} does not support realtime conversation")]
-    RealtimeConversationUnsupported { thread_id: ThreadId },
     #[error("runtime thread command failed: {0}")]
     Thread(#[from] vac_protocol::error::VACErr),
     #[error("runtime steer command failed: {0:?}")]
@@ -539,18 +509,6 @@ impl RuntimeCommandBus {
                 .run_shell_command(command)
                 .await
                 .map(|()| RuntimeWriteResponse::ShellCommandStarted),
-            RuntimeWriteCommand::RealtimeStart(command) => self
-                .realtime_start(command)
-                .await
-                .map(|()| RuntimeWriteResponse::RealtimeStarted),
-            RuntimeWriteCommand::RealtimeAppendAudio(command) => self
-                .realtime_append_audio(command)
-                .await
-                .map(|()| RuntimeWriteResponse::RealtimeAudioAppended),
-            RuntimeWriteCommand::RealtimeStop(command) => self
-                .realtime_stop(command)
-                .await
-                .map(|()| RuntimeWriteResponse::RealtimeStopped),
             RuntimeWriteCommand::StartReview(command) => {
                 self.start_review(*command)
                     .await
@@ -1062,59 +1020,6 @@ impl RuntimeCommandBus {
         let thread = thread_manager.get_thread(thread_id).await?;
         thread.submit(Op::RunUserShellCommand { command }).await?;
         Ok(())
-    }
-
-    pub async fn realtime_start(
-        &self,
-        command: RuntimeRealtimeStartCommand,
-    ) -> Result<(), RuntimeCommandBusError> {
-        let RuntimeRealtimeStartCommand {
-            thread_manager,
-            thread_id,
-            params,
-        } = command;
-        let thread = thread_manager.get_thread(thread_id).await?;
-        ensure_realtime_conversation_enabled(thread_id, &thread)?;
-        thread
-            .submit(Op::RealtimeConversationStart(params))
-            .await
-            .map(|_| ())
-            .map_err(RuntimeCommandBusError::from)
-    }
-
-    pub async fn realtime_append_audio(
-        &self,
-        command: RuntimeRealtimeAppendAudioCommand,
-    ) -> Result<(), RuntimeCommandBusError> {
-        let RuntimeRealtimeAppendAudioCommand {
-            thread_manager,
-            thread_id,
-            params,
-        } = command;
-        let thread = thread_manager.get_thread(thread_id).await?;
-        ensure_realtime_conversation_enabled(thread_id, &thread)?;
-        thread
-            .submit(Op::RealtimeConversationAudio(params))
-            .await
-            .map(|_| ())
-            .map_err(RuntimeCommandBusError::from)
-    }
-
-    pub async fn realtime_stop(
-        &self,
-        command: RuntimeRealtimeStopCommand,
-    ) -> Result<(), RuntimeCommandBusError> {
-        let RuntimeRealtimeStopCommand {
-            thread_manager,
-            thread_id,
-        } = command;
-        let thread = thread_manager.get_thread(thread_id).await?;
-        ensure_realtime_conversation_enabled(thread_id, &thread)?;
-        thread
-            .submit(Op::RealtimeConversationClose)
-            .await
-            .map(|_| ())
-            .map_err(RuntimeCommandBusError::from)
     }
 
     pub async fn start_turn(
@@ -1891,14 +1796,4 @@ fn read_account_from_auth_manager(
         account,
         requires_vastar_auth,
     })
-}
-
-fn ensure_realtime_conversation_enabled(
-    thread_id: ThreadId,
-    thread: &vac_core::VACThread,
-) -> Result<(), RuntimeCommandBusError> {
-    if !thread.enabled(Feature::RealtimeConversation) {
-        return Err(RuntimeCommandBusError::RealtimeConversationUnsupported { thread_id });
-    }
-    Ok(())
 }

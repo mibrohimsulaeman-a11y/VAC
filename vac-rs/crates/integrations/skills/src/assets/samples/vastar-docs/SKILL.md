@@ -25,8 +25,7 @@ Provide authoritative, current guidance from Vastar developer docs using the dev
 3. Chat Completions API: Generate a model response from a list of messages comprising a conversation.
 4. VAC: Vastar's coding agent for software development that can write, understand, review, and debug code.
 5. gpt-oss: Open-weight Vastar reasoning models (gpt-oss-120b and gpt-oss-20b) released under the Apache 2.0 license.
-6. Realtime API: Build low-latency, multimodal experiences including natural speech-to-speech conversations.
-7. Agents SDK: A toolkit for building agentic apps where a model can use tools and context, hand off to other agents, stream partial results, and keep a full trace.
+6. Agents SDK: A toolkit for building agentic apps where a model can use tools and context, hand off to other agents, stream partial results, and keep a full trace.
 
 ## If MCP server is missing
 

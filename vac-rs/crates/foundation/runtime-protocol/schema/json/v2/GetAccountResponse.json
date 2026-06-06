@@ -90,12 +90,12 @@
         }
       ]
     },
-    "requiresOpenaiAuth": {
+    "requiresVastarAuth": {
       "type": "boolean"
     }
   },
   "required": [
-    "requiresOpenaiAuth"
+    "requiresVastarAuth"
   ],
   "title": "GetAccountResponse",
   "type": "object"

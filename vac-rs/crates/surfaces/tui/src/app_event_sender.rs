@@ -12,7 +12,6 @@ use crate::session_protocol::CommandExecutionApprovalDecision;
 use crate::session_protocol::FileChangeApprovalDecision;
 use crate::session_protocol::McpServerElicitationAction;
 use crate::session_protocol::RequestId as AppServerRequestId;
-use crate::session_protocol::ThreadRealtimeAudioChunk;
 use crate::session_protocol::ToolRequestUserInputResponse;
 use tokio::sync::mpsc::Sender;
 #[cfg(test)]
@@ -126,13 +125,6 @@ impl AppEventSender {
 
     pub(crate) fn list_skills(&self, cwds: Vec<PathBuf>, force_reload: bool) {
         self.send(AppEvent::VACOp(AppCommand::list_skills(cwds, force_reload)));
-    }
-
-    #[cfg_attr(target_os = "linux", allow(dead_code))]
-    pub(crate) fn realtime_conversation_audio(&self, frame: ThreadRealtimeAudioChunk) {
-        self.send(AppEvent::VACOp(AppCommand::realtime_conversation_audio(
-            frame,
-        )));
     }
 
     pub(crate) fn user_input_answer(&self, id: String, response: ToolRequestUserInputResponse) {

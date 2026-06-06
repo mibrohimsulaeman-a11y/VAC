@@ -32,9 +32,6 @@ pub use command_bus::RuntimePluginSurfaceCommand;
 pub use command_bus::RuntimePluginSurfaceOperation;
 pub use command_bus::RuntimeReadCommand;
 pub use command_bus::RuntimeReadResponse;
-pub use command_bus::RuntimeRealtimeAppendAudioCommand;
-pub use command_bus::RuntimeRealtimeStartCommand;
-pub use command_bus::RuntimeRealtimeStopCommand;
 pub use command_bus::RuntimeReviewStartCommand;
 pub use command_bus::RuntimeShellCommand;
 pub use command_bus::RuntimeSkillsListCommand;
@@ -114,10 +111,7 @@ mod tests {
     use tempfile::TempDir;
     use vac_core::config::Config;
     use vac_exec_server::EnvironmentManager;
-    use vac_features::Feature;
     use vac_protocol::ThreadId;
-    use vac_protocol::protocol::ConversationStartParams;
-    use vac_protocol::protocol::RealtimeOutputModality;
     use vac_protocol::protocol::SessionSource;
 
     async fn test_config(vac_home: &TempDir) -> Config {
@@ -464,65 +458,6 @@ mod tests {
             err,
             RuntimeCommandBusError::ThreadMemoryModeSet(_)
         ));
-    }
-
-    #[tokio::test]
-    async fn command_bus_realtime_start_preserves_feature_gate() {
-        let vac_home = TempDir::new().expect("temp vac home");
-        let mut config = test_config(&vac_home).await;
-        config
-            .features
-            .disable(Feature::RealtimeConversation)
-            .expect("realtime feature should be configurable in tests");
-        let config = Arc::new(config);
-        let retained = LocalRuntimeOwner::new()
-            .build_retained_resources(RuntimeStartupInput::new(
-                Arc::clone(&config),
-                Arc::new(EnvironmentManager::default_for_tests()),
-                SessionSource::Cli,
-                false,
-            ))
-            .await;
-        let started = retained
-            .thread_manager()
-            .start_thread_with_options(vac_core::StartThreadOptions {
-                config: (*config).clone(),
-                initial_history: vac_protocol::protocol::InitialHistory::New,
-                session_source: None,
-                dynamic_tools: Vec::new(),
-                persist_extended_history: false,
-                metrics_service_name: None,
-                parent_trace: None,
-                environments: Vec::new(),
-            })
-            .await
-            .expect("thread should start");
-        let command_bus = RuntimeCommandBus::new();
-
-        let err = command_bus
-            .execute_write(RuntimeWriteCommand::RealtimeStart(
-                RuntimeRealtimeStartCommand {
-                    thread_manager: retained.thread_manager(),
-                    thread_id: started.thread_id,
-                    params: ConversationStartParams {
-                        output_modality: RealtimeOutputModality::Audio,
-                        prompt: None,
-                        realtime_session_id: None,
-                        transport: None,
-                        voice: None,
-                    },
-                },
-            ))
-            .await
-            .expect_err("disabled realtime must fail before submitting core op");
-
-        assert_eq!(
-            err.to_string(),
-            format!(
-                "thread {} does not support realtime conversation",
-                started.thread_id
-            )
-        );
     }
 
     #[tokio::test]

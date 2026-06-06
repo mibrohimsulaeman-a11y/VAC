@@ -121,36 +121,6 @@ pub struct HookCompletedEvent {
     pub run: HookRunSummary,
 }
 
-#[derive(Debug, Clone, Copy, Default, Deserialize, Serialize, PartialEq, Eq, JsonSchema, TS)]
-#[serde(rename_all = "snake_case")]
-pub enum RealtimeConversationVersion {
-    V1,
-    #[default]
-    V2,
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, JsonSchema, TS)]
-pub struct RealtimeConversationStartedEvent {
-    pub realtime_session_id: Option<String>,
-    pub version: RealtimeConversationVersion,
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, JsonSchema, TS)]
-pub struct RealtimeConversationRealtimeEvent {
-    pub payload: RealtimeEvent,
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, JsonSchema, TS)]
-pub struct RealtimeConversationClosedEvent {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub reason: Option<String>,
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, JsonSchema, TS)]
-pub struct RealtimeConversationSdpEvent {
-    pub sdp: String,
-}
-
 impl From<CollabAgentSpawnBeginEvent> for EventMsg {
     fn from(event: CollabAgentSpawnBeginEvent) -> Self {
         EventMsg::CollabAgentSpawnBegin(event)

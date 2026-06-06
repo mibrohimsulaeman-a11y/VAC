@@ -163,21 +163,6 @@ pub(crate) const OWNER_NATIVE_OPERATION_PARITY: &[OwnerNativeOperationParity] = 
         owner: "RuntimeWriteCommand::RunShellCommand",
     },
     OwnerNativeOperationParity {
-        operation: "thread_realtime_start",
-        status: OwnerNativeOperationStatus::NonDefaultFailClosed,
-        owner: "RuntimeWriteCommand::RealtimeStart",
-    },
-    OwnerNativeOperationParity {
-        operation: "thread_realtime_audio",
-        status: OwnerNativeOperationStatus::OwnerNative,
-        owner: "RuntimeWriteCommand::RealtimeAppendAudio",
-    },
-    OwnerNativeOperationParity {
-        operation: "thread_realtime_stop",
-        status: OwnerNativeOperationStatus::OwnerNative,
-        owner: "RuntimeWriteCommand::RealtimeStop",
-    },
-    OwnerNativeOperationParity {
         operation: "review_start",
         status: OwnerNativeOperationStatus::OwnerNative,
         owner: "RuntimeWriteCommand::StartReview",
@@ -265,7 +250,6 @@ mod tests {
         assert_eq!(
             non_default,
             vec![
-                "thread_realtime_start",
                 "thread_rollback",
                 "resolve_server_request",
                 "reject_server_request",
@@ -281,8 +265,6 @@ mod tests {
             "turn_steer",
             "thread_compact_start",
             "thread_shell_command",
-            "thread_realtime_audio",
-            "thread_realtime_stop",
             "review_start",
             "skills_list",
         ] {

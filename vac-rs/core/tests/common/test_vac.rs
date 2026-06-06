@@ -34,7 +34,6 @@ use vac_protocol::models::PermissionProfile;
 use vac_protocol::protocol::AskForApproval;
 use vac_protocol::protocol::EventMsg;
 use vac_protocol::protocol::Op;
-use vac_protocol::protocol::RealtimeConversationVersion as RealtimeWsVersion;
 use vac_protocol::protocol::SandboxPolicy;
 use vac_protocol::protocol::SessionConfiguredEvent;
 use vac_protocol::protocol::SessionSource;
@@ -341,8 +340,6 @@ impl TestVACBuilder {
         self.config_mutators.push(Box::new(move |config| {
             config.model_provider.base_url = Some(base_url_clone);
             config.model_provider.supports_websockets = true;
-            config.experimental_realtime_ws_model = Some("realtime-test-model".to_string());
-            config.realtime.version = RealtimeWsVersion::V1;
         }));
         let test_env = TestEnv::local().await?;
         Box::pin(self.build_with_home_and_base_url(base_url, home, /*resume_from*/ None, test_env))

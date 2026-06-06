@@ -22,7 +22,6 @@ pub(crate) struct Session {
     /// session.
     pub(super) features: ManagedFeatures,
     pub(super) pending_mcp_server_refresh_config: Mutex<Option<McpServerRefreshConfig>>,
-    pub(crate) conversation: Arc<RealtimeConversationManager>,
     pub(crate) active_turn: Mutex<Option<ActiveTurn>>,
     pub(super) mailbox: Mailbox,
     pub(super) mailbox_rx: Mutex<MailboxReceiver>,
@@ -912,7 +911,6 @@ impl Session {
                 watch::channel(false);
 
             let (mailbox, mailbox_rx) = Mailbox::new();
-            let conversation = Arc::new(RealtimeConversationManager::new());
             let goal_runtime = GoalRuntimeState::new();
             let guardian_review_session = GuardianReviewSessionManager::default();
             let sess = Arc::new(Session {
@@ -924,7 +922,6 @@ impl Session {
                 managed_network_proxy_refresh_lock: Semaphore::new(/*permits*/ 1),
                 features: config.features.clone(),
                 pending_mcp_server_refresh_config: Mutex::new(None),
-                conversation,
                 active_turn: Mutex::new(None),
                 mailbox,
                 mailbox_rx: Mutex::new(mailbox_rx),

@@ -405,15 +405,6 @@ pub mod event_mapping;
 #[path = "../../crates/capabilities/sessions/src/core_migrated/goals.rs"]
 pub mod goals;
 
-#[path = "../../crates/capabilities/sessions/src/core_migrated/realtime_conversation.rs"]
-pub mod realtime_conversation;
-
-#[path = "../../crates/capabilities/sessions/src/core_migrated/realtime_context.rs"]
-pub mod realtime_context;
-
-#[path = "../../crates/capabilities/sessions/src/core_migrated/realtime_prompt.rs"]
-pub mod realtime_prompt;
-
 #[path = "../../crates/capabilities/sessions/src/core_migrated/rollout.rs"]
 pub mod rollout;
 

@@ -10,7 +10,8 @@
           "format": "int64",
           "type": "integer"
         }
-      ]
+      ],
+      "description": "ID of a request, which can be either a string or an integer."
     }
   },
   "description": "A successful (non-error) response to a request.",

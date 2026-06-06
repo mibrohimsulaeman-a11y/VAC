@@ -96,5 +96,3 @@ pub use crate::requests::Compression;
 pub use crate::sse::stream_from_fixture;
 pub use crate::telemetry::SseTelemetry;
 pub use crate::telemetry::WebsocketTelemetry;
-pub use vac_protocol::protocol::RealtimeAudioFrame;
-pub use vac_protocol::protocol::RealtimeEvent;

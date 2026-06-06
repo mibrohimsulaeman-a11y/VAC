@@ -619,7 +619,6 @@ pub(crate) struct ChatWidget {
     current_goal_status: Option<GoalStatusState>,
     goal_status_active_turn_started_at: Option<Instant>,
     external_editor_state: ExternalEditorState,
-    realtime_conversation: RealtimeConversationUiState,
     last_rendered_user_message_display: Option<UserMessageDisplay>,
     last_non_retry_error: Option<(String, String)>,
 }

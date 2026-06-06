@@ -9,5 +9,6 @@
       "type": "integer"
     }
   ],
+  "description": "ID of a request, which can be either a string or an integer.",
   "title": "RequestId"
 }

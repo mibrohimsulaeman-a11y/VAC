@@ -91,8 +91,6 @@ pub enum SlashCommand {
     Stop,
     Clear,
     Personality,
-    Realtime,
-    Settings,
     TestApproval,
     #[strum(serialize = "subagents")]
     MultiAgents,
@@ -106,7 +104,6 @@ pub enum SlashCommand {
 impl SlashCommand {
     pub fn availability(self) -> CommandAvailability {
         match self {
-            SlashCommand::Realtime | SlashCommand::Settings => CommandAvailability::FeatureOff,
             SlashCommand::Collab | SlashCommand::Experimental => CommandAvailability::Experimental,
             SlashCommand::MemoryDrop | SlashCommand::MemoryUpdate => {
                 CommandAvailability::Unavailable
@@ -170,8 +167,6 @@ impl SlashCommand {
                 "include current selection, open files, and other context from your IDE"
             }
             SlashCommand::Personality => "choose a communication style for VAC",
-            SlashCommand::Realtime => "toggle realtime voice mode (experimental)",
-            SlashCommand::Settings => "configure realtime microphone/speaker",
             SlashCommand::Plan => "switch to Plan mode",
             SlashCommand::Goal => "set or view the goal for a long-running task",
             SlashCommand::Collab => "change collaboration mode (experimental)",
@@ -291,8 +286,6 @@ impl SlashCommand {
             | SlashCommand::Activity => true,
             SlashCommand::Rollout => true,
             SlashCommand::TestApproval => true,
-            SlashCommand::Realtime => true,
-            SlashCommand::Settings => true,
             SlashCommand::Collab => true,
             SlashCommand::Agent | SlashCommand::MultiAgents => true,
             SlashCommand::Theme => false,

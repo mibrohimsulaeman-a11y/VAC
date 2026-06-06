@@ -5,4 +5,4 @@
 /**
  * Authentication mode for Vastar-backed providers.
  */
-export type AuthMode = "apikey" | "chatgpt" | "chatgptAuthTokens" | "agentIdentity";
+export type AuthMode = "apikey" | "bearer" | "local" | "providerCredential" | "chatgpt" | "chatgptAuthTokens" | "agentIdentity";

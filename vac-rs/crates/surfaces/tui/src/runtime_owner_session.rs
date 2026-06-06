@@ -54,8 +54,6 @@ mod owner_native {
     use crate::session_protocol::ThreadLoadedListParams;
     use crate::session_protocol::ThreadLoadedListResponse;
     use crate::session_protocol::ThreadMemoryMode;
-    use crate::session_protocol::ThreadRealtimeAudioChunk;
-    use crate::session_protocol::ThreadRealtimeStartTransport;
     use crate::session_protocol::ThreadRollbackResponse;
     use crate::session_protocol::ThreadStartSource;
     use crate::session_protocol::ThreadStatus;
@@ -1282,26 +1280,6 @@ mod owner_native {
             .map_err(|err| color_eyre::eyre::eyre!("owner-native skills/list failed: {err}"))
         }
         async fn reload_user_config(&mut self) -> Result<()> {
-            Ok(())
-        }
-        async fn thread_realtime_start(
-            &mut self,
-            _thread_id: ThreadId,
-            _transport: Option<ThreadRealtimeStartTransport>,
-            _voice: Option<serde_json::Value>,
-        ) -> Result<()> {
-            Err(color_eyre::eyre::eyre!(
-                "owner-native realtime start is not part of the critical startup/turn runtime path"
-            ))
-        }
-        async fn thread_realtime_audio(
-            &mut self,
-            _thread_id: ThreadId,
-            _frame: ThreadRealtimeAudioChunk,
-        ) -> Result<()> {
-            Ok(())
-        }
-        async fn thread_realtime_stop(&mut self, _thread_id: ThreadId) -> Result<()> {
             Ok(())
         }
         async fn thread_shell_command(

@@ -33,8 +33,6 @@ use crate::session_protocol::ThreadListResponse;
 use crate::session_protocol::ThreadLoadedListParams;
 use crate::session_protocol::ThreadLoadedListResponse;
 use crate::session_protocol::ThreadMemoryMode;
-use crate::session_protocol::ThreadRealtimeAudioChunk;
-use crate::session_protocol::ThreadRealtimeStartTransport;
 use crate::session_protocol::ThreadRollbackResponse;
 use crate::session_protocol::ThreadStartSource;
 use crate::session_protocol::Turn;
@@ -270,21 +268,6 @@ pub(crate) trait LocalRuntimeSession: Send {
     async fn skills_list(&mut self, params: SkillsListParams) -> Result<SkillsListResponse>;
 
     async fn reload_user_config(&mut self) -> Result<()>;
-
-    async fn thread_realtime_start(
-        &mut self,
-        thread_id: ThreadId,
-        transport: Option<ThreadRealtimeStartTransport>,
-        voice: Option<serde_json::Value>,
-    ) -> Result<()>;
-
-    async fn thread_realtime_audio(
-        &mut self,
-        thread_id: ThreadId,
-        frame: ThreadRealtimeAudioChunk,
-    ) -> Result<()>;
-
-    async fn thread_realtime_stop(&mut self, thread_id: ThreadId) -> Result<()>;
 
     async fn thread_shell_command(&mut self, thread_id: ThreadId, command: String) -> Result<()>;
 

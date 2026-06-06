@@ -462,7 +462,6 @@ fn validate_owner_native_support_manifest(report: &mut RuntimeOwnerGateReport) {
             "release_blocking_owner_runtime_methods",
             "OwnerRuntimeMethodStatus::Implemented",
             "OwnerRuntimeMethodSupport::fail_closed(\"thread_rollback\"",
-            "OwnerRuntimeMethodSupport::fail_closed(\"thread_realtime_start\"",
             "OwnerRuntimeMethodSupport::fail_closed(\"resolve_server_request\"",
             "OwnerRuntimeMethodSupport::fail_closed(\"reject_server_request\"",
         ] {
@@ -492,7 +491,6 @@ fn validate_owner_native_support_manifest(report: &mut RuntimeOwnerGateReport) {
         for required in [
             "OwnerNativeOperationStatus::NonDefaultFailClosed",
             "plan30_non_default_fail_closed_is_limited_to_noncritical_controls",
-            "thread_realtime_start",
             "thread_rollback",
             "resolve_server_request",
             "reject_server_request",
