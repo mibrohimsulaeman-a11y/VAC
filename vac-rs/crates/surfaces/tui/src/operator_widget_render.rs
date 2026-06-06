@@ -448,7 +448,10 @@ fn render_agent_streaming(state: &AgentStreamingState, area: Rect, buf: &mut Buf
         .style(Style::default().fg(FG).bg(BG))
         .render(chunks[1], buf);
 
-    let omitted = state.tools.len().saturating_sub(state.visible_tools().len());
+    let omitted = state
+        .tools
+        .len()
+        .saturating_sub(state.visible_tools().len());
     let timeline_width = chunks[2].width as usize;
     let clip_pad = |text: &str, target_width: usize| -> String {
         let chars: Vec<char> = text.chars().collect();
@@ -1033,7 +1036,10 @@ fn render_chrome_header(title: &str, mode: &str, area: Rect, buf: &mut Buffer) {
             spans.push(Span::raw(" "));
             spans.push(Span::styled("—", Style::default().fg(MUTED)));
             spans.push(Span::raw(" "));
-            spans.push(Span::styled(mode.to_string(), Style::default().fg(mode_color)));
+            spans.push(Span::styled(
+                mode.to_string(),
+                Style::default().fg(mode_color),
+            ));
         }
     }
     Paragraph::new(Line::from(spans))
