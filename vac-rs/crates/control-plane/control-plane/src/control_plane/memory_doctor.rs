@@ -116,6 +116,9 @@ fn check_sqlite_db(report: &mut MemoryDoctorReport, path: PathBuf, tables: &[&st
     }
 }
 
+/// FTS5 query latency budget surfaced by `vac doctor memory` (Spec v1.4 §VIII.7 / §29).
+const FTS_LATENCY_BUDGET_MS: u128 = 15;
+
 fn check_semantic_db(report: &mut MemoryDoctorReport, path: PathBuf) {
     if !path.exists() {
         report.warnings.push(format!(
@@ -137,13 +140,31 @@ fn check_semantic_db(report: &mut MemoryDoctorReport, path: PathBuf) {
                 return Err(format!("missing FTS maintenance trigger {trigger}"));
             }
         }
-        sqlx::query("SELECT rowid FROM project_facts_fts LIMIT 1")
-            .fetch_optional(&pool)
+        let fact_count = sqlx::query("SELECT COUNT(*) AS count FROM project_facts")
+            .fetch_one(&pool)
             .await
-            .map_err(|err| format!("project_facts_fts query failed: {err}"))?;
-        Ok(())
+            .map_err(|err| format!("project_facts count failed: {err}"))?
+            .get::<i64, _>("count");
+        let started = std::time::Instant::now();
+        sqlx::query("SELECT rowid FROM project_facts_fts WHERE project_facts_fts MATCH ? LIMIT 5")
+            .bind("vac OR memory OR fact")
+            .fetch_all(&pool)
+            .await
+            .map_err(|err| format!("project_facts_fts MATCH query failed: {err}"))?;
+        let latency_ms = started.elapsed().as_millis();
+        Ok((fact_count, latency_ms))
     }) {
-        Ok(()) => report.infos.push("semantic db schema: ready".to_string()),
+        Ok((fact_count, latency_ms)) => {
+            report.infos.push("semantic db schema: ready".to_string());
+            report.infos.push(format!(
+                "semantic FTS latency: {latency_ms}ms over {fact_count} fact(s) (budget {FTS_LATENCY_BUDGET_MS}ms)"
+            ));
+            if latency_ms > FTS_LATENCY_BUDGET_MS {
+                report.warnings.push(format!(
+                    "semantic FTS latency {latency_ms}ms exceeds {FTS_LATENCY_BUDGET_MS}ms budget over {fact_count} fact(s)"
+                ));
+            }
+        }
         Err(err) => report.errors.push(format!("{}: {err}", path.display())),
     }
 }
@@ -313,6 +334,118 @@ mod tests {
             report
                 .render_text()
                 .contains("missing FTS maintenance trigger facts_au")
+        );
+    }
+
+    #[test]
+    fn memory_doctor_reports_semantic_fts_latency() {
+        let temp = tempfile::tempdir().unwrap();
+        let vac = temp.path().join(".vac");
+        std::fs::create_dir_all(vac.join("capabilities")).unwrap();
+        std::fs::create_dir_all(vac.join("workflows")).unwrap();
+        std::fs::create_dir_all(vac.join("memories")).unwrap();
+        std::fs::write(
+            vac.join("capabilities/memory-read.yaml"),
+            "schema_version: 1\nkind: capability\nid: capability.memory.read\n",
+        )
+        .unwrap();
+        std::fs::write(
+            vac.join("capabilities/memory-write.yaml"),
+            "schema_version: 1\nkind: capability\nid: capability.memory.write\n",
+        )
+        .unwrap();
+        std::fs::write(
+            vac.join("workflows/maintenance.memory-consolidation.yaml"),
+            "schema_version: 1\nkind: workflow\nid: maintenance.memory-consolidation\n",
+        )
+        .unwrap();
+        let semantic_db = vac.join("memories/semantic.db");
+        run_sqlite(semantic_db.clone(), async move {
+            let options =
+                SqliteConnectOptions::from_str(&format!("sqlite://{}", semantic_db.display()))
+                    .map_err(|err| err.to_string())?
+                    .create_if_missing(true);
+            let pool = SqlitePoolOptions::new()
+                .max_connections(1)
+                .connect_with(options)
+                .await
+                .map_err(|err| err.to_string())?;
+            sqlx::query(
+                "CREATE TABLE project_facts (
+                    fact_id TEXT PRIMARY KEY,
+                    category TEXT NOT NULL,
+                    subject TEXT NOT NULL,
+                    fact_summary TEXT NOT NULL,
+                    source_attribution TEXT NOT NULL,
+                    associated_tags TEXT NOT NULL,
+                    confidence_score REAL NOT NULL,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )",
+            )
+            .execute(&pool)
+            .await
+            .map_err(|err| err.to_string())?;
+            sqlx::query(
+                "CREATE VIRTUAL TABLE project_facts_fts USING fts5(
+                    subject,
+                    fact_summary,
+                    associated_tags,
+                    content='project_facts',
+                    content_rowid='rowid'
+                )",
+            )
+            .execute(&pool)
+            .await
+            .map_err(|err| err.to_string())?;
+            sqlx::query(
+                "CREATE TRIGGER facts_ai AFTER INSERT ON project_facts BEGIN
+                    INSERT INTO project_facts_fts(rowid, subject, fact_summary, associated_tags)
+                    VALUES (new.rowid, new.subject, new.fact_summary, new.associated_tags);
+                END",
+            )
+            .execute(&pool)
+            .await
+            .map_err(|err| err.to_string())?;
+            sqlx::query(
+                "CREATE TRIGGER facts_ad AFTER DELETE ON project_facts BEGIN
+                    INSERT INTO project_facts_fts(project_facts_fts, rowid, subject, fact_summary, associated_tags)
+                    VALUES('delete', old.rowid, old.subject, old.fact_summary, old.associated_tags);
+                END",
+            )
+            .execute(&pool)
+            .await
+            .map_err(|err| err.to_string())?;
+            sqlx::query(
+                "CREATE TRIGGER facts_au AFTER UPDATE ON project_facts BEGIN
+                    INSERT INTO project_facts_fts(project_facts_fts, rowid, subject, fact_summary, associated_tags)
+                    VALUES('delete', old.rowid, old.subject, old.fact_summary, old.associated_tags);
+                    INSERT INTO project_facts_fts(rowid, subject, fact_summary, associated_tags)
+                    VALUES (new.rowid, new.subject, new.fact_summary, new.associated_tags);
+                END",
+            )
+            .execute(&pool)
+            .await
+            .map_err(|err| err.to_string())?;
+            for index in 0..5 {
+                sqlx::query(
+                    "INSERT INTO project_facts (fact_id, category, subject, fact_summary, source_attribution, associated_tags, confidence_score) VALUES (?, 'concept', ?, 'memory fact summary', 'scan', 'vac,memory', 0.9)",
+                )
+                .bind(format!("mem.semantic.{index}"))
+                .bind(format!("subject vac memory {index}"))
+                .execute(&pool)
+                .await
+                .map_err(|err| err.to_string())?;
+            }
+            Ok(())
+        })
+        .unwrap();
+
+        let report = load_memory_doctor_report(temp.path());
+        assert_eq!(report.exit_code(), 0, "{}", report.render_text());
+        assert!(
+            report.render_text().contains("semantic FTS latency"),
+            "{}",
+            report.render_text()
         );
     }
 }

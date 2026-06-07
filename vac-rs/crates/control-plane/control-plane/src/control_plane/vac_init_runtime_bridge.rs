@@ -1087,6 +1087,13 @@ fn active_plan_id(workspace_root: &Path) -> Option<String> {
     yaml_scalar_by_key(&source, "id")
 }
 
+/// Returns true when a VAC-Init runtime plan governs this workspace. Command
+/// gating is fail-closed, so it must only engage for governed sessions; ungoverned
+/// workspaces (no active plan) are never subject to command enforcement.
+pub fn runtime_command_enforcement_active(workspace_root: &Path) -> bool {
+    active_plan_id(workspace_root).is_some()
+}
+
 fn classify_runtime_command_risk(runner: &str, args: &[String]) -> CommandRisk {
     if matches!(
         runner,
@@ -1309,4 +1316,138 @@ fn unix_seconds() -> u64 {
         .duration_since(UNIX_EPOCH)
         .map(|duration| duration.as_secs())
         .unwrap_or_default()
+}
+
+#[cfg(test)]
+mod runtime_bridge_integration_tests {
+    use super::*;
+    use tempfile::tempdir;
+
+    fn write_file(root: &std::path::Path, relative: &str, contents: &str) {
+        let path = root.join(relative);
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent).unwrap();
+        }
+        std::fs::write(path, contents).unwrap();
+    }
+
+    fn write_capability(root: &std::path::Path, status: &str) {
+        write_file(
+            root,
+            ".vac/capabilities/tools.yaml",
+            &format!("id: vac.test\nstatus: {status}\n"),
+        );
+    }
+
+    fn write_ownership_report(root: &std::path::Path) {
+        write_file(
+            root,
+            ".vac/registry/ownership/report.yaml",
+            "version: 1\nfiles: []\n",
+        );
+    }
+
+    fn write_policy(root: &std::path::Path) {
+        write_file(root, ".vac/policies/base.yaml", "version: 1\n");
+    }
+
+    fn write_active_plan(root: &std::path::Path, status: &str) {
+        write_file(
+            root,
+            ".vac/registry/runtime/active_plan.yaml",
+            &format!(
+                "id: plan.test.001\nstatus: {status}\ntask:\n  capability: vac.test\nallowed_files:\n  - path: src/allowed.rs\n    operation: modify\n    line_range:\n      start: 1\n      end: 40\n    ownership: vac.test\nforbidden:\n  files: []\napproval:\n  required: false\nbounds:\n  max_patches: 1\n  max_new_files: 0\n  max_line_delta: 250\n  timeout_seconds: 120\n"
+            ),
+        );
+    }
+
+    fn sample_change() -> RuntimePatchFileChange {
+        RuntimePatchFileChange::modify(
+            "src/allowed.rs",
+            "@@ -1,2 +1,2 @@\n-old\n+new\n",
+            Some("new\n".to_string()),
+        )
+    }
+
+    #[test]
+    fn ungoverned_workspace_returns_err() {
+        let dir = tempdir().unwrap();
+        let result = evaluate_runtime_patch_contract(dir.path(), &[sample_change()]);
+        assert!(
+            result.is_err(),
+            "workspace without an active plan must not be governed"
+        );
+    }
+
+    #[test]
+    fn unapproved_plan_is_blocked() {
+        let dir = tempdir().unwrap();
+        write_active_plan(dir.path(), "draft");
+        write_capability(dir.path(), "ready");
+        write_policy(dir.path());
+        write_ownership_report(dir.path());
+
+        let report = evaluate_runtime_patch_contract(dir.path(), &[sample_change()])
+            .expect("plan present so contract evaluates");
+        assert!(
+            report.is_blocked(),
+            "draft (unapproved) plan must be fail-closed: {}",
+            report.render_text()
+        );
+    }
+
+    #[test]
+    fn missing_policy_layer_is_blocked() {
+        let dir = tempdir().unwrap();
+        write_active_plan(dir.path(), "approved");
+        write_capability(dir.path(), "ready");
+        write_ownership_report(dir.path());
+        // Intentionally omit .vac/policies so the policy layer is absent.
+
+        let report = evaluate_runtime_patch_contract(dir.path(), &[sample_change()])
+            .expect("plan present so contract evaluates");
+        assert!(
+            report.is_blocked(),
+            "missing policy layer must be fail-closed: {}",
+            report.render_text()
+        );
+    }
+
+    #[test]
+    fn ungoverned_workspace_skips_command_enforcement() {
+        let dir = tempdir().unwrap();
+        assert!(
+            !runtime_command_enforcement_active(dir.path()),
+            "workspace without an active plan must not gate commands"
+        );
+    }
+
+    #[test]
+    fn governed_workspace_enables_command_enforcement() {
+        let dir = tempdir().unwrap();
+        write_active_plan(dir.path(), "approved");
+        assert!(
+            runtime_command_enforcement_active(dir.path()),
+            "workspace with an active plan must gate commands"
+        );
+    }
+
+    #[test]
+    fn governed_unknown_runner_command_is_blocked() {
+        let dir = tempdir().unwrap();
+        write_active_plan(dir.path(), "approved");
+        write_policy(dir.path());
+
+        let report = evaluate_runtime_command_contract(
+            dir.path(),
+            "totallybogusrunner --do-stuff",
+            "totallybogusrunner --do-stuff",
+        )
+        .expect("command contract always evaluates");
+        assert!(
+            report.is_blocked(),
+            "non-allowlisted runner must be fail-closed: {}",
+            report.render_text()
+        );
+    }
 }

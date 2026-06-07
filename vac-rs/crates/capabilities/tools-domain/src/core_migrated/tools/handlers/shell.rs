@@ -4,6 +4,8 @@ use vac_protocol::ThreadId;
 use vac_protocol::models::ShellCommandToolCallParams;
 use vac_protocol::models::ShellToolCallParams;
 
+use crate::control_plane::evaluate_vac_init_runtime_command_contract;
+use crate::control_plane::vac_init_runtime_command_enforcement_active;
 use crate::exec::ExecCapturePolicy;
 use crate::exec::ExecParams;
 use crate::exec_env::create_env;
@@ -496,6 +498,31 @@ impl ShellHandler {
         .await?
         {
             return Ok(output);
+        }
+
+        // VAC-Init runtime command contract: fail-closed, but only when a runtime
+        // plan governs this workspace. Ungoverned workspaces pass through unchanged
+        // so ordinary development shells are unaffected.
+        if vac_init_runtime_command_enforcement_active(exec_params.cwd.as_path()) {
+            let command_display = exec_params.command.join(" ");
+            match evaluate_vac_init_runtime_command_contract(
+                exec_params.cwd.as_path(),
+                &hook_command,
+                &command_display,
+            ) {
+                Ok(report) if report.is_blocked() => {
+                    return Err(FunctionCallError::RespondToModel(format!(
+                        "command blocked by VAC-Init runtime command contract (fail-closed):\n{}",
+                        report.render_text()
+                    )));
+                }
+                Ok(_) => {}
+                Err(err) => {
+                    return Err(FunctionCallError::RespondToModel(format!(
+                        "VAC-Init runtime command contract evaluation failed (fail-closed): {err}"
+                    )));
+                }
+            }
         }
 
         let source = ExecCommandSource::Agent;
