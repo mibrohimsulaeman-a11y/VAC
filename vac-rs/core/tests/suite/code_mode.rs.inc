@@ -12,6 +12,7 @@ use core_test_support::responses::ev_custom_tool_call;
 use core_test_support::responses::ev_response_created;
 use core_test_support::responses::sse;
 use core_test_support::skip_if_no_network;
+use core_test_support::skip_if_no_code_mode_v8;
 use core_test_support::stdio_server_bin;
 use core_test_support::test_vac::TestVAC;
 use core_test_support::test_vac::test_vac;
@@ -280,6 +281,7 @@ async fn run_code_mode_turn_with_rmcp_config(
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn code_mode_can_return_exec_command_output() -> Result<()> {
     skip_if_no_network!(Ok(()));
+    skip_if_no_code_mode_v8!(Ok(()));
 
     let server = responses::start_mock_server().await;
     let (_test, second_mock) = run_code_mode_turn(
@@ -1016,6 +1018,7 @@ while (true) {}
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn code_mode_can_run_multiple_yielded_sessions() -> Result<()> {
     skip_if_no_network!(Ok(()));
+    skip_if_no_code_mode_v8!(Ok(()));
 
     let server = responses::start_mock_server().await;
     let mut builder = test_vac().with_config(move |config| {
@@ -2541,6 +2544,7 @@ text(JSON.stringify(tool));
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn code_mode_can_call_hidden_dynamic_tools() -> Result<()> {
     skip_if_no_network!(Ok(()));
+    skip_if_no_code_mode_v8!(Ok(()));
 
     let server = responses::start_mock_server().await;
     let mut builder = test_vac().with_config(move |config| {
@@ -2696,6 +2700,7 @@ text(
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn code_mode_can_print_content_only_mcp_tool_result_fields() -> Result<()> {
     skip_if_no_network!(Ok(()));
+    skip_if_no_code_mode_v8!(Ok(()));
 
     let server = responses::start_mock_server().await;
     let code = r#"
@@ -2739,6 +2744,7 @@ isError=false"
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn code_mode_can_print_error_mcp_tool_result_fields() -> Result<()> {
     skip_if_no_network!(Ok(()));
+    skip_if_no_code_mode_v8!(Ok(()));
 
     let server = responses::start_mock_server().await;
     let code = r#"
@@ -2871,6 +2877,7 @@ text(JSON.stringify(load("nb")));
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn code_mode_can_compare_elapsed_time_around_set_timeout() -> Result<()> {
     skip_if_no_network!(Ok(()));
+    skip_if_no_code_mode_v8!(Ok(()));
 
     let server = responses::start_mock_server().await;
     let (_test, second_mock) = run_code_mode_turn(

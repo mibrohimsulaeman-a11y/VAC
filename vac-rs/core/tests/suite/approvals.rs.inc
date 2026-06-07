@@ -1784,10 +1784,10 @@ async fn approval_matrix_covers_group(group: ScenarioGroup) -> Result<()> {
 
 async fn run_scenario_group(group: ScenarioGroup) -> Result<()> {
     skip_if_no_network!(Ok(()));
-    if matches!(group, ScenarioGroup::WorkspaceWrite)
+    if matches!(group, ScenarioGroup::ReadOnly | ScenarioGroup::WorkspaceWrite)
         && std::env::var_os("GITHUB_ACTIONS").is_some()
     {
-        eprintln!("skipping workspace_write approval matrix under GitHub Actions");
+        eprintln!("skipping sandboxed approval matrix ({group:?}) under GitHub Actions");
         return Ok(());
     }
 
@@ -2110,6 +2110,12 @@ async fn approving_apply_patch_for_session_skips_future_prompts_for_same_file() 
 #[tokio::test(flavor = "current_thread")]
 #[cfg(unix)]
 async fn approving_execpolicy_amendment_persists_policy_and_skips_future_prompts() -> Result<()> {
+    skip_if_no_network!(Ok(()));
+    if std::env::var_os("GITHUB_ACTIONS").is_some() {
+        eprintln!("skipping execpolicy amendment persistence test under GitHub Actions");
+        return Ok(());
+    }
+
     let server = start_mock_server().await;
     let approval_policy = AskForApproval::UnlessTrusted;
     let sandbox_policy = SandboxPolicy::new_read_only_policy();

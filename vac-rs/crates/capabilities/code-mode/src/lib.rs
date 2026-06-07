@@ -40,3 +40,10 @@ pub use service::CodeModeTurnWorker;
 
 pub const PUBLIC_TOOL_NAME: &str = "exec";
 pub const WAIT_TOOL_NAME: &str = "wait";
+
+/// Returns `true` when the V8-backed code-mode runtime is compiled in (feature
+/// `code-mode-v8`). Integration tests that execute JavaScript should skip when
+/// this is `false`, mirroring the `skip_if_no_network!` idiom.
+pub const fn code_mode_v8_enabled() -> bool {
+    cfg!(feature = "code-mode-v8")
+}

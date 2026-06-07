@@ -558,6 +558,26 @@ macro_rules! skip_if_no_network {
 }
 
 #[macro_export]
+macro_rules! skip_if_no_code_mode_v8 {
+    () => {{
+        if !::vac_code_mode::code_mode_v8_enabled() {
+            println!(
+                "Skipping test because the code-mode-v8 JavaScript runtime is not compiled in (build with --features code-mode-v8)."
+            );
+            return;
+        }
+    }};
+    ($return_value:expr $(,)?) => {{
+        if !::vac_code_mode::code_mode_v8_enabled() {
+            println!(
+                "Skipping test because the code-mode-v8 JavaScript runtime is not compiled in (build with --features code-mode-v8)."
+            );
+            return $return_value;
+        }
+    }};
+}
+
+#[macro_export]
 macro_rules! skip_if_remote {
     ($reason:expr $(,)?) => {{
         if ::std::env::var_os($crate::remote_env_env_var()).is_some() {
