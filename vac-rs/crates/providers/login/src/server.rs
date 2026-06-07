@@ -60,15 +60,16 @@ const DEFAULT_ISSUER: &str = "https://auth.vastar.com";
 const DEFAULT_PORT: u16 = 1455;
 // Keep in sync with the VAC CLI Hydra redirect URI allow-list.
 const FALLBACK_PORT: u16 = 1457;
-static LOGIN_ERROR_PAGE_TEMPLATE: LazyLock<Option<Template>> = LazyLock::new(|| {
-    match Template::parse(include_str!("assets/error.html")) {
-        Ok(template) => Some(template),
-        Err(err) => {
-            error!("login error page template failed to parse: {err}");
-            None
-        }
-    }
-});
+static LOGIN_ERROR_PAGE_TEMPLATE: LazyLock<Option<Template>> =
+    LazyLock::new(
+        || match Template::parse(include_str!("assets/error.html")) {
+            Ok(template) => Some(template),
+            Err(err) => {
+                error!("login error page template failed to parse: {err}");
+                None
+            }
+        },
+    );
 
 /// Options for launching the local login callback server.
 #[derive(Debug, Clone)]

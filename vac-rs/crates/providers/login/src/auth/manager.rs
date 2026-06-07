@@ -209,7 +209,6 @@ mod auth_manager;
 mod recovery;
 mod vac_auth;
 
-
 impl ChatgptAuth {
     fn current_auth_json(&self) -> Option<AuthDotJson> {
         auth_dot_json_snapshot(&self.state)
@@ -864,7 +863,6 @@ impl UnauthorizedRecoveryStepResult {
     }
 }
 
-
 /// Central manager providing a single source of truth for auth.json derived
 /// authentication data. It loads once (or on preference change) and then
 /// hands out cloned `VACAuth` values so the rest of the program has a
@@ -923,7 +921,6 @@ impl Debug for AuthManager {
             .finish_non_exhaustive()
     }
 }
-
 
 #[cfg(test)]
 #[path = "auth_tests.rs"]
