@@ -40,7 +40,7 @@ impl AuthProvider for AgentIdentityAuthProvider {
         }
 
         if let Ok(header) = HeaderValue::from_str(self.auth.account_id()) {
-            let _ = headers.insert("ChatGPT-Account-ID", header);
+            let _ = headers.insert("Provider-Account-ID", header);
         }
 
         if self.auth.is_fedramp_account() {

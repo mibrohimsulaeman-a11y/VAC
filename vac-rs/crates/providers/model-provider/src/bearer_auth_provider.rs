@@ -38,7 +38,7 @@ impl AuthProvider for BearerAuthProvider {
         if let Some(account_id) = self.account_id.as_ref()
             && let Ok(header) = HeaderValue::from_str(account_id)
         {
-            let _ = headers.insert("ChatGPT-Account-ID", header);
+            let _ = headers.insert("Provider-Account-ID", header);
         }
         if self.is_fedramp_account {
             let _ = headers.insert("X-Vastar-Fedramp", HeaderValue::from_static("true"));
@@ -83,7 +83,7 @@ mod tests {
         );
         assert_eq!(
             headers
-                .get("ChatGPT-Account-ID")
+                .get("Provider-Account-ID")
                 .and_then(|value| value.to_str().ok()),
             Some("workspace-123")
         );
