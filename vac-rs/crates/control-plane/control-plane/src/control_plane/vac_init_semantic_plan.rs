@@ -310,6 +310,20 @@ fn is_forbidden(path: &str, patterns: &[String]) -> bool {
         if let Some(prefix) = pattern.strip_suffix('*') {
             return path.starts_with(prefix);
         }
+        // `**/<rest>`: match `rest` at any directory depth (the trailing path
+        // component(s)), e.g. `**/secrets.yaml` matches `a/b/secrets.yaml`.
+        if let Some(rest) = pattern.strip_prefix("**/") {
+            return rest.is_empty()
+                || path == rest
+                || path.ends_with(&format!("/{}", rest));
+        }
+        // `*<suffix>`: suffix match within the final path segment only, never
+        // crossing a `/` boundary, e.g. `*.env` matches `config/prod.env` and
+        // `.env` but not `prod.env.bak`.
+        if let Some(suffix) = pattern.strip_prefix('*') {
+            let segment = path.rsplit('/').next().unwrap_or(path);
+            return !suffix.is_empty() && segment.ends_with(suffix);
+        }
         false
     })
 }
@@ -408,6 +422,19 @@ mod tests {
                 .iter()
                 .any(|issue| issue.code == "plan.file.forbidden")
         );
+    }
+
+    #[test]
+    fn forbidden_suffix_and_recursive_globs_match() {
+        // `*.ext` suffix globs match within the final path segment only.
+        assert!(is_forbidden(".env", &["*.env".to_string()]));
+        assert!(is_forbidden("config/prod.env", &["*.env".to_string()]));
+        assert!(!is_forbidden("config/prod.toml", &["*.env".to_string()]));
+        assert!(!is_forbidden("prod.env.bak", &["*.env".to_string()]));
+        // `**/<rest>` recursive globs match at any directory depth.
+        assert!(is_forbidden("secrets.yaml", &["**/secrets.yaml".to_string()]));
+        assert!(is_forbidden("a/b/secrets.yaml", &["**/secrets.yaml".to_string()]));
+        assert!(!is_forbidden("a/b/other.yaml", &["**/secrets.yaml".to_string()]));
     }
 
     #[test]
