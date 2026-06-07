@@ -1,11 +1,14 @@
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
+use std::path::PathBuf;
 
 use serde_yaml::Value;
 
 use super::hash::hash_evidence_v2;
 use super::hash::hash_merkle_root;
 use super::hash::hash_xref_marker;
+use super::merkle::calculate_merkle_root;
 use super::migration::evidence_v1_to_v2_migration_path;
 use super::signing::verify_signature_payload;
 use super::types::EvidenceV2;
@@ -73,6 +76,7 @@ pub fn load_evidence_v2_doctor_report(root: impl AsRef<Path>) -> EvidenceV2Docto
     }
 
     let mut records = 0usize;
+    let mut capability_chains: BTreeMap<String, Vec<PathBuf>> = BTreeMap::new();
     collect_yaml_files(&store_root, &mut |path| {
         if path.file_name().and_then(|value| value.to_str()) == Some("head.yaml") {
             return;
@@ -93,7 +97,13 @@ pub fn load_evidence_v2_doctor_report(root: impl AsRef<Path>) -> EvidenceV2Docto
             Some("evidence") => {
                 records += 1;
                 match serde_yaml::from_str::<EvidenceV2>(&source) {
-                    Ok(record) => verify_evidence(path, &record, &mut report),
+                    Ok(record) => {
+                        verify_evidence(path, &record, &mut report);
+                        capability_chains
+                            .entry(record.capability)
+                            .or_default()
+                            .push(path.to_path_buf());
+                    }
                     Err(err) => report.errors.push(format!(
                         "{}: invalid evidence v2 shape: {err}",
                         path.display()
@@ -103,7 +113,13 @@ pub fn load_evidence_v2_doctor_report(root: impl AsRef<Path>) -> EvidenceV2Docto
             Some("xref_marker") => {
                 records += 1;
                 match serde_yaml::from_str::<XrefMarker>(&source) {
-                    Ok(record) => verify_xref(path, &record, &mut report),
+                    Ok(record) => {
+                        verify_xref(path, &record, &mut report);
+                        capability_chains
+                            .entry(record.capability)
+                            .or_default()
+                            .push(path.to_path_buf());
+                    }
                     Err(err) => report
                         .errors
                         .push(format!("{}: invalid xref v2 shape: {err}", path.display())),
@@ -134,6 +150,17 @@ pub fn load_evidence_v2_doctor_report(root: impl AsRef<Path>) -> EvidenceV2Docto
             .infos
             .push(format!("validated {records} evidence v2 chain record(s)"));
     }
+
+    for (capability, mut paths) in capability_chains {
+        paths.sort();
+        verify_subchain_continuity(&capability, &paths, &mut report);
+    }
+
+    let anchor_dir = store_root.join("anchors");
+    if anchor_dir.exists() {
+        verify_epoch_chain(&anchor_dir, &mut report);
+    }
+
     report
 }
 
@@ -228,10 +255,22 @@ fn verify_anchor(path: &Path, record: &MerkleRoot, report: &mut EvidenceV2Doctor
             .errors
             .push(format!("{}: missing root_hash", path.display()));
     }
-    if let Err(err) = hash_merkle_root(record) {
-        report
+    match hash_merkle_root(record) {
+        Ok(metadata_hash) => {
+            let inclusion_hash = calculate_merkle_root(&record.leaves);
+            let combined = format!("{inclusion_hash}:{metadata_hash}");
+            let expected_root =
+                super::super::vac_init_evidence_chain::sha256_hex(combined.as_bytes());
+            if expected_root != record.root_hash {
+                report.errors.push(format!(
+                    "{}: merkle root_hash mismatch (inclusion+metadata)",
+                    path.display()
+                ));
+            }
+        }
+        Err(err) => report
             .errors
-            .push(format!("{}: merkle hash failure: {err}", path.display()));
+            .push(format!("{}: merkle hash failure: {err}", path.display())),
     }
     verify_signature(
         path,
@@ -287,6 +326,104 @@ fn scalar(value: &Value, key: &str) -> Option<String> {
     }
 }
 
+fn verify_subchain_continuity(
+    capability: &str,
+    paths: &[PathBuf],
+    report: &mut EvidenceV2DoctorReport,
+) {
+    let mut prev_hash: Option<String> = None;
+    for path in paths {
+        let Ok(source) = fs::read_to_string(path) else {
+            continue;
+        };
+        let Ok(value) = serde_yaml::from_str::<Value>(&source) else {
+            continue;
+        };
+        let kind = scalar(&value, "kind");
+        let sub_chain = value
+            .as_mapping()
+            .and_then(|map| map.get(&Value::String("sub_chain".to_string())));
+        let self_hash = sub_chain.and_then(|sc| scalar(sc, "self_hash"));
+        let stored_prev_hash = sub_chain.and_then(|sc| scalar(sc, "prev_hash"));
+
+        if let Some(expected_prev) = &prev_hash {
+            match &stored_prev_hash {
+                Some(actual_prev) if actual_prev == expected_prev => {}
+                Some(actual_prev) => report.errors.push(format!(
+                    "{}: sub-chain prev_hash mismatch for {capability} (expected {}, got {})",
+                    path.display(),
+                    expected_prev,
+                    actual_prev
+                )),
+                None => report.errors.push(format!(
+                    "{}: sub-chain missing prev_hash for {capability}",
+                    path.display()
+                )),
+            }
+        } else if stored_prev_hash.is_some() {
+            report.errors.push(format!(
+                "{}: first record in {capability} sub-chain must have prev_hash = null",
+                path.display()
+            ));
+        }
+
+        if let Some(hash) = self_hash {
+            prev_hash = Some(hash);
+        } else if kind.as_deref() == Some("evidence") || kind.as_deref() == Some("xref_marker") {
+            report.errors.push(format!(
+                "{}: missing self_hash in sub_chain for {capability}",
+                path.display()
+            ));
+        }
+    }
+}
+
+fn verify_epoch_chain(anchor_dir: &Path, report: &mut EvidenceV2DoctorReport) {
+    let mut anchors = Vec::new();
+    if let Ok(entries) = fs::read_dir(anchor_dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.extension().and_then(|ext| ext.to_str()) == Some("yaml")
+                && path.file_name().and_then(|name| name.to_str()) != Some("head.yaml")
+            {
+                if let Ok(source) = fs::read_to_string(&path) {
+                    if let Ok(anchor) = serde_yaml::from_str::<MerkleRoot>(&source) {
+                        anchors.push((anchor.epoch, anchor, path));
+                    }
+                }
+            }
+        }
+    }
+    anchors.sort_by_key(|(epoch, _, _)| *epoch);
+
+    let mut prev_root_hash: Option<String> = None;
+    for (epoch, anchor, path) in anchors {
+        match (&prev_root_hash, &anchor.prev_epoch.root_hash) {
+            (Some(expected), Some(actual)) if expected == actual => {}
+            (Some(expected), Some(actual)) => report.errors.push(format!(
+                "{}: epoch {} prev_epoch.root_hash mismatch (expected {}, got {})",
+                path.display(),
+                epoch,
+                expected,
+                actual
+            )),
+            (Some(expected), None) => report.errors.push(format!(
+                "{}: epoch {} missing prev_epoch.root_hash (expected {})",
+                path.display(),
+                epoch,
+                expected
+            )),
+            (None, Some(_)) => report.errors.push(format!(
+                "{}: first anchor (epoch {}) must have prev_epoch.root_hash = null",
+                path.display(),
+                epoch
+            )),
+            (None, None) => {}
+        }
+        prev_root_hash = Some(anchor.root_hash);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -338,6 +475,204 @@ mod tests {
         let report = load_evidence_v2_doctor_report(temp.path());
         assert_eq!(report.exit_code(), 0, "{}", report.render_text());
         assert!(report.render_text().contains("validated 1 evidence v2"));
+    }
+
+    #[test]
+    fn doctor_fails_on_broken_subchain_continuity() {
+        let temp = tempfile::tempdir().unwrap();
+        let migration_path =
+            crate::control_plane::evidence_v2::migration::evidence_v1_to_v2_migration_path(
+                temp.path(),
+            );
+        std::fs::create_dir_all(migration_path.parent().unwrap()).unwrap();
+        std::fs::write(
+            migration_path,
+            crate::control_plane::evidence_v2::migration::render_evidence_v1_to_v2_migration_yaml(),
+        )
+        .unwrap();
+
+        let store = GitRefEvidenceStore::new(temp.path());
+        let capability = "vac.test".to_string();
+        store
+            .append(
+                &capability,
+                EvidenceV2::new(
+                    &capability,
+                    1,
+                    "session.test",
+                    GitEvidence {
+                        code_commit: "abc".to_string(),
+                        parent_commit: "def".to_string(),
+                        worktree_ref: "refs/heads/main".to_string(),
+                    },
+                    ApprovalRequestV2 {
+                        approval_id: "approval.test".to_string(),
+                        content_hash: "0".repeat(64),
+                    },
+                ),
+            )
+            .unwrap();
+        store
+            .append(
+                &capability,
+                EvidenceV2::new(
+                    &capability,
+                    2,
+                    "session.test",
+                    GitEvidence {
+                        code_commit: "ghi".to_string(),
+                        parent_commit: "abc".to_string(),
+                        worktree_ref: "refs/heads/main".to_string(),
+                    },
+                    ApprovalRequestV2 {
+                        approval_id: "approval.test2".to_string(),
+                        content_hash: "1".repeat(64),
+                    },
+                ),
+            )
+            .unwrap();
+
+        let path_2 = temp.path().join(
+            ".vac/registry/evidence-v2/capabilities/vac_test/00000000000000000002.evidence.yaml",
+        );
+        let mut source = std::fs::read_to_string(&path_2).unwrap();
+        source = source.replace(
+            "prev_hash:",
+            "prev_hash: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa # tampered",
+        );
+        std::fs::write(&path_2, source).unwrap();
+
+        let report = load_evidence_v2_doctor_report(temp.path());
+        assert_eq!(report.exit_code(), 1);
+        assert!(report.render_text().contains("prev_hash mismatch"));
+    }
+
+    #[test]
+    fn doctor_fails_on_invalid_merkle_inclusion() {
+        let temp = tempfile::tempdir().unwrap();
+        let migration_path =
+            crate::control_plane::evidence_v2::migration::evidence_v1_to_v2_migration_path(
+                temp.path(),
+            );
+        std::fs::create_dir_all(migration_path.parent().unwrap()).unwrap();
+        std::fs::write(
+            migration_path,
+            crate::control_plane::evidence_v2::migration::render_evidence_v1_to_v2_migration_yaml(),
+        )
+        .unwrap();
+
+        let store = GitRefEvidenceStore::new(temp.path());
+        let capability = "vac.test".to_string();
+        store
+            .append(
+                &capability,
+                EvidenceV2::new(
+                    &capability,
+                    1,
+                    "session.test",
+                    GitEvidence {
+                        code_commit: "abc".to_string(),
+                        parent_commit: "def".to_string(),
+                        worktree_ref: "refs/heads/main".to_string(),
+                    },
+                    ApprovalRequestV2 {
+                        approval_id: "approval.test".to_string(),
+                        content_hash: "0".repeat(64),
+                    },
+                ),
+            )
+            .unwrap();
+        store.seal_epoch(EpochTrigger::Manual).unwrap();
+
+        let anchor_path = temp
+            .path()
+            .join(".vac/registry/evidence-v2/anchors/00000000000000000001.yaml");
+        let mut source = std::fs::read_to_string(&anchor_path).unwrap();
+        source = source.replace(
+            "root_hash:",
+            "root_hash: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff # tampered",
+        );
+        std::fs::write(&anchor_path, source).unwrap();
+
+        let report = load_evidence_v2_doctor_report(temp.path());
+        assert_eq!(report.exit_code(), 1);
+        assert!(report.render_text().contains("merkle root_hash mismatch"));
+    }
+
+    #[test]
+    fn doctor_fails_on_broken_epoch_chain() {
+        let temp = tempfile::tempdir().unwrap();
+        let migration_path =
+            crate::control_plane::evidence_v2::migration::evidence_v1_to_v2_migration_path(
+                temp.path(),
+            );
+        std::fs::create_dir_all(migration_path.parent().unwrap()).unwrap();
+        std::fs::write(
+            migration_path,
+            crate::control_plane::evidence_v2::migration::render_evidence_v1_to_v2_migration_yaml(),
+        )
+        .unwrap();
+
+        let store = GitRefEvidenceStore::new(temp.path());
+        let capability = "vac.test".to_string();
+        store
+            .append(
+                &capability,
+                EvidenceV2::new(
+                    &capability,
+                    1,
+                    "session.test",
+                    GitEvidence {
+                        code_commit: "abc".to_string(),
+                        parent_commit: "def".to_string(),
+                        worktree_ref: "refs/heads/main".to_string(),
+                    },
+                    ApprovalRequestV2 {
+                        approval_id: "approval.test".to_string(),
+                        content_hash: "0".repeat(64),
+                    },
+                ),
+            )
+            .unwrap();
+        store.seal_epoch(EpochTrigger::Manual).unwrap();
+        store
+            .append(
+                &capability,
+                EvidenceV2::new(
+                    &capability,
+                    2,
+                    "session.test",
+                    GitEvidence {
+                        code_commit: "ghi".to_string(),
+                        parent_commit: "abc".to_string(),
+                        worktree_ref: "refs/heads/main".to_string(),
+                    },
+                    ApprovalRequestV2 {
+                        approval_id: "approval.test2".to_string(),
+                        content_hash: "1".repeat(64),
+                    },
+                ),
+            )
+            .unwrap();
+        store.seal_epoch(EpochTrigger::Manual).unwrap();
+
+        let anchor_2_path = temp
+            .path()
+            .join(".vac/registry/evidence-v2/anchors/00000000000000000002.yaml");
+        let mut source = std::fs::read_to_string(&anchor_2_path).unwrap();
+        source = source.replace(
+            "root_hash:",
+            "root_hash: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee # tampered prev_epoch.root_hash",
+        );
+        std::fs::write(&anchor_2_path, source).unwrap();
+
+        let report = load_evidence_v2_doctor_report(temp.path());
+        assert_eq!(report.exit_code(), 1);
+        assert!(
+            report
+                .render_text()
+                .contains("prev_epoch.root_hash mismatch")
+        );
     }
 
     #[test]
