@@ -693,14 +693,30 @@ pub fn validate_patch_attempt(ctx: &PatchGuardContext, attempt: &PatchAttempt) -
 }
 
 fn glob_forbidden(path: &str, patterns: &[String]) -> bool {
+    // Mirror `vac_init_semantic_plan::is_forbidden`: the same `plan.forbidden_files`
+    // patterns flow into both matchers, so they must agree. `dir/**` matches the
+    // directory itself or paths beneath it on a path-segment boundary, never a
+    // sibling that merely shares the textual prefix (e.g. `target/**` must not
+    // match `targetfoo`).
+    let path = path.trim_start_matches("./");
     patterns.iter().any(|pattern| {
-        if let Some(prefix) = pattern.strip_suffix("/**") {
-            path.starts_with(prefix)
-        } else if let Some(prefix) = pattern.strip_suffix('*') {
-            path.starts_with(prefix)
-        } else {
-            path == pattern
+        let pattern = pattern.trim().trim_start_matches("./");
+        if pattern.is_empty() {
+            return false;
         }
+        if path == pattern {
+            return true;
+        }
+        if let Some(directory) = pattern.strip_suffix("/**") {
+            return path == directory
+                || path
+                    .strip_prefix(directory)
+                    .is_some_and(|suffix| suffix.starts_with('/'));
+        }
+        if let Some(prefix) = pattern.strip_suffix('*') {
+            return path.starts_with(prefix);
+        }
+        false
     })
 }
 
@@ -749,6 +765,17 @@ mod tests {
     fn accepts_bounded_patch() {
         let report = validate_patch_attempt(&context(), &attempt());
         assert!(report.allowed, "{:?}", report.issues);
+    }
+
+    #[test]
+    fn forbidden_glob_matches_on_segment_boundary() {
+        let patterns = vec!["target/**".to_string()];
+        // A path beneath the forbidden directory is matched.
+        assert!(glob_forbidden("target/debug/app", &patterns));
+        // The directory itself is matched.
+        assert!(glob_forbidden("target", &patterns));
+        // A sibling that merely shares the textual prefix is NOT matched.
+        assert!(!glob_forbidden("targetfoo/app", &patterns));
     }
 
     #[test]
