@@ -648,11 +648,16 @@ pub fn validate_patch_attempt(ctx: &PatchGuardContext, attempt: &PatchAttempt) -
             "new file budget exhausted",
         ));
     }
-    let delta = attempt.lines_added as isize - attempt.lines_removed as isize;
-    if delta.abs() > ctx.budget.max_line_delta.abs() {
+    // Bound the *gross* churn (added + removed lines), not just the net delta.
+    // A balanced rewrite (e.g. +1000/-1000) has a net delta of zero yet can
+    // rewrite an unbounded region, defeating the bounded-patch contract. Gross
+    // churn is always >= |net delta|, so this only ever tightens the guard and
+    // never admits a patch the previous net-delta check would have rejected.
+    let gross_churn = attempt.lines_added.saturating_add(attempt.lines_removed) as isize;
+    if gross_churn > ctx.budget.max_line_delta.abs() {
         issues.push(PatchGuardIssue::new(
             "patch.budget.max_line_delta",
-            "line delta exceeds patch budget",
+            "patch churn exceeds bounded-patch budget",
         ));
     }
     match (&scope.line_range, &attempt.line_range) {
@@ -805,6 +810,23 @@ mod tests {
         let mut attempt = attempt();
         attempt.lines_added = 100;
         let report = validate_patch_attempt(&context(), &attempt);
+        assert!(
+            report
+                .issues
+                .iter()
+                .any(|issue| issue.code == "patch.budget.max_line_delta")
+        );
+    }
+
+    #[test]
+    fn rejects_high_churn_even_with_zero_net_delta() {
+        // A balanced rewrite (+1000/-1000) has a net delta of zero but a gross
+        // churn of 2000 lines, which must still exhaust the bounded-patch budget.
+        let mut attempt = attempt();
+        attempt.lines_added = 1000;
+        attempt.lines_removed = 1000;
+        let report = validate_patch_attempt(&context(), &attempt);
+        assert!(!report.allowed);
         assert!(
             report
                 .issues
