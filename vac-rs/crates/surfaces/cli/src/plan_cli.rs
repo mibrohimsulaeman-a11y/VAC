@@ -246,7 +246,7 @@ impl PlanCreateCommand {
             ));
         }
         let contents = format!(
-            "schema_version: 1\nkind: plan\nid: {}\nstatus: draft\ntask:\n  capability: {}\nallowed_files:\n{}validation:\n  commands:\n    - id: vac.static.check\n      runner: bash\n      args:\n        - scripts/check-vac-source-artifact-packaging-gate.sh\n      risk: low\n      approval: not_required\napproval:\n  state: draft\n",
+            "schema_version: 1\nkind: plan\nid: {}\nstatus: draft\ntask:\n  capability: {}\nallowed_files:\n{}validation:\n  commands:\n    - id: vac.static.check\n      runner: bash\n      args:\n        - scripts/check-vac-cargo-gates-if-available.sh\n      risk: low\n      approval: not_required\napproval:\n  state: draft\n",
             yaml_scalar(&self.id),
             yaml_scalar(&self.capability),
             allowed

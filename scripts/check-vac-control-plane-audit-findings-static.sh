@@ -35,7 +35,6 @@ grep -q 'next_pre_draw_tick_delay' "$operator_console" || fail "operator console
 grep -q 'execute_workflow_manifest' "$workflow" || fail "workflow browser must execute selected workflow on /workflow run"
 grep -q 'runtime_profile_label' vac-rs/crates/surfaces/tui/src/operator_widget_render.rs || fail "status bar still lacks runtime profile/rulebook lookup"
 grep -q 'MARKDOWN_RENDER_CACHE' vac-rs/crates/surfaces/tui/src/markdown_render.rs || fail "markdown renderer must memoize repeated renders"
-[[ -f scripts/check-vac-source-artifact-packaging-gate.sh ]] || fail "artifact packaging gate missing"
 bash scripts/check-vac-tui-operator-draw-readonly-contract.sh
 bash scripts/check-vac-tui-local-tool-cleanup-static.sh
 echo "control-plane audit findings static gate: PASS"
