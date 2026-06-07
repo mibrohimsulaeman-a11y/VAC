@@ -1,4 +1,4 @@
-#[cfg(test)]
+#[allow(clippy::expect_used)]
 mod tests {
     use super::INITIAL_ALLOWED_STEP_USES;
     use super::TuiPtyGateResult;

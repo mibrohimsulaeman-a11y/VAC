@@ -1,7 +1,10 @@
-include!("build_check_parts/build_check_part_000.rs");
-include!("build_check_parts/build_check_part_001.rs");
-include!("build_check_parts/build_check_part_002.rs");
-include!("build_check_parts/build_check_part_003.rs");
-include!("build_check_parts/build_check_part_004.rs");
-include!("build_check_parts/build_check_part_005.rs");
-include!("build_check_parts/build_check_part_006.rs");
+// Inline aggregator for workflow_runner build_check split (semantic consolidation).
+// Since this file is include!()'d from semantic_split.rs, we use include!() for content, not mod declarations.
+
+include!("build_check_parts/vocabulary.rs");
+include!("build_check_parts/dry_run.rs");
+include!("build_check_parts/execution_machine.rs");
+include!("build_check_parts/execution_reports.rs");
+include!("build_check_parts/formatters.rs");
+#[cfg(test)]
+include!("build_check_parts/tests.rs");
