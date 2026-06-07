@@ -110,6 +110,7 @@ pub struct PolicyMatch {
     pub path_prefix: Option<String>,
     pub data_class: Option<String>,
     pub network_host: Option<String>,
+    pub capability: Option<String>,
 }
 
 impl PolicyMatch {
@@ -119,6 +120,7 @@ impl PolicyMatch {
             path_prefix: None,
             data_class: None,
             network_host: None,
+            capability: None,
         }
     }
 
@@ -141,6 +143,12 @@ impl PolicyMatch {
         if let Some(host) = &self.network_host {
             match &request.network_host {
                 Some(request_host) if glob_like_match(host, request_host) => {}
+                _ => return false,
+            }
+        }
+        if let Some(capability) = &self.capability {
+            match &request.capability {
+                Some(request_capability) if request_capability == capability => {}
                 _ => return false,
             }
         }
@@ -516,5 +524,32 @@ mod tests {
         ctx.path = Some("vac-rs/core/src/control_plane/mod.rs".to_string());
         let report = evaluate_policies(&[workspace, plan], &ctx);
         assert_eq!(report.final_decision, PolicyDecision::ApprovalRequired);
+    }
+
+    #[test]
+    fn scoped_grant_does_not_apply_outside_capability_scope() {
+        let mut scoped_grant = PolicyRule::new(
+            "workspace.docs.write.grant",
+            PolicyAction::FilesystemWrite,
+            PolicyDecision::Allow,
+            "docs capability may write docs",
+        );
+        scoped_grant.matcher.capability = Some("vac.docs".to_string());
+        let workspace = PolicyLayer::new(
+            "workspace.fixture",
+            PolicyLayerKind::Workspace,
+            PolicyDecision::Deny,
+        )
+        .with_rule(scoped_grant);
+
+        let mut in_scope = ActionContext::new(PolicyAction::FilesystemWrite);
+        in_scope.capability = Some("vac.docs".to_string());
+        let granted = evaluate_policies(std::slice::from_ref(&workspace), &in_scope);
+        assert_eq!(granted.final_decision, PolicyDecision::Allow);
+
+        let mut out_of_scope = ActionContext::new(PolicyAction::FilesystemWrite);
+        out_of_scope.capability = Some("vac.runtime".to_string());
+        let denied = evaluate_policies(&[workspace], &out_of_scope);
+        assert_eq!(denied.final_decision, PolicyDecision::Deny);
     }
 }

@@ -495,13 +495,30 @@ fn parse_every_interval_secs(value: &str) -> Option<u64> {
         return None;
     }
     let amount = digits.parse::<u64>().ok()?;
+    // Fail-closed zero guard: a zero interval makes next_run_at == now, so the
+    // scheduler would re-fire the workflow on every tick (a busy-loop). Treat a
+    // zero amount as an invalid trigger and stop auto-rescheduling (None),
+    // mirroring the unknown-unit handling below.
+    if amount == 0 {
+        return None;
+    }
     let unit = rest[digits.len()..].trim_start();
-    if unit.starts_with('h') {
-        Some(amount.saturating_mul(60 * 60))
+    // Fail-closed unit handling: an empty unit (or an explicit seconds unit)
+    // means seconds, but an *unrecognized* unit must not silently fall through
+    // to seconds -- e.g. "every 1d" would otherwise be read as "every 1 second"
+    // and hammer the runtime. Returning None makes the workflow stop
+    // auto-rescheduling instead. NOTE: day/week units are intentionally not
+    // parsed here yet (the only multi-day vocabulary is the @daily/@weekly cron
+    // aliases handled in schedule_interval_secs); add them to both places
+    // together if the spec adopts "every Nd"/"every Nw".
+    if unit.is_empty() || unit.starts_with('s') {
+        Some(amount)
     } else if unit.starts_with('m') {
         Some(amount.saturating_mul(60))
+    } else if unit.starts_with('h') {
+        Some(amount.saturating_mul(60 * 60))
     } else {
-        Some(amount)
+        None
     }
 }
 
@@ -732,6 +749,35 @@ fn unix_ts() -> u64 {
 mod tests {
     use super::*;
     use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[test]
+    fn parse_every_interval_rejects_unknown_units_fail_closed() {
+        // Recognized cron aliases and "every N<unit>" forms.
+        assert_eq!(schedule_interval_secs("@hourly"), Some(60 * 60));
+        assert_eq!(schedule_interval_secs("@daily"), Some(24 * 60 * 60));
+        assert_eq!(schedule_interval_secs("@weekly"), Some(7 * 24 * 60 * 60));
+        assert_eq!(parse_every_interval_secs("every 30"), Some(30));
+        assert_eq!(parse_every_interval_secs("every 30s"), Some(30));
+        assert_eq!(parse_every_interval_secs("every 5m"), Some(5 * 60));
+        assert_eq!(parse_every_interval_secs("every 2h"), Some(2 * 60 * 60));
+
+        // Fail-closed: an unrecognized unit must NOT silently degrade to seconds
+        // (previously "every 1d" scheduled every 1 second). Returning None stops
+        // auto-rescheduling instead of hammering the runtime.
+        assert_eq!(parse_every_interval_secs("every 1d"), None);
+        assert_eq!(parse_every_interval_secs("every 2w"), None);
+        assert_eq!(parse_every_interval_secs("every 5y"), None);
+
+        // No "every" marker -> None.
+        assert_eq!(parse_every_interval_secs("@monthly"), None);
+
+        // Zero amount must fail closed (None), not a 0s busy-loop interval.
+        assert_eq!(parse_every_interval_secs("every 0"), None);
+        assert_eq!(parse_every_interval_secs("every 0s"), None);
+        assert_eq!(parse_every_interval_secs("every 0m"), None);
+        assert_eq!(parse_every_interval_secs("every 0h"), None);
+        assert_eq!(schedule_interval_secs("every 0s"), None);
+    }
 
     fn temp_root() -> PathBuf {
         let unique = SystemTime::now()

@@ -648,11 +648,16 @@ pub fn validate_patch_attempt(ctx: &PatchGuardContext, attempt: &PatchAttempt) -
             "new file budget exhausted",
         ));
     }
-    let delta = attempt.lines_added as isize - attempt.lines_removed as isize;
-    if delta.abs() > ctx.budget.max_line_delta.abs() {
+    // Bound the *gross* churn (added + removed lines), not just the net delta.
+    // A balanced rewrite (e.g. +1000/-1000) has a net delta of zero yet can
+    // rewrite an unbounded region, defeating the bounded-patch contract. Gross
+    // churn is always >= |net delta|, so this only ever tightens the guard and
+    // never admits a patch the previous net-delta check would have rejected.
+    let gross_churn = attempt.lines_added.saturating_add(attempt.lines_removed) as isize;
+    if gross_churn > ctx.budget.max_line_delta.abs() {
         issues.push(PatchGuardIssue::new(
             "patch.budget.max_line_delta",
-            "line delta exceeds patch budget",
+            "patch churn exceeds bounded-patch budget",
         ));
     }
     match (&scope.line_range, &attempt.line_range) {
@@ -688,14 +693,44 @@ pub fn validate_patch_attempt(ctx: &PatchGuardContext, attempt: &PatchAttempt) -
 }
 
 fn glob_forbidden(path: &str, patterns: &[String]) -> bool {
+    // Mirror `vac_init_semantic_plan::is_forbidden`: the same `plan.forbidden_files`
+    // patterns flow into both matchers, so they must agree. `dir/**` matches the
+    // directory itself or paths beneath it on a path-segment boundary, never a
+    // sibling that merely shares the textual prefix (e.g. `target/**` must not
+    // match `targetfoo`).
+    let path = path.trim_start_matches("./");
     patterns.iter().any(|pattern| {
-        if let Some(prefix) = pattern.strip_suffix("/**") {
-            path.starts_with(prefix)
-        } else if let Some(prefix) = pattern.strip_suffix('*') {
-            path.starts_with(prefix)
-        } else {
-            path == pattern
+        let pattern = pattern.trim().trim_start_matches("./");
+        if pattern.is_empty() {
+            return false;
         }
+        if path == pattern {
+            return true;
+        }
+        if let Some(directory) = pattern.strip_suffix("/**") {
+            return path == directory
+                || path
+                    .strip_prefix(directory)
+                    .is_some_and(|suffix| suffix.starts_with('/'));
+        }
+        if let Some(prefix) = pattern.strip_suffix('*') {
+            return path.starts_with(prefix);
+        }
+        // `**/<rest>`: match `rest` at any directory depth (the trailing path
+        // component(s)), e.g. `**/secrets.yaml` matches `a/b/secrets.yaml`.
+        if let Some(rest) = pattern.strip_prefix("**/") {
+            return rest.is_empty()
+                || path == rest
+                || path.ends_with(&format!("/{}", rest));
+        }
+        // `*<suffix>`: suffix match within the final path segment only, never
+        // crossing a `/` boundary, e.g. `*.env` matches `config/prod.env` and
+        // `.env` but not `prod.env.bak`.
+        if let Some(suffix) = pattern.strip_prefix('*') {
+            let segment = path.rsplit('/').next().unwrap_or(path);
+            return !suffix.is_empty() && segment.ends_with(suffix);
+        }
+        false
     })
 }
 
@@ -744,6 +779,30 @@ mod tests {
     fn accepts_bounded_patch() {
         let report = validate_patch_attempt(&context(), &attempt());
         assert!(report.allowed, "{:?}", report.issues);
+    }
+
+    #[test]
+    fn forbidden_glob_suffix_and_recursive_patterns_match() {
+        // `*.ext` suffix globs match within the final path segment only.
+        assert!(glob_forbidden(".env", &["*.env".to_string()]));
+        assert!(glob_forbidden("config/prod.env", &["*.env".to_string()]));
+        assert!(!glob_forbidden("config/prod.toml", &["*.env".to_string()]));
+        assert!(!glob_forbidden("prod.env.bak", &["*.env".to_string()]));
+        // `**/<rest>` recursive globs match at any directory depth.
+        assert!(glob_forbidden("secrets.yaml", &["**/secrets.yaml".to_string()]));
+        assert!(glob_forbidden("a/b/secrets.yaml", &["**/secrets.yaml".to_string()]));
+        assert!(!glob_forbidden("a/b/other.yaml", &["**/secrets.yaml".to_string()]));
+    }
+
+    #[test]
+    fn forbidden_glob_matches_on_segment_boundary() {
+        let patterns = vec!["target/**".to_string()];
+        // A path beneath the forbidden directory is matched.
+        assert!(glob_forbidden("target/debug/app", &patterns));
+        // The directory itself is matched.
+        assert!(glob_forbidden("target", &patterns));
+        // A sibling that merely shares the textual prefix is NOT matched.
+        assert!(!glob_forbidden("targetfoo/app", &patterns));
     }
 
     #[test]
@@ -805,6 +864,23 @@ mod tests {
         let mut attempt = attempt();
         attempt.lines_added = 100;
         let report = validate_patch_attempt(&context(), &attempt);
+        assert!(
+            report
+                .issues
+                .iter()
+                .any(|issue| issue.code == "patch.budget.max_line_delta")
+        );
+    }
+
+    #[test]
+    fn rejects_high_churn_even_with_zero_net_delta() {
+        // A balanced rewrite (+1000/-1000) has a net delta of zero but a gross
+        // churn of 2000 lines, which must still exhaust the bounded-patch budget.
+        let mut attempt = attempt();
+        attempt.lines_added = 1000;
+        attempt.lines_removed = 1000;
+        let report = validate_patch_attempt(&context(), &attempt);
+        assert!(!report.allowed);
         assert!(
             report
                 .issues
