@@ -152,6 +152,98 @@ pub fn confidence_label(confidence: f32) -> ConfidenceLabel {
     }
 }
 
+/// Minimum scan coverage ratio (G-01) below which the scanner verdict fails
+/// closed to `Unverified`. Coverage is the fraction of scan-eligible Rust
+/// sources that were successfully read and scanned.
+pub const SCAN_COVERAGE_MIN_THRESHOLD: f32 = 0.95;
+
+/// Three-class, fail-closed scan verdict (F-03).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub enum ScanCoverageVerdict {
+    Verified,
+    Partial,
+    Unverified,
+}
+
+impl ScanCoverageVerdict {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Verified => "verified",
+            Self::Partial => "partial",
+            Self::Unverified => "unverified",
+        }
+    }
+
+    pub const fn is_fail_closed(self) -> bool {
+        matches!(self, Self::Unverified)
+    }
+}
+
+/// Scan coverage accounting over scan-eligible Rust sources.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct ScanCoverage {
+    pub scannable_files: usize,
+    pub scanned_files: usize,
+    pub unreadable_files: Vec<String>,
+}
+
+impl ScanCoverage {
+    pub fn coverage_ratio(&self) -> f32 {
+        if self.scannable_files == 0 {
+            return 0.0;
+        }
+        self.scanned_files as f32 / self.scannable_files as f32
+    }
+
+    pub fn verdict(&self, threshold: f32) -> ScanCoverageVerdict {
+        scan_coverage_verdict(self, threshold)
+    }
+}
+
+/// Compute the three-class verdict, failing closed to `Unverified`.
+///
+/// - No scan-eligible sources at all => `Unverified` (cannot attest coverage).
+/// - Full coverage with no unreadable files => `Verified`.
+/// - Coverage at/above `threshold` (but not full) => `Partial`.
+/// - Coverage below `threshold` => `Unverified` (G-01 fail-closed).
+pub fn scan_coverage_verdict(coverage: &ScanCoverage, threshold: f32) -> ScanCoverageVerdict {
+    if coverage.scannable_files == 0 {
+        return ScanCoverageVerdict::Unverified;
+    }
+    if coverage.unreadable_files.is_empty() && coverage.scanned_files == coverage.scannable_files {
+        ScanCoverageVerdict::Verified
+    } else if coverage.coverage_ratio() >= threshold {
+        ScanCoverageVerdict::Partial
+    } else {
+        ScanCoverageVerdict::Unverified
+    }
+}
+
+/// Walk the workspace and account for scan coverage over scan-eligible Rust
+/// sources. A scan-eligible Rust file that cannot be read is recorded as
+/// unreadable so coverage cannot be silently inflated.
+pub fn build_live_scan_coverage(root: impl AsRef<Path>) -> Result<ScanCoverage, String> {
+    let root = root.as_ref();
+    let entries = build_live_source_inventory(root)?;
+    Ok(scan_coverage_from_inventory(root, &entries))
+}
+
+fn scan_coverage_from_inventory(root: &Path, entries: &[LiveSourceEntry]) -> ScanCoverage {
+    let mut coverage = ScanCoverage::default();
+    for entry in entries {
+        if !entry.scan_eligible || !entry.path.ends_with(".rs") {
+            continue;
+        }
+        coverage.scannable_files += 1;
+        if fs::read_to_string(root.join(&entry.path)).is_ok() {
+            coverage.scanned_files += 1;
+        } else {
+            coverage.unreadable_files.push(entry.path.clone());
+        }
+    }
+    coverage
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct LiveSourceEntry {
     pub path: String,
@@ -658,9 +750,10 @@ pub fn build_live_scanner_report_files(
         ".vac/.init/policy_inference_report.yaml".to_string(),
         render_policy_inference_report_yaml(&findings),
     ));
+    let coverage = scan_coverage_from_inventory(root, &inventory);
     files.push((
         ".vac/.init/scanner_doctor_report.yaml".to_string(),
-        render_scanner_doctor_report_yaml(&inventory, &findings),
+        render_scanner_doctor_report_yaml(&inventory, &findings, &coverage),
     ));
     Ok(files)
 }
@@ -668,6 +761,7 @@ pub fn build_live_scanner_report_files(
 pub fn render_scanner_doctor_report_yaml(
     entries: &[LiveSourceEntry],
     findings: &[LiveRiskFinding],
+    coverage: &ScanCoverage,
 ) -> String {
     let total_by_class = count_sources_by_class(entries);
     let not_evaluated = findings
@@ -722,9 +816,32 @@ pub fn render_scanner_doctor_report_yaml(
     out.push_str(&format!(
         "  product_runtime_credential_without_deny: {credential_without_deny}\n"
     ));
+    let scan_verdict = scan_coverage_verdict(coverage, SCAN_COVERAGE_MIN_THRESHOLD);
+    out.push_str(&format!(
+        "  scannable_rust_files: {}\n",
+        coverage.scannable_files
+    ));
+    out.push_str(&format!("  scanned_rust_files: {}\n", coverage.scanned_files));
+    out.push_str(&format!(
+        "  unreadable_rust_files: {}\n",
+        coverage.unreadable_files.len()
+    ));
+    out.push_str(&format!("  scan_coverage: {:.2}\n", coverage.coverage_ratio()));
+    out.push_str(&format!(
+        "  scan_coverage_threshold: {SCAN_COVERAGE_MIN_THRESHOLD:.2}\n"
+    ));
+    out.push_str(&format!("  scan_verdict: {}\n", scan_verdict.as_str()));
     out.push_str("checks:\n");
     out.push_str("  full_storage: pass\n");
     out.push_str("  policy_fail_closed: pass\n");
+    out.push_str(&format!(
+        "  scan_coverage: {}\n",
+        if scan_verdict.is_fail_closed() {
+            "fail"
+        } else {
+            "pass"
+        }
+    ));
     out.push_str(&format!("  ownership: {ownership_status}\n"));
     out.push_str("classes:\n");
     for class in LiveSourceClass::ALL_REPORT_CLASSES {
@@ -1516,5 +1633,74 @@ mod tests {
         assert!(policy.contains("decision: deny"));
         assert!(policy.contains("scope: product_test"));
         assert!(policy.contains("decision: review_only"));
+    }
+
+    #[test]
+    fn scan_coverage_verdict_fails_closed_when_below_threshold() {
+        let coverage = ScanCoverage {
+            scannable_files: 10,
+            scanned_files: 5,
+            unreadable_files: vec!["vac-rs/core/src/a.rs".to_string()],
+        };
+        assert_eq!(
+            scan_coverage_verdict(&coverage, SCAN_COVERAGE_MIN_THRESHOLD),
+            ScanCoverageVerdict::Unverified
+        );
+    }
+
+    #[test]
+    fn scan_coverage_verdict_is_partial_at_or_above_threshold() {
+        let coverage = ScanCoverage {
+            scannable_files: 100,
+            scanned_files: 96,
+            unreadable_files: vec!["vac-rs/core/src/a.rs".to_string()],
+        };
+        assert_eq!(
+            scan_coverage_verdict(&coverage, SCAN_COVERAGE_MIN_THRESHOLD),
+            ScanCoverageVerdict::Partial
+        );
+    }
+
+    #[test]
+    fn scan_coverage_verdict_is_verified_on_full_coverage() {
+        let coverage = ScanCoverage {
+            scannable_files: 8,
+            scanned_files: 8,
+            unreadable_files: Vec::new(),
+        };
+        assert_eq!(
+            scan_coverage_verdict(&coverage, SCAN_COVERAGE_MIN_THRESHOLD),
+            ScanCoverageVerdict::Verified
+        );
+    }
+
+    #[test]
+    fn scan_coverage_verdict_fails_closed_with_no_scannable_sources() {
+        let coverage = ScanCoverage::default();
+        assert_eq!(
+            scan_coverage_verdict(&coverage, SCAN_COVERAGE_MIN_THRESHOLD),
+            ScanCoverageVerdict::Unverified
+        );
+    }
+
+    #[test]
+    fn scanner_doctor_report_surfaces_scan_coverage_verdict() {
+        let root = temp_root();
+        fs::create_dir_all(root.join("vac-rs/core/src")).unwrap();
+        fs::write(
+            root.join("vac-rs/core/src/lib.rs"),
+            "fn run() { std::process::Command::new(\"git\"); }\n",
+        )
+        .unwrap();
+        let files = build_live_scanner_report_files(&root).unwrap();
+        let doctor = files
+            .iter()
+            .find(|(path, _)| path == ".vac/.init/scanner_doctor_report.yaml")
+            .map(|(_, content)| content)
+            .unwrap();
+        assert!(doctor.contains("scan_verdict: verified"));
+        assert!(doctor.contains("scan_coverage: 1.00"));
+        assert!(doctor.contains("scannable_rust_files: 1"));
+        let _ = fs::remove_dir_all(root);
     }
 }
