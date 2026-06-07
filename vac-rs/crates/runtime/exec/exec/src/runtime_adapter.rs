@@ -24,6 +24,7 @@ use vac_protocol::protocol::Op;
 use vac_protocol::protocol::SessionConfiguredEvent;
 use vac_protocol::protocol::SessionSource;
 
+#[allow(clippy::too_many_arguments)]
 pub(crate) async fn run_local_runtime_prompt(
     config: &Config,
     environment_manager: Arc<EnvironmentManager>,
@@ -374,6 +375,7 @@ pub(crate) async fn resolve_resume_rollout_path(
 }
 
 #[allow(dead_code)]
+#[allow(clippy::too_many_arguments)]
 pub(crate) async fn run_local_runtime_resume(
     config: &Config,
     environment_manager: Arc<EnvironmentManager>,
@@ -835,6 +837,8 @@ impl LocalRuntimeJsonOutput {
         }
     }
 
+    // Deliberately writes serialized JSON events to stdout: this is the json_mode output channel.
+    #[allow(clippy::print_stdout)]
     fn emit<T: serde::Serialize>(&self, event: &T) {
         println!(
             "{}",
@@ -931,6 +935,25 @@ fn should_print_final_message_to_tty(
     final_message.is_some() && !final_message_rendered && stdout_is_terminal && stderr_is_terminal
 }
 
+pub(crate) fn handle_last_message(last_agent_message: Option<&str>, output_file: &Path) {
+    let message = last_agent_message.unwrap_or_default();
+    write_last_message_file(message, Some(output_file));
+    if last_agent_message.is_none() {
+        eprintln!(
+            "Warning: no last agent message; wrote empty content to {}",
+            output_file.display()
+        );
+    }
+}
+
+fn write_last_message_file(contents: &str, last_message_path: Option<&Path>) {
+    if let Some(path) = last_message_path
+        && let Err(e) = std::fs::write(path, contents)
+    {
+        eprintln!("Failed to write last message file {path:?}: {e}");
+    }
+}
+
 #[cfg(test)]
 mod human_output_tests {
     use super::LocalRuntimeHumanOutput;
@@ -958,6 +981,7 @@ mod human_output_tests {
         }
     }
 
+    #[allow(clippy::type_complexity)]
     fn make_buffers() -> (
         Arc<Mutex<Vec<u8>>>,
         Arc<Mutex<Vec<u8>>>,
@@ -992,24 +1016,5 @@ mod human_output_tests {
         let (stdout, stderr, _output) = make_buffers();
         assert!(read_buf(&stdout).is_empty());
         assert!(read_buf(&stderr).is_empty());
-    }
-}
-
-pub(crate) fn handle_last_message(last_agent_message: Option<&str>, output_file: &Path) {
-    let message = last_agent_message.unwrap_or_default();
-    write_last_message_file(message, Some(output_file));
-    if last_agent_message.is_none() {
-        eprintln!(
-            "Warning: no last agent message; wrote empty content to {}",
-            output_file.display()
-        );
-    }
-}
-
-fn write_last_message_file(contents: &str, last_message_path: Option<&Path>) {
-    if let Some(path) = last_message_path
-        && let Err(e) = std::fs::write(path, contents)
-    {
-        eprintln!("Failed to write last message file {path:?}: {e}");
     }
 }

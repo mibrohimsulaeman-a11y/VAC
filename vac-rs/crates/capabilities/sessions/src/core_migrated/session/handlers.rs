@@ -58,7 +58,6 @@ use vac_protocol::config_types::CollaborationMode;
 use vac_protocol::config_types::ModeKind;
 use vac_protocol::config_types::Settings;
 use vac_protocol::dynamic_tools::DynamicToolResponse;
-use vac_protocol::items::UserMessageItem;
 use vac_protocol::mcp::RequestId as ProtocolRequestId;
 use vac_protocol::user_input::UserInput;
 use vac_rmcp_client::ElicitationAction;

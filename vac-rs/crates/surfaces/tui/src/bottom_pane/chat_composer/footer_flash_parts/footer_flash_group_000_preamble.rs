@@ -23,6 +23,7 @@ struct ComposerMentionBinding {
 }
 
 /// Popup state – at most one can be visible at any time.
+#[allow(clippy::large_enum_variant)] // popup variants differ in size; boxing deferred to avoid wide refactor
 enum ActivePopup {
     None,
     Command(CommandPopup),

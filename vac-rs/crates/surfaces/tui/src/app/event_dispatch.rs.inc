@@ -1312,7 +1312,7 @@ impl App {
                 }
                 self.config = config;
                 let approval_policy =
-                    AskForApproval::from(self.config.permissions.approval_policy.value());
+                    self.config.permissions.approval_policy.value();
                 self.runtime_approval_policy_override = Some(approval_policy);
                 self.chat_widget.set_approval_policy(approval_policy);
                 self.sync_active_thread_permission_settings_to_cached_session()

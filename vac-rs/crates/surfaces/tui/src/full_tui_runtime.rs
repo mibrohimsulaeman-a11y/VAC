@@ -507,7 +507,7 @@ fn log_startup_phase(started_at: Instant, phase: &str) {
     }
 }
 
-fn latest_session_cwd_filter<'a>(config: &'a Config, show_all: bool) -> Option<&'a Path> {
+fn latest_session_cwd_filter(config: &Config, show_all: bool) -> Option<&Path> {
     if show_all {
         return None;
     }
@@ -1012,7 +1012,7 @@ async fn run_ratatui_app(
         trust_decision_was_made = onboarding_result.directory_trust_decision.is_some();
         // If this onboarding run included the login step, reload config so
         // persisted auth/trust changes are reflected in the current process.
-        if show_login_screen {}
+        
 
         // If the user made an explicit trust decision, or we showed the login flow, reload config
         // so current process state reflects persisted trust/auth changes.
@@ -1765,7 +1765,7 @@ trust_level = "untrusted"
             .build()
             .await?;
         assert_eq!(
-            AskForApproval::from(trusted_config.permissions.approval_policy.value()),
+            trusted_config.permissions.approval_policy.value(),
             AskForApproval::OnRequest
         );
 
@@ -1780,7 +1780,7 @@ trust_level = "untrusted"
             .build()
             .await?;
         assert_eq!(
-            AskForApproval::from(untrusted_config.permissions.approval_policy.value()),
+            untrusted_config.permissions.approval_policy.value(),
             AskForApproval::UnlessTrusted
         );
         Ok(())

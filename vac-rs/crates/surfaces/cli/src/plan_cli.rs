@@ -457,9 +457,9 @@ fn validate_allowed_files(
 fn validate_plan_commands(plan: &Value, issues: &mut Vec<String>) {
     let commands = plan
         .as_mapping()
-        .and_then(|mapping| mapping.get(&Value::String("validation".to_string())))
+        .and_then(|mapping| mapping.get(Value::String("validation".to_string())))
         .and_then(|validation| validation.as_mapping())
-        .and_then(|mapping| mapping.get(&Value::String("commands".to_string())));
+        .and_then(|mapping| mapping.get(Value::String("commands".to_string())));
 
     let Some(Value::Sequence(commands)) = commands else {
         return;
@@ -483,12 +483,12 @@ fn validate_plan_commands(plan: &Value, issues: &mut Vec<String>) {
                 "validation.commands[{index}].args.invalid: expected list"
             ));
         }
-        if let Some(runner) = nested_scalar(command, &["runner"]) {
-            if runner.contains('/') || runner.contains('\\') {
-                issues.push(format!(
-                    "validation.commands[{index}].runner.path: `{runner}`"
-                ));
-            }
+        if let Some(runner) = nested_scalar(command, &["runner"])
+            && (runner.contains('/') || runner.contains('\\'))
+        {
+            issues.push(format!(
+                "validation.commands[{index}].runner.path: `{runner}`"
+            ));
         }
     }
 }
@@ -533,7 +533,7 @@ fn has_policy(workspace: &Path) -> anyhow::Result<bool> {
 
 fn plan_capability(plan: &Value) -> Option<String> {
     plan.as_mapping()
-        .and_then(|mapping| mapping.get(&Value::String("task".to_string())))
+        .and_then(|mapping| mapping.get(Value::String("task".to_string())))
         .and_then(|task| nested_scalar(task, &["capability"]))
         .or_else(|| scalar(plan, "capability"))
 }
@@ -558,7 +558,7 @@ fn nested_scalar(value: &Value, keys: &[&str]) -> Option<String> {
 fn mapping_get<'a>(value: &'a Value, key: &str) -> Option<&'a Value> {
     value
         .as_mapping()
-        .and_then(|mapping| mapping.get(&Value::String(key.to_string())))
+        .and_then(|mapping| mapping.get(Value::String(key.to_string())))
 }
 
 fn plan_path_from(workspace: &Path, plan: &Path) -> anyhow::Result<PathBuf> {
@@ -596,9 +596,9 @@ struct PlanExecutionOutcome {
 fn plan_execution_steps(plan: &Value) -> anyhow::Result<Vec<PlanExecutionStep>> {
     let commands = plan
         .as_mapping()
-        .and_then(|mapping| mapping.get(&Value::String("validation".to_string())))
+        .and_then(|mapping| mapping.get(Value::String("validation".to_string())))
         .and_then(|validation| validation.as_mapping())
-        .and_then(|mapping| mapping.get(&Value::String("commands".to_string())));
+        .and_then(|mapping| mapping.get(Value::String("commands".to_string())));
     let Some(Value::Sequence(commands)) = commands else {
         return Ok(Vec::new());
     };

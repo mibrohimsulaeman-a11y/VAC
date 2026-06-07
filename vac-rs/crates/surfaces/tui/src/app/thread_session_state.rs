@@ -1,5 +1,4 @@
 use super::App;
-use crate::session_protocol::AskForApproval;
 use crate::session_protocol::Thread;
 use crate::session_resume::read_session_model;
 use crate::session_state::ThreadSessionState;
@@ -13,7 +12,7 @@ impl App {
             return;
         };
 
-        let approval_policy = AskForApproval::from(self.config.permissions.approval_policy.value());
+        let approval_policy = self.config.permissions.approval_policy.value();
         let approvals_reviewer = self.config.approvals_reviewer;
         let permission_profile = self
             .chat_widget
@@ -64,9 +63,7 @@ impl App {
                 model: self.chat_widget.current_model().to_string(),
                 model_provider_id: self.config.model_provider_id.clone(),
                 service_tier: self.chat_widget.current_service_tier(),
-                approval_policy: AskForApproval::from(
-                    self.config.permissions.approval_policy.value(),
-                ),
+                approval_policy: self.config.permissions.approval_policy.value(),
                 approvals_reviewer: self.config.approvals_reviewer,
                 permission_profile: permission_profile.clone(),
                 active_permission_profile: active_permission_profile.clone(),

@@ -50,19 +50,12 @@ pub(crate) enum RuntimeActivityStatus {
 }
 
 #[derive(Debug, Clone)]
+#[derive(Default)]
 pub(crate) struct RuntimeActivityState {
     items: Vec<RuntimeActivityItem>,
     expanded: bool,
 }
 
-impl Default for RuntimeActivityState {
-    fn default() -> Self {
-        Self {
-            items: Vec::new(),
-            expanded: false,
-        }
-    }
-}
 
 impl RuntimeActivityState {
     pub(crate) fn push(&mut self, item: RuntimeActivityItem) {

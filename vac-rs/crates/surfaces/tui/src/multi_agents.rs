@@ -118,8 +118,8 @@ pub(crate) fn tool_call_history_cell(
                     ]))
                 } else if matches!(status, CollabAgentToolCallStatus::Completed) {
                     let mut name = "Agent".to_string();
-                    if let Some(first_receiver) = receiver_thread_ids.first() {
-                        if let Ok(tid) = ThreadId::from_string(first_receiver) {
+                    if let Some(first_receiver) = receiver_thread_ids.first()
+                        && let Ok(tid) = ThreadId::from_string(first_receiver) {
                             let meta = agent_metadata(tid);
                             name = format_agent_picker_item_name(
                                 meta.agent_nickname.as_deref(),
@@ -127,7 +127,6 @@ pub(crate) fn tool_call_history_cell(
                                 false,
                             );
                         }
-                    }
 
                     let final_model = model.as_ref().or(cached_spawn_request.map(|r| &r.model));
                     let final_effort =
@@ -135,7 +134,7 @@ pub(crate) fn tool_call_history_cell(
 
                     let details = match (final_model, final_effort) {
                         (Some(m), Some(e)) => format!(" ({} {})", m, format!("{e}").to_lowercase()),
-                        (Some(m), None) => format!(" ({})", m),
+                        (Some(m), None) => format!(" ({m})"),
                         (None, Some(e)) => format!(" ({})", format!("{e}").to_lowercase()),
                         (None, None) => String::new(),
                     };
@@ -181,7 +180,7 @@ pub(crate) fn tool_call_history_cell(
                             "Unknown".to_string()
                         };
                         lines.push(
-                            vec!["  - ".dim(), name.into(), format!(" ({})", state_str).dim()]
+                            vec!["  - ".dim(), name.into(), format!(" ({state_str})").dim()]
                                 .into(),
                         );
                     }

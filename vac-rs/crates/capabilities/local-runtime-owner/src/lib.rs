@@ -131,11 +131,11 @@ mod tests {
         let requests = ServerRequestRegistry::new();
         let shutdown = RuntimeShutdownHandle::new();
 
-        assert_eq!(owner, LocalRuntimeOwner::default());
-        assert_eq!(command_bus, RuntimeCommandBus::default());
+        assert_eq!(owner, LocalRuntimeOwner);
+        assert_eq!(command_bus, RuntimeCommandBus);
         assert_eq!(events, RuntimeEventStream::default());
         assert_eq!(requests, ServerRequestRegistry::default());
-        assert_eq!(shutdown, RuntimeShutdownHandle::default());
+        assert_eq!(shutdown, RuntimeShutdownHandle);
     }
 
     #[test]

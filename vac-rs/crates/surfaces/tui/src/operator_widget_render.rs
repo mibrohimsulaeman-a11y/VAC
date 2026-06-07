@@ -8,6 +8,10 @@
 // intact while preserving per-cell foreground, background, and modifier style
 // from ratatui `Buffer` cells.
 
+// Production visual renderer: raw RGB color constants are intentional here, so
+// the workspace disallowed_methods policy is relaxed for this module.
+#![allow(clippy::disallowed_methods)]
+
 use ratatui::buffer::Buffer;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::style::{Color, Modifier, Style};
@@ -705,7 +709,7 @@ fn render_runtime_jobs(state: &AutopilotSchedulerState, area: Rect, buf: &mut Bu
             state
                 .actions
                 .iter()
-                .map(|a| a.render_hotkey())
+                .map(super::operator_ui::AutopilotActionSpec::render_hotkey)
                 .collect::<Vec<_>>()
                 .join("   "),
         ),
@@ -1502,7 +1506,7 @@ fn format_thousands(n: u64) -> String {
     let len = digits.len();
     let mut out = String::with_capacity(len + len / 3);
     for (idx, ch) in digits.chars().enumerate() {
-        if idx > 0 && (len - idx) % 3 == 0 {
+        if idx > 0 && (len - idx).is_multiple_of(3) {
             out.push(',');
         }
         out.push(ch);

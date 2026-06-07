@@ -172,7 +172,7 @@ fn with_border_internal(
         let span_count = line.spans.len();
         let mut spans: Vec<Span<'static>> = Vec::with_capacity(span_count + 4);
         spans.push(Span::from("│ ").dim());
-        spans.extend(line.into_iter());
+        spans.extend(line);
         if used_width < content_width {
             spans.push(Span::from(" ".repeat(content_width - used_width)).dim());
         }
@@ -362,7 +362,7 @@ fn short_session_label(thread_id: ThreadId) -> String {
 
 pub(crate) fn is_yolo_mode(config: &Config) -> bool {
     has_yolo_permissions(
-        AskForApproval::from(config.permissions.approval_policy.value()),
+        config.permissions.approval_policy.value(),
         &config.permissions.permission_profile(),
     )
 }

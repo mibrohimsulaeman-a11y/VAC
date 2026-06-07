@@ -350,6 +350,8 @@ pub(crate) struct ToolCtx {
 #[derive(Debug)]
 pub(crate) enum ToolError {
     Rejected(String),
+    // VAC is an intentional product acronym (Vastar Agentic CLI); keep uppercase.
+    #[allow(clippy::upper_case_acronyms)]
     VAC(VACErr),
 }
 

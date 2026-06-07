@@ -2892,7 +2892,7 @@ async fn test_chatwidget_idle_operator_view() {
     .unwrap();
     let contents = term.backend().vt100().screen().contents();
 
-    assert!(contents.contains("recent tasks"), "Expected 'recent tasks' in screen contents, got: {}", contents);
+    assert!(contents.contains("recent tasks"), "Expected 'recent tasks' in screen contents, got: {contents}");
     assert!(contents.contains("no persisted recent task loaded"), "Expected 'no persisted recent task loaded' in screen contents");
-    assert!(contents.contains("Ask VAC to do anything"), "Expected composer placeholder 'Ask VAC to do anything' in screen contents, got: {}", contents);
+    assert!(contents.contains("Ask VAC to do anything"), "Expected composer placeholder 'Ask VAC to do anything' in screen contents, got: {contents}");
 }

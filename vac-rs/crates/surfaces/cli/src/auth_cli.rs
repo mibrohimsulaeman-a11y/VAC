@@ -132,7 +132,7 @@ impl AuthLoginCommand {
             credential = CredentialConfig::PlaintextBearer { api_key };
         }
 
-        let vac_home = find_vac_home()?.to_path_buf();
+        let vac_home = find_vac_home()?;
         std::fs::create_dir_all(&vac_home)
             .with_context(|| format!("failed to create VAC home at {}", vac_home.display()))?;
 

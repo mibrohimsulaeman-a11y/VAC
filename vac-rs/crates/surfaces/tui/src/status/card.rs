@@ -247,7 +247,7 @@ impl StatusHistoryCell {
         agents_summary: String,
         refreshing_rate_limits: bool,
     ) -> (Self, StatusHistoryHandle) {
-        let approval_policy = AskForApproval::from(config.permissions.approval_policy.value());
+        let approval_policy = config.permissions.approval_policy.value();
         let permission_profile = config.permissions.permission_profile();
         let mut config_entries = vec![
             ("workdir", config.cwd.display().to_string()),

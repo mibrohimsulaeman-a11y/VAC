@@ -1688,17 +1688,15 @@ async fn update_feature_flags_enabling_guardian_selects_auto_review() -> Result<
         auto_review.approvals_reviewer
     );
     assert_eq!(
-        AskForApproval::from(app.config.permissions.approval_policy.value()),
+        app.config.permissions.approval_policy.value(),
         auto_review.approval_policy
     );
     assert_eq!(
-        AskForApproval::from(
-            app.chat_widget
+        app.chat_widget
                 .config_ref()
                 .permissions
                 .approval_policy
                 .value(),
-        ),
         auto_review.approval_policy
     );
     assert_eq!(
@@ -1799,7 +1797,7 @@ async fn update_feature_flags_disabling_guardian_clears_review_policy_and_restor
     );
     assert_eq!(app.config.approvals_reviewer, ApprovalsReviewer::User);
     assert_eq!(
-        AskForApproval::from(app.config.permissions.approval_policy.value()),
+        app.config.permissions.approval_policy.value(),
         AskForApproval::OnRequest
     );
     assert_eq!(
@@ -1875,7 +1873,7 @@ async fn update_feature_flags_enabling_guardian_overrides_explicit_manual_review
         auto_review.approvals_reviewer
     );
     assert_eq!(
-        AskForApproval::from(app.config.permissions.approval_policy.value()),
+        app.config.permissions.approval_policy.value(),
         auto_review.approval_policy
     );
     assert_eq!(

@@ -101,7 +101,7 @@ impl ApproveCommand {
         )
         .map_err(|err| anyhow::anyhow!("approval binding verification failed: {err:?}"))?;
 
-        let response_nonce = request_record.binding.nonce.clone();
+        let response_nonce = request_record.binding.nonce;
         let response_path = workspace
             .join(".vac/registry/approvals")
             .join(format!("{id}.response.yaml"));
@@ -368,7 +368,7 @@ fn nested_scalar(value: &Value, keys: &[&str]) -> Option<String> {
 fn mapping_get<'a>(value: &'a Value, key: &str) -> Option<&'a Value> {
     value
         .as_mapping()
-        .and_then(|mapping| mapping.get(&Value::String(key.to_string())))
+        .and_then(|mapping| mapping.get(Value::String(key.to_string())))
 }
 
 fn yaml_scalar(value: &str) -> String {

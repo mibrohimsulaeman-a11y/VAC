@@ -1388,7 +1388,7 @@ async fn collab_slash_command_opens_picker_and_updates_mode() {
         received.push(event);
     }
     let selected_mask = selected_mask.unwrap_or_else(|| {
-        panic!("expected UpdateCollaborationMode event, got: {:?}", received)
+        panic!("expected UpdateCollaborationMode event, got: {received:?}")
     });
     chat.set_collaboration_mask(selected_mask);
 

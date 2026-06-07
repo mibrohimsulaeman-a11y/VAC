@@ -308,6 +308,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::assertions_on_constants)] // assert documented const display-policy invariants
     fn status_operator_display_policy_rejects_quota_and_balance_rows() {
         assert!(STATUS_OPERATOR_DISPLAY_POLICY.show_model_rows);
         assert!(STATUS_OPERATOR_DISPLAY_POLICY.show_provider_model_rows);

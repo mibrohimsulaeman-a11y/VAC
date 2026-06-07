@@ -241,6 +241,7 @@ fn centered_offset(available: u16, content: u16, min_frame: u16) -> u16 {
     frame + free.saturating_sub(frame.saturating_mul(2)) / 2
 }
 
+#[allow(clippy::explicit_counter_loop)] // y is a render-cursor with non-zero start, not a 0-based index
 fn render_preview(
     area: Rect,
     buf: &mut Buffer,
@@ -500,6 +501,25 @@ pub(crate) fn build_theme_picker_params(
 }
 
 #[cfg(test)]
+pub(crate) fn contrast_ratio_for_benchmark(fg: (u8, u8, u8), bg: (u8, u8, u8)) -> f64 {
+    fn channel(v: u8) -> f64 {
+        let v = f64::from(v) / 255.0;
+        if v <= 0.03928 {
+            v / 12.92
+        } else {
+            ((v + 0.055) / 1.055).powf(2.4)
+        }
+    }
+    fn luminance(rgb: (u8, u8, u8)) -> f64 {
+        0.2126 * channel(rgb.0) + 0.7152 * channel(rgb.1) + 0.0722 * channel(rgb.2)
+    }
+    let a = luminance(fg);
+    let b = luminance(bg);
+    let (lighter, darker) = if a >= b { (a, b) } else { (b, a) };
+    (lighter + 0.05) / (darker + 0.05)
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
@@ -740,23 +760,4 @@ mod tests {
 
         assert_eq!(selected_name, configured_or_default_theme);
     }
-}
-
-#[cfg(test)]
-pub(crate) fn contrast_ratio_for_benchmark(fg: (u8, u8, u8), bg: (u8, u8, u8)) -> f64 {
-    fn channel(v: u8) -> f64 {
-        let v = f64::from(v) / 255.0;
-        if v <= 0.03928 {
-            v / 12.92
-        } else {
-            ((v + 0.055) / 1.055).powf(2.4)
-        }
-    }
-    fn luminance(rgb: (u8, u8, u8)) -> f64 {
-        0.2126 * channel(rgb.0) + 0.7152 * channel(rgb.1) + 0.0722 * channel(rgb.2)
-    }
-    let a = luminance(fg);
-    let b = luminance(bg);
-    let (lighter, darker) = if a >= b { (a, b) } else { (b, a) };
-    (lighter + 0.05) / (darker + 0.05)
 }

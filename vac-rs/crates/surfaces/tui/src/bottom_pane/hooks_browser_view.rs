@@ -75,7 +75,7 @@ impl HooksBrowserView {
     fn event_rows(&self) -> Vec<EventRow> {
         vac_protocol::protocol::HookEventName::iter()
             .map(|event_name| {
-                let event_name: HookEventName = event_name.into();
+                let event_name: HookEventName = event_name;
                 let installed = self
                     .hooks
                     .iter()
@@ -106,9 +106,7 @@ impl HooksBrowserView {
     fn selected_event(&self) -> Option<HookEventName> {
         self.state
             .selected_idx
-            .and_then(|idx| vac_protocol::protocol::HookEventName::iter().nth(idx))
-            .map(Into::into)
-    }
+            .and_then(|idx| vac_protocol::protocol::HookEventName::iter().nth(idx))}
 
     fn selected_hook_index(&self, event_name: HookEventName) -> Option<usize> {
         let selected_visible_idx = self.state.selected_idx?;
@@ -191,7 +189,7 @@ impl HooksBrowserView {
         self.state.selected_idx = selected_event_name
             .and_then(|event_name| {
                 vac_protocol::protocol::HookEventName::iter()
-                    .position(|candidate| HookEventName::from(candidate) == event_name)
+                    .position(|candidate| candidate == event_name)
             })
             .or_else(|| (self.page_len() > 0).then_some(0));
     }

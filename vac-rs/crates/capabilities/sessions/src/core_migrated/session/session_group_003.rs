@@ -402,7 +402,7 @@ impl Session {
         let mut developer_sections = Vec::<String>::with_capacity(8);
         let mut contextual_user_sections = Vec::<String>::with_capacity(2);
         let (
-            reference_context_item,
+            _reference_context_item,
             previous_turn_settings,
             collaboration_mode,
             base_instructions,

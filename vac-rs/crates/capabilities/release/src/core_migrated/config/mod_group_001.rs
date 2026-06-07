@@ -1207,9 +1207,7 @@ pub fn deserialize_config_toml_with_base(
 }
 
 /// Validate user-visible feature settings against managed feature requirements.
-
 // O5/O6 compile-balanced config group: source split_003_validate_feature_requirements_for_co.rs
-
 pub fn validate_feature_requirements_for_config_toml(
     cfg: &ConfigToml,
     feature_requirements: Option<&Sourced<FeatureRequirementsToml>>,

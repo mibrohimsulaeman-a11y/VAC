@@ -203,7 +203,7 @@ async fn cli_main(arg0_paths: Arg0DispatchPaths) -> anyhow::Result<()> {
                 interactive
                     .config_overrides
                     .raw_overrides
-                    .push(format!("forced_login_method={}", forced_login_method));
+                    .push(format!("forced_login_method={forced_login_method}"));
                 interactive
                     .config_overrides
                     .raw_overrides
@@ -399,10 +399,7 @@ fn project_workspace_cli_preflight(interactive: &TuiCli) -> Option<String> {
     project_workspace_startup_notice(&root).map(|notice| {
         let mut preflight = notice.render_cli_preflight();
         if let Some(dialog) = build_project_workspace_confirmation_dialog(&root) {
-            preflight.push_str(
-                "
-",
-            );
+            preflight.push('\n');
             preflight.push_str(&dialog.render_text());
         }
         preflight

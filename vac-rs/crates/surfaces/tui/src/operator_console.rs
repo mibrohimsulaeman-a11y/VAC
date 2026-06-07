@@ -182,6 +182,7 @@ impl OperatorConsoleView {
                 );
             }
             OperatorConsoleTab::Review => {
+                #[allow(clippy::disallowed_methods)]
                 lines.push("review pane: approval and policy queues are surfaced by the live approval overlay".yellow().into());
                 lines.push("runtime note: destructive actions still fail closed until an approval decision is recorded".into());
             }
@@ -207,6 +208,7 @@ impl OperatorConsoleView {
 
         if let Some(action) = &self.last_action {
             lines.push("".into());
+            #[allow(clippy::disallowed_methods)]
             lines.push(format!("last runtime action: {action}").yellow().into());
         }
         lines

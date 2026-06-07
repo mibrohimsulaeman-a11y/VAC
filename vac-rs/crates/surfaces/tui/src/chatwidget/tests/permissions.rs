@@ -247,7 +247,7 @@ async fn approvals_popup_shows_disabled_presets() {
 
     chat.config.permissions.approval_policy = Constrained::new(
         AskForApproval::OnRequest,
-        |candidate| match AskForApproval::from(*candidate) {
+        |candidate| match *candidate {
             AskForApproval::OnRequest => Ok(()),
             _ => Err(invalid_value(
                 candidate.to_string(),
@@ -286,7 +286,7 @@ async fn approvals_popup_navigation_skips_disabled() {
 
     chat.config.permissions.approval_policy = Constrained::new(
         AskForApproval::OnRequest,
-        |candidate| match AskForApproval::from(*candidate) {
+        |candidate| match *candidate {
             AskForApproval::OnRequest => Ok(()),
             _ => Err(invalid_value(candidate.to_string(), "[on-request]")),
         },

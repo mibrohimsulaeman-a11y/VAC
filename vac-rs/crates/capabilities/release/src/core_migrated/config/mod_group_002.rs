@@ -1443,9 +1443,7 @@ impl Config {
     /// If `path` is `Some`, attempts to read the file at the given path and
     /// returns its contents as a trimmed `String`. If the file is empty, or
     /// is `Some` but cannot be read, returns an `Err`.
-
-// O5/O6 compile-balanced config group: source split_006_try_read_non_empty_file.rs
-
+    // O5/O6 compile-balanced config group: source split_006_try_read_non_empty_file.rs
     async fn try_read_non_empty_file(
         fs: &dyn ExecutorFileSystem,
         path: Option<&AbsolutePathBuf>,

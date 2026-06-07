@@ -244,6 +244,9 @@ mod owner_native {
             self.request_handle.clone()
         }
 
+        // Single-consumer receiver guarded by an async mutex; holding the guard
+        // across recv().await is required and intentional here.
+        #[allow(clippy::await_holding_invalid_type)]
         async fn next_event(&self) -> Option<TuiSessionEvent> {
             self.event_rx.lock().await.recv().await
         }
@@ -533,15 +536,14 @@ mod owner_native {
                             None
                         }
                     };
-                    if let Some(notification) = notification {
-                        if event_tx
+                    if let Some(notification) = notification
+                        && event_tx
                             .send(TuiSessionEvent::ServerNotification(notification))
                             .await
                             .is_err()
                         {
                             break;
                         }
-                    }
                 }
             });
         }
@@ -676,7 +678,7 @@ mod owner_native {
         }
 
         fn enforce_plan_mode_runtime_completion_gate(
-            cwd: &PathBuf,
+            cwd: &Path,
             collaboration_mode: &Option<vac_protocol::config_types::CollaborationMode>,
         ) -> Result<()> {
             Self::enforce_plan_mode_runtime_gate(cwd, collaboration_mode).map_err(|err| {
@@ -686,7 +688,7 @@ mod owner_native {
             })
         }
 
-        fn active_runtime_plan_path(vac_root: &PathBuf) -> Result<PathBuf> {
+        fn active_runtime_plan_path(vac_root: &Path) -> Result<PathBuf> {
             let active_plan = vac_root.join(".vac/registry/runtime/active_plan.yaml");
             if active_plan.exists() {
                 return Ok(active_plan);
@@ -698,7 +700,7 @@ mod owner_native {
         }
 
         fn enforce_plan_mode_runtime_gate(
-            cwd: &PathBuf,
+            cwd: &Path,
             collaboration_mode: &Option<vac_protocol::config_types::CollaborationMode>,
         ) -> Result<()> {
             if !matches!(
@@ -707,7 +709,7 @@ mod owner_native {
             ) {
                 return Ok(());
             }
-            let vac_root = find_vac_root(cwd).unwrap_or_else(|| cwd.clone());
+            let vac_root = find_vac_root(cwd).unwrap_or_else(|| cwd.to_path_buf());
             let active_plan = Self::active_runtime_plan_path(&vac_root)?;
             let report = vac_core::control_plane::validate_vac_init_plan_yaml_with_engine(
                 &vac_root,
@@ -852,7 +854,7 @@ mod owner_native {
     ) -> TypedRequestError {
         TypedRequestError::Transport {
             method: method.to_string(),
-            source: io::Error::new(ErrorKind::Other, err.to_string()),
+            source: io::Error::other(err.to_string()),
         }
     }
 
@@ -925,9 +927,9 @@ mod owner_native {
         Ok(SkillsListResponse { data })
     }
 
-    fn find_vac_root(start: &PathBuf) -> Option<PathBuf> {
+    fn find_vac_root(start: &Path) -> Option<PathBuf> {
         let mut cursor = if start.is_dir() {
-            start.clone()
+            start.to_path_buf()
         } else {
             start.parent()?.to_path_buf()
         };
@@ -1217,8 +1219,8 @@ mod owner_native {
         }
         async fn memory_reset(&mut self) -> Result<()> {
             let memory_root = self.config().vac_home.join("memories");
-            if memory_root.exists() {
-                if let Ok(mut entries) = tokio::fs::read_dir(&memory_root).await {
+            if memory_root.exists()
+                && let Ok(mut entries) = tokio::fs::read_dir(&memory_root).await {
                     while let Ok(Some(entry)) = entries.next_entry().await {
                         let path = entry.path();
                         if path.is_dir() {
@@ -1228,7 +1230,6 @@ mod owner_native {
                         }
                     }
                 }
-            }
             Ok(())
         }
         async fn logout_account(&mut self) -> Result<()> {
@@ -1331,7 +1332,7 @@ mod owner_native {
             Self::enforce_plan_mode_runtime_gate(&cwd, &collaboration_mode)?;
             let sandbox_policy = permission_profile.to_legacy_sandbox_policy(&cwd)?;
             let items: Vec<vac_protocol::user_input::UserInput> =
-                items.into_iter().map(|item| item.into_core()).collect();
+                items.into_iter().map(vac_runtime_protocol::UserInput::into_core).collect();
             let thread = self.thread_manager().get_thread(thread_id).await?;
             let submit_id = thread
                 .submit(Op::UserTurn {
@@ -1374,7 +1375,7 @@ mod owner_native {
                 .await
                 .map_err(|err| typed_transport_error("turn_steer", err))?;
             let items: Vec<vac_protocol::user_input::UserInput> =
-                items.into_iter().map(|item| item.into_core()).collect();
+                items.into_iter().map(vac_runtime_protocol::UserInput::into_core).collect();
             let turn_id = thread
                 .steer_input(items, Some(&turn_id), None)
                 .await

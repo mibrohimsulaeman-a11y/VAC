@@ -82,7 +82,6 @@ mod tests {
     use pretty_assertions::assert_eq;
     use std::collections::HashMap;
     use std::path::PathBuf;
-    use vac_protocol::request_permissions::RequestPermissionProfile as CoreRequestPermissionProfile;
     use vac_utils_absolute_path::AbsolutePathBuf;
 
     fn absolute_path(path: &str) -> AbsolutePathBuf {
@@ -123,8 +122,7 @@ mod tests {
     #[test]
     fn converts_request_permissions_into_granted_permissions() {
         assert_eq!(
-            granted_permission_profile_from_request(CoreRequestPermissionProfile::from(
-                crate::session_protocol::RequestPermissionProfile {
+            granted_permission_profile_from_request(crate::session_protocol::RequestPermissionProfile {
                     network: Some(
                         crate::session_protocol::AdditionalNetworkPermissions {
                             enabled: Some(true),
@@ -140,8 +138,7 @@ mod tests {
                         }
                         .into()
                     ),
-                }
-            )),
+                }),
             crate::session_protocol::GrantedPermissionProfile {
                 network: Some(crate::session_protocol::AdditionalNetworkPermissions {
                     enabled: Some(true),
@@ -172,8 +169,7 @@ mod tests {
     #[test]
     fn converts_request_permissions_into_canonical_granted_permissions() {
         assert_eq!(
-            granted_permission_profile_from_request(CoreRequestPermissionProfile::from(
-                crate::session_protocol::RequestPermissionProfile {
+            granted_permission_profile_from_request(crate::session_protocol::RequestPermissionProfile {
                     network: None,
                     file_system: Some(
                         crate::session_protocol::AdditionalFileSystemPermissions {
@@ -189,8 +185,7 @@ mod tests {
                         }
                         .into()
                     ),
-                }
-            )),
+                }),
             crate::session_protocol::GrantedPermissionProfile {
                 network: None,
                 file_system: Some(crate::session_protocol::AdditionalFileSystemPermissions {

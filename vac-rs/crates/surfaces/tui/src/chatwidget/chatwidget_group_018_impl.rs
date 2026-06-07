@@ -15,7 +15,7 @@ impl ChatWidget {
     pub(crate) fn open_permissions_popup(&mut self) {
         let include_read_only = cfg!(target_os = "windows");
         let current_approval =
-            AskForApproval::from(self.config.permissions.approval_policy.value());
+            self.config.permissions.approval_policy.value();
         let current_permission_profile = self.config.permissions.permission_profile();
         let guardian_approval_enabled = self.config.features.enabled(Feature::GuardianApproval);
         let current_review_policy = self.config.approvals_reviewer;
@@ -54,7 +54,7 @@ impl ChatWidget {
             } else {
                 preset.label.to_string()
             };
-            let preset_approval = AskForApproval::from(preset.approval);
+            let preset_approval = preset.approval;
             let base_description =
                 Some(preset.description.replace(" (Identical to Agent mode)", ""));
             let approval_disabled_reason = match self
@@ -358,7 +358,7 @@ impl ChatWidget {
         cwd: &std::path::Path,
         preset: &ApprovalPreset,
     ) -> bool {
-        let preset_approval = AskForApproval::from(preset.approval);
+        let preset_approval = preset.approval;
         if current_approval != preset_approval {
             return false;
         }

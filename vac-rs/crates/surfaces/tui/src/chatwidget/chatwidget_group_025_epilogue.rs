@@ -187,7 +187,7 @@ impl ChatWidget {
             .borrow_mut()
             .windowed_render_plan(total_cells, scroll_top, area.height, 2);
         let mut y = area.y;
-        for idx in window.visible.clone() {
+        for idx in window.visible {
             let Some(height) = heights.get(idx).copied() else { continue; };
             if height == 0 { continue; }
             let child_area = Rect::new(area.x, y, area.width, height).intersection(area);
@@ -207,7 +207,7 @@ impl Renderable for ChatWidget {
 
         let is_idle = self.visible_user_turn_count == 0
             && self.active_cell.is_none()
-            && self.active_hook_cell.as_ref().map_or(true, |c| !c.should_render())
+            && self.active_hook_cell.as_ref().is_none_or(|c| !c.should_render())
             && !self.is_user_turn_pending_or_running()
             && self.bottom_pane.no_modal_or_popup_active();
 
@@ -273,7 +273,7 @@ impl Renderable for ChatWidget {
                 .unwrap_or_else(|| "active".to_string());
 
             let mut tools = Vec::new();
-            for (_, cmd) in &self.running_commands {
+            for cmd in self.running_commands.values() {
                 let program = cmd
                     .command
                     .first()
@@ -296,8 +296,8 @@ impl Renderable for ChatWidget {
                     elapsed_label.clone(),
                 ));
             }
-            if tools.is_empty() {
-                if let Some(cell) = &self.active_cell {
+            if tools.is_empty()
+                && let Some(cell) = &self.active_cell {
                     let is_exec = cell.as_any().is::<crate::exec_cell::ExecCell>();
                     let is_mcp = cell.as_any().is::<crate::history_cell::McpToolCallCell>();
                     if is_exec || is_mcp {
@@ -310,11 +310,10 @@ impl Renderable for ChatWidget {
                             name,
                             target.to_string(),
                             crate::operator_ui::ToolTimelineState::Running,
-                            elapsed_label.clone(),
+                            elapsed_label,
                         ));
                     }
                 }
-            }
 
             let state = crate::operator_ui::AgentStreamingState {
                 user_prompt,

@@ -473,8 +473,8 @@ impl ChatWidget {
         );
         let op = AppCommand::user_turn(
             items,
-            runtime_submission.start_task.cwd.clone(),
-            AskForApproval::from(self.config.permissions.approval_policy.value()),
+            runtime_submission.start_task.cwd,
+            self.config.permissions.approval_policy.value(),
             permission_profile,
             effective_mode.model().to_string(),
             effective_mode.reasoning_effort(),
@@ -935,7 +935,7 @@ impl ChatWidget {
                     .verifications
                     .iter()
                     .copied()
-                    .map(|verification| verification.to_core())
+                    .map(vac_runtime_protocol::ModelVerification::to_core)
                     .collect::<Vec<_>>();
                 self.on_app_server_model_verification(&verifications)
             }

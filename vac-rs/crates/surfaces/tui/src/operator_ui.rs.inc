@@ -850,11 +850,10 @@ impl CapabilityDashboardState {
             .iter()
             .filter(|record| record.status.is_control_plane_valid())
             .count();
-        let valid_percent = if capability_count == 0 {
-            0
-        } else {
-            ((valid_count * 100) / capability_count).min(100) as u8
-        };
+        let valid_percent = (valid_count * 100)
+            .checked_div(capability_count)
+            .unwrap_or(0)
+            .min(100) as u8;
         let capability_rows = capability_records
             .iter()
             .map(CapabilityDashboardRecord::render_table_row)
@@ -1492,7 +1491,7 @@ fn render_tabbar(chrome: &OperatorChromeState, width: usize) -> String {
         .iter()
         .map(|tab| {
             if tab == &chrome.active_tab {
-                format!("[{}]", tab)
+                format!("[{tab}]")
             } else {
                 tab.to_string()
             }
@@ -1506,7 +1505,7 @@ fn render_tabbar(chrome: &OperatorChromeState, width: usize) -> String {
         .map(|index| format!("tab {}/{}", index + 1, chrome.tabs.len()))
         .unwrap_or_default();
     fit_line(
-        &format!("{tabs}"),
+        &tabs,
         width.saturating_sub(tab_index.len() + 2),
     ) + &format!(" {tab_index}")
 }
@@ -1579,7 +1578,7 @@ fn render_idle_body_lines(state: &IdleViewState, width: usize) -> Vec<String> {
     if let Some(notice) = &state.update_notice {
         rows.extend(box_lines(
             "update",
-            &[notice.clone()],
+            std::slice::from_ref(notice),
             width.saturating_sub(8).min(108),
         ));
     }
@@ -1642,11 +1641,7 @@ fn render_agent_streaming_body_lines(state: &AgentStreamingState, width: usize) 
 }
 
 fn render_approval_popup_body_lines(state: &ApprovalPopupState, width: usize) -> Vec<String> {
-    let risk = if state.destructive {
-        format!("{}  {}", state.risk.label(), state.risk_detail)
-    } else {
-        format!("{}  {}", state.risk.label(), state.risk_detail)
-    };
+    let risk = format!("{}  {}", state.risk.label(), state.risk_detail);
     let rows = vec![
         "approval required".to_string(),
         format!(
@@ -2130,11 +2125,11 @@ fn compact_number(value: u64) -> String {
 }
 
 fn context_bar(used: u64, limit: u64, width: usize) -> String {
-    let filled = if limit == 0 {
-        0
-    } else {
-        ((used.saturating_mul(width as u64)) / limit).min(width as u64) as usize
-    };
+    let filled = used
+        .saturating_mul(width as u64)
+        .checked_div(limit)
+        .unwrap_or(0)
+        .min(width as u64) as usize;
     format!(
         "{}{}",
         "█".repeat(filled),

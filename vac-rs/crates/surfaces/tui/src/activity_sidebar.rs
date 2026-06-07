@@ -155,7 +155,7 @@ fn activity_item_lines(item: &RuntimeActivityItem, width: u16) -> Vec<Line<'stat
 
     if let Some(detail) = item.detail.as_deref() {
         // Two-space indent so the eye groups detail under its header.
-        let detail_text = format!("  {}", detail);
+        let detail_text = format!("  {detail}");
         lines.push(Line::from(Span::styled(
             truncate_to_width(&detail_text, width),
             Style::default().add_modifier(Modifier::DIM),

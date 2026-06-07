@@ -1,3 +1,4 @@
+#![allow(clippy::print_stdout)] // perf bench harness intentionally prints timing to stdout
 // Dependency-free performance smoke harness for TUI hot paths.
 //
 // These are ordinary ignored tests so local/toolchain environments can produce

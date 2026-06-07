@@ -280,7 +280,7 @@ async fn session_configured_syncs_widget_config_permissions_and_cwd() {
     chat.handle_thread_session(configured);
 
     assert_eq!(
-        AskForApproval::from(chat.config_ref().permissions.approval_policy.value()),
+        chat.config_ref().permissions.approval_policy.value(),
         AskForApproval::Never
     );
     let actual_sandbox = SandboxPolicy::from(chat.config_ref().legacy_sandbox_policy());

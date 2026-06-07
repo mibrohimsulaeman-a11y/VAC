@@ -312,6 +312,15 @@ pub fn built_in_slash_commands() -> Vec<(&'static str, SlashCommand)> {
 }
 
 #[cfg(test)]
+pub(crate) fn palette_badge_for_benchmark(command: &str, available: bool) -> String {
+    if available {
+        format!("{command} [ready]")
+    } else {
+        format!("{command} [feature-off]")
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;
     use std::str::FromStr;
@@ -326,12 +335,9 @@ mod tests {
         let catalog = SurfaceRouteCatalog::load(root);
         let missing = built_in_slash_commands()
             .into_iter()
-            .filter_map(|(name, _)| {
-                catalog
+            .filter(|&(name, _)| catalog
                     .slash_route(name)
-                    .is_none()
-                    .then(|| format!("/{name}"))
-            })
+                    .is_none()).map(|(name, _)| format!("/{name}"))
             .collect::<Vec<_>>();
 
         assert!(
@@ -376,14 +382,5 @@ mod tests {
             SlashCommand::from_str("autoreview"),
             Ok(SlashCommand::AutoReview)
         );
-    }
-}
-
-#[cfg(test)]
-pub(crate) fn palette_badge_for_benchmark(command: &str, available: bool) -> String {
-    if available {
-        format!("{command} [ready]")
-    } else {
-        format!("{command} [feature-off]")
     }
 }

@@ -111,7 +111,7 @@ impl InitCommand {
         write_store(&root, ".vac/.init/doctor_report.yaml", &doctor_report_yaml)?;
         write_init_lifecycle_evidence(&root, current_state, &timestamp)?;
 
-        println!("vac init: {}", current_state);
+        println!("vac init: {current_state}");
         println!("workspace: {}", root.display());
         println!("wrote: {}", state_path.display());
         Ok(())

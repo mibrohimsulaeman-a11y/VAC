@@ -87,7 +87,7 @@ fn render_workflow_preview(
         .map(|step| format!("{}={}", step.id, step.uses))
         .collect::<Vec<_>>()
         .join(", ");
-    format!("blocked: unsupported steps=[{}]", blocked_steps)
+    format!("blocked: unsupported steps=[{blocked_steps}]")
 }
 
 impl WorkflowInspectCommand {

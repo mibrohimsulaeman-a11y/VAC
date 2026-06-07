@@ -11,6 +11,7 @@ impl ChatWidget {
     ) {
         match notification.turn.status {
             TurnStatus::Completed => {
+                #[allow(clippy::redundant_closure_for_method_calls)] // module `bridge` is private; method-path form inaccessible
                 let runtime_events = self
                     .runtime_bridge
                     .as_mut()
@@ -122,11 +123,10 @@ impl ChatWidget {
                 reasoning_effort,
                 agents_states,
             }),
-            ThreadItem::EnteredReviewMode { review, .. } => {
-                if !from_replay {
+            ThreadItem::EnteredReviewMode { review, .. }
+                if !from_replay => {
                     self.enter_review_mode_with_hint(review, /*from_replay*/ false);
                 }
-            }
             _ => {}
         }
     }

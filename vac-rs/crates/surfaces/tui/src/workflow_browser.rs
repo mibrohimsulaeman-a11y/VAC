@@ -145,14 +145,15 @@ fn render_workflow_browser_with_state(
     state: &WorkflowBrowserState,
 ) -> Vec<Line<'static>> {
     let report = load_workflow_run_report(cwd);
-    let mut lines: Vec<Line<'static>> = Vec::new();
-    lines.push("/workflow".magenta().into());
-    lines.push("──── Workflow Browser ────".dim().into());
-    lines.push("".into());
-    lines.push(format_filter_hint(state).into());
-    lines.push("actions: /workflow run <id> · /workflow inspect <id> · /workflow filter <capability> · Esc/q closes".green().into());
-    lines.push("".into());
-    lines.push("Control plane registry:".bold().into());
+    let mut lines: Vec<Line<'static>> = vec![
+        "/workflow".magenta().into(),
+        "──── Workflow Browser ────".dim().into(),
+        "".into(),
+        format_filter_hint(state).into(),
+        "actions: /workflow run <id> · /workflow inspect <id> · /workflow filter <capability> · Esc/q closes".green().into(),
+        "".into(),
+        "Control plane registry:".bold().into(),
+    ];
     lines.extend(
         report
             .registry()
@@ -698,7 +699,7 @@ fn format_workflow_runner_preview(preview: &WorkflowRunPreview) -> String {
         .map(|step| format!("{}={}", step.id, step.uses))
         .collect::<Vec<_>>()
         .join(", ");
-    format!("blocked: unsupported steps=[{}]", blocked_steps)
+    format!("blocked: unsupported steps=[{blocked_steps}]")
 }
 
 #[cfg(test)]

@@ -214,11 +214,10 @@ fn build_operator_dashboard_state(
                 .count()
         })
         .unwrap_or(0);
-    let valid_percent = if capability_count == 0 {
-        0
-    } else {
-        ((ready_count * 100) / capability_count).min(100) as u8
-    };
+    let valid_percent = (ready_count * 100)
+        .checked_div(capability_count)
+        .unwrap_or(0)
+        .min(100) as u8;
     let registry_summary = report.render_tui_lines();
     let capability_rows = report
         .registry()
@@ -245,7 +244,7 @@ fn build_operator_dashboard_state(
     let diagnostics: Vec<String> = report
         .diagnostics()
         .iter()
-        .map(|diagnostic| diagnostic.render_line())
+        .map(vac_core::control_plane::RegistryDiagnostic::render_line)
         .collect();
     let capability_records = report
         .registry()
@@ -345,7 +344,7 @@ fn render_route_kind_lines(
     lines.push(format!("  {kind}:").bold().into());
     for (name, route) in routes {
         let label = if kind == "slash" {
-            format!("/{}", name)
+            format!("/{name}")
         } else {
             name
         };

@@ -653,8 +653,7 @@ impl App {
                 let _ = std::fs::write(
                     &exit_path,
                     format!(
-                        "schema_version: 1\nkind: runtime.startup_exit\nid: runtime.startup_exit\nreason: {}\n",
-                        exit_reason
+                        "schema_version: 1\nkind: runtime.startup_exit\nid: runtime.startup_exit\nreason: {exit_reason}\n"
                     ),
                 );
                 let _ = tui.notify(exit_reason);

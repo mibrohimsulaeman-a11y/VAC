@@ -757,6 +757,7 @@ fn build_header(request: &ApprovalRequest) -> Box<dyn Renderable> {
                 " · ".dim(),
                 write_context_label(additional_permissions.as_ref()).into(),
             ]));
+            #[allow(clippy::disallowed_methods)]
             let risk_label = if destructive {
                 Line::from(vec![
                     "risk         ".dim(),
@@ -856,6 +857,7 @@ fn build_header(request: &ApprovalRequest) -> Box<dyn Renderable> {
                 "cwd          ".dim(),
                 cwd.as_path().display().to_string().into(),
             ])));
+            #[allow(clippy::disallowed_methods)]
             header.push(Box::new(Line::from(vec![
                 "risk         ".dim(),
                 "write mutation · review diff before applying".yellow(),
@@ -920,7 +922,7 @@ fn network_context_label(network_approval_context: Option<&NetworkApprovalContex
 
 fn write_context_label(additional_permissions: Option<&AdditionalPermissionProfile>) -> String {
     additional_permissions
-        .and_then(|permissions| format_additional_permissions_rule(permissions))
+        .and_then(format_additional_permissions_rule)
         .map(|rule| format!("writes requested ({rule})"))
         .unwrap_or_else(|| "writes policy-gated".to_string())
 }

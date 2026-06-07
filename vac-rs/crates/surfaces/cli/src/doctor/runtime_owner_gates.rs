@@ -230,7 +230,7 @@ impl RuntimeOwnerGateReport {
             out.push_str("  - (none)\n");
         } else {
             for manifest in &self.checked_manifests {
-                out.push_str(&format!("  - {}\n", manifest));
+                out.push_str(&format!("  - {manifest}\n"));
             }
         }
         out.push_str("findings:\n");
@@ -243,7 +243,7 @@ impl RuntimeOwnerGateReport {
                 out.push_str(&format!("  - level: {}\n", finding.level.as_str()));
                 out.push_str(&format!("    code: {}\n", finding.code));
                 if let Some(manifest) = &finding.manifest {
-                    out.push_str(&format!("    manifest: {}\n", manifest));
+                    out.push_str(&format!("    manifest: {manifest}\n"));
                 }
                 out.push_str(&format!("    detail: {}\n", finding.detail));
             }
@@ -621,8 +621,7 @@ fn validate_unsupported_control_default_defers(report: &mut RuntimeOwnerGateRepo
                     "unsupported_control_default_defer",
                     None,
                     format!(
-                        "{} contains `{pattern}`: {detail}; default owner-native parity must not rely on unsupported controls",
-                        scan_path
+                        "{scan_path} contains `{pattern}`: {detail}; default owner-native parity must not rely on unsupported controls"
                     ),
                 );
             }

@@ -154,7 +154,7 @@ impl ArchitectureDoctorCommand {
             println!("  - ready + visible=false is rejected");
             println!("  - partial routes require reason/degraded guidance");
         }
-        return Ok(if report.is_failure() { 1 } else { 0 });
+        Ok(if report.is_failure() { 1 } else { 0 })
     }
 }
 
@@ -179,7 +179,7 @@ impl DocsDoctorCommand {
             println!("  - ready + visible=false is rejected");
             println!("  - partial routes require reason/degraded guidance");
         }
-        return Ok(if report.is_failure() { 1 } else { 0 });
+        Ok(if report.is_failure() { 1 } else { 0 })
     }
 }
 
@@ -216,7 +216,7 @@ impl WorkflowDoctorCommand {
         if aggregate.exit_code != 0 {
             return Ok(aggregate.exit_code);
         }
-        return Ok(if report.is_failure() { 1 } else { 0 });
+        Ok(if report.is_failure() { 1 } else { 0 })
     }
 }
 
@@ -241,7 +241,7 @@ impl OwnershipDoctorCommand {
             println!("  - ready + visible=false is rejected");
             println!("  - partial routes require reason/degraded guidance");
         }
-        return Ok(if report.is_failure() { 1 } else { 0 });
+        Ok(if report.is_failure() { 1 } else { 0 })
     }
 }
 
@@ -266,7 +266,7 @@ impl SurfacesDoctorCommand {
             println!("  - ready + visible=false is rejected");
             println!("  - partial routes require reason/degraded guidance");
         }
-        return Ok(if report.is_failure() { 1 } else { 0 });
+        Ok(if report.is_failure() { 1 } else { 0 })
     }
 }
 
@@ -291,7 +291,7 @@ impl PolicyDoctorCommand {
             println!("  - ready + visible=false is rejected");
             println!("  - partial routes require reason/degraded guidance");
         }
-        return Ok(if report.is_failure() { 1 } else { 0 });
+        Ok(if report.is_failure() { 1 } else { 0 })
     }
 }
 
@@ -521,7 +521,7 @@ impl ProjectWorkspaceDoctorCommand {
             println!("  - ready + visible=false is rejected");
             println!("  - partial routes require reason/degraded guidance");
         }
-        return Ok(if report.is_failure() { 1 } else { 0 });
+        Ok(if report.is_failure() { 1 } else { 0 })
     }
 }
 
@@ -604,7 +604,7 @@ impl EvidenceSigningDoctorCommand {
     }
 }
 
-fn evidence_signing_required_for_workspace(root: &PathBuf) -> bool {
+fn evidence_signing_required_for_workspace(root: &Path) -> bool {
     if matches!(
         std::env::var("VAC_EVIDENCE_SIGNING_REQUIRED")
             .unwrap_or_default()
@@ -869,11 +869,10 @@ fn collect_latest_source_mtime(path: &Path, latest: &mut Option<SystemTime>) {
         return;
     };
     if metadata.is_file() {
-        if let Ok(modified) = metadata.modified() {
-            if latest.is_none_or(|current| modified > current) {
+        if let Ok(modified) = metadata.modified()
+            && latest.is_none_or(|current| modified > current) {
                 *latest = Some(modified);
             }
-        }
         return;
     }
     if !metadata.is_dir() {
@@ -893,7 +892,7 @@ fn collect_latest_source_mtime(path: &Path, latest: &mut Option<SystemTime>) {
     }
 }
 
-fn count_release_ownership_context(path: &PathBuf) -> (usize, usize) {
+fn count_release_ownership_context(path: &Path) -> (usize, usize) {
     let mut hard_quarantine_count = 0usize;
     let mut unowned_file_count = 0usize;
     let report_path = path.join(".vac/registry/ownership/report.yaml");
@@ -964,7 +963,7 @@ fn build_real_doctor_aggregate(path: &PathBuf) -> vac_core::control_plane::Docto
     )
 }
 
-fn inspect_evidence_records(root: &PathBuf) -> SimpleDoctorInspection {
+fn inspect_evidence_records(root: &Path) -> SimpleDoctorInspection {
     let evidence_dir = root.join(".vac/registry/evidence");
     if !evidence_dir.exists() {
         return SimpleDoctorInspection {
@@ -1065,7 +1064,7 @@ fn inspect_memory_records(root: &PathBuf) -> SimpleDoctorInspection {
     report
 }
 
-fn inspect_init_state(root: &PathBuf) -> SimpleDoctorInspection {
+fn inspect_init_state(root: &Path) -> SimpleDoctorInspection {
     let state_path = root.join(".vac/.init/state.yaml");
     if !state_path.exists() {
         return SimpleDoctorInspection {
@@ -1145,7 +1144,7 @@ fn nested_scalar(value: &Value, keys: &[&str]) -> Option<String> {
     for key in keys {
         current = current
             .as_mapping()
-            .and_then(|mapping| mapping.get(&Value::String((*key).to_string())))?;
+            .and_then(|mapping| mapping.get(Value::String((*key).to_string())))?;
     }
     match current {
         Value::String(value) => Some(value.clone()),
@@ -1354,11 +1353,9 @@ impl ReleaseDoctorCommand {
                     reason,
                     ..
                 } = event
-                {
-                    if *ev_idx == index {
+                    && *ev_idx == index {
                         return Some(reason);
                     }
-                }
                 None
             });
 
@@ -1372,13 +1369,13 @@ impl ReleaseDoctorCommand {
 
             if let Some(reason) = fail_event {
                 println!("  [FAIL] {} ({})", step.id, step.uses);
-                println!("         Reason: {}", reason);
+                println!("         Reason: {reason}");
                 failed = true;
             } else if success_event {
                 println!("  [OK]   {} ({})", step.id, step.uses);
             } else if let Some(blocked_reason) = &step.blocked_reason {
                 println!("  [BLOCK] {} ({})", step.id, step.uses);
-                println!("          Reason: {}", blocked_reason);
+                println!("          Reason: {blocked_reason}");
                 failed = true;
             } else {
                 println!("  [PEND] {} ({})", step.id, step.uses);
@@ -1641,12 +1638,7 @@ validation:
   commands:
     - cargo +1.95.0 check -p vac-surface-cli
 {compatibility_block}
-"#,
-                id = id,
-                title = title,
-                owner_crate = owner_crate,
-                owner_module = owner_module,
-                compatibility_block = compatibility_block
+"#
             )
         };
 
@@ -2502,7 +2494,7 @@ validation:
         ];
         for (policy_id, filename) in policies {
             fs::write(
-                tempdir.join(format!(".vac/policies/{}", filename)),
+                tempdir.join(format!(".vac/policies/{filename}")),
                 format!(
                     r#"
 schema_version: 1
@@ -2752,7 +2744,7 @@ validation:
             };
 
             fs::write(
-                tempdir.join(format!(".vac/surfaces/{}", filename)),
+                tempdir.join(format!(".vac/surfaces/{filename}")),
                 format!(
                     r#"
 schema_version: 1

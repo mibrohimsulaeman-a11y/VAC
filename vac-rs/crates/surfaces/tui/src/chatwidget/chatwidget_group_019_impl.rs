@@ -12,7 +12,7 @@ impl ChatWidget {
         return_to_permissions: bool,
     ) {
         let selected_name = preset.label.to_string();
-        let approval = AskForApproval::from(preset.approval);
+        let approval = preset.approval;
         let permission_profile = preset.permission_profile;
         let mut header_children: Vec<Box<dyn Renderable>> = Vec::new();
         let title_line = Line::from("Enable full access?").bold();

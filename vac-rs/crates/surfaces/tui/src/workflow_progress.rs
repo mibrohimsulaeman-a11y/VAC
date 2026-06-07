@@ -329,7 +329,7 @@ impl WorkflowProgressModel {
 
 pub(crate) fn capability_id_from_uses(uses: &str) -> Option<String> {
     uses.strip_prefix("capability.")
-        .map(|tail| tail.to_string())
+        .map(std::string::ToString::to_string)
         .filter(|tail| !tail.is_empty())
 }
 
