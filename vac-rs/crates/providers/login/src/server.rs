@@ -60,9 +60,14 @@ const DEFAULT_ISSUER: &str = "https://auth.vastar.com";
 const DEFAULT_PORT: u16 = 1455;
 // Keep in sync with the VAC CLI Hydra redirect URI allow-list.
 const FALLBACK_PORT: u16 = 1457;
-static LOGIN_ERROR_PAGE_TEMPLATE: LazyLock<Template> = LazyLock::new(|| {
-    Template::parse(include_str!("assets/error.html"))
-        .unwrap_or_else(|err| panic!("login error page template must parse: {err}"))
+static LOGIN_ERROR_PAGE_TEMPLATE: LazyLock<Option<Template>> = LazyLock::new(|| {
+    match Template::parse(include_str!("assets/error.html")) {
+        Ok(template) => Some(template),
+        Err(err) => {
+            error!("login error page template failed to parse: {err}");
+            None
+        }
+    }
 });
 
 /// Options for launching the local login callback server.
@@ -1079,16 +1084,64 @@ fn render_login_error_page(
                     .to_string(),
             )
         };
-    LOGIN_ERROR_PAGE_TEMPLATE
-        .render([
+    let rendered = LOGIN_ERROR_PAGE_TEMPLATE.as_ref().and_then(|template| {
+        match template.render([
             ("error_title", html_escape(&title)),
             ("error_message", html_escape(&display_message)),
             ("error_code", html_escape(code)),
             ("error_description", html_escape(&display_description)),
             ("error_help", html_escape(&help_text)),
-        ])
-        .unwrap_or_else(|err| panic!("login error page template must render: {err}"))
-        .into_bytes()
+        ]) {
+            Ok(html) => Some(html),
+            Err(err) => {
+                error!("login error page template failed to render: {err}");
+                None
+            }
+        }
+    });
+    match rendered {
+        Some(html) => html.into_bytes(),
+        None => render_login_error_fallback(
+            &title,
+            &display_message,
+            &display_description,
+            &help_text,
+            code,
+        ),
+    }
+}
+
+/// Minimal static error page used when the branded template cannot be parsed or rendered.
+fn render_login_error_fallback(
+    title: &str,
+    message: &str,
+    description: &str,
+    help_text: &str,
+    code: &str,
+) -> Vec<u8> {
+    let title = html_escape(title);
+    let message = html_escape(message);
+    let description = html_escape(description);
+    let help_text = html_escape(help_text);
+    let code = html_escape(code);
+    format!(
+        r#"<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{title}</title>
+</head>
+<body>
+<h1>{title}</h1>
+<p>{message}</p>
+<p>{description}</p>
+<p>{help_text}</p>
+<p>Error code: {code}</p>
+</body>
+</html>
+"#
+    )
+    .into_bytes()
 }
 
 /// Escapes error strings before inserting them into HTML.
