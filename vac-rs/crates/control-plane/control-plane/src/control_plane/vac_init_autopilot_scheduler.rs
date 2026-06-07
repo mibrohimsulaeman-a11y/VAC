@@ -495,6 +495,13 @@ fn parse_every_interval_secs(value: &str) -> Option<u64> {
         return None;
     }
     let amount = digits.parse::<u64>().ok()?;
+    // Fail-closed zero guard: a zero interval makes next_run_at == now, so the
+    // scheduler would re-fire the workflow on every tick (a busy-loop). Treat a
+    // zero amount as an invalid trigger and stop auto-rescheduling (None),
+    // mirroring the unknown-unit handling below.
+    if amount == 0 {
+        return None;
+    }
     let unit = rest[digits.len()..].trim_start();
     // Fail-closed unit handling: an empty unit (or an explicit seconds unit)
     // means seconds, but an *unrecognized* unit must not silently fall through
@@ -763,6 +770,13 @@ mod tests {
 
         // No "every" marker -> None.
         assert_eq!(parse_every_interval_secs("@monthly"), None);
+
+        // Zero amount must fail closed (None), not a 0s busy-loop interval.
+        assert_eq!(parse_every_interval_secs("every 0"), None);
+        assert_eq!(parse_every_interval_secs("every 0s"), None);
+        assert_eq!(parse_every_interval_secs("every 0m"), None);
+        assert_eq!(parse_every_interval_secs("every 0h"), None);
+        assert_eq!(schedule_interval_secs("every 0s"), None);
     }
 
     fn temp_root() -> PathBuf {
