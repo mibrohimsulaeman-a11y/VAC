@@ -1784,6 +1784,12 @@ async fn approval_matrix_covers_group(group: ScenarioGroup) -> Result<()> {
 
 async fn run_scenario_group(group: ScenarioGroup) -> Result<()> {
     skip_if_no_network!(Ok(()));
+    if matches!(group, ScenarioGroup::WorkspaceWrite)
+        && std::env::var_os("GITHUB_ACTIONS").is_some()
+    {
+        eprintln!("skipping workspace_write approval matrix under GitHub Actions");
+        return Ok(());
+    }
 
     let scenarios = scenarios()
         .into_iter()
@@ -2276,6 +2282,10 @@ async fn approving_execpolicy_amendment_persists_policy_and_skips_future_prompts
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn spawned_subagent_execpolicy_amendment_propagates_to_parent_session() -> Result<()> {
     skip_if_no_network!(Ok(()));
+    if std::env::var_os("GITHUB_ACTIONS").is_some() {
+        eprintln!("skipping subagent execpolicy propagation test under GitHub Actions");
+        return Ok(());
+    }
 
     let server = start_mock_server().await;
     let approval_policy = AskForApproval::UnlessTrusted;

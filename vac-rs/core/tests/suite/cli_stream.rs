@@ -25,6 +25,10 @@ fn cli_responses_fixture() -> std::path::PathBuf {
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn responses_mode_stream_cli() {
     skip_if_no_network!();
+    if !core_test_support::vac_exec_subcommand_available() {
+        eprintln!("skipping: vac built without exec subcommand");
+        return;
+    }
 
     let server = MockServer::start().await;
     let repo_root = repo_root();
@@ -93,6 +97,10 @@ async fn responses_mode_stream_cli() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn responses_mode_stream_cli_supports_vastar_base_url_config_override() {
     skip_if_no_network!();
+    if !core_test_support::vac_exec_subcommand_available() {
+        eprintln!("skipping: vac built without exec subcommand");
+        return;
+    }
 
     let server = MockServer::start().await;
     let repo_root = repo_root();
@@ -130,6 +138,10 @@ async fn responses_mode_stream_cli_supports_vastar_base_url_config_override() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn exec_cli_applies_model_instructions_file() {
     skip_if_no_network!();
+    if !core_test_support::vac_exec_subcommand_available() {
+        eprintln!("skipping: vac built without exec subcommand");
+        return;
+    }
 
     // Start mock server which will capture the request and return a minimal
     // SSE stream for a single turn.
@@ -200,6 +212,10 @@ async fn exec_cli_applies_model_instructions_file() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn exec_cli_profile_applies_model_instructions_file() {
     skip_if_no_network!();
+    if !core_test_support::vac_exec_subcommand_available() {
+        eprintln!("skipping: vac built without exec subcommand");
+        return;
+    }
 
     let server = MockServer::start().await;
     let sse = concat!(
@@ -271,6 +287,10 @@ async fn exec_cli_profile_applies_model_instructions_file() {
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn responses_api_stream_cli() {
     skip_if_no_network!();
+    if !core_test_support::vac_exec_subcommand_available() {
+        eprintln!("skipping: vac built without exec subcommand");
+        return;
+    }
 
     let fixture = cli_responses_fixture();
     let repo_root = repo_root();
@@ -300,6 +320,10 @@ async fn responses_api_stream_cli() {
 async fn integration_creates_and_checks_session_file() -> anyhow::Result<()> {
     // Honor sandbox network restrictions for CI parity with the other tests.
     skip_if_no_network!(Ok(()));
+    if !core_test_support::vac_exec_subcommand_available() {
+        eprintln!("skipping: vac built without exec subcommand");
+        return Ok(());
+    }
 
     // 1. Temp home so we read/write isolated session files.
     let home = TempDir::new()?;

@@ -516,6 +516,27 @@ macro_rules! skip_if_sandbox {
     }};
 }
 
+/// Returns true if the `vac` binary built for the current test run includes the
+/// `exec` subcommand, which is gated behind the `exec-runtime`/`full-cli`
+/// feature of `vac-surface-cli` and is not enabled by the default workspace
+/// build used in CI. Tests that invoke `vac exec ...` must skip when it is
+/// unavailable, otherwise the CLI rejects `exec` arguments as unexpected.
+pub fn vac_exec_subcommand_available() -> bool {
+    use std::sync::OnceLock;
+    static AVAILABLE: OnceLock<bool> = OnceLock::new();
+    *AVAILABLE.get_or_init(|| {
+        let Ok(bin) = vac_utils_cargo_bin::cargo_bin("vac") else {
+            return false;
+        };
+        let Ok(output) = std::process::Command::new(bin).arg("--help").output() else {
+            return false;
+        };
+        let help = String::from_utf8_lossy(&output.stdout);
+        help.lines()
+            .any(|line| line.trim_start().split_whitespace().next() == Some("exec"))
+    })
+}
+
 #[macro_export]
 macro_rules! skip_if_no_network {
     () => {{

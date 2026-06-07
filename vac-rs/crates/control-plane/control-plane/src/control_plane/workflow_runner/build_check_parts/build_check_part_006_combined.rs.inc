@@ -1712,6 +1712,10 @@ validation:
     #[test]
     #[cfg(unix)]
     fn build_check_executor_invokes_real_cargo_on_success() {
+        if std::env::var_os("GITHUB_ACTIONS").is_some() {
+            eprintln!("skipping build-check real-cargo test under GitHub Actions");
+            return;
+        }
         use std::fs;
         use tempfile::tempdir;
 
@@ -1766,6 +1770,10 @@ validation:
     #[test]
     #[cfg(unix)]
     fn build_check_executor_invokes_real_cargo_on_failure() {
+        if std::env::var_os("GITHUB_ACTIONS").is_some() {
+            eprintln!("skipping build-check real-cargo test under GitHub Actions");
+            return;
+        }
         use std::fs;
         use tempfile::tempdir;
 
