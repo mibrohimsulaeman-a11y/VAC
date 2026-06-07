@@ -292,14 +292,25 @@ pub fn can_transition_plan_status(from: PlanStatus, to: PlanStatus) -> bool {
 }
 
 fn is_forbidden(path: &str, patterns: &[String]) -> bool {
+    let path = path.trim_start_matches("./");
     patterns.iter().any(|pattern| {
-        if let Some(prefix) = pattern.strip_suffix("/**") {
-            path.starts_with(prefix)
-        } else if let Some(prefix) = pattern.strip_suffix('*') {
-            path.starts_with(prefix)
-        } else {
-            path == pattern
+        let pattern = pattern.trim().trim_start_matches("./");
+        if pattern.is_empty() {
+            return false;
         }
+        if path == pattern {
+            return true;
+        }
+        if let Some(directory) = pattern.strip_suffix("/**") {
+            return path == directory
+                || path
+                    .strip_prefix(directory)
+                    .is_some_and(|suffix| suffix.starts_with('/'));
+        }
+        if let Some(prefix) = pattern.strip_suffix('*') {
+            return path.starts_with(prefix);
+        }
+        false
     })
 }
 
@@ -382,6 +393,44 @@ mod tests {
     fn accepts_valid_plan() {
         let report = validate_semantic_plan(&valid_plan(), &base_context());
         assert!(report.is_valid(), "{:?}", report.issues);
+    }
+
+    #[test]
+    fn forbidden_files_precede_explicit_allowed_files() {
+        let mut plan = valid_plan();
+        plan.forbidden_files = vec!["src/**".to_string()];
+
+        let report = validate_semantic_plan(&plan, &base_context());
+
+        assert!(
+            report
+                .issues
+                .iter()
+                .any(|issue| issue.code == "plan.file.forbidden")
+        );
+    }
+
+    #[test]
+    fn forbidden_directory_globs_match_path_segments_only() {
+        let mut plan = valid_plan();
+        plan.allowed_files[0].path = "targeted/lib.rs".to_string();
+        let mut ctx = base_context();
+        ctx.file_owners.insert(
+            "targeted/lib.rs".to_string(),
+            "vac.test.fixture".to_string(),
+        );
+        ctx.known_files.insert("targeted/lib.rs".to_string());
+
+        let report = validate_semantic_plan(&plan, &ctx);
+
+        assert!(
+            report
+                .issues
+                .iter()
+                .all(|issue| issue.code != "plan.file.forbidden"),
+            "{:?}",
+            report.issues
+        );
     }
 
     #[test]
