@@ -140,6 +140,8 @@ pub struct ApprovalRequest {
     pub action: ApprovalAction,
     pub reasons: Vec<String>,
     pub risk: ApprovalRisk,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub required_role: Option<String>,
     pub requested_at: DateTime<Utc>,
     pub expires_at: Option<DateTime<Utc>>,
     pub status: ApprovalStatus,
@@ -169,6 +171,7 @@ impl ApprovalRequest {
             action,
             reasons,
             risk,
+            required_role: None,
             requested_at,
             expires_at,
             status: ApprovalStatus::Pending,
@@ -176,6 +179,16 @@ impl ApprovalRequest {
             decided_at: None,
             decision_reason: None,
         }
+    }
+
+    pub fn with_required_role(mut self, role: impl Into<String>) -> Self {
+        let role = role.into();
+        self.required_role = (!role.trim().is_empty()).then_some(role);
+        self
+    }
+
+    pub fn requires_role(&self, role: &str) -> bool {
+        self.required_role.as_deref() == Some(role)
     }
 
     pub fn is_pending(&self) -> bool {
@@ -191,11 +204,13 @@ impl ApprovalRequest {
 pub enum ApprovalDecision {
     Approved {
         actor: String,
+        actor_role: Option<String>,
         reason: String,
         decided_at: DateTime<Utc>,
     },
     Rejected {
         actor: String,
+        actor_role: Option<String>,
         reason: String,
         decided_at: DateTime<Utc>,
     },
@@ -213,6 +228,21 @@ impl ApprovalDecision {
     ) -> Self {
         Self::Approved {
             actor: actor.into(),
+            actor_role: None,
+            reason: reason.into(),
+            decided_at,
+        }
+    }
+
+    pub fn approved_with_role(
+        actor: impl Into<String>,
+        actor_role: impl Into<String>,
+        reason: impl Into<String>,
+        decided_at: DateTime<Utc>,
+    ) -> Self {
+        Self::Approved {
+            actor: actor.into(),
+            actor_role: Some(actor_role.into()),
             reason: reason.into(),
             decided_at,
         }
@@ -225,6 +255,21 @@ impl ApprovalDecision {
     ) -> Self {
         Self::Rejected {
             actor: actor.into(),
+            actor_role: None,
+            reason: reason.into(),
+            decided_at,
+        }
+    }
+
+    pub fn rejected_with_role(
+        actor: impl Into<String>,
+        actor_role: impl Into<String>,
+        reason: impl Into<String>,
+        decided_at: DateTime<Utc>,
+    ) -> Self {
+        Self::Rejected {
+            actor: actor.into(),
+            actor_role: Some(actor_role.into()),
             reason: reason.into(),
             decided_at,
         }
@@ -248,6 +293,15 @@ impl ApprovalDecision {
     fn actor(&self) -> Option<&str> {
         match self {
             Self::Approved { actor, .. } | Self::Rejected { actor, .. } => Some(actor.as_str()),
+            Self::Expired { .. } => None,
+        }
+    }
+
+    fn actor_role(&self) -> Option<&str> {
+        match self {
+            Self::Approved { actor_role, .. } | Self::Rejected { actor_role, .. } => {
+                actor_role.as_deref()
+            }
             Self::Expired { .. } => None,
         }
     }
@@ -372,6 +426,9 @@ fn local_runtime_preview(request: &ApprovalRequest) -> String {
         format!("risk: {}", request.risk),
         format!("status: {}", request.status),
     ];
+    if let Some(required_role) = &request.required_role {
+        lines.push(format!("required_role: {required_role}"));
+    }
     if !request.reasons.is_empty() {
         lines.push(format!("reasons: {}", request.reasons.join("; ")));
     }
@@ -386,6 +443,13 @@ pub enum ApprovalStoreError {
     AlreadyResolved {
         id: ApprovalRequestId,
         status: ApprovalStatus,
+    },
+    #[error("approval request requires role `{required_role}` but decision did not carry an actor role")]
+    RoleRequired { required_role: String },
+    #[error("approval request requires role `{required_role}` but actor role `{actual_role}` was provided")]
+    RoleMismatch {
+        required_role: String,
+        actual_role: String,
     },
     #[error("failed to load approval store `{path}`: {message}")]
     Load { path: String, message: String },
@@ -455,6 +519,31 @@ impl InMemoryApprovalStore {
     }
 }
 
+fn validate_actor_role(
+    request: &ApprovalRequest,
+    decision: &ApprovalDecision,
+) -> Result<(), ApprovalStoreError> {
+    let Some(required_role) = &request.required_role else {
+        return Ok(());
+    };
+    let Some(actor_role) = decision.actor_role() else {
+        if matches!(decision, ApprovalDecision::Expired { .. }) {
+            return Ok(());
+        }
+        return Err(ApprovalStoreError::RoleRequired {
+            required_role: required_role.clone(),
+        });
+    };
+    if actor_role == required_role {
+        Ok(())
+    } else {
+        Err(ApprovalStoreError::RoleMismatch {
+            required_role: required_role.clone(),
+            actual_role: actor_role.to_string(),
+        })
+    }
+}
+
 impl ApprovalStore for InMemoryApprovalStore {
     fn request(&mut self, mut request: ApprovalRequest) -> ApprovalRequestId {
         request.status = ApprovalStatus::Pending;
@@ -482,6 +571,7 @@ impl ApprovalStore for InMemoryApprovalStore {
             });
         }
 
+        validate_actor_role(request, &decision)?;
         request.status = decision.status();
         request.decided_by = decision.actor().map(str::to_string);
         request.decided_at = Some(decision.decided_at());
@@ -586,6 +676,59 @@ mod tests {
             request.to_local_runtime_event(),
             crate::local_runtime::RuntimeEvent::ApprovalRequested(_)
         ));
+    }
+
+    #[test]
+    fn workflow_approval_requires_matching_actor_role() {
+        let mut store = InMemoryApprovalStore::new();
+        let request = request().with_required_role("security_reviewer");
+        let id = store.request(request);
+
+        let err = store
+            .resolve(
+                &id,
+                ApprovalDecision::approved("operator", "reviewed", ts(10)),
+            )
+            .expect_err("approval without role should fail closed");
+        assert_eq!(
+            err,
+            ApprovalStoreError::RoleRequired {
+                required_role: "security_reviewer".to_string(),
+            }
+        );
+
+        let err = store
+            .resolve(
+                &id,
+                ApprovalDecision::approved_with_role(
+                    "operator",
+                    "release_manager",
+                    "reviewed",
+                    ts(11),
+                ),
+            )
+            .expect_err("wrong role should fail closed");
+        assert_eq!(
+            err,
+            ApprovalStoreError::RoleMismatch {
+                required_role: "security_reviewer".to_string(),
+                actual_role: "release_manager".to_string(),
+            }
+        );
+
+        let resolved = store
+            .resolve(
+                &id,
+                ApprovalDecision::approved_with_role(
+                    "operator",
+                    "security_reviewer",
+                    "reviewed",
+                    ts(12),
+                ),
+            )
+            .expect("matching role resolves approval");
+        assert_eq!(resolved.status, ApprovalStatus::Approved);
+        assert_eq!(resolved.decided_by.as_deref(), Some("operator"));
     }
 
     #[test]
