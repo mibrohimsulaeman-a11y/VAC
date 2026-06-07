@@ -97,3 +97,6 @@ __pycache__/
 # The generic "build/" rule above would otherwise drop it from git and break cargo metadata in CI.
 !vac-rs/crates/capabilities/build/
 !vac-rs/crates/capabilities/build/**
+.prompt
+.claudeprompt
+.claudeprompt.local
