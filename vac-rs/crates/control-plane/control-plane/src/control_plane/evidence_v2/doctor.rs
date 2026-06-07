@@ -342,7 +342,7 @@ fn verify_subchain_continuity(
         let kind = scalar(&value, "kind");
         let sub_chain = value
             .as_mapping()
-            .and_then(|map| map.get(&Value::String("sub_chain".to_string())));
+            .and_then(|map| map.get(Value::String("sub_chain".to_string())));
         let self_hash = sub_chain.and_then(|sc| scalar(sc, "self_hash"));
         let stored_prev_hash = sub_chain.and_then(|sc| scalar(sc, "prev_hash"));
 
@@ -385,12 +385,10 @@ fn verify_epoch_chain(anchor_dir: &Path, report: &mut EvidenceV2DoctorReport) {
             let path = entry.path();
             if path.extension().and_then(|ext| ext.to_str()) == Some("yaml")
                 && path.file_name().and_then(|name| name.to_str()) != Some("head.yaml")
+                && let Ok(source) = fs::read_to_string(&path)
+                && let Ok(anchor) = serde_yaml::from_str::<MerkleRoot>(&source)
             {
-                if let Ok(source) = fs::read_to_string(&path) {
-                    if let Ok(anchor) = serde_yaml::from_str::<MerkleRoot>(&source) {
-                        anchors.push((anchor.epoch, anchor, path));
-                    }
-                }
+                anchors.push((anchor.epoch, anchor, path));
             }
         }
     }

@@ -533,7 +533,7 @@ pub fn vac_exec_subcommand_available() -> bool {
         };
         let help = String::from_utf8_lossy(&output.stdout);
         help.lines()
-            .any(|line| line.trim_start().split_whitespace().next() == Some("exec"))
+            .any(|line| line.split_whitespace().next() == Some("exec"))
     })
 }
 
