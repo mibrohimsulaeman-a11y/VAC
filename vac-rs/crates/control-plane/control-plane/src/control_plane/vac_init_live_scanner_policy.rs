@@ -667,7 +667,7 @@ pub fn render_policy_inference_report_yaml(findings: &[LiveRiskFinding]) -> Stri
             out.push_str(&format!("    decision: {decision}\n"));
             out.push_str(&format!(
                 "    confidence_label: {}\n",
-                max_confidence_label(&scoped).as_str()
+                conservative_confidence_label(&scoped).as_str()
             ));
             out.push_str(
                 "    reason: Scope-aware fail-closed inference from VAC init scanner findings.\n",
@@ -1227,11 +1227,31 @@ fn more_restrictive(left: &'static str, right: &'static str) -> &'static str {
     }
 }
 
-fn max_confidence_label(findings: &[&LiveRiskFinding]) -> ConfidenceLabel {
+/// Returns the most conservative (least-confident) [`ConfidenceLabel`] among
+/// `findings`, defaulting to [`ConfidenceLabel::Uncertain`] when empty.
+///
+/// Fail-closed: a merged rule is reported only as confident as its *weakest*
+/// finding, so a single low-confidence hit downgrades the whole group. The
+/// ranking is encoded explicitly rather than relying on `ConfidenceLabel`'s
+/// `Ord` derive -- this enum is declared `Certain..Uncertain` (the reverse of
+/// `vac_init_risk_policy::ConfidenceLabel`), so a `.max()` here was correct only
+/// by accident of declaration order. The explicit rank keeps the result stable
+/// if the variants are ever reordered.
+fn conservative_confidence_label(findings: &[&LiveRiskFinding]) -> ConfidenceLabel {
+    // Higher rank = less confident = more conservative.
+    const fn conservatism_rank(label: ConfidenceLabel) -> u8 {
+        match label {
+            ConfidenceLabel::Certain => 0,
+            ConfidenceLabel::High => 1,
+            ConfidenceLabel::Moderate => 2,
+            ConfidenceLabel::Low => 3,
+            ConfidenceLabel::Uncertain => 4,
+        }
+    }
     findings
         .iter()
         .map(|finding| confidence_label(finding.confidence))
-        .max()
+        .max_by_key(|label| conservatism_rank(*label))
         .unwrap_or(ConfidenceLabel::Uncertain)
 }
 
@@ -1639,6 +1659,47 @@ mod tests {
         assert!(policy.contains("decision: deny"));
         assert!(policy.contains("scope: product_test"));
         assert!(policy.contains("decision: review_only"));
+    }
+
+    #[test]
+    fn group_confidence_label_is_fail_closed_to_weakest_finding() {
+        fn finding(confidence: f32) -> LiveRiskFinding {
+            LiveRiskFinding {
+                id: "finding.test".to_string(),
+                file: "vac-rs/core/src/lib.rs".to_string(),
+                line: 1,
+                pattern: "std::env::var".to_string(),
+                action: LiveRiskAction::CredentialRead,
+                scope: LiveSourceClass::ProductRuntime,
+                confidence,
+                method: LIVE_SCANNER_METHOD,
+                ambiguous: false,
+                alternatives: Vec::new(),
+                ownership: LiveOwnershipAnnotation::not_evaluated("test fixture"),
+            }
+        }
+
+        // A single low-confidence finding downgrades an otherwise certain group.
+        let certain = finding(0.95);
+        let low = finding(0.35);
+        assert_eq!(
+            conservative_confidence_label(&[&certain, &low]),
+            ConfidenceLabel::Low
+        );
+
+        // A homogeneously confident group keeps the strongest shared label.
+        let high_a = finding(0.95);
+        let high_b = finding(0.80);
+        assert_eq!(
+            conservative_confidence_label(&[&high_a, &high_b]),
+            ConfidenceLabel::High
+        );
+
+        // An empty group defaults to the most conservative label.
+        assert_eq!(
+            conservative_confidence_label(&[]),
+            ConfidenceLabel::Uncertain
+        );
     }
 
     #[test]
