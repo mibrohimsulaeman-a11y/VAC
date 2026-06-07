@@ -444,9 +444,13 @@ pub enum ApprovalStoreError {
         id: ApprovalRequestId,
         status: ApprovalStatus,
     },
-    #[error("approval request requires role `{required_role}` but decision did not carry an actor role")]
+    #[error(
+        "approval request requires role `{required_role}` but decision did not carry an actor role"
+    )]
     RoleRequired { required_role: String },
-    #[error("approval request requires role `{required_role}` but actor role `{actual_role}` was provided")]
+    #[error(
+        "approval request requires role `{required_role}` but actor role `{actual_role}` was provided"
+    )]
     RoleMismatch {
         required_role: String,
         actual_role: String,

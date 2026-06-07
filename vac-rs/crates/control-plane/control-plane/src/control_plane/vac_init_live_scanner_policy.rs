@@ -821,12 +821,18 @@ pub fn render_scanner_doctor_report_yaml(
         "  scannable_rust_files: {}\n",
         coverage.scannable_files
     ));
-    out.push_str(&format!("  scanned_rust_files: {}\n", coverage.scanned_files));
+    out.push_str(&format!(
+        "  scanned_rust_files: {}\n",
+        coverage.scanned_files
+    ));
     out.push_str(&format!(
         "  unreadable_rust_files: {}\n",
         coverage.unreadable_files.len()
     ));
-    out.push_str(&format!("  scan_coverage: {:.2}\n", coverage.coverage_ratio()));
+    out.push_str(&format!(
+        "  scan_coverage: {:.2}\n",
+        coverage.coverage_ratio()
+    ));
     out.push_str(&format!(
         "  scan_coverage_threshold: {SCAN_COVERAGE_MIN_THRESHOLD:.2}\n"
     ));
