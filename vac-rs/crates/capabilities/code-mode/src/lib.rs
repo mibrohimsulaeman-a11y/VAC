@@ -3,12 +3,12 @@ mod response;
 #[cfg(feature = "code-mode-v8")]
 mod runtime;
 #[cfg(not(feature = "code-mode-v8"))]
-#[path = "runtime_stub.rs"]
+#[path = "runtime_disabled.rs"]
 mod runtime;
 #[cfg(feature = "code-mode-v8")]
 mod service;
 #[cfg(not(feature = "code-mode-v8"))]
-#[path = "service_stub.rs"]
+#[path = "service_disabled.rs"]
 mod service;
 
 pub use description::CODE_MODE_PRAGMA_PREFIX;

@@ -30,11 +30,11 @@ use vac_protocol::user_input::UserInput;
 use super::SessionTask;
 use super::SessionTaskContext;
 
-static REVIEW_EXIT_SUCCESS_TEMPLATE: LazyLock<Template> = LazyLock::new(|| {
+static REVIEW_EXIT_SUCCESS_TEMPLATE: LazyLock<Result<Template, String>> = LazyLock::new(|| {
     let normalized =
         normalize_review_template_line_endings(crate::client_common::REVIEW_EXIT_SUCCESS_TMPL);
     Template::parse(normalized.as_ref())
-        .unwrap_or_else(|err| panic!("review exit success template must parse: {err}"))
+        .map_err(|err| format!("review exit success template must parse: {err}"))
 });
 
 #[derive(Clone, Copy)]
@@ -105,7 +105,8 @@ async fn start_review_conversation(
         .web_search_mode
         .set(WebSearchMode::Disabled)
     {
-        panic!("by construction Constrained<WebSearchMode> must always support Disabled: {err}");
+        tracing::warn!("failed to disable web search for review sub-agent: {err}");
+        return None;
     }
     let _ = sub_agent_config.features.disable(Feature::SpawnCsv);
     let _ = sub_agent_config.features.disable(Feature::Collab);
@@ -280,9 +281,23 @@ pub(crate) async fn exit_review_mode(
 }
 
 fn render_review_exit_success(results: &str) -> String {
-    REVIEW_EXIT_SUCCESS_TEMPLATE
-        .render([("results", results)])
-        .unwrap_or_else(|err| panic!("review exit success template must render: {err}"))
+    match REVIEW_EXIT_SUCCESS_TEMPLATE.as_ref() {
+        Ok(template) => match template.render([("results", results)]) {
+            Ok(rendered) => rendered,
+            Err(err) => {
+                tracing::warn!("failed to render review exit success template: {err}");
+                fallback_review_exit_success(results)
+            }
+        },
+        Err(err) => {
+            tracing::warn!("failed to parse review exit success template: {err}");
+            fallback_review_exit_success(results)
+        }
+    }
+}
+
+fn fallback_review_exit_success(results: &str) -> String {
+    format!("Review complete.\n\n{results}")
 }
 
 fn normalize_review_template_line_endings(template: &str) -> Cow<'_, str> {

@@ -62,6 +62,7 @@ fn guardian_review_request_includes_patch_context() {
             proposed_execpolicy_amendment: None,
         },
         additional_permissions: None,
+        effective_file_system_sandbox_policy: FileSystemSandboxPolicy::unrestricted(),
         permissions_preapproved: false,
     };
 
@@ -95,6 +96,7 @@ fn permission_request_payload_uses_apply_patch_hook_name_and_aliases() {
             proposed_execpolicy_amendment: None,
         },
         additional_permissions: None,
+        effective_file_system_sandbox_policy: FileSystemSandboxPolicy::unrestricted(),
         permissions_preapproved: false,
     };
 
@@ -125,6 +127,8 @@ fn file_system_sandbox_context_uses_active_attempt() {
             Some(Vec::new()),
         )),
     };
+    let sandbox_policy = SandboxPolicy::new_read_only_policy();
+    let file_system_policy = FileSystemSandboxPolicy::from(&sandbox_policy);
     let req = ApplyPatchRequest {
         action: ApplyPatchAction::new_add_for_test(&path, "hello".to_string()),
         file_paths: vec![path.clone()],
@@ -134,10 +138,12 @@ fn file_system_sandbox_context_uses_active_attempt() {
             proposed_execpolicy_amendment: None,
         },
         additional_permissions: Some(additional_permissions.clone()),
+        effective_file_system_sandbox_policy: effective_file_system_sandbox_policy(
+            &file_system_policy,
+            Some(&additional_permissions),
+        ),
         permissions_preapproved: false,
     };
-    let sandbox_policy = SandboxPolicy::new_read_only_policy();
-    let file_system_policy = FileSystemSandboxPolicy::from(&sandbox_policy);
     let permissions = PermissionProfile::from_runtime_permissions(
         &file_system_policy,
         NetworkSandboxPolicy::Restricted,
@@ -168,7 +174,7 @@ fn file_system_sandbox_context_uses_active_attempt() {
     let expected_permissions =
         PermissionProfile::from_runtime_permissions(&file_system_policy, network_policy);
     assert_eq!(sandbox.permissions, expected_permissions);
-    assert_eq!(sandbox.cwd, Some(path.clone()));
+    assert_eq!(sandbox.cwd, Some(req.action.cwd));
     assert_eq!(
         sandbox.windows_sandbox_level,
         WindowsSandboxLevel::RestrictedToken
@@ -178,7 +184,7 @@ fn file_system_sandbox_context_uses_active_attempt() {
 }
 
 #[test]
-fn no_sandbox_attempt_has_no_file_system_context() {
+fn no_sandbox_attempt_with_disabled_permissions_has_no_file_system_context() {
     let path = std::env::temp_dir()
         .join("apply-patch-runtime-none.txt")
         .abs();
@@ -191,6 +197,7 @@ fn no_sandbox_attempt_has_no_file_system_context() {
             proposed_execpolicy_amendment: None,
         },
         additional_permissions: None,
+        effective_file_system_sandbox_policy: FileSystemSandboxPolicy::unrestricted(),
         permissions_preapproved: false,
     };
     let permissions = PermissionProfile::Disabled;

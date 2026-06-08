@@ -558,6 +558,7 @@ impl ToolHandler for ApplyPatchHandler {
                             exec_approval_requirement: apply.exec_approval_requirement,
                             additional_permissions: effective_additional_permissions
                                 .additional_permissions,
+                            effective_file_system_sandbox_policy: file_system_sandbox_policy,
                             permissions_preapproved: effective_additional_permissions
                                 .permissions_preapproved,
                         };
@@ -760,6 +761,7 @@ pub(crate) async fn intercept_apply_patch(
                         exec_approval_requirement: apply.exec_approval_requirement,
                         additional_permissions: effective_additional_permissions
                             .additional_permissions,
+                        effective_file_system_sandbox_policy: file_system_sandbox_policy,
                         permissions_preapproved: effective_additional_permissions
                             .permissions_preapproved,
                     };

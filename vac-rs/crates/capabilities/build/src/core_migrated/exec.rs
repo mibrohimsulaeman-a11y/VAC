@@ -726,17 +726,26 @@ fn finalize_exec_result(
             let mut timed_out = raw_output.timed_out;
 
             #[cfg(target_family = "unix")]
+            let mut signal_to_report = None;
+
+            #[cfg(target_family = "unix")]
             {
                 if let Some(signal) = raw_output.exit_status.signal() {
                     if signal == TIMEOUT_CODE {
                         timed_out = true;
                     } else {
-                        return Err(VACErr::Sandbox(SandboxErr::Signal(signal)));
+                        signal_to_report = Some(signal);
                     }
                 }
             }
 
             let mut exit_code = raw_output.exit_status.code().unwrap_or(-1);
+            #[cfg(target_family = "unix")]
+            if exit_code == -1
+                && let Some(signal) = signal_to_report
+            {
+                exit_code = EXIT_CODE_SIGNAL_BASE + signal;
+            }
             if timed_out {
                 exit_code = EXEC_TIMEOUT_EXIT_CODE;
             }
@@ -764,6 +773,11 @@ fn finalize_exec_result(
                     output: Box::new(exec_output),
                     network_policy_decision: None,
                 }));
+            }
+
+            #[cfg(target_family = "unix")]
+            if let Some(signal) = signal_to_report {
+                return Err(VACErr::Sandbox(SandboxErr::Signal(signal)));
             }
 
             Ok(exec_output)

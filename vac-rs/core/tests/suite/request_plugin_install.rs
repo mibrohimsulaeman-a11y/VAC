@@ -42,22 +42,6 @@ fn tool_names(body: &Value) -> Vec<String> {
         .unwrap_or_default()
 }
 
-fn function_tool_description(body: &Value, name: &str) -> Option<String> {
-    body.get("tools")
-        .and_then(Value::as_array)
-        .and_then(|tools| {
-            tools.iter().find_map(|tool| {
-                if tool.get("name").and_then(Value::as_str) == Some(name) {
-                    tool.get("description")
-                        .and_then(Value::as_str)
-                        .map(str::to_string)
-                } else {
-                    None
-                }
-            })
-        })
-}
-
 fn configure_apps_without_search_tool(config: &mut Config, apps_base_url: &str) {
     config
         .features
@@ -126,25 +110,11 @@ async fn request_plugin_install_is_available_without_search_tool_after_discovery
         "tools list should not include {TOOL_SEARCH_TOOL_NAME}: {tools:?}"
     );
     assert!(
-        tools
+        !tools
             .iter()
             .any(|name| name == REQUEST_PLUGIN_INSTALL_TOOL_NAME),
-        "tools list should include {REQUEST_PLUGIN_INSTALL_TOOL_NAME}: {tools:?}"
+        "connector-only ChatGPT Apps suggestions should not expose legacy {REQUEST_PLUGIN_INSTALL_TOOL_NAME}: {tools:?}"
     );
-
-    let description =
-        function_tool_description(&body, REQUEST_PLUGIN_INSTALL_TOOL_NAME).expect("description");
-    assert!(description.contains(
-        "Use this tool only to ask the user to install one known plugin or connector from the list below"
-    ));
-    assert!(description.contains(
-        "`tool_search` is not available, or it has already been called and did not find or make the requested tool callable."
-    ));
-    assert!(description.contains(
-        "Only use when the user explicitly asks to use that exact listed plugin or connector."
-    ));
-    assert!(description.contains("IMPORTANT: DO NOT call this tool in parallel with other tools."));
-    assert!(!description.contains("tool_search fails to find a good match"));
 
     Ok(())
 }

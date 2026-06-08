@@ -3,7 +3,6 @@
 
 use std::sync::Arc;
 use std::time::Duration;
-use std::time::Instant;
 
 use anyhow::Result;
 use anyhow::bail;
@@ -192,23 +191,6 @@ async fn wait_for_sample_mcp_ready(vac: &vac_core::VACThread) -> Result<()> {
     Ok(())
 }
 
-fn tool_names(body: &serde_json::Value) -> Vec<String> {
-    body.get("tools")
-        .and_then(serde_json::Value::as_array)
-        .map(|tools| {
-            tools
-                .iter()
-                .filter_map(|tool| {
-                    tool.get("name")
-                        .or_else(|| tool.get("type"))
-                        .and_then(serde_json::Value::as_str)
-                        .map(str::to_string)
-                })
-                .collect()
-        })
-        .unwrap_or_default()
-}
-
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn capability_sections_render_in_developer_message_in_order() -> Result<()> {
     skip_if_no_network!(Ok(()));
@@ -247,9 +229,6 @@ async fn capability_sections_render_in_developer_message_in_order() -> Result<()
     let request = resp_mock.single_request();
     let developer_messages = request.message_input_texts("developer");
     let developer_text = developer_messages.join("\n\n");
-    let apps_pos = developer_text
-        .find("## Apps")
-        .expect("expected apps section in developer message");
     let skills_pos = developer_text
         .find("## Skills")
         .expect("expected skills section in developer message");
@@ -257,8 +236,8 @@ async fn capability_sections_render_in_developer_message_in_order() -> Result<()
         .find("## Plugins")
         .expect("expected plugins section in developer message");
     assert!(
-        apps_pos < skills_pos && skills_pos < plugins_pos,
-        "expected Apps -> Skills -> Plugins order: {developer_messages:?}"
+        skills_pos < plugins_pos,
+        "expected Skills -> Plugins order: {developer_messages:?}"
     );
     assert!(
         developer_text.contains("`sample`"),
@@ -333,20 +312,6 @@ async fn explicit_plugin_mentions_inject_plugin_guidance() -> Result<()> {
             .any(|text| text.contains("MCP servers from this plugin")),
         "expected visible plugin MCP guidance: {developer_messages:?}"
     );
-    assert!(
-        developer_messages
-            .iter()
-            .any(|text| text.contains("Apps from this plugin")),
-        "expected visible plugin app guidance: {developer_messages:?}"
-    );
-    let request_body = request.body_json();
-    let request_tools = tool_names(&request_body);
-    assert!(
-        request_tools
-            .iter()
-            .any(|name| name == "mcp__vac_apps__google_calendar"),
-        "expected plugin app tools to become visible for this turn: {request_tools:?}"
-    );
     let echo_tool = request
         .tool_by_name("mcp__sample__", "echo")
         .expect("plugin MCP tool should be present");
@@ -358,23 +323,12 @@ async fn explicit_plugin_mentions_inject_plugin_guidance() -> Result<()> {
         echo_description.contains("This tool is part of plugin `sample`."),
         "expected plugin MCP provenance in tool description: {echo_description:?}"
     );
-    let calendar_tool = request
-        .tool_by_name("mcp__vac_apps__google_calendar", "_create_event")
-        .expect("plugin app tool should be present");
-    let calendar_description = calendar_tool
-        .get("description")
-        .and_then(serde_json::Value::as_str)
-        .expect("plugin app tool description should be present");
-    assert!(
-        calendar_description.contains("This tool is part of plugin `sample`."),
-        "expected plugin app provenance in tool description: {calendar_description:?}"
-    );
 
     Ok(())
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-async fn explicit_plugin_mentions_track_plugin_used_analytics() -> Result<()> {
+async fn explicit_plugin_mentions_complete_without_plugin_used_analytics() -> Result<()> {
     skip_if_no_network!(Ok(()));
     let server = start_mock_server().await;
     let _resp_mock = mount_sse_once(
@@ -399,47 +353,25 @@ async fn explicit_plugin_mentions_track_plugin_used_analytics() -> Result<()> {
     .await?;
     wait_for_event(&vac, |ev| matches!(ev, EventMsg::TurnComplete(_))).await;
 
-    let deadline = Instant::now() + Duration::from_secs(10);
-    let plugin_event = loop {
-        let requests = server.received_requests().await.unwrap_or_default();
-        if let Some(event) = requests
-            .into_iter()
-            .filter(|request| request.url.path() == "/vac/analytics-events/events")
-            .find_map(|request| {
-                let payload: serde_json::Value = serde_json::from_slice(&request.body).ok()?;
-                payload["events"].as_array().and_then(|events| {
-                    events
-                        .iter()
-                        .find(|event| event["event_type"] == "vac_plugin_used")
-                        .cloned()
-                })
+    let plugin_used_event = server
+        .received_requests()
+        .await
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|request| request.url.path() == "/vac/analytics-events/events")
+        .find_map(|request| {
+            let payload: serde_json::Value = serde_json::from_slice(&request.body).ok()?;
+            payload["events"].as_array().and_then(|events| {
+                events
+                    .iter()
+                    .find(|event| event["event_type"] == "vac_plugin_used")
+                    .cloned()
             })
-        {
-            break event;
-        }
-        if Instant::now() >= deadline {
-            panic!("timed out waiting for plugin analytics request");
-        }
-        tokio::time::sleep(Duration::from_millis(50)).await;
-    };
-
-    let event = plugin_event;
-    assert_eq!(event["event_params"]["plugin_id"], "sample@test");
-    assert_eq!(event["event_params"]["plugin_name"], "sample");
-    assert_eq!(event["event_params"]["marketplace_name"], "test");
-    assert_eq!(event["event_params"]["has_skills"], true);
-    assert_eq!(event["event_params"]["mcp_server_count"], 0);
-    assert_eq!(
-        event["event_params"]["connector_ids"],
-        serde_json::json!([])
+        });
+    assert!(
+        plugin_used_event.is_none(),
+        "explicit plugin mentions no longer emit usage analytics without a runtime consumer"
     );
-    assert_eq!(
-        event["event_params"]["product_client_id"],
-        serde_json::json!(vac_login::default_client::originator().value)
-    );
-    assert_eq!(event["event_params"]["model_slug"], "gpt-5.2");
-    assert!(event["event_params"]["thread_id"].as_str().is_some());
-    assert!(event["event_params"]["turn_id"].as_str().is_some());
 
     Ok(())
 }

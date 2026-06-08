@@ -207,48 +207,31 @@ fn vac_apps_mcp_url_uses_legacy_vac_apps_path() {
 }
 
 #[test]
-fn vac_apps_server_config_uses_legacy_vac_apps_path() {
+fn vac_apps_mcp_injection_is_disabled_for_local_coding_build() {
     let mut config = test_mcp_config(PathBuf::from("/tmp"));
     let auth = VACAuth::create_dummy_chatgpt_auth_for_testing();
 
-    let mut servers = with_vac_apps_mcp(HashMap::new(), /*auth*/ None, &config);
+    let servers = with_vac_apps_mcp(HashMap::new(), /*auth*/ None, &config);
     assert!(!servers.contains_key(VAC_APPS_MCP_SERVER_NAME));
 
     config.apps_enabled = true;
-
-    servers = with_vac_apps_mcp(servers, Some(&auth), &config);
-    let server = servers
-        .get(VAC_APPS_MCP_SERVER_NAME)
-        .expect("vac apps should be present when apps is enabled");
-    let url = match &server.transport {
-        McpServerTransportConfig::StreamableHttp { url, .. } => url,
-        _ => panic!("expected streamable http transport for vac apps"),
-    };
-
-    assert_eq!(url, "https://provider.vac.invalid/provider-api/wham/apps");
+    let servers = with_vac_apps_mcp(servers, Some(&auth), &config);
+    assert!(!servers.contains_key(VAC_APPS_MCP_SERVER_NAME));
 }
 
 #[test]
-fn vac_apps_server_config_uses_configured_apps_mcp_path_override() {
+fn vac_apps_mcp_path_override_does_not_reenable_cloud_injection() {
     let mut config = test_mcp_config(PathBuf::from("/tmp"));
     config.apps_mcp_path_override = Some("/custom/mcp".to_string());
     config.apps_enabled = true;
     let auth = VACAuth::create_dummy_chatgpt_auth_for_testing();
 
     let servers = with_vac_apps_mcp(HashMap::new(), Some(&auth), &config);
-    let server = servers
-        .get(VAC_APPS_MCP_SERVER_NAME)
-        .expect("vac apps should be present when apps is enabled");
-    let url = match &server.transport {
-        McpServerTransportConfig::StreamableHttp { url, .. } => url,
-        _ => panic!("expected streamable http transport for vac apps"),
-    };
-
-    assert_eq!(url, "https://provider.vac.invalid/provider-api/custom/mcp");
+    assert!(!servers.contains_key(VAC_APPS_MCP_SERVER_NAME));
 }
 
 #[tokio::test]
-async fn effective_mcp_servers_preserve_user_servers_and_add_vac_apps() {
+async fn effective_mcp_servers_preserve_user_servers_without_cloud_app_injection() {
     let vac_home = tempfile::tempdir().expect("tempdir");
     let mut config = test_mcp_config(vac_home.path().to_path_buf());
     config.apps_enabled = true;
@@ -309,9 +292,7 @@ async fn effective_mcp_servers_preserve_user_servers_and_add_vac_apps() {
     let docs = effective
         .get("docs")
         .expect("configured server should exist");
-    let vac_apps = effective
-        .get(VAC_APPS_MCP_SERVER_NAME)
-        .expect("vac apps server should exist");
+    assert!(!effective.contains_key(VAC_APPS_MCP_SERVER_NAME));
 
     match &sample.transport {
         McpServerTransportConfig::StreamableHttp { url, .. } => {
@@ -322,12 +303,6 @@ async fn effective_mcp_servers_preserve_user_servers_and_add_vac_apps() {
     match &docs.transport {
         McpServerTransportConfig::StreamableHttp { url, .. } => {
             assert_eq!(url, "https://docs.example/mcp");
-        }
-        other => panic!("expected streamable http transport, got {other:?}"),
-    }
-    match &vac_apps.transport {
-        McpServerTransportConfig::StreamableHttp { url, .. } => {
-            assert_eq!(url, "https://provider.vac.invalid/provider-api/wham/apps");
         }
         other => panic!("expected streamable http transport, got {other:?}"),
     }

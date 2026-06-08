@@ -31,18 +31,17 @@ const SANDBOX_MODE_WORKSPACE_WRITE: &str =
     include_str!("prompts/permissions/sandbox_mode/workspace_write.md");
 const SANDBOX_MODE_READ_ONLY: &str = include_str!("prompts/permissions/sandbox_mode/read_only.md");
 
-static SANDBOX_MODE_DANGER_FULL_ACCESS_TEMPLATE: LazyLock<Template> = LazyLock::new(|| {
-    Template::parse(SANDBOX_MODE_DANGER_FULL_ACCESS.trim_end())
-        .unwrap_or_else(|err| panic!("danger-full-access sandbox template must parse: {err}"))
-});
-static SANDBOX_MODE_WORKSPACE_WRITE_TEMPLATE: LazyLock<Template> = LazyLock::new(|| {
-    Template::parse(SANDBOX_MODE_WORKSPACE_WRITE.trim_end())
-        .unwrap_or_else(|err| panic!("workspace-write sandbox template must parse: {err}"))
-});
-static SANDBOX_MODE_READ_ONLY_TEMPLATE: LazyLock<Template> = LazyLock::new(|| {
-    Template::parse(SANDBOX_MODE_READ_ONLY.trim_end())
-        .unwrap_or_else(|err| panic!("read-only sandbox template must parse: {err}"))
-});
+static SANDBOX_MODE_DANGER_FULL_ACCESS_TEMPLATE: LazyLock<Result<Template, String>> =
+    LazyLock::new(|| parse_sandbox_template(SANDBOX_MODE_DANGER_FULL_ACCESS, "danger-full-access"));
+static SANDBOX_MODE_WORKSPACE_WRITE_TEMPLATE: LazyLock<Result<Template, String>> =
+    LazyLock::new(|| parse_sandbox_template(SANDBOX_MODE_WORKSPACE_WRITE, "workspace-write"));
+static SANDBOX_MODE_READ_ONLY_TEMPLATE: LazyLock<Result<Template, String>> =
+    LazyLock::new(|| parse_sandbox_template(SANDBOX_MODE_READ_ONLY, "read-only"));
+
+fn parse_sandbox_template(template: &str, mode: &str) -> Result<Template, String> {
+    Template::parse(template.trim_end())
+        .map_err(|err| format!("{mode} sandbox template must parse: {err}"))
+}
 
 struct PermissionsPromptConfig<'a> {
     approval_policy: AskForApproval,
@@ -239,15 +238,42 @@ fn approval_text(
 }
 
 fn sandbox_text(mode: SandboxMode, network_access: NetworkAccess) -> String {
-    let template = match mode {
-        SandboxMode::DangerFullAccess => &*SANDBOX_MODE_DANGER_FULL_ACCESS_TEMPLATE,
-        SandboxMode::WorkspaceWrite => &*SANDBOX_MODE_WORKSPACE_WRITE_TEMPLATE,
-        SandboxMode::ReadOnly => &*SANDBOX_MODE_READ_ONLY_TEMPLATE,
+    let (mode_label, template) = match mode {
+        SandboxMode::DangerFullAccess => (
+            "danger-full-access",
+            &*SANDBOX_MODE_DANGER_FULL_ACCESS_TEMPLATE,
+        ),
+        SandboxMode::WorkspaceWrite => ("workspace-write", &*SANDBOX_MODE_WORKSPACE_WRITE_TEMPLATE),
+        SandboxMode::ReadOnly => ("read-only", &*SANDBOX_MODE_READ_ONLY_TEMPLATE),
     };
     let network_access = network_access.to_string();
-    template
-        .render([("network_access", network_access.as_str())])
-        .unwrap_or_else(|err| panic!("sandbox template must render: {err}"))
+    match template {
+        Ok(template) => match template.render([("network_access", network_access.as_str())]) {
+            Ok(text) => text,
+            Err(err) => {
+                tracing::warn!(
+                    mode = mode_label,
+                    "failed to render sandbox permissions template: {err}"
+                );
+                fallback_sandbox_text(mode_label, network_access.as_str())
+            }
+        },
+        Err(err) => {
+            tracing::warn!(
+                mode = mode_label,
+                "failed to parse sandbox permissions template: {err}"
+            );
+            fallback_sandbox_text(mode_label, network_access.as_str())
+        }
+    }
+}
+
+fn fallback_sandbox_text(mode: &str, network_access: &str) -> String {
+    format!(
+        "# Sandbox Mode
+
+Sandbox mode `{mode}` is active. Network access is `{network_access}`."
+    )
 }
 
 fn writable_roots_text(writable_roots: Option<Vec<WritableRoot>>) -> Option<String> {

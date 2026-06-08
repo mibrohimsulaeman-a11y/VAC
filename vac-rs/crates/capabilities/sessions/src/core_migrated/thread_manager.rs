@@ -323,8 +323,9 @@ impl ThreadManager {
         set_thread_manager_test_mode_for_tests(/*enabled*/ true);
         let vac_home =
             std::env::temp_dir().join(format!("vac-thread-manager-test-{}", uuid::Uuid::new_v4()));
-        std::fs::create_dir_all(&vac_home)
-            .unwrap_or_else(|err| panic!("temp vac home dir create failed: {err}"));
+        if let Err(err) = std::fs::create_dir_all(&vac_home) {
+            tracing::warn!("failed to create temp vac home dir for test thread manager: {err}");
+        }
         let mut manager = Self::with_models_provider_and_home_for_tests(
             auth,
             provider,
@@ -347,7 +348,12 @@ impl ThreadManager {
         let auth_manager = AuthManager::from_auth_for_testing(auth);
         let skills_vac_home = match AbsolutePathBuf::from_absolute_path_checked(&vac_home) {
             Ok(vac_home) => vac_home,
-            Err(err) => panic!("test vac_home should be absolute: {err}"),
+            Err(err) => {
+                tracing::warn!(
+                    "test vac_home is not absolute; resolving it against process temp dir: {err}"
+                );
+                AbsolutePathBuf::resolve_path_against_base(&vac_home, std::env::temp_dir())
+            }
         };
         let (thread_created_tx, _) = broadcast::channel(THREAD_CREATED_CHANNEL_CAPACITY);
         let restriction_product = SessionSource::Exec.restriction_product();

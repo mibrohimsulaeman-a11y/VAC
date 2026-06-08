@@ -28,11 +28,15 @@ use vac_protocol::error::VACErr;
 use vac_protocol::exec_output::ExecToolCallOutput;
 use vac_protocol::exec_output::StreamOutput;
 use vac_protocol::models::AdditionalPermissionProfile;
+use vac_protocol::models::PermissionProfile;
+use vac_protocol::models::SandboxEnforcement;
+use vac_protocol::permissions::FileSystemSandboxKind;
+use vac_protocol::permissions::FileSystemSandboxPolicy;
 use vac_protocol::protocol::AskForApproval;
 use vac_protocol::protocol::FileChange;
 use vac_protocol::protocol::ReviewDecision;
-use vac_sandboxing::SandboxType;
 use vac_sandboxing::SandboxablePreference;
+use vac_sandboxing::policy_transforms::effective_file_system_sandbox_policy;
 use vac_sandboxing::policy_transforms::effective_permission_profile;
 use vac_utils_absolute_path::AbsolutePathBuf;
 
@@ -43,6 +47,7 @@ pub struct ApplyPatchRequest {
     pub changes: std::collections::HashMap<PathBuf, FileChange>,
     pub exec_approval_requirement: ExecApprovalRequirement,
     pub additional_permissions: Option<AdditionalPermissionProfile>,
+    pub effective_file_system_sandbox_policy: FileSystemSandboxPolicy,
     pub permissions_preapproved: bool,
 }
 
@@ -70,15 +75,39 @@ impl ApplyPatchRuntime {
         req: &ApplyPatchRequest,
         attempt: &SandboxAttempt<'_>,
     ) -> Option<FileSystemSandboxContext> {
-        if attempt.sandbox == SandboxType::None {
+        // The patch engine needs a filesystem context to authorize patch paths
+        // that are outside cwd but explicitly granted by approval/request-permissions.
+        // The handler computes the effective filesystem policy after applying
+        // session/turn grants and apply_patch-specific requested write roots;
+        // use that policy here instead of rebuilding solely from the raw turn
+        // permission profile.
+        let effective_file_system_policy = effective_file_system_sandbox_policy(
+            &req.effective_file_system_sandbox_policy,
+            req.additional_permissions.as_ref(),
+        );
+        let has_effective_fs_policy = !matches!(
+            effective_file_system_policy.kind,
+            FileSystemSandboxKind::Unrestricted
+        );
+        if !has_effective_fs_policy && req.additional_permissions.is_none() {
             return None;
         }
-
-        let permissions =
-            effective_permission_profile(attempt.permissions, req.additional_permissions.as_ref());
+        let (_, network_policy) =
+            effective_permission_profile(attempt.permissions, req.additional_permissions.as_ref())
+                .to_runtime_permissions();
+        let enforcement = if has_effective_fs_policy {
+            SandboxEnforcement::Managed
+        } else {
+            attempt.permissions.enforcement()
+        };
+        let permissions = PermissionProfile::from_runtime_permissions_with_enforcement(
+            enforcement,
+            &effective_file_system_policy,
+            network_policy,
+        );
         Some(FileSystemSandboxContext {
             permissions,
-            cwd: Some(attempt.sandbox_cwd.clone()),
+            cwd: Some(req.action.cwd.clone()),
             windows_sandbox_level: attempt.windows_sandbox_level,
             windows_sandbox_private_desktop: attempt.windows_sandbox_private_desktop,
             use_legacy_landlock: attempt.use_legacy_landlock,

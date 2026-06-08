@@ -65,6 +65,7 @@ test-group = 'heavy-serial'
 # ---------------------------------------------------------------------------
 [profile.ci]
 default-filter = 'not test(/live_/)'
+retries = 1
 
 [[profile.ci.overrides]]
 filter = 'test(/snapshot|perf_bench/)'

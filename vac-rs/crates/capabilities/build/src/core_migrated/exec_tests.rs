@@ -943,6 +943,46 @@ fn sandbox_detection_flags_sigsys_exit_code() {
 }
 
 #[cfg(unix)]
+#[test]
+fn finalize_exec_result_preserves_signal_sandbox_denial_output() {
+    use std::os::unix::process::ExitStatusExt as _;
+
+    let stdout = "sandbox-denied sentinel: Permission denied while writing\n";
+    let raw_output = RawExecToolCallOutput {
+        exit_status: std::process::ExitStatus::from_raw(libc::SIGABRT),
+        stdout: StreamOutput {
+            text: stdout.as_bytes().to_vec(),
+            truncated_after_lines: None,
+        },
+        stderr: StreamOutput {
+            text: Vec::new(),
+            truncated_after_lines: None,
+        },
+        aggregated_output: StreamOutput {
+            text: stdout.as_bytes().to_vec(),
+            truncated_after_lines: None,
+        },
+        timed_out: false,
+    };
+
+    let err = finalize_exec_result(
+        Ok(raw_output),
+        SandboxType::LinuxSeccomp,
+        Duration::from_millis(7),
+    )
+    .expect_err("signal with denial output should stay a sandbox denial");
+
+    match err {
+        VACErr::Sandbox(SandboxErr::Denied { output, .. }) => {
+            assert_eq!(output.exit_code, EXIT_CODE_SIGNAL_BASE + libc::SIGABRT);
+            assert_eq!(output.stdout.text, stdout);
+            assert_eq!(output.aggregated_output.text, stdout);
+        }
+        other => panic!("expected sandbox denial, got {other:?}"),
+    }
+}
+
+#[cfg(unix)]
 #[tokio::test]
 async fn kill_child_process_group_kills_grandchildren_on_timeout() -> Result<()> {
     // On Linux/macOS, /bin/bash is typically present; on FreeBSD/OpenBSD,

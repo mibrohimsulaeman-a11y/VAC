@@ -67,7 +67,18 @@ pub fn assess_patch_safety(
     // Even though the patch appears to be constrained to writable paths, it is
     // possible that paths in the patch are hard links to files outside the
     // writable roots, so we should still run `apply_patch` in a sandbox in that case.
-    if is_write_patch_constrained_to_writable_paths(action, file_system_sandbox_policy, cwd)
+    let patch_is_constrained_to_writable_paths =
+        is_write_patch_constrained_to_writable_paths(action, file_system_sandbox_policy, cwd);
+    let patch_is_constrained_to_project_paths =
+        is_write_patch_constrained_to_project_paths(action, cwd);
+    let patch_can_skip_project_boundary_approval = matches!(
+        permission_profile,
+        PermissionProfile::Disabled | PermissionProfile::External { .. }
+    ) || file_system_sandbox_policy
+        .has_full_disk_write_access();
+
+    if (patch_is_constrained_to_writable_paths
+        && (patch_is_constrained_to_project_paths || patch_can_skip_project_boundary_approval))
         || matches!(policy, AskForApproval::OnFailure)
     {
         if matches!(
@@ -133,6 +144,35 @@ fn patch_rejection_reason(
         | PermissionProfile::Disabled
         | PermissionProfile::External { .. } => PATCH_REJECTED_OUTSIDE_PROJECT_REASON,
     }
+}
+
+fn is_write_patch_constrained_to_project_paths(
+    action: &ApplyPatchAction,
+    cwd: &AbsolutePathBuf,
+) -> bool {
+    let is_path_inside_project = |p: &PathBuf| resolve_path(cwd, p).starts_with(cwd.as_path());
+
+    for (path, change) in action.changes() {
+        match change {
+            ApplyPatchFileChange::Add { .. } | ApplyPatchFileChange::Delete { .. } => {
+                if !is_path_inside_project(path) {
+                    return false;
+                }
+            }
+            ApplyPatchFileChange::Update { move_path, .. } => {
+                if !is_path_inside_project(path) {
+                    return false;
+                }
+                if let Some(dest) = move_path
+                    && !is_path_inside_project(dest)
+                {
+                    return false;
+                }
+            }
+        }
+    }
+
+    true
 }
 
 fn is_write_patch_constrained_to_writable_paths(

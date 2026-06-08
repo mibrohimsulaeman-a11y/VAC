@@ -3,8 +3,6 @@
 
 use anyhow::Result;
 use core_test_support::apps_test_server::AppsTestServer;
-use core_test_support::apps_test_server::CALENDAR_CREATE_EVENT_MCP_APP_RESOURCE_URI;
-use core_test_support::apps_test_server::CALENDAR_CREATE_EVENT_RESOURCE_URI;
 use core_test_support::responses::ResponsesRequest;
 use core_test_support::responses::ev_assistant_message;
 use core_test_support::responses::ev_completed;
@@ -38,7 +36,6 @@ use vac_protocol::models::FunctionCallOutputPayload;
 use vac_protocol::models::PermissionProfile;
 use vac_protocol::protocol::AskForApproval;
 use vac_protocol::protocol::EventMsg;
-use vac_protocol::protocol::McpInvocation;
 use vac_protocol::protocol::Op;
 use vac_protocol::user_input::UserInput;
 
@@ -407,7 +404,7 @@ async fn search_tool_hides_apps_tools_without_search() -> Result<()> {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-async fn explicit_app_mentions_expose_apps_tools_without_search() -> Result<()> {
+async fn explicit_app_mentions_do_not_expose_legacy_chatgpt_app_tools() -> Result<()> {
     skip_if_no_network!(Ok(()));
 
     let server = start_mock_server().await;
@@ -440,61 +437,30 @@ async fn explicit_app_mentions_expose_apps_tools_without_search() -> Result<()> 
             SEARCH_CALENDAR_NAMESPACE,
             SEARCH_CALENDAR_CREATE_TOOL
         )
-        .is_some(),
-        "expected explicit app mention to expose create tool, got tools: {tools:?}"
+        .is_none(),
+        "legacy ChatGPT app mentions should not expose remote create tool, got tools: {tools:?}"
     );
     assert!(
-        namespace_child_tool(&body, SEARCH_CALENDAR_NAMESPACE, SEARCH_CALENDAR_LIST_TOOL).is_some(),
-        "expected explicit app mention to expose list tool, got tools: {tools:?}"
+        namespace_child_tool(&body, SEARCH_CALENDAR_NAMESPACE, SEARCH_CALENDAR_LIST_TOOL).is_none(),
+        "legacy ChatGPT app mentions should not expose remote list tool, got tools: {tools:?}"
     );
 
     Ok(())
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-async fn tool_search_returns_deferred_tools_without_follow_up_tool_injection() -> Result<()> {
+async fn tool_search_omits_legacy_chatgpt_apps_without_local_deferred_tools() -> Result<()> {
     skip_if_no_network!(Ok(()));
 
     let server = start_mock_server().await;
     let apps_server = AppsTestServer::mount_searchable(&server).await?;
-    let call_id = "tool-search-1";
-    let mock = mount_sse_sequence(
+    let mock = mount_sse_once(
         &server,
-        vec![
-            sse(vec![
-                ev_response_created("resp-1"),
-                ev_tool_search_call(
-                    call_id,
-                    &json!({
-                        "query": "create calendar event",
-                        "limit": 1,
-                    }),
-                ),
-                ev_completed("resp-1"),
-            ]),
-            sse(vec![
-                ev_response_created("resp-2"),
-                json!({
-                    "type": "response.output_item.done",
-                    "item": {
-                        "type": "function_call",
-                        "call_id": "calendar-call-1",
-                        "name": SEARCH_CALENDAR_CREATE_TOOL,
-                        "namespace": SEARCH_CALENDAR_NAMESPACE,
-                        "arguments": serde_json::to_string(&json!({
-                            "title": "Lunch",
-                            "starts_at": "2026-03-10T12:00:00Z"
-                        })).expect("serialize calendar args")
-                    }
-                }),
-                ev_completed("resp-2"),
-            ]),
-            sse(vec![
-                ev_response_created("resp-3"),
-                ev_assistant_message("msg-1", "done"),
-                ev_completed("resp-3"),
-            ]),
-        ],
+        sse(vec![
+            ev_response_created("resp-1"),
+            ev_assistant_message("msg-1", "done"),
+            ev_completed("resp-1"),
+        ]),
     )
     .await;
 
@@ -512,212 +478,48 @@ async fn tool_search_returns_deferred_tools_without_follow_up_tool_injection() -
         })
         .await?;
 
-    let EventMsg::McpToolCallBegin(begin) = wait_for_event(&test.vac, |event| {
-        matches!(event, EventMsg::McpToolCallBegin(_))
-    })
-    .await
-    else {
-        unreachable!("event guard guarantees McpToolCallBegin");
-    };
-    assert_eq!(begin.call_id, "calendar-call-1");
-    assert_eq!(
-        begin.mcp_app_resource_uri.as_deref(),
-        Some(CALENDAR_CREATE_EVENT_MCP_APP_RESOURCE_URI)
-    );
-
-    let EventMsg::McpToolCallEnd(end) = wait_for_event(&test.vac, |event| {
-        matches!(event, EventMsg::McpToolCallEnd(_))
-    })
-    .await
-    else {
-        unreachable!("event guard guarantees McpToolCallEnd");
-    };
-    assert_eq!(end.call_id, "calendar-call-1");
-    assert_eq!(
-        end.mcp_app_resource_uri.as_deref(),
-        Some(CALENDAR_CREATE_EVENT_MCP_APP_RESOURCE_URI)
-    );
-    assert_eq!(
-        end.invocation,
-        McpInvocation {
-            server: "vac_apps".to_string(),
-            tool: "calendar_create_event".to_string(),
-            arguments: Some(json!({
-                "title": "Lunch",
-                "starts_at": "2026-03-10T12:00:00Z"
-            })),
-        }
-    );
-    assert_eq!(
-        end.result
-            .as_ref()
-            .expect("tool call should succeed")
-            .structured_content,
-        Some(json!({
-            "_vac_apps": {
-                "call_id": "calendar-call-1",
-                "resource_uri": CALENDAR_CREATE_EVENT_RESOURCE_URI,
-                "contains_mcp_source": true,
-                "connector_id": "calendar",
-            },
-        }))
-    );
-
     wait_for_event(&test.vac, |event| {
         matches!(event, EventMsg::TurnComplete(_))
     })
     .await;
 
     let requests = mock.requests();
-    assert_eq!(requests.len(), 3);
+    assert_eq!(requests.len(), 1);
+    let first_request_tools = tool_names(&requests[0].body_json());
+    assert!(
+        !first_request_tools
+            .iter()
+            .any(|name| name == TOOL_SEARCH_TOOL_NAME),
+        "legacy ChatGPT Apps alone should not advertise tool_search: {first_request_tools:?}"
+    );
+    assert!(
+        !first_request_tools
+            .iter()
+            .any(|name| name == CALENDAR_CREATE_TOOL),
+        "legacy ChatGPT Apps should not expose direct app tools: {first_request_tools:?}"
+    );
+    assert!(
+        !first_request_tools
+            .iter()
+            .any(|name| name == SEARCH_CALENDAR_NAMESPACE),
+        "legacy ChatGPT Apps should not expose app namespace: {first_request_tools:?}"
+    );
 
     let apps_tool_call = server
         .received_requests()
         .await
         .unwrap_or_default()
         .into_iter()
-        .find_map(|request| {
-            let body: Value = serde_json::from_slice(&request.body).ok()?;
-            (request.url.path() == "/api/vac/apps"
-                && body.get("method").and_then(Value::as_str) == Some("tools/call"))
-            .then_some(body)
-        })
-        .expect("apps tools/call request should be recorded");
-
-    assert_eq!(
-        apps_tool_call.pointer("/params/_meta/_vac_apps"),
-        Some(&json!({
-            "call_id": "calendar-call-1",
-            "resource_uri": CALENDAR_CREATE_EVENT_RESOURCE_URI,
-            "contains_mcp_source": true,
-            "connector_id": "calendar",
-        }))
-    );
-    assert_eq!(
-        apps_tool_call.pointer("/params/_meta/x-vac-turn-metadata/session_id"),
-        Some(&json!(test.session_configured.session_id.to_string()))
-    );
+        .find(|request| {
+            let Ok(body) = serde_json::from_slice::<Value>(&request.body) else {
+                return false;
+            };
+            request.url.path() == "/api/vac/apps"
+                && body.get("method").and_then(Value::as_str) == Some("tools/call")
+        });
     assert!(
-        apps_tool_call
-            .pointer("/params/_meta/x-vac-turn-metadata/turn_id")
-            .and_then(Value::as_str)
-            .is_some_and(|turn_id| !turn_id.is_empty()),
-        "apps tools/call should include turn metadata turn_id: {apps_tool_call:?}"
-    );
-    let mcp_turn_started_at_unix_ms = apps_tool_call
-        .pointer("/params/_meta/x-vac-turn-metadata/turn_started_at_unix_ms")
-        .and_then(Value::as_i64)
-        .expect("apps tools/call should include turn_started_at_unix_ms");
-    assert!(
-        mcp_turn_started_at_unix_ms > 0,
-        "apps tools/call should include a positive turn_started_at_unix_ms: {apps_tool_call:?}"
-    );
-
-    let first_request_turn_metadata: Value = serde_json::from_str(
-        &requests[0]
-            .header("x-vac-turn-metadata")
-            .expect("first response request should include turn metadata"),
-    )
-    .expect("first response request turn metadata should be valid JSON");
-    assert_eq!(
-        first_request_turn_metadata
-            .get("turn_started_at_unix_ms")
-            .and_then(Value::as_i64),
-        Some(mcp_turn_started_at_unix_ms)
-    );
-
-    let first_request_body = requests[0].body_json();
-    let first_request_tools = tool_names(&first_request_body);
-    assert!(
-        first_request_tools
-            .iter()
-            .any(|name| name == TOOL_SEARCH_TOOL_NAME),
-        "first request should advertise tool_search: {first_request_tools:?}"
-    );
-    assert!(
-        !first_request_tools
-            .iter()
-            .any(|name| name == CALENDAR_CREATE_TOOL),
-        "app tools should still be hidden before search: {first_request_tools:?}"
-    );
-    assert!(
-        !first_request_tools
-            .iter()
-            .any(|name| name == SEARCH_CALENDAR_NAMESPACE),
-        "app namespace should still be hidden before search: {first_request_tools:?}"
-    );
-
-    let output_item = tool_search_output_item(&requests[1], call_id);
-    assert_eq!(
-        output_item.get("status").and_then(Value::as_str),
-        Some("completed")
-    );
-    assert_eq!(
-        output_item.get("execution").and_then(Value::as_str),
-        Some("client")
-    );
-
-    let tools = tool_search_output_tools(&requests[1], call_id);
-    assert_eq!(
-        tools,
-        vec![json!({
-            "type": "namespace",
-            "name": SEARCH_CALENDAR_NAMESPACE,
-            "description": "Plan events and manage your calendar.",
-            "tools": [
-                {
-                    "type": "function",
-                    "name": SEARCH_CALENDAR_CREATE_TOOL,
-                    "description": "Create a calendar event.",
-                    "strict": false,
-                    "defer_loading": true,
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "starts_at": {"type": "string"},
-                            "timezone": {"type": "string"},
-                            "title": {"type": "string"},
-                        },
-                        "required": ["title", "starts_at"],
-                        "additionalProperties": false,
-                    }
-                }
-            ]
-        })]
-    );
-
-    let second_request_tools = tool_names(&requests[1].body_json());
-    assert!(
-        !second_request_tools
-            .iter()
-            .any(|name| name == CALENDAR_CREATE_TOOL),
-        "follow-up request should rely on tool_search_output history, not tool injection: {second_request_tools:?}"
-    );
-    assert!(
-        !second_request_tools
-            .iter()
-            .any(|name| name == SEARCH_CALENDAR_NAMESPACE),
-        "follow-up request should rely on tool_search_output history, not namespace injection: {second_request_tools:?}"
-    );
-
-    let output_item = requests[2].function_call_output("calendar-call-1");
-    assert_eq!(
-        output_item.get("call_id").and_then(Value::as_str),
-        Some("calendar-call-1")
-    );
-
-    let third_request_tools = tool_names(&requests[2].body_json());
-    assert!(
-        !third_request_tools
-            .iter()
-            .any(|name| name == CALENDAR_CREATE_TOOL),
-        "post-tool follow-up should still rely on tool_search_output history, not tool injection: {third_request_tools:?}"
-    );
-    assert!(
-        !third_request_tools
-            .iter()
-            .any(|name| name == SEARCH_CALENDAR_NAMESPACE),
-        "post-tool follow-up should still rely on tool_search_output history, not namespace injection: {third_request_tools:?}"
+        apps_tool_call.is_none(),
+        "legacy remote apps tools/call should not be used after local-only apps cleanup"
     );
 
     Ok(())

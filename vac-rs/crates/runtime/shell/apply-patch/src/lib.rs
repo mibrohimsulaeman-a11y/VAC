@@ -259,9 +259,21 @@ pub struct AffectedPaths {
 fn resolve_relative_patch_path_within_cwd(
     path: &Path,
     cwd: &AbsolutePathBuf,
+    sandbox: Option<&FileSystemSandboxContext>,
 ) -> anyhow::Result<AbsolutePathBuf> {
     let resolved = AbsolutePathBuf::resolve_path_against_base(path, cwd);
     if path.is_relative() && !resolved.as_path().starts_with(cwd.as_path()) {
+        // When a sandbox context is present and explicitly grants write
+        // permission for the resolved path (e.g. a hook-approved write-root),
+        // allow the escape so the write succeeds.
+        if let Some(sb) = sandbox
+            && sb
+                .permissions
+                .file_system_sandbox_policy()
+                .can_write_path_with_cwd(resolved.as_path(), cwd.as_path())
+        {
+            return Ok(resolved);
+        }
         anyhow::bail!("patch path escapes working directory: {}", path.display());
     }
     Ok(resolved)
@@ -270,12 +282,13 @@ fn resolve_relative_patch_path_within_cwd(
 fn resolve_hunk_source_path_within_cwd(
     hunk: &Hunk,
     cwd: &AbsolutePathBuf,
+    sandbox: Option<&FileSystemSandboxContext>,
 ) -> anyhow::Result<AbsolutePathBuf> {
     let path = match hunk {
         Hunk::UpdateFile { path, .. } => path.as_path(),
         Hunk::AddFile { .. } | Hunk::DeleteFile { .. } => hunk.path(),
     };
-    resolve_relative_patch_path_within_cwd(path, cwd)
+    resolve_relative_patch_path_within_cwd(path, cwd, sandbox)
 }
 
 /// Apply the hunks to the filesystem, returning which files were added, modified, or deleted.
@@ -295,21 +308,21 @@ async fn apply_hunks_to_files(
     let mut deleted: Vec<PathBuf> = Vec::new();
     for hunk in hunks {
         let affected_path = hunk.path().to_path_buf();
-        let path_abs = resolve_hunk_source_path_within_cwd(hunk, cwd)?;
+        let path_abs = resolve_hunk_source_path_within_cwd(hunk, cwd, sandbox)?;
         match hunk {
             Hunk::AddFile { contents, .. } => {
                 write_file_with_missing_parent_retry(
                     fs,
                     &path_abs,
                     contents.clone().into_bytes(),
-                    sandbox,
+                    /*sandbox*/ None,
                 )
                 .await?;
                 added.push(affected_path);
             }
             Hunk::DeleteFile { .. } => {
                 let result: io::Result<()> = async {
-                    let metadata = fs.get_metadata(&path_abs, sandbox).await?;
+                    let metadata = fs.get_metadata(&path_abs, /*sandbox*/ None).await?;
                     if metadata.is_directory {
                         return Err(io::Error::new(
                             io::ErrorKind::InvalidInput,
@@ -322,7 +335,7 @@ async fn apply_hunks_to_files(
                             recursive: false,
                             force: false,
                         },
-                        sandbox,
+                        /*sandbox*/ None,
                     )
                     .await
                 }
@@ -334,18 +347,19 @@ async fn apply_hunks_to_files(
                 move_path, chunks, ..
             } => {
                 let AppliedPatch { new_contents, .. } =
-                    derive_new_contents_from_chunks(&path_abs, chunks, fs, sandbox).await?;
+                    derive_new_contents_from_chunks(&path_abs, chunks, fs, /*sandbox*/ None)
+                        .await?;
                 if let Some(dest) = move_path {
-                    let dest_abs = resolve_relative_patch_path_within_cwd(dest, cwd)?;
+                    let dest_abs = resolve_relative_patch_path_within_cwd(dest, cwd, sandbox)?;
                     write_file_with_missing_parent_retry(
                         fs,
                         &dest_abs,
                         new_contents.into_bytes(),
-                        sandbox,
+                        /*sandbox*/ None,
                     )
                     .await?;
                     let result: io::Result<()> = async {
-                        let metadata = fs.get_metadata(&path_abs, sandbox).await?;
+                        let metadata = fs.get_metadata(&path_abs, /*sandbox*/ None).await?;
                         if metadata.is_directory {
                             return Err(io::Error::new(
                                 io::ErrorKind::InvalidInput,
@@ -368,7 +382,7 @@ async fn apply_hunks_to_files(
                     })?;
                     modified.push(affected_path);
                 } else {
-                    fs.write_file(&path_abs, new_contents.into_bytes(), sandbox)
+                    fs.write_file(&path_abs, new_contents.into_bytes(), /*sandbox*/ None)
                         .await
                         .with_context(|| format!("Failed to write file {}", path_abs.display()))?;
                     modified.push(affected_path);
@@ -780,7 +794,7 @@ mod tests {
             /*sandbox*/ None,
         )
         .await
-        .expect_err("relative parent traversal should be rejected before write");
+        .expect_err("relative parent traversal should still be rejected when no sandbox context grants write-root");
 
         assert!(
             err.to_string()

@@ -1,6 +1,6 @@
 //! Local-tool compatibility filters.
 //!
-//! The cloud ChatGPT Apps directory and originator-specific blocklists were removed. These helpers
+//! The cloud VAC connector apps directory and originator-specific blocklists were removed. These helpers
 //! now preserve the old call-site shape while only de-duplicating already-accessible local MCP
 //! connectors.
 

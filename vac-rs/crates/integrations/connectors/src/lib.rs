@@ -1,6 +1,6 @@
 //! Local MCP connector helpers.
 //!
-//! The ChatGPT Apps cloud directory surface was removed for the local TUI+CLI coding build.
+//! The VAC connector apps cloud directory surface was removed for the local TUI+CLI coding build.
 //! This crate now keeps only helper logic used to derive `@mention` connector labels from MCP
 //! tool metadata.
 

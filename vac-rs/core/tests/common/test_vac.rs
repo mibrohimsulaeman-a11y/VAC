@@ -1,3 +1,4 @@
+use std::fs;
 use std::future::Future;
 use std::io::ErrorKind;
 use std::mem::swap;
@@ -75,7 +76,12 @@ pub struct TestEnv {
 
 impl TestEnv {
     pub async fn local() -> Result<Self> {
-        let local_cwd_temp_dir = Arc::new(TempDir::new()?);
+        Self::local_in(std::env::temp_dir()).await
+    }
+
+    pub async fn local_in(base: impl AsRef<Path>) -> Result<Self> {
+        fs::create_dir_all(base.as_ref())?;
+        let local_cwd_temp_dir = Arc::new(TempDir::new_in(base.as_ref())?);
         let cwd = local_cwd_temp_dir.abs();
         let environment =
             vac_exec_server::Environment::create_for_tests(/*exec_server_url*/ None)?;
@@ -217,6 +223,7 @@ pub struct TestVACBuilder {
     pre_build_hooks: Vec<Box<PreBuildHook>>,
     workspace_setups: Vec<Box<WorkspaceSetup>>,
     home: Option<Arc<TempDir>>,
+    local_cwd_base: Option<PathBuf>,
     user_shell_override: Option<Shell>,
     exec_server_url: Option<String>,
 }
@@ -265,6 +272,11 @@ impl TestVACBuilder {
         self
     }
 
+    pub fn with_local_cwd_base(mut self, base: impl Into<PathBuf>) -> Self {
+        self.local_cwd_base = Some(base.into());
+        self
+    }
+
     pub fn with_user_shell(mut self, user_shell: Shell) -> Self {
         self.user_shell_override = Some(user_shell);
         self
@@ -283,13 +295,20 @@ impl TestVACBuilder {
         }
     }
 
+    async fn local_test_env(&self) -> Result<TestEnv> {
+        match &self.local_cwd_base {
+            Some(base) => TestEnv::local_in(base).await,
+            None => TestEnv::local().await,
+        }
+    }
+
     pub async fn build(&mut self, server: &wiremock::MockServer) -> anyhow::Result<TestVAC> {
         let home = match self.home.clone() {
             Some(home) => home,
             None => Arc::new(TempDir::new()?),
         };
         let base_url = format!("{}/v1", server.uri());
-        let test_env = TestEnv::local().await?;
+        let test_env = self.local_test_env().await?;
         Box::pin(self.build_with_home_and_base_url(base_url, home, /*resume_from*/ None, test_env))
             .await
     }
@@ -317,7 +336,7 @@ impl TestVACBuilder {
             Some(home) => home,
             None => Arc::new(TempDir::new()?),
         };
-        let test_env = TestEnv::local().await?;
+        let test_env = self.local_test_env().await?;
         Box::pin(self.build_with_home_and_base_url(
             format!("{base_url}/v1"),
             home,
@@ -341,7 +360,7 @@ impl TestVACBuilder {
             config.model_provider.base_url = Some(base_url_clone);
             config.model_provider.supports_websockets = true;
         }));
-        let test_env = TestEnv::local().await?;
+        let test_env = self.local_test_env().await?;
         Box::pin(self.build_with_home_and_base_url(base_url, home, /*resume_from*/ None, test_env))
             .await
     }
@@ -353,7 +372,7 @@ impl TestVACBuilder {
         rollout_path: PathBuf,
     ) -> anyhow::Result<TestVAC> {
         let base_url = format!("{}/v1", server.uri());
-        let test_env = TestEnv::local().await?;
+        let test_env = self.local_test_env().await?;
         Box::pin(self.build_with_home_and_base_url(base_url, home, Some(rollout_path), test_env))
             .await
     }
@@ -993,6 +1012,7 @@ pub fn test_vac() -> TestVACBuilder {
         pre_build_hooks: vec![],
         workspace_setups: vec![],
         home: None,
+        local_cwd_base: None,
         user_shell_override: None,
         exec_server_url: None,
     }

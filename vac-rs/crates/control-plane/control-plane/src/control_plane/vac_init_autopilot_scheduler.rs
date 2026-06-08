@@ -794,7 +794,7 @@ mod tests {
     }
 
     fn capability_workflow_yaml() -> String {
-        "schema_version: 1\nkind: capability\nid: vac.workflow\ntitle: Workflow\nstatus: ready\nowner:\n  crate: vac-control-plane\n  module: control_plane\ndescription: Stub\nreason: stub\ndepends_on: []\npolicy:\n  risk: safe_read\n  mutates_files: false\n  network: false\n  redaction: false\n  approval_required_for: []\nvalidation:\n  commands: []\n".to_string()
+        "schema_version: 1\nkind: capability\nid: vac.workflow\ntitle: Workflow\nstatus: ready\nowner:\n  crate: vac-control-plane\n  module: control_plane\ndescription: Workflow capability fixture for autopilot scheduler integration tests\nreason: scheduler_fixture\ndepends_on: []\npolicy:\n  risk: safe_read\n  mutates_files: false\n  network: false\n  redaction: false\n  approval_required_for: []\nvalidation:\n  commands: []\n".to_string()
     }
 
     #[test]

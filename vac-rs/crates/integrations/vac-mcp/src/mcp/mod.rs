@@ -205,7 +205,7 @@ pub fn with_vac_apps_mcp(
     _auth: Option<&VACAuth>,
     _config: &McpConfig,
 ) -> HashMap<String, McpServerConfig> {
-    // Local coding build: do not inject the cloud ChatGPT Apps MCP directory server.
+    // Local coding build: do not inject the cloud VAC connector apps MCP directory server.
     servers
 }
 

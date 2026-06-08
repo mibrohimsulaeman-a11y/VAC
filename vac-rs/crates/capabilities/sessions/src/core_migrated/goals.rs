@@ -46,21 +46,15 @@ pub(crate) struct CreateGoalRequest {
     pub(crate) token_budget: Option<i64>,
 }
 
-static CONTINUATION_PROMPT_TEMPLATE: LazyLock<Template> =
-    LazyLock::new(
-        || match Template::parse(include_str!("../templates/goals/continuation.md")) {
-            Ok(template) => template,
-            Err(err) => panic!("embedded goals/continuation.md template is invalid: {err}"),
-        },
-    );
+static CONTINUATION_PROMPT_TEMPLATE: LazyLock<anyhow::Result<Template>> = LazyLock::new(|| {
+    Template::parse(include_str!("../templates/goals/continuation.md"))
+        .context("embedded goals/continuation.md template is invalid")
+});
 
-static BUDGET_LIMIT_PROMPT_TEMPLATE: LazyLock<Template> =
-    LazyLock::new(
-        || match Template::parse(include_str!("../templates/goals/budget_limit.md")) {
-            Ok(template) => template,
-            Err(err) => panic!("embedded goals/budget_limit.md template is invalid: {err}"),
-        },
-    );
+static BUDGET_LIMIT_PROMPT_TEMPLATE: LazyLock<anyhow::Result<Template>> = LazyLock::new(|| {
+    Template::parse(include_str!("../templates/goals/budget_limit.md"))
+        .context("embedded goals/budget_limit.md template is invalid")
+});
 
 #[derive(Clone, Copy)]
 enum BudgetLimitSteering {
@@ -885,7 +879,7 @@ impl Session {
         )
         .await;
         if should_steer_budget_limit {
-            let item = budget_limit_steering_item(&goal);
+            let item = budget_limit_steering_item(&goal)?;
             if self.inject_response_items(vec![item]).await.is_err() {
                 tracing::debug!("skipping budget-limit goal steering because no turn is active");
             }
@@ -1252,12 +1246,19 @@ impl Session {
         }
         let goal_id = goal.goal_id.clone();
         let goal = protocol_goal_from_state(goal);
+        let continuation_text = match continuation_prompt(&goal) {
+            Ok(text) => text,
+            Err(err) => {
+                tracing::warn!("failed to render goal continuation template: {err:#}");
+                return None;
+            }
+        };
         Some(GoalContinuationCandidate {
             goal_id,
             items: vec![ResponseInputItem::Message {
                 role: "developer".to_string(),
                 content: vec![ContentItem::InputText {
-                    text: continuation_prompt(&goal),
+                    text: continuation_text,
                 }],
                 phase: None,
             }],
@@ -1347,7 +1348,7 @@ fn should_ignore_goal_for_mode(mode: ModeKind) -> bool {
 // previous turn completes. Runtime-owned state such as budget exhaustion is
 // reported as context, but the model is only asked to mark goals active,
 // paused, or complete.
-fn continuation_prompt(goal: &ThreadGoal) -> String {
+fn continuation_prompt(goal: &ThreadGoal) -> anyhow::Result<String> {
     let token_budget = goal
         .token_budget
         .map(|budget| budget.to_string())
@@ -1360,19 +1361,21 @@ fn continuation_prompt(goal: &ThreadGoal) -> String {
     let time_used_seconds = goal.time_used_seconds.to_string();
     let objective = escape_xml_text(&goal.objective);
 
-    match CONTINUATION_PROMPT_TEMPLATE.render([
-        ("objective", objective.as_str()),
-        ("tokens_used", tokens_used.as_str()),
-        ("time_used_seconds", time_used_seconds.as_str()),
-        ("token_budget", token_budget.as_str()),
-        ("remaining_tokens", remaining_tokens.as_str()),
-    ]) {
-        Ok(prompt) => prompt,
-        Err(err) => panic!("embedded goals/continuation.md template failed to render: {err}"),
-    }
+    let template = CONTINUATION_PROMPT_TEMPLATE
+        .as_ref()
+        .map_err(|err| anyhow::anyhow!("{err:#}"))?;
+    template
+        .render([
+            ("objective", objective.as_str()),
+            ("tokens_used", tokens_used.as_str()),
+            ("time_used_seconds", time_used_seconds.as_str()),
+            ("token_budget", token_budget.as_str()),
+            ("remaining_tokens", remaining_tokens.as_str()),
+        ])
+        .context("embedded goals/continuation.md template failed to render")
 }
 
-fn budget_limit_prompt(goal: &ThreadGoal) -> String {
+fn budget_limit_prompt(goal: &ThreadGoal) -> anyhow::Result<String> {
     let token_budget = goal
         .token_budget
         .map(|budget| budget.to_string())
@@ -1381,15 +1384,17 @@ fn budget_limit_prompt(goal: &ThreadGoal) -> String {
     let time_used_seconds = goal.time_used_seconds.to_string();
     let objective = escape_xml_text(&goal.objective);
 
-    match BUDGET_LIMIT_PROMPT_TEMPLATE.render([
-        ("objective", objective.as_str()),
-        ("tokens_used", tokens_used.as_str()),
-        ("time_used_seconds", time_used_seconds.as_str()),
-        ("token_budget", token_budget.as_str()),
-    ]) {
-        Ok(prompt) => prompt,
-        Err(err) => panic!("embedded goals/budget_limit.md template failed to render: {err}"),
-    }
+    let template = BUDGET_LIMIT_PROMPT_TEMPLATE
+        .as_ref()
+        .map_err(|err| anyhow::anyhow!("{err:#}"))?;
+    template
+        .render([
+            ("objective", objective.as_str()),
+            ("tokens_used", tokens_used.as_str()),
+            ("time_used_seconds", time_used_seconds.as_str()),
+            ("token_budget", token_budget.as_str()),
+        ])
+        .context("embedded goals/budget_limit.md template failed to render")
 }
 
 fn escape_xml_text(input: &str) -> String {
@@ -1399,14 +1404,14 @@ fn escape_xml_text(input: &str) -> String {
         .replace('>', "&gt;")
 }
 
-fn budget_limit_steering_item(goal: &ThreadGoal) -> ResponseInputItem {
-    ResponseInputItem::Message {
+fn budget_limit_steering_item(goal: &ThreadGoal) -> anyhow::Result<ResponseInputItem> {
+    Ok(ResponseInputItem::Message {
         role: "developer".to_string(),
         content: vec![ContentItem::InputText {
-            text: budget_limit_prompt(goal),
+            text: budget_limit_prompt(goal)?,
         }],
         phase: None,
-    }
+    })
 }
 
 pub(crate) fn protocol_goal_from_state(goal: vac_state::ThreadGoal) -> ThreadGoal {
@@ -1524,6 +1529,7 @@ mod tests {
             created_at: 1,
             updated_at: 2,
         })
+        .expect("render continuation template")
         .replace("\r\n", "\n");
 
         assert!(prompt.contains("finish the stack"));
@@ -1549,6 +1555,7 @@ mod tests {
             created_at: 1,
             updated_at: 2,
         })
+        .expect("render budget limit template")
         .replace("\r\n", "\n");
 
         assert!(prompt.contains("finish the stack"));
@@ -1573,7 +1580,8 @@ mod tests {
             time_used_seconds: 0,
             created_at: 1,
             updated_at: 2,
-        });
+        })
+        .expect("render continuation template");
         let budget_limit = budget_limit_prompt(&ThreadGoal {
             thread_id: ThreadId::new(),
             objective: objective.to_string(),
@@ -1583,7 +1591,8 @@ mod tests {
             time_used_seconds: 56,
             created_at: 1,
             updated_at: 2,
-        });
+        })
+        .expect("render budget limit template");
 
         for prompt in [continuation, budget_limit] {
             assert!(prompt.contains(&escaped_objective));

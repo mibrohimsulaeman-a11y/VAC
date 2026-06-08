@@ -1,6 +1,6 @@
 //! Local MCP connector helpers.
 //!
-//! The ChatGPT Apps cloud directory was removed for the local TUI+CLI coding tool build. This
+//! The VAC connector apps cloud directory was removed for the local TUI+CLI coding tool build. This
 //! module keeps only MCP-derived `@mention` connector labels and local app-tool policy handling.
 
 use std::collections::HashMap;
@@ -72,7 +72,7 @@ pub struct AccessibleConnectorsStatus {
 
 /// List every locally known connector from installed MCP plugin metadata.
 ///
-/// Cloud ChatGPT Apps directory fetching is intentionally retired; this only
+/// Cloud VAC connector apps directory fetching is intentionally retired; this only
 /// projects local plugin connector metadata into the same `AppInfo` shape used
 /// by the TUI connector picker.
 pub async fn list_all_connectors(config: &Config) -> anyhow::Result<Vec<AppInfo>> {
