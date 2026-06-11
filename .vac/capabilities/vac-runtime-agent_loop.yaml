@@ -1,0 +1,73 @@
+schema_version: 2
+kind: capability
+id: vac.runtime.agent_loop
+title: VAC v1.5 Bounded Agent Loop
+readiness:
+  declared: partial
+  computed: partial
+  effective: partial
+  reason: "SV runtime behavior and E2E fixture harness implemented; cargo/build gates deferred to local TV loop"
+  blockers:
+    - cargo_validation_not_run_in_sandbox
+    - l2_broker_enforcement_not_verified
+  last_checked_at: "2026-06-10T05:12:00Z"
+owner:
+  crate: vac-agent-loop
+  module: bound_runtime
+ownership:
+  targets:
+    - kind: path
+      include:
+        - vac-rs/crates/runtime/vac-agent-loop/**
+      exclude:
+        - target/**
+        - .git/**
+        - node_modules/**
+    - kind: path
+      include:
+        - tests/fixtures/runtime/bound_agent_e2e_cases.json
+        - scripts/vac-runtime-agent-e2e-sv.py
+policy:
+  risk: high
+  mutates_files: true
+  network: false
+  redaction: true
+  approval_required_for:
+    - execute_process
+    - filesystem_delete
+    - network_access
+surfaces:
+  cli:
+    enabled: false
+    commands:
+      - vac runtime inspect
+  palette: true
+  tui:
+    route: /runtime
+validation:
+  gates:
+    - sv.runtime.agent_e2e
+    - sv.static_architecture
+    - sv.docs.current_state
+  commands:
+    - id: sv.runtime.agent_e2e
+      runner: python3
+      args:
+        - scripts/vac-runtime-agent-e2e-sv.py
+      risk: safe_read
+      approval: never
+    - id: sv.docs.current_state
+      runner: python3
+      args:
+        - scripts/check-docs-current-state.py
+      risk: safe_read
+      approval: never
+    - id: sv.static.validate
+      runner: python3
+      args:
+        - scripts/sv_static_validate.py
+      risk: safe_read
+      approval: never
+docs:
+  - docs/workflow-control-plane/VAC_RUNTIME_V1_5_BOUND_AGENT.md
+  - docs/workflow-control-plane/VAC_CURRENT_DEVELOPMENT_STATE.md

@@ -1,0 +1,28 @@
+[package]
+name = "vac-mcp-proxy"
+version = { workspace = true }
+edition.workspace = true
+description.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+vac-mcp-config = { workspace = true }
+vac-foundation = { workspace = true }
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+rmcp = { workspace = true }
+tracing = { workspace = true }
+toml = { workspace = true }
+reqwest = { workspace = true }
+rustls = { workspace = true }
+rustls-platform-verifier = { workspace = true }
+axum = { workspace = true }
+axum-server = { workspace = true }
+

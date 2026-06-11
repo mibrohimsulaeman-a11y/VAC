@@ -1,0 +1,31 @@
+[package]
+name = "vac-agent-loop"
+version = { workspace = true }
+edition = "2024"
+description = { workspace = true }
+license = { workspace = true }
+readme = "README.md"
+
+[lints]
+workspace = true
+
+[dependencies]
+vac-paths = { workspace = true }
+vac-jcs = { workspace = true }
+vac-provider-core = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_yaml = { workspace = true }
+uuid = { workspace = true }
+tokio = { workspace = true }
+chrono = { workspace = true }
+async-trait = { workspace = true }
+thiserror = { workspace = true }
+sha2 = { workspace = true }
+vac-shell-approval = { workspace = true }
+vac-policy = { workspace = true }
+tokio-util = { version = "0.7", features = ["rt"] }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+

@@ -1,171 +1,18 @@
 [package]
-edition.workspace = true
-license.workspace = true
 name = "vac-core"
 version.workspace = true
-
-[lib]
-doctest = false
-name = "vac_core"
-path = "src/lib.rs"
-
-[[bin]]
-name = "vac-write-config-schema"
-path = "src/bin/config_schema.rs"
+edition.workspace = true
+description = "VAC root facade crate for control-plane-first workspace integration."
+license.workspace = true
 
 [lints]
 workspace = true
 
 [dependencies]
-anyhow = { workspace = true }
-arc-swap = { workspace = true }
-async-channel = { workspace = true }
-async-trait = { workspace = true }
-base64 = { workspace = true }
-bm25 = { workspace = true }
-chrono = { workspace = true, features = ["serde"] }
-clap = { workspace = true, features = ["derive"] }
-vac-analytics = { workspace = true }
-vac-api = { workspace = true }
-vac-runtime-protocol = { workspace = true }
-vac-apply-patch = { workspace = true }
-vac-async-utils = { workspace = true }
-vac-code-mode = { workspace = true }
-vac-connectors = { workspace = true }
-vac-control-plane = { workspace = true }
-vac-capability-ownership = { workspace = true }
-vac-config = { workspace = true }
-vac-core-plugins = { workspace = true }
-vac-core-skills = { workspace = true }
-vac-exec-server = { workspace = true }
-vac-features = { workspace = true }
-vac-feedback = { workspace = true }
-vac-login = { workspace = true }
-vac-memories-read = { workspace = true }
-vac-mcp = { workspace = true }
-vac-model-provider-info = { workspace = true }
-vac-models-manager = { workspace = true }
-vac-shell-command = { workspace = true }
-vac-execpolicy = { workspace = true }
-vac-git-utils = { workspace = true }
-vac-hooks = { workspace = true }
-vac-network-proxy = { workspace = true }
-vac-otel = { workspace = true }
-vac-plugin = { workspace = true }
-vac-model-provider = { workspace = true }
-vac-protocol = { workspace = true }
-vac-provider-http = { workspace = true }
-vac-response-debug-context = { workspace = true }
-vac-rollout = { workspace = true }
-vac-rollout-trace = { workspace = true }
-vac-rmcp-client = { workspace = true }
-vac-sandboxing = { workspace = true }
-vac-state = { workspace = true }
-vac-terminal-detection = { workspace = true }
-vac-thread-store = { workspace = true }
-vac-tools = { workspace = true }
-vac-utils-absolute-path = { workspace = true }
-vac-utils-cache = { workspace = true }
-vac-utils-image = { workspace = true }
-vac-utils-home-dir = { workspace = true }
-vac-utils-output-truncation = { workspace = true }
-vac-utils-path = { workspace = true }
-vac-utils-plugins = { workspace = true }
-vac-utils-pty = { workspace = true }
-vac-utils-readiness = { workspace = true }
-vac-utils-string = { workspace = true }
-vac-utils-stream-parser = { workspace = true }
-vac-utils-template = { workspace = true }
-vac-windows-sandbox = { package = "vac-windows-sandbox", path = "../crates/runtime/sandbox/windows-sandbox-rs" }
-csv = { workspace = true }
-dirs = { workspace = true }
-ed25519-dalek = { workspace = true }
-dunce = { workspace = true }
-env-flags = { workspace = true }
-eventsource-stream = { workspace = true }
-futures = { workspace = true }
-http = { workspace = true }
-iana-time-zone = { workspace = true }
-image = { workspace = true, features = ["jpeg", "png", "webp"] }
-indexmap = { workspace = true }
-libc = { workspace = true }
-notify = { workspace = true }
-once_cell = { workspace = true }
-rand = { workspace = true }
-regex-lite = { workspace = true }
-reqwest = { workspace = true, features = ["json", "stream"] }
-rmcp = { workspace = true, default-features = false, features = [
-    "base64",
-    "macros",
-    "schemars",
-    "server",
-] }
-schemars = { workspace = true }
-serde = { workspace = true, features = ["derive"] }
-serde_json = { workspace = true }
-sqlx = { workspace = true }
-serde_path_to_error = { workspace = true }
-serde_yaml = { workspace = true }
-sha1 = { workspace = true }
-shlex = { workspace = true }
-similar = { workspace = true }
-tempfile = { workspace = true }
-thiserror = { workspace = true }
-tokio = { workspace = true, features = [
-    "io-std",
-    "macros",
-    "process",
-    "rt-multi-thread",
-    "signal",
-] }
-tokio-util = { workspace = true, features = ["rt"] }
-tokio-tungstenite = { workspace = true }
-toml = { workspace = true }
-toml_edit = { workspace = true }
-tracing = { workspace = true, features = ["log"] }
-url = { workspace = true }
-uuid = { workspace = true, features = ["serde", "v4", "v5"] }
-which = { workspace = true }
-whoami = { workspace = true }
-
-# Build OpenSSL from source for musl builds.
-[target.x86_64-unknown-linux-musl.dependencies]
-openssl-sys = { workspace = true, features = ["vendored"] }
-
-# Build OpenSSL from source for musl builds.
-[target.aarch64-unknown-linux-musl.dependencies]
-openssl-sys = { workspace = true, features = ["vendored"] }
-
-[target.'cfg(unix)'.dependencies]
-vac-shell-escalation = { workspace = true }
-
-[dev-dependencies]
-assert_cmd = { workspace = true }
-assert_matches = { workspace = true }
-vac-otel = { workspace = true }
-vac-test-binary-support = { workspace = true }
-vac-utils-cargo-bin = { workspace = true }
-core_test_support = { workspace = true }
-ctor = { workspace = true }
-insta = { workspace = true, features = ["json"] }
-maplit = { workspace = true }
-opentelemetry = { workspace = true }
-predicates = { workspace = true }
-pretty_assertions = { workspace = true }
-test-case = "3.3.1"
-opentelemetry_sdk = { workspace = true, features = [
-    "experimental_metrics_custom_reader",
-    "metrics",
-] }
-serial_test = { workspace = true }
-tempfile = { workspace = true }
-test-log = { workspace = true }
-tracing-opentelemetry = { workspace = true }
-tracing-subscriber = { workspace = true }
-tracing-test = { workspace = true, features = ["no-env-filter"] }
-walkdir = { workspace = true }
-wiremock = { workspace = true }
-zstd = { workspace = true }
-
-[package.metadata.cargo-shear]
-ignored = ["openssl-sys"]
+vac-brand.workspace = true
+vac-control-plane.workspace = true
+vac-runtime-jobs.workspace = true
+vac-readiness.workspace = true
+vac-types.workspace = true
+serde.workspace = true
+serde_json.workspace = true

@@ -1,0 +1,77 @@
+{
+  "compiled_snapshot_hash": "sha256:d9026406a1233ca1e89e9052045a86bb854373f4f02783031a7563044efdf481",
+  "control_plane": {
+    "audit": "jcs_json",
+    "authoring": "yaml",
+    "capabilities_snapshot_hash": "sha256:d2b8bf2cdae622bbf711bb32e89c35a5863bb206ac048dbdfc681e693aaafd33",
+    "compiled_snapshot_hash": "sha256:d9026406a1233ca1e89e9052045a86bb854373f4f02783031a7563044efdf481",
+    "compiled_snapshot_location": ".vac/cache/compiled",
+    "compiled_snapshots_current": true,
+    "generated_mirror_location": ".vac/registry/compiled",
+    "runtime": "compiled_json"
+  },
+  "control_plane_version": "1.9",
+  "enforcement_level": "L1",
+  "generated_at": "1970-01-01T00:00:00Z",
+  "id": "status.workspace.current",
+  "kind": "registry_status",
+  "model": null,
+  "product": "VAC",
+  "profile": "default",
+  "provider": null,
+  "readiness": {
+    "deprecated": 0,
+    "effective_percent": 0,
+    "partial": 24,
+    "planned": 1,
+    "ready": 0,
+    "source": "canonical compiled capabilities/current.json; cargo gates not evaluated",
+    "valid_percent": 0
+  },
+  "readiness_summary": {
+    "deprecated": 0,
+    "partial": 24,
+    "planned": 1,
+    "ready": 0,
+    "total": 25
+  },
+  "rulebook": "vac.core",
+  "runtime": {
+    "compiled_cache": ".vac/cache/compiled",
+    "gateway_default": false,
+    "jobs": ".vac/registry/runtime/jobs.json",
+    "journal": ".vac/db/runtime.db",
+    "server_default": false
+  },
+  "runtime_authority": "compiled_json",
+  "runtime_jobs": {
+    "queued": 0,
+    "running": 0
+  },
+  "runtime_mode": "local-control-plane",
+  "rust_workspace": "vac-rs",
+  "schema_version": 1,
+  "spec_sync": {
+    "unresolved_critical_drift": 0
+  },
+  "storage_class": {
+    "authority_manifests": "tracked",
+    "compiled_snapshot": "cache_or_db",
+    "generated_artifacts": "export_only_by_default",
+    "runtime_journal": "local_sqlite_ignored"
+  },
+  "tv_pending": [
+    "cargo_metadata",
+    "cargo_fmt",
+    "cargo_check",
+    "cargo_clippy",
+    "cargo_test"
+  ],
+  "updated_at": "1970-01-01T00:00:00Z",
+  "workspace": {
+    "conformance_level": "L1",
+    "enforcement_level": "L1",
+    "file_count": 722,
+    "rust_crate_count": 38
+  }
+}

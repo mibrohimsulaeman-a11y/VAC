@@ -1,0 +1,12 @@
+[package]
+name = "vac-telemetry"
+version = { workspace = true }
+edition = { workspace = true }
+description = { workspace = true }
+license = { workspace = true }
+
+[dependencies]
+
+
+[lints]
+workspace = true

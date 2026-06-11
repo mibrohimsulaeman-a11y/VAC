@@ -1,0 +1,33 @@
+schema_version: 1
+kind: policy
+id: vac.policy.clippy_debt
+status: partial
+title: Clippy deny-debt staged rollout policy
+summary: >
+  VAC v1.9 keeps CI product gates honest by not enabling deny-level unwrap/expect/string-slice lints
+  until the legacy donor/runtime debt has been paid down or waived per crate.
+default_decision: deny
+rules:
+  - id: vac.policy.clippy_debt.allow_observed_l1_debt_tracking
+    match:
+      action: checkpoint_write
+      path: project
+      data_class: null
+    decision: allow
+    reason: Source checkpoints may record clippy debt baselines as L1 evidence hints.
+  - id: vac.policy.clippy_debt.approval_for_new_unwrap_expect
+    match:
+      action: plan_modify
+      path: workspace
+      data_class: null
+    decision: approval_required
+    reason: New unwrap/expect debt requires explicit plan scope or local waiver until TV clippy passes.
+debt_baseline:
+  source: VAC_RUNTIME_V19_STATE8_SOURCE_CLEAN_STATE_EXPORT_AUDIT_20260611.md
+  cargo_tv: NotEvaluated
+  strategy: staged_paydown_before_deny_lints
+  current_policy: workspace_lints_allow_for_unwrap_expect_string_slice
+  required_exit:
+    - run cargo clippy from vac-rs successfully
+    - reduce or waive production unwrap/expect/panic hotspots per crate
+    - raise workspace lints from allow to deny only after TV proof exists

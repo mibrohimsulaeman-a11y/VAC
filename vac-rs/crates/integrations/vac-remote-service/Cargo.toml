@@ -1,0 +1,38 @@
+[package]
+name = "vac-remote-service"
+version = { workspace = true }
+edition = "2024"
+description = { workspace = true }
+license = { workspace = true }
+
+[lints]
+workspace = true
+
+[dependencies]
+vac-foundation = { workspace = true, features = ["sqlite"] }
+vac-provider-core = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+futures-util = { workspace = true }
+chrono = { workspace = true }
+reqwest = { workspace = true }
+rmcp = { workspace = true }
+eventsource-stream = "0.2.3"
+include_dir = "0.7"
+urlencoding = "2.1"
+async-trait = { workspace = true }
+libsql = "0.9.29"
+async-stream = "0.3.6"
+tokio = { workspace = true, features = ["macros", "fs", "io-util", "sync"] }
+serde_yaml = "0.9.34"
+once_cell = "1.21.3"
+regex.workspace = true
+tempfile = { workspace = true }
+sha2 = { workspace = true }
+dirs = "5.0"
+tracing = { workspace = true }
+
+[dev-dependencies]
+axum = { workspace = true }
+

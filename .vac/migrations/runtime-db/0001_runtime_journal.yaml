@@ -1,0 +1,14 @@
+schema_version: 1
+kind: migration
+id: runtime_db.0001
+from_version: 0
+to_version: 1
+applies_to: .vac/db/runtime.db
+rollback_supported: false
+verification_command:
+  id: vac.doctor.runtime_db
+  runner: vac
+  args: ["doctor", "runtime-db", "."]
+notes:
+  - runtime.db is ignored local journal state, not source authority.
+  - every runtime record that can authorize future work carries manifest_set_hash and git state.

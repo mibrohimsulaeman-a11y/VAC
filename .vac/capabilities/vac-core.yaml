@@ -1,0 +1,52 @@
+schema_version: 2
+kind: capability
+id: vac.core.facade
+title: VAC Core Facade
+readiness:
+  declared: partial
+  computed: partial
+  effective: partial
+  reason: facade crate scaffolded; cargo gates intentionally deferred
+  blockers:
+  - cargo_gates_not_evaluated
+  last_checked_at: '2026-06-10T03:47:54Z'
+owner:
+  crate: vac-core
+  module: root
+ownership:
+  targets:
+  - kind: path
+    include:
+    - vac-rs/core/**
+policy:
+  risk: safe_read
+  mutates_files: false
+  network: false
+  redaction: true
+  approval_required_for:
+  - filesystem_delete
+  - execute_process
+surfaces:
+  tui:
+    route: /core
+  palette: false
+  cli:
+    enabled: false
+    commands: []
+validation:
+  gates:
+  - vac.static.structure
+  commands:
+  - id: vac.static.gate
+    runner: vac-script-runner
+    args:
+    - --script-id
+    - vac.static.gate
+    risk: safe_read
+    approval: policy
+    script_binding:
+      script_id: vac.static.gate
+      broker_owned: true
+      immutable_path: true
+docs:
+- docs/workflow-control-plane/VAC_V1_5_REPO_ARCHITECTURE.md

@@ -1,9 +1,0 @@
----
-source: crates/surfaces/tui/src/history_cell/split_006_finalmessageseparator.rs.inc
-assertion_line: 1500
-expression: rendered
----
-• Explored
-  └ Search shimmer_spans
-    Read shimmer.rs
-    Read status_indicator_widget.rs

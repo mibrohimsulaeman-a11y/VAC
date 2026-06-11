@@ -1,0 +1,15 @@
+{
+  "id": "runtime.v15.needs_discussion",
+  "description": "Completion may pause only when open question, blocking reason, and operator-visible status are explicit.",
+  "closeout_patch": {
+    "task": {
+      "state": "needs_discussion",
+      "open_questions": ["Which intent spec owns the remote broker compatibility behavior?"]
+    },
+    "spec_sync": {"no_critical_spec_drift": false, "unresolved_critical_drift": 1},
+    "explicit_open_question": "Which intent spec owns the remote broker compatibility behavior?",
+    "blocking_reason": "critical spec drift requires operator decision",
+    "operator_visible_status": true
+  },
+  "expect_completion": "paused_for_discussion"
+}

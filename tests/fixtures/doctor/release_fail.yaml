@@ -1,7 +1,0 @@
-schema_version: 1
-kind: registry_status
-id: doctor.release.fail
-release:
-  policy_loaded: false
-  hard_quarantine_count: 1
-  broken_evidence_chain: true

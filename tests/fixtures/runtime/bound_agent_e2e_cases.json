@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "kind": "runtime_e2e_fixture_matrix",
+  "id": "fixture.runtime.bound_agent_e2e",
+  "cases": [
+    {
+      "id": "happy_path_done",
+      "expect": "done",
+      "registry": {
+        "authority": "compiled_json",
+        "compiled_snapshot_current": true,
+        "deterministic_index_current": true,
+        "policy_loaded": true,
+        "conformance_level": "L1",
+        "capability_ready": true,
+        "owns_path": true
+      },
+      "plan": {
+        "status": "approved",
+        "approval_required": false,
+        "approval_approved": true,
+        "path_forbidden": false,
+        "path_in_plan": true,
+        "range_inside": true,
+        "anchor_matches": true,
+        "budget_ok": true
+      },
+      "command": {
+        "runner": "python",
+        "args": ["scripts/vac-runtime-agent-e2e-sv.py"],
+        "approval": "never",
+        "risk": "safe_read",
+        "operator_approved": false
+      },
+      "validation": { "exit_zero": true, "no_new_orphans": true },
+      "closeout": {
+        "tasks_terminal": true,
+        "spec_terminal": true,
+        "todo_terminal": true,
+        "tasks_complete": true,
+        "spec_complete": true,
+        "todo_complete": true,
+        "discussion_escape": false,
+        "evidence_valid": true,
+        "compiled_json_snapshot_current": true,
+        "no_critical_spec_drift": true,
+        "no_unresolved_readiness_mismatch": true,
+        "no_code_without_capability": true,
+        "no_capability_without_current_intent_spec": true,
+        "assessment_findings_have_span_evidence": true,
+        "operator_visible_status": true
+      }
+    },
+    {
+      "id": "raw_yaml_authority_blocks_pre_plan",
+      "expect": "blocked_pre_plan",
+      "registry": { "authority": "raw_yaml", "compiled_snapshot_current": true, "deterministic_index_current": true, "policy_loaded": true, "conformance_level": "L1", "capability_ready": true, "owns_path": true }
+    },
+    {
+      "id": "stale_compiled_snapshot_blocks_pre_plan",
+      "expect": "blocked_pre_plan",
+      "registry": { "authority": "compiled_json", "compiled_snapshot_current": false, "deterministic_index_current": true, "policy_loaded": true, "conformance_level": "L1", "capability_ready": true, "owns_path": true }
+    },
+    {
+      "id": "missing_policy_blocks_pre_plan",
+      "expect": "blocked_pre_plan",
+      "registry": { "authority": "compiled_json", "compiled_snapshot_current": true, "deterministic_index_current": true, "policy_loaded": false, "conformance_level": "L1", "capability_ready": true, "owns_path": true }
+    },
+    {
+      "id": "unowned_path_blocks_pre_plan",
+      "expect": "blocked_pre_plan",
+      "registry": { "authority": "compiled_json", "compiled_snapshot_current": true, "deterministic_index_current": true, "policy_loaded": true, "conformance_level": "L1", "capability_ready": true, "owns_path": false }
+    },
+    {
+      "id": "planned_capability_blocks_pre_plan",
+      "expect": "blocked_pre_plan",
+      "registry": { "authority": "compiled_json", "compiled_snapshot_current": true, "deterministic_index_current": true, "policy_loaded": true, "conformance_level": "L1", "capability_ready": false, "owns_path": true }
+    },
+    {
+      "id": "forbidden_file_blocks_pre_patch",
+      "expect": "blocked_pre_patch",
+      "registry": { "authority": "compiled_json", "compiled_snapshot_current": true, "deterministic_index_current": true, "policy_loaded": true, "conformance_level": "L1", "capability_ready": true, "owns_path": true },
+      "plan": { "status": "approved", "approval_required": false, "approval_approved": true, "path_forbidden": true, "path_in_plan": true, "range_inside": true, "anchor_matches": true, "budget_ok": true }
+    },
+    {
+      "id": "shell_runner_blocks_pre_command",
+      "expect": "blocked_pre_command",
+      "registry": { "authority": "compiled_json", "compiled_snapshot_current": true, "deterministic_index_current": true, "policy_loaded": true, "conformance_level": "L1", "capability_ready": true, "owns_path": true },
+      "command": { "runner": "bash", "args": ["-lc", "cargo check"], "approval": "policy", "risk": "execute_process", "operator_approved": false }
+    },
+    {
+      "id": "destructive_command_pauses_for_approval",
+      "expect": "paused_pre_command",
+      "registry": { "authority": "compiled_json", "compiled_snapshot_current": true, "deterministic_index_current": true, "policy_loaded": true, "conformance_level": "L1", "capability_ready": true, "owns_path": true },
+      "command": { "runner": "rm", "args": ["-rf", "target/debug/incremental"], "approval": "always", "risk": "high", "operator_approved": false }
+    },
+    {
+      "id": "validation_failure_blocks_post_validation",
+      "expect": "blocked_post_validation",
+      "registry": { "authority": "compiled_json", "compiled_snapshot_current": true, "deterministic_index_current": true, "policy_loaded": true, "conformance_level": "L1", "capability_ready": true, "owns_path": true },
+      "validation": { "exit_zero": false, "no_new_orphans": true }
+    },
+    {
+      "id": "open_todo_blocks_completion_lock",
+      "expect": "blocked_completion_lock",
+      "registry": { "authority": "compiled_json", "compiled_snapshot_current": true, "deterministic_index_current": true, "policy_loaded": true, "conformance_level": "L1", "capability_ready": true, "owns_path": true },
+      "closeout": { "tasks_terminal": true, "spec_terminal": true, "todo_terminal": false, "tasks_complete": true, "spec_complete": true, "todo_complete": false, "discussion_escape": false, "evidence_valid": true, "compiled_json_snapshot_current": true, "no_critical_spec_drift": true, "no_unresolved_readiness_mismatch": true, "no_code_without_capability": true, "no_capability_without_current_intent_spec": true, "assessment_findings_have_span_evidence": true, "operator_visible_status": true }
+    },
+    {
+      "id": "critical_spec_drift_blocks_completion_lock",
+      "expect": "blocked_completion_lock",
+      "registry": { "authority": "compiled_json", "compiled_snapshot_current": true, "deterministic_index_current": true, "policy_loaded": true, "conformance_level": "L1", "capability_ready": true, "owns_path": true },
+      "closeout": { "tasks_terminal": true, "spec_terminal": true, "todo_terminal": true, "tasks_complete": true, "spec_complete": true, "todo_complete": true, "discussion_escape": false, "evidence_valid": true, "compiled_json_snapshot_current": true, "no_critical_spec_drift": false, "no_unresolved_readiness_mismatch": true, "no_code_without_capability": true, "no_capability_without_current_intent_spec": true, "assessment_findings_have_span_evidence": true, "operator_visible_status": true }
+    },
+    {
+      "id": "needs_discussion_pauses_and_surfaces_question",
+      "expect": "paused_completion_lock",
+      "registry": { "authority": "compiled_json", "compiled_snapshot_current": true, "deterministic_index_current": true, "policy_loaded": true, "conformance_level": "L1", "capability_ready": true, "owns_path": true },
+      "closeout": { "tasks_terminal": true, "spec_terminal": true, "todo_terminal": true, "tasks_complete": false, "spec_complete": true, "todo_complete": true, "discussion_escape": true, "evidence_valid": true, "compiled_json_snapshot_current": true, "no_critical_spec_drift": true, "no_unresolved_readiness_mismatch": true, "no_code_without_capability": true, "no_capability_without_current_intent_spec": true, "assessment_findings_have_span_evidence": true, "operator_visible_status": true }
+    },
+    {
+      "id": "l1_runtime_cannot_claim_l2",
+      "expect": "blocked_enforcement_honesty",
+      "requested_l2_claim": true,
+      "registry": { "authority": "compiled_json", "compiled_snapshot_current": true, "deterministic_index_current": true, "policy_loaded": true, "conformance_level": "L1", "capability_ready": true, "owns_path": true }
+    }
+  ]
+}

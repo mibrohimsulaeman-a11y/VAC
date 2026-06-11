@@ -1,9 +1,0 @@
----
-source: core/src/local_runtime/tests_serde.rs
-expression: "RuntimeCommand::Reject { approval_id: fixed_approval_id(), }"
----
-{
-  "Reject": {
-    "approval_id": "33333333-3333-3333-3333-333333333333"
-  }
-}

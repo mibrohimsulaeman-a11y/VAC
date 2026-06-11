@@ -1,0 +1,102 @@
+schema_version: 1
+kind: workflow
+id: maintenance.session_closeout
+title: VAC v1.5 session closeout and completion lock
+status: partial
+steps:
+  - id: compile_registry
+    uses: capability.registry.compile_snapshot
+    ui:
+      surface: /runtime
+      progress_panel: true
+      activity_log: true
+      approval_surface: false
+      evidence_surface: true
+  - id: spec_sync
+    uses: capability.spec.detect_drift
+    depends_on: [compile_registry]
+    ui:
+      surface: /spec-sync
+      progress_panel: true
+      activity_log: true
+      approval_surface: true
+      evidence_surface: true
+  - id: evidence_write
+    uses: capability.evidence.summarize
+    depends_on: [spec_sync]
+    ui:
+      surface: /runtime
+      progress_panel: true
+      activity_log: true
+      approval_surface: false
+      evidence_surface: true
+  - id: slice_register
+    uses: capability.slice.register
+    depends_on: [evidence_write]
+    ui:
+      surface: /capabilities
+      progress_panel: false
+      activity_log: true
+      approval_surface: false
+      evidence_surface: true
+  - id: security_scan
+    uses: capability.security.scan
+    depends_on: [slice_register]
+    ui:
+      surface: /assessment
+      progress_panel: true
+      activity_log: true
+      approval_surface: true
+      evidence_surface: true
+  - id: maintenance_doctor
+    uses: capability.maintenance.doctor
+    depends_on: [security_scan]
+    ui:
+      surface: /assessment
+      progress_panel: true
+      activity_log: true
+      approval_surface: false
+      evidence_surface: true
+  - id: lockcheck
+    uses: capability.session.lockcheck
+    depends_on: [maintenance_doctor]
+    ui:
+      surface: /runtime
+      progress_panel: true
+      activity_log: true
+      approval_surface: true
+      evidence_surface: true
+policy:
+  default_risk: medium
+  mutates_files: true
+  network: false
+  redaction: true
+  approval_required_for:
+    - execute_process
+    - filesystem_delete
+validation:
+  gates:
+    - tasks_terminal
+    - spec_terminal
+    - todo_terminal
+    - evidence_valid
+    - compiled_json_snapshot_current
+    - no_critical_spec_drift
+    - no_unresolved_readiness_mismatch
+    - no_code_without_capability
+    - no_capability_without_current_intent_spec
+    - assessment_findings_have_span_evidence
+  commands:
+    - id: sv.runtime.agent_e2e
+      runner: python3
+      args:
+        - scripts/vac-runtime-agent-e2e-sv.py
+      risk: safe_read
+      approval: never
+ui:
+  surface: /runtime
+  inspect_surface: /spec-sync
+  progress_panel: true
+  activity_log: true
+  approval_surface: true
+  evidence_surface: true

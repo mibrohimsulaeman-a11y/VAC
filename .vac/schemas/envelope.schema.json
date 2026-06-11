@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string"
+    },
+    "schema_version": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "id"
+  ],
+  "title": "VAC schema envelope",
+  "type": "object"
+}

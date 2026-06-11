@@ -1,0 +1,13 @@
+id: runtime-v15-reaudit-closure
+title: Runtime v1.5 re-audit closure
+status: done
+validation_commands:
+  - check-checkpoint-integrity
+  - vac-runtime-realpath-e2e
+  - vac-runtime-audit-closure-sv
+findings_closed:
+  - F-001
+  - F-002
+  - F-003
+  - F-004
+  - F-005

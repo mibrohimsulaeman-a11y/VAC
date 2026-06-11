@@ -1,12 +1,19 @@
 schema_version: 1
 kind: surface
 id: surface.cli
-title: CLI commands
-# `capabilities:` coverage is DERIVED (derived/surface-coverage.yaml) from these routes.
+title: VAC CLI surface
+capabilities:
+  - vac.surfaces.cli
 routes:
-  - { kind: cli, command: "vac init",   capability: vac.init,         status: ready }
-  - { kind: cli, command: "vac scan",   capability: vac.init,         status: ready }
-  - { kind: cli, command: "vac doctor", capability: vac.architecture, status: ready }
-  - { kind: cli, command: "vac why",    capability: vac.runtime,      status: ready }
-  - { kind: cli, command: "vac review", capability: vac.approvals,    status: ready }
-  - { kind: cli, command: "vac chat",   capability: vac.chat,         status: ready }
+  - kind: cli
+    command: vac
+    capability: vac.surfaces.cli
+    owner: vac-rs/crates/surfaces/vac-cli
+    visible: true
+    status: partial
+  - kind: cli
+    command: vac compile registry .
+    capability: vac.control_plane.registry
+    owner: vac-rs/crates/control-plane/vac-registry-compiler
+    visible: true
+    status: planned

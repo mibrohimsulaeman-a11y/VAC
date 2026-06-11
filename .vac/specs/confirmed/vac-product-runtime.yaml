@@ -1,0 +1,20 @@
+schema_version: 1
+kind: intent_spec
+id: intent.vac.runtime
+status: confirmed
+source: operator_prompt_and_spec_v1_5
+business_processes:
+  - id: vac.runtime.local_operator_console
+    description: "Operator can run VAC locally with a TUI that shows real session, model, control-plane, approval, and runtime job state."
+    required_capability: vac.surfaces.tui
+    invariants:
+      - no_hardcoded_model_name
+      - runtime_authority_uses_compiled_json
+      - destructive_actions_require_approval
+      - readiness_effective_never_exceeds_computed
+  - id: vac.runtime.job_monitor
+    description: "Operator can inspect one-shot, cron, and filewatch runtime jobs or an honest empty state."
+    required_capability: vac.runtime.jobs
+    invariants:
+      - jobs_loaded_from_runtime_snapshot
+      - empty_state_is_explicit

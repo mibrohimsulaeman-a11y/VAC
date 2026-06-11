@@ -1,0 +1,7 @@
+target/
+vac-rs/target/
+.git/
+node_modules/
+*.log
+.vac/cache/
+.vac/memories/*.db

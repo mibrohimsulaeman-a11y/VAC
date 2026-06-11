@@ -1,0 +1,19 @@
+schema_version: 1
+kind: workflow
+id: runtime.jobs.monitor
+status: partial
+title: Runtime jobs monitor
+steps:
+  - id: collect_oneshot
+    uses: capability.runtime.oneshot.collect
+  - id: collect_cron
+    uses: capability.runtime.cron.collect
+  - id: collect_filewatch
+    uses: capability.runtime.filewatch.collect
+  - id: write_snapshot
+    uses: capability.runtime.jobs.snapshot
+ui:
+  surface: /runtime
+  inspect_surface: /runtime/inspect
+  progress_panel: true
+  activity_log: true

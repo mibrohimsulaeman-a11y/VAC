@@ -1,8 +1,0 @@
-[env]
-RULES_RUST_RUNFILES_WORKSPACE_NAME = "vac"
-REPOSITORY_NAME = "vac"
-RUSTC_WRAPPER = "sccache"
-VAC_SKIP_BUILD_CHECK = "1"
-
-[build]
-rustc-wrapper = "sccache"

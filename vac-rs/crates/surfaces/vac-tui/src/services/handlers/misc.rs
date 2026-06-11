@@ -1,0 +1,462 @@
+//! Miscellaneous Event Handlers
+//!
+//! Handles miscellaneous events that don't fit into other categories.
+
+use crate::app::{AppState, InputEvent};
+use crate::services::bash_block::render_bash_block_rejected;
+use crate::services::board_tasks::{
+    FetchTasksResult, extract_board_agent_id_from_messages, fetch_tasks_as_todo_items,
+};
+use crate::services::commands::list_auto_approved_tools;
+use crate::services::detect_term::ThemeColors;
+use crate::services::file_search::{handle_file_selection, handle_tab_trigger};
+use crate::services::helper_block::{handle_errors, push_error_message, push_styled_message};
+use crate::services::message::Message;
+use crate::services::message::get_wrapped_collapsed_message_lines_cached;
+use ratatui::layout::Size;
+use uuid::Uuid;
+use vac_provider_core::Model;
+
+/// Handle error event
+pub fn handle_error(state: &mut AppState, err: String) {
+    if err.contains("FREE_PLAN") {
+        push_error_message(state, "Free plan limit reached.", None);
+        push_error_message(
+            state,
+            "Please top up your account at https://vastar.ai/settings/billing to keep VACing.",
+            Some(true),
+        );
+        return;
+    }
+    if err == "STREAM_CANCELLED" {
+        // Clear cancellation flag since we're now handling it
+        state.tool_call_state.cancel_requested = false;
+        state.tool_call_state.is_streaming = false;
+
+        let rendered_lines =
+            render_bash_block_rejected("Interrupted by user", "System", None, None);
+        state.messages_scrolling_state.messages.push(Message {
+            id: Uuid::new_v4(),
+            content: crate::services::message::MessageContent::StyledBlock(rendered_lines),
+            is_collapsed: None,
+        });
+
+        // Invalidate cache and scroll to bottom so the cancelled message is visible
+        crate::services::message::invalidate_message_lines_cache(state);
+        state.messages_scrolling_state.stay_at_bottom = true;
+        return;
+    }
+    let mut error_message = handle_errors(err);
+    if error_message.contains("RETRY_ATTEMPT") || error_message.contains("MAX_RETRY_REACHED") {
+        if error_message.contains("RETRY_ATTEMPT") {
+            let retry_attempt = error_message.split("RETRY_ATTEMPT_").last().unwrap_or("1");
+            error_message = format!(
+                "There was an issue sending your request, retrying attempt {}...",
+                retry_attempt
+            );
+        } else if error_message.contains("MAX_RETRY_REACHED") {
+            error_message = "Maximum retry attempts reached. Please try again later.".to_string();
+        }
+        use super::tool::handle_retry_mechanism;
+        handle_retry_mechanism(state);
+    }
+
+    push_error_message(state, &error_message, None);
+}
+
+/// Handle resized event
+pub fn handle_resized(state: &mut AppState, width: u16, height: u16) {
+    state.terminal_ui_state.terminal_size = Size { width, height };
+
+    // Resize shell parser
+    // We reserve space for borders (4 columns for side borders/padding, 2 rows for top/bottom borders)
+    let shell_rows = height.saturating_sub(2).max(1);
+    let shell_cols = width.saturating_sub(4).max(1);
+    state
+        .shell_runtime_state
+        .screen
+        .set_size(shell_rows, shell_cols);
+}
+
+/// Handle toggle cursor visible event
+pub fn handle_toggle_cursor_visible(state: &mut AppState) {
+    state.input_state.cursor_visible = !state.input_state.cursor_visible;
+}
+
+/// Handle toggle auto approve event
+pub fn handle_toggle_auto_approve(state: &mut AppState) {
+    if let Err(e) = state
+        .configuration_state
+        .auto_approve_manager
+        .toggle_enabled()
+    {
+        push_error_message(
+            state,
+            &format!("Failed to toggle auto-approve: {}", e),
+            None,
+        );
+    } else {
+        let status = if state.configuration_state.auto_approve_manager.is_enabled() {
+            "enabled"
+        } else {
+            "disabled"
+        };
+
+        let status_color = if state.configuration_state.auto_approve_manager.is_enabled() {
+            ThemeColors::green()
+        } else {
+            ThemeColors::red()
+        };
+
+        push_styled_message(
+            state,
+            &format!("Auto-approve {}", status),
+            status_color,
+            "",
+            ThemeColors::green(),
+        );
+    }
+}
+
+/// Handle auto approve current tool event
+pub fn handle_auto_approve_current_tool(state: &mut AppState) {
+    list_auto_approved_tools(state);
+}
+
+/// Handle tab event
+pub fn handle_tab(state: &mut AppState, message_area_height: usize, message_area_width: usize) {
+    // Handle tab switching in unified shortcuts popup (Commands -> Shortcuts -> Sessions -> Commands)
+    if state.shortcuts_panel_state.is_visible {
+        state.shortcuts_panel_state.mode = match state.shortcuts_panel_state.mode {
+            crate::app::ShortcutsPopupMode::Commands => crate::app::ShortcutsPopupMode::Shortcuts,
+            crate::app::ShortcutsPopupMode::Shortcuts => crate::app::ShortcutsPopupMode::Sessions,
+            crate::app::ShortcutsPopupMode::Sessions => crate::app::ShortcutsPopupMode::Commands,
+        };
+        return;
+    }
+
+    if state.messages_scrolling_state.show_collapsed_messages {
+        handle_collapsed_messages_tab(state, message_area_height, message_area_width);
+    } else {
+        handle_tab_normal(state);
+    }
+}
+
+/// Handle tab in normal mode
+fn handle_tab_normal(state: &mut AppState) {
+    // If side panel is visible and input is empty, cycle sections
+    if state.side_panel_state.is_shown && state.input_state.text_area.text().is_empty() {
+        state.side_panel_state.focused_section = state.side_panel_state.focused_section.next();
+        return;
+    }
+
+    // Check if we're already in helper dropdown mode
+    if state.input_state.show_helper_dropdown {
+        // If in file file_search mode, handle file selection
+        if state.input_state.file_search.is_active() {
+            let selected_file = state
+                .input_state
+                .file_search
+                .get_file_at_index(state.input_state.helper_selected)
+                .map(|s| s.to_string());
+            if let Some(selected_file) = selected_file {
+                handle_file_selection(state, &selected_file);
+            }
+            return;
+        }
+        // Handle helper selection - auto-complete the selected helper
+        if !state.input_state.filtered_helpers.is_empty() && state.input().starts_with('/') {
+            let selected_helper =
+                &state.input_state.filtered_helpers[state.input_state.helper_selected];
+            // Commands that take arguments should have a trailing space
+            let needs_space = matches!(
+                selected_helper.command.as_str(),
+                "/editor" | "/toggle_auto_approve"
+            ) || matches!(
+                selected_helper.source,
+                crate::app::CommandSource::Custom { .. }
+            ) || matches!(
+                &selected_helper.source,
+                crate::app::CommandSource::BuiltInWithPrompt { prompt_content }
+                    if prompt_content.contains("{input}")
+            );
+            let new_text = if needs_space {
+                format!("{} ", selected_helper.command)
+            } else {
+                selected_helper.command.to_string()
+            };
+            state.input_state.text_area.set_text(&new_text);
+            // Position cursor at the end of the text
+            state.input_state.text_area.set_cursor(new_text.len());
+            state.input_state.show_helper_dropdown = false;
+            state.input_state.filtered_helpers.clear();
+            state.input_state.helper_selected = 0;
+            state.input_state.helper_scroll = 0;
+            return;
+        }
+        return;
+    }
+    // Trigger file file_search with Tab
+    handle_tab_trigger(state);
+}
+
+/// Handle collapsed messages tab
+fn handle_collapsed_messages_tab(
+    state: &mut AppState,
+    message_area_height: usize,
+    message_area_width: usize,
+) {
+    let collapsed_messages: Vec<Message> = state
+        .messages_scrolling_state
+        .messages
+        .iter()
+        .filter(|m| m.is_collapsed == Some(true))
+        .cloned()
+        .collect();
+
+    if collapsed_messages.is_empty() {
+        return;
+    }
+
+    // Move to next message
+    state.messages_scrolling_state.collapsed_messages_selected =
+        (state.messages_scrolling_state.collapsed_messages_selected + 1) % collapsed_messages.len();
+
+    // Calculate scroll position to show the top of the selected message
+    let mut line_count = 0;
+
+    for (i, _message) in collapsed_messages.iter().enumerate() {
+        if i == state.messages_scrolling_state.collapsed_messages_selected {
+            // This is our target message, set scroll to show its top
+            state.messages_scrolling_state.collapsed_messages_scroll = line_count;
+            break;
+        }
+
+        // Count lines for this message
+        let message_lines = get_wrapped_collapsed_message_lines_cached(state, message_area_width);
+        line_count += message_lines.len();
+    }
+
+    // Ensure scroll doesn't exceed bounds
+    let all_lines = get_wrapped_collapsed_message_lines_cached(state, message_area_width);
+    let total_lines = all_lines.len();
+    let max_scroll = total_lines.saturating_sub(message_area_height);
+    state.messages_scrolling_state.collapsed_messages_scroll = state
+        .messages_scrolling_state
+        .collapsed_messages_scroll
+        .min(max_scroll);
+}
+
+/// Handle Ctrl+S event
+pub fn handle_ctrl_s(state: &mut AppState, input_tx: &tokio::sync::mpsc::Sender<InputEvent>) {
+    if state.rulebook_switcher_state.show_rulebook_switcher {
+        let _ = input_tx.try_send(InputEvent::RulebookSwitcherSelectAll);
+        return;
+    }
+    let _ = input_tx.try_send(InputEvent::ShowShortcuts);
+}
+
+/// Handle attempt quit event
+pub fn handle_attempt_quit(state: &mut AppState, input_tx: &tokio::sync::mpsc::Sender<InputEvent>) {
+    use std::time::Instant;
+    let now = Instant::now();
+    if !state.quit_intent_state.ctrl_c_pressed_once
+        || state.quit_intent_state.ctrl_c_timer.is_none()
+        || state
+            .quit_intent_state
+            .ctrl_c_timer
+            .map(|t| now > t)
+            .unwrap_or(true)
+    {
+        // First press or timer expired: clear input, move cursor, set timer
+        state.input_state.text_area.set_text("");
+        state.quit_intent_state.ctrl_c_pressed_once = true;
+        state.quit_intent_state.ctrl_c_timer = Some(now + std::time::Duration::from_secs(2));
+        state.background_tasks_state.running_background_tasks = 0;
+
+        // Query running background tasks count asynchronously
+        if let Some(handle) = state.background_tasks_state.task_manager_handle.clone() {
+            let input_tx_clone = input_tx.clone();
+            tokio::spawn(async move {
+                let count = match handle.get_all_tasks().await {
+                    Ok(tasks) => tasks
+                        .iter()
+                        .filter(|t| {
+                            matches!(
+                                t.status,
+                                vac_foundation::task_manager::TaskStatus::Running
+                                    | vac_foundation::task_manager::TaskStatus::Pending
+                                    | vac_foundation::task_manager::TaskStatus::Paused
+                            )
+                        })
+                        .count(),
+                    Err(_) => 0,
+                };
+                let _ = input_tx_clone.try_send(InputEvent::RunningBackgroundTasksCount(count));
+            });
+        }
+    } else {
+        // Second press within 2s: trigger quit
+        state.quit_intent_state.ctrl_c_pressed_once = false;
+        state.quit_intent_state.ctrl_c_timer = None;
+        // Clear the background tasks count since we're quitting
+        state.background_tasks_state.running_background_tasks = 0;
+        let _ = input_tx.try_send(InputEvent::Quit);
+    }
+}
+
+/// Handle toggle mouse capture event
+pub fn handle_toggle_mouse_capture(_state: &mut AppState) {
+    #[cfg(unix)]
+    let _ = crate::toggle_mouse_capture(_state);
+}
+
+/// Handle set sessions event
+pub fn handle_set_sessions(state: &mut AppState, sessions: Vec<crate::app::SessionInfo>) {
+    // Terminate any active shell before showing sessions popup
+    if let Some(cmd) = &state.shell_popup_state.active_shell_command {
+        let _ = cmd.kill();
+    }
+    if let Some(shell_msg_id) = state.shell_session_state.interactive_shell_message_id {
+        state
+            .messages_scrolling_state
+            .messages
+            .retain(|m| m.id != shell_msg_id);
+    }
+    state.shell_popup_state.active_shell_command = None;
+    state.shell_popup_state.active_shell_command_output = None;
+    state.shell_session_state.interactive_shell_message_id = None;
+    state.shell_popup_state.is_visible = false;
+    state.shell_popup_state.is_expanded = false;
+    state.shell_popup_state.waiting_for_shell_input = false;
+    state.input_state.text_area.set_shell_mode(false);
+
+    state.sessions_state.sessions = sessions;
+    state.sessions_state.session_selected = 0; // Reset selection to first item
+    // Open unified popup at Sessions tab instead of separate sessions dialog
+    state.shortcuts_panel_state.is_visible = true;
+    state.shortcuts_panel_state.mode = crate::app::ShortcutsPopupMode::Sessions;
+}
+
+/// Handle set banner message event
+pub fn handle_set_banner_message(
+    state: &mut AppState,
+    text: String,
+    style: crate::services::banner::BannerStyle,
+) {
+    state.banner_state.message = Some(crate::services::banner::BannerMessage::new(text, style));
+}
+
+/// Handle start loading operation event
+pub fn handle_start_loading_operation(
+    state: &mut AppState,
+    operation: crate::app::LoadingOperation,
+) {
+    state
+        .loading_state
+        .loading_manager
+        .start_operation(operation.clone());
+    state.loading_state.is_loading = state.loading_state.loading_manager.is_loading();
+    state.loading_state.loading_type = state.loading_state.loading_manager.get_loading_type();
+}
+
+/// Handle end loading operation event
+pub fn handle_end_loading_operation(state: &mut AppState, operation: crate::app::LoadingOperation) {
+    // Check if this is a checkpoint resume before consuming operation
+    let is_checkpoint_resume = matches!(operation, crate::app::LoadingOperation::CheckpointResume);
+
+    state.loading_state.loading_manager.end_operation(operation);
+    state.loading_state.is_loading = state.loading_state.loading_manager.is_loading();
+    state.loading_state.loading_type = state.loading_state.loading_manager.get_loading_type();
+
+    // After checkpoint resume completes, ensure we scroll to show the latest messages
+    if is_checkpoint_resume {
+        state.messages_scrolling_state.scroll_to_bottom = true;
+        state.messages_scrolling_state.stay_at_bottom = true;
+        // Invalidate cache to ensure fresh render with correct scroll
+        crate::services::message::invalidate_message_lines_cache(state);
+    }
+}
+
+/// Handle assistant message event
+pub fn handle_assistant_message(state: &mut AppState, msg: String) {
+    // Clear any pending cancellation since a new assistant message arrived
+    state.tool_call_state.cancel_requested = false;
+    state
+        .messages_scrolling_state
+        .messages
+        .push(Message::assistant(None, msg, None));
+
+    // Invalidate cache since messages changed
+    crate::services::message::invalidate_message_lines_cache(state);
+
+    // Scroll to bottom to show the new message
+    state.messages_scrolling_state.scroll_to_bottom = true;
+    state.messages_scrolling_state.stay_at_bottom = true;
+
+    // Auto-show side panel on first message (assistant)
+    state.auto_show_side_panel();
+}
+
+/// Handle get status event
+pub fn handle_get_status(state: &mut AppState, account_info: String) {
+    state.sessions_state.account_info = account_info;
+}
+
+/// Handle stream model event - updates current_model for side panel display
+pub fn handle_stream_model(state: &mut AppState, model: Model) {
+    state.model_switcher_state.current_model = Some(model);
+}
+
+/// Handle billing info loaded event
+pub fn handle_billing_info_loaded(
+    state: &mut AppState,
+    billing_info: vac_foundation::models::billing::BillingResponse,
+) {
+    state.side_panel_state.billing_info = Some(billing_info);
+}
+
+/// Handle refresh board tasks event - spawns blocking task to fetch from agent-board
+pub fn handle_refresh_board_tasks(
+    state: &mut AppState,
+    input_tx: &tokio::sync::mpsc::Sender<InputEvent>,
+) {
+    // Try to get agent_id from state, or extract from message history
+    let agent_id =
+        state.side_panel_state.board_agent_id.clone().or_else(|| {
+            extract_board_agent_id_from_messages(&state.messages_scrolling_state.messages)
+        });
+
+    let Some(agent_id) = agent_id else {
+        return;
+    };
+
+    // Update state if we found it from messages
+    if state.side_panel_state.board_agent_id.is_none() {
+        state.side_panel_state.board_agent_id = Some(agent_id.clone());
+    }
+
+    let tx = input_tx.clone();
+    // Use spawn_blocking since fetch_tasks_as_todo_items calls std::process::Command
+    // which is a blocking operation that should not run on the async runtime
+    tokio::task::spawn_blocking(move || match fetch_tasks_as_todo_items(&agent_id) {
+        Ok(result) => {
+            let _ = tx.blocking_send(InputEvent::BoardTasksLoaded(result));
+        }
+        Err(err) => {
+            let _ = tx.blocking_send(InputEvent::BoardTasksError(err));
+        }
+    });
+}
+
+/// Handle board tasks loaded event
+pub fn handle_board_tasks_loaded(state: &mut AppState, result: FetchTasksResult) {
+    state.side_panel_state.todos = result.items;
+    state.side_panel_state.task_progress = Some(result.progress);
+}
+
+/// Handle board tasks error event
+pub fn handle_board_tasks_error(_state: &mut AppState, _err: String) {
+    // Log error but don't show to user - tasks will just be empty
+    // Could add logging here if tracing is added as a dependency
+}

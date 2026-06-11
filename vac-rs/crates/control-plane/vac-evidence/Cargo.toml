@@ -1,0 +1,17 @@
+[package]
+name = "vac-evidence"
+version = { workspace = true }
+edition = { workspace = true }
+description = { workspace = true }
+license = { workspace = true }
+
+[dependencies]
+vac-jcs = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+sha2 = { workspace = true }
+
+
+[lints]
+workspace = true

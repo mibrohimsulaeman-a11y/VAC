@@ -1,0 +1,256 @@
+use uuid::Uuid;
+use vac_foundation::models::integrations::openai::{
+    ChatMessage, FunctionDefinition, MessageContent, Role, Tool, ToolCallResult,
+};
+
+/// Resolve a short model name against the provider's model catalog.
+///
+/// When the user passes `--model GLM-5` (a short, unprefixed name) and the model
+/// gets assigned `provider: "vac"`, the VAC API still needs the full
+/// to route the request to the correct upstream provider.
+///
+/// This function fetches the available models from the provider and tries to find
+/// a match by:
+/// 1. Exact match on the full model ID
+/// 2. Case-insensitive match on the last segment of the model ID (after the last `/`)
+/// 3. Case-insensitive match on the model name
+///
+/// Returns the resolved model if found, or the original model unchanged.
+pub async fn resolve_model_from_provider(
+    model: vac_provider_core::Model,
+    client: &dyn vac_remote_service::AgentProvider,
+) -> vac_provider_core::Model {
+    // Only resolve for VAC provider with short names (no "/" means it's not
+    // already a full provider-prefixed ID like "anthropic/claude-sonnet-4-5")
+    if model.provider != "vac" || model.id.contains('/') {
+        return model;
+    }
+
+    let available_models = client.list_models().await;
+    if available_models.is_empty() {
+        return model;
+    }
+
+    let short_name = model.id.to_lowercase();
+
+    // 1. Exact match on full ID
+    if let Some(matched) = available_models.iter().find(|m| m.id == model.id) {
+        return matched.clone();
+    }
+
+    // 2. Case-insensitive match on the last segment of the ID (after last "/")
+    if let Some(matched) = available_models.iter().find(|m| {
+        m.id.rsplit('/')
+            .next()
+            .is_some_and(|last| last.to_lowercase() == short_name)
+    }) {
+        return matched.clone();
+    }
+
+    // 3. Case-insensitive match on the model display name
+    if let Some(matched) = available_models
+        .iter()
+        .find(|m| m.name.to_lowercase() == short_name)
+    {
+        return matched.clone();
+    }
+
+    // No match found — return as-is and let the API return its own error
+    model
+}
+
+/// Build a CLI resume command string, preferring session ID over checkpoint ID.
+pub fn build_resume_command(
+    session_id: Option<Uuid>,
+    checkpoint_id: Option<Uuid>,
+) -> Option<String> {
+    if let Some(session_id) = session_id {
+        return Some(format!("vac -s {}", session_id));
+    }
+    checkpoint_id.map(|checkpoint_id| format!("vac -c {}", checkpoint_id))
+}
+
+/// Extract the checkpoint ID from the last assistant message that contains one.
+pub fn extract_last_checkpoint_id(messages: &[ChatMessage]) -> Option<Uuid> {
+    messages
+        .iter()
+        .rev()
+        .filter(|m| m.role == Role::Assistant)
+        .find_map(|m| {
+            m.content
+                .as_ref()
+                .and_then(MessageContent::extract_checkpoint_id)
+        })
+}
+
+/// Returns true when there are no user/assistant/tool turns yet.
+///
+/// System messages (e.g. injected prompts) do not count as conversation turns.
+pub fn is_first_non_system_message(messages: &[ChatMessage]) -> bool {
+    messages.iter().all(|message| message.role == Role::System)
+}
+
+pub fn convert_tools_with_filter(
+    tools: &[rmcp::model::Tool],
+    allowed_tools: Option<&Vec<String>>,
+) -> Vec<Tool> {
+    tools
+        .iter()
+        .filter_map(|tool| {
+            let tool_name = tool.name.as_ref();
+
+            // Filter tools based on allowed_tools if specified
+            if let Some(allowed) = allowed_tools
+                && !allowed.is_empty()
+                && !allowed.contains(&tool_name.to_string())
+            {
+                return None;
+            }
+
+            Some(Tool {
+                r#type: "function".to_string(),
+                function: FunctionDefinition {
+                    name: tool_name.to_owned(),
+                    description: tool.description.clone().map(|d| d.to_string()),
+                    parameters: serde_json::Value::Object((*tool.input_schema).clone()),
+                },
+            })
+        })
+        .collect()
+}
+
+pub fn user_message(user_input: String) -> ChatMessage {
+    ChatMessage {
+        role: Role::User,
+        content: Some(MessageContent::String(user_input)),
+        name: None,
+        tool_calls: None,
+        tool_call_id: None,
+        usage: None,
+        ..Default::default()
+    }
+}
+
+pub fn system_message(system_prompt: String) -> ChatMessage {
+    ChatMessage {
+        role: Role::System,
+        content: Some(MessageContent::String(system_prompt)),
+        name: None,
+        tool_calls: None,
+        tool_call_id: None,
+        usage: None,
+        ..Default::default()
+    }
+}
+
+pub fn tool_result(tool_call_id: String, result: String) -> ChatMessage {
+    ChatMessage {
+        role: Role::Tool,
+        content: Some(MessageContent::String(result)),
+        name: None,
+        tool_calls: None,
+        tool_call_id: Some(tool_call_id),
+        usage: None,
+        ..Default::default()
+    }
+}
+
+pub fn tool_call_history_string(tool_calls: &[ToolCallResult]) -> Option<String> {
+    if tool_calls.is_empty() {
+        return None;
+    }
+    let history = tool_calls
+        .iter()
+        .map(|tc| {
+            let command = if let Ok(json) =
+                serde_json::from_str::<serde_json::Value>(&tc.call.function.arguments)
+            {
+                json.get("command")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or(&tc.call.function.arguments)
+                    .to_string()
+            } else {
+                tc.call.function.arguments.clone()
+            };
+
+            let output = if tc.result.trim().is_empty() {
+                "No output".to_string()
+            } else {
+                tc.result.clone()
+            };
+            format!("```shell\n$ {}\n{}\n```", command, output)
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    Some(format!("Here's my shell history:\n{}", history))
+}
+
+/// Returns the plan mode instruction text that gets prepended to the user's
+/// first message when the session is in Planning phase.
+///
+/// The instructions tell the agent to:
+/// - Create .vac/session/plan.md with YAML front matter
+/// - Use status lifecycle: draft -> reviewing -> approved
+/// - Structure the plan with Overview, Steps, Risks, Estimated Effort
+/// - Use existing tools (create, str_replace, view) for plan management
+pub fn build_plan_mode_instructions() -> &'static str {
+    include_str!("prompts/plan_mode_activated.txt")
+}
+
+/// Refresh billing info and send it to the TUI.
+/// This is used to update the balance display after assistant messages.
+pub async fn refresh_billing_info(
+    client: &dyn vac_remote_service::AgentProvider,
+    input_tx: &tokio::sync::mpsc::Sender<vac_tui::InputEvent>,
+) {
+    if let Ok(account_data) = client.get_my_account().await {
+        let billing_username = account_data
+            .scope
+            .as_ref()
+            .map(|s| s.name.as_str())
+            .unwrap_or(&account_data.username);
+
+        if let Ok(billing_info) = client.get_billing_info(billing_username).await {
+            let _ = crate::commands::agent::run::tui::send_input_event(
+                input_tx,
+                vac_tui::InputEvent::BillingInfoLoaded(billing_info),
+            )
+            .await;
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_build_plan_mode_instructions_contains_key_sections() {
+        let instructions = build_plan_mode_instructions();
+
+        // Must mention plan mode activation
+        assert!(instructions.contains("PLAN MODE ACTIVATED"));
+
+        // Must include front matter schema guidance
+        assert!(instructions.contains("status: drafting"));
+        assert!(instructions.contains("status: pending_review"));
+
+        // Must include plan file path
+        assert!(instructions.contains(".vac/session/plan.md"));
+
+        // Must instruct not to execute changes
+        assert!(instructions.contains("Do NOT execute any changes"));
+
+        // Must include front matter fields
+        assert!(instructions.contains("title:"));
+        assert!(instructions.contains("version:"));
+        assert!(instructions.contains("created:"));
+        assert!(instructions.contains("updated:"));
+    }
+
+    #[test]
+    fn test_build_plan_mode_instructions_ends_with_user_request_marker() {
+        let instructions = build_plan_mode_instructions();
+        assert!(instructions.trim().ends_with("User request:"));
+    }
+}

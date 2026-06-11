@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "VAC capability authoring manifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "kind",
+    "id",
+    "readiness"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer"
+    },
+    "kind": {
+      "const": "capability"
+    },
+    "id": {
+      "type": "string"
+    },
+    "readiness": {
+      "type": "object",
+      "required": [
+        "declared",
+        "computed",
+        "effective"
+      ]
+    }
+  }
+}

@@ -1,0 +1,25 @@
+schema_version: 1
+kind: workflow
+id: release.vac_v1_5_static
+title: VAC v1.5 static release gate
+status: partial
+steps:
+- id: static_structure
+  uses: capability.registry.schema_check
+- id: static_brand
+  uses: capability.policy.brand_check
+- id: static_tui
+  uses: capability.tui.no_mock_runtime
+validation:
+  commands:
+  - id: vac.static.gate
+    runner: vac-script-runner
+    args:
+    - --script-id
+    - vac.static.gate
+    risk: safe_read
+    approval: policy
+    script_binding:
+      script_id: vac.static.gate
+      broker_owned: true
+      immutable_path: true

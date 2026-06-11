@@ -1,0 +1,127 @@
+{
+  "id": "runtime.v15.happy_path",
+  "description": "Compiled JSON authority, approved plan, locked artifacts, bounded patch, policy-allowed validation command, and green v1.5 closeout reach done.",
+  "registry": {
+    "authority": "compiled_json",
+    "compiled_snapshot_current": true,
+    "deterministic_index_current": true,
+    "policy_loaded": true,
+    "conformance_level": "L1",
+    "capabilities": [
+      {
+        "id": "vac.runtime.agent_loop",
+        "readiness": {
+          "declared": "ready",
+          "computed": "partial",
+          "effective": "partial",
+          "reason": "TV cargo gates pending in sandbox",
+          "blockers": ["tv_cargo_gates_pending"]
+        },
+        "owned_paths": ["vac-rs/crates/runtime/vac-agent-loop/**"],
+        "validation_commands": ["sv.runtime.agent_e2e"],
+        "surfaces": ["/runtime"]
+      }
+    ]
+  },
+  "plan": {
+    "id": "plan.runtime-agent-bound-loop-sv",
+    "status": "approved",
+    "capability": "vac.runtime.agent_loop",
+    "allowed_files": [
+      {
+        "path": "vac-rs/crates/runtime/vac-agent-loop/src/bound_runtime.rs",
+        "operation": "modify",
+        "line_range": {"start": 1, "end": 1800},
+        "semantic_anchor": {
+          "symbol": "BoundRuntimeController",
+          "kind": "module",
+          "ast_path": "crate::bound_runtime",
+          "normalized_fingerprint": "sha256:anchor"
+        },
+        "ownership": "vac.runtime.agent_loop"
+      }
+    ],
+    "forbidden_files": ["target/**", ".git/**"],
+    "approval": {"required": false, "approved": true, "plan_hash": "sha256:plan"},
+    "bounds": {"max_patches": 2, "max_new_files": 0, "max_line_delta": 600}
+  },
+  "artifacts": {
+    "task": {
+      "id": "task.session-happy.runtime",
+      "session": "session-happy",
+      "state": "done",
+      "capability": "vac.runtime.agent_loop",
+      "plan": "plan.runtime-agent-bound-loop-sv",
+      "acceptance_criteria": [
+        {"id": "ac.1", "text": "runtime follows v1.5 bound loop", "met": true, "evidence": "evidence.vac.runtime.agent_loop.1"}
+      ],
+      "open_questions": []
+    },
+    "spec": {
+      "id": "spec.session-happy.runtime",
+      "session": "session-happy",
+      "state": "finalized",
+      "invariants": ["runtime consumes compiled JSON, not raw YAML"],
+      "touched_capabilities": ["vac.runtime.agent_loop"],
+      "memory_refs": [],
+      "open_questions": []
+    },
+    "todo": {
+      "id": "todo.session-happy.runtime",
+      "session": "session-happy",
+      "state": "all_checked",
+      "items": [
+        {"id": "t.1", "text": "run SV runtime E2E", "kind": "test", "checked": true, "blocking": true}
+      ],
+      "open_questions": []
+    }
+  },
+  "patches": [
+    {
+      "path": "vac-rs/crates/runtime/vac-agent-loop/src/bound_runtime.rs",
+      "operation": "modify",
+      "touched_range": {"start": 900, "end": 1010},
+      "semantic_anchor": {
+        "symbol": "BoundRuntimeController",
+        "kind": "module",
+        "ast_path": "crate::bound_runtime",
+        "normalized_fingerprint": "sha256:anchor"
+      },
+      "lines_added": 32,
+      "lines_removed": 4,
+      "creates_new_file": false,
+      "patch_index": 0
+    }
+  ],
+  "commands": [
+    {
+      "id": "sv.runtime.agent_e2e",
+      "runner": "python",
+      "args": ["scripts/vac-runtime-v15-e2e.py"],
+      "risk": "execute_process",
+      "approval": "policy",
+      "policy_decision": "allow"
+    }
+  ],
+  "post_validation": {"commands_exit_zero": true, "no_new_orphans": true},
+  "closeout": {
+    "evidence": {"valid": true, "self_hash": "sha256:evidence", "broker_sig_algorithm": "none", "broker_sig_mode": "integrity_hint"},
+    "compiled_json_snapshot_current": true,
+    "spec_sync": {"no_critical_spec_drift": true, "unresolved_critical_drift": 0},
+    "readiness": {"no_unresolved_readiness_mismatch": true, "unresolved_mismatches": 0},
+    "ownership": {"no_code_without_capability": true, "no_capability_without_current_intent_spec": true, "code_without_capability": 0, "capabilities_without_intent": 0},
+    "assessment": {"findings_have_span_evidence": true, "unresolved_critical_findings": 0},
+    "explicit_open_question": null,
+    "blocking_reason": null,
+    "operator_visible_status": true
+  },
+  "expect": {
+    "pre_plan": "pass_with_warnings",
+    "artifact_lock": "pass",
+    "patches": ["pass"],
+    "commands": ["pass_with_warnings"],
+    "post_validation": "pass",
+    "completion": "done",
+    "final_session_state": "done"
+  }
+}

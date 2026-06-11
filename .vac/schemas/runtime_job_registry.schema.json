@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "vac.runtime_job_registry.schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "kind",
+    "id",
+    "records"
+  ],
+  "properties": {
+    "kind": {
+      "const": "runtime_job_registry"
+    },
+    "records": {
+      "type": "array"
+    }
+  }
+}

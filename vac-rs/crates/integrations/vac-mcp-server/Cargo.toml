@@ -1,0 +1,42 @@
+[package]
+name = "vac-mcp-server"
+version = { workspace = true }
+edition = "2024"
+description = { workspace = true }
+license = { workspace = true }
+
+[dependencies]
+vac-jcs = { workspace = true }
+vac-remote-service = { workspace = true }
+vac-foundation = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+anyhow = { workspace = true }
+rmcp = { workspace = true }
+uuid = { workspace = true }
+rand = { workspace = true }
+axum = "0.8.4"
+chrono = { version = "0.4", features = ["serde"] }
+axum-server = { workspace = true }
+rustls = { workspace = true }
+reqwest = { workspace = true }
+url = "2.5.0"
+fast_html2md = "=0.0.48"
+walkdir = { workspace = true }
+toml = "0.8"
+similar = { workspace = true }
+# Ripgrep ecosystem for grep/glob
+grep-matcher = { workspace = true }
+grep-regex = { workspace = true }
+grep-searcher = { workspace = true }
+ignore = { workspace = true }
+globset = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3.8"
+
+[lints]
+workspace = true

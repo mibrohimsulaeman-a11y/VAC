@@ -1,0 +1,42 @@
+{
+  "name": "green-path",
+  "expect": "done",
+  "registry": {
+    "authority": "compiled_json",
+    "compiled_snapshot_current": true,
+    "deterministic_index_current": true,
+    "policy_loaded": true,
+    "conformance_level": "l1",
+    "capability": {
+      "id": "vac.runtime.agent_loop",
+      "readiness": {"declared": "ready", "computed": "ready", "effective": "ready"},
+      "owned_paths": ["vac-rs/crates/runtime/vac-agent-loop/**"]
+    }
+  },
+  "plan": {
+    "status": "approved",
+    "capability": "vac.runtime.agent_loop",
+    "allowed_file": "vac-rs/crates/runtime/vac-agent-loop/src/bound_runtime.rs",
+    "forbidden_files": ["target/**"],
+    "approval_required": false,
+    "approval_approved": true,
+    "bounds": {"max_patches": 3, "max_new_files": 0, "max_line_delta": 200}
+  },
+  "patch": {
+    "path": "vac-rs/crates/runtime/vac-agent-loop/src/bound_runtime.rs",
+    "line_start": 10,
+    "line_end": 12,
+    "lines_added": 2,
+    "lines_removed": 1,
+    "creates_new_file": false
+  },
+  "command": {"runner": "python3", "args": ["scripts/vac-runtime-agent-e2e-sv.py"], "risk": "safe_read", "approval": "never"},
+  "closeout": {
+    "artifacts_complete": true,
+    "evidence_valid": true,
+    "compiled_json_snapshot_current": true,
+    "no_critical_spec_drift": true,
+    "ownership_clean": true,
+    "assessment_span_grounded": true
+  }
+}

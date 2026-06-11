@@ -1,0 +1,11 @@
+[package]
+name = "vac-brand"
+version = { workspace = true }
+edition = { workspace = true }
+description = "VAC brand, environment, and compatibility constants"
+license = { workspace = true }
+
+[dependencies]
+
+[lints]
+workspace = true

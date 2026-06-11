@@ -1,0 +1,7 @@
+id: runtime-v15-reaudit-closure-ledger
+status: sv_done
+evidence:
+  compiled_source_hash_mismatches: checked-by-check-checkpoint-integrity
+  actual_patch_range_resolution: old_str matching plus byte_range_to_line_range in bound_tool
+  structured_command_authority: runner_args_object_required
+  policy_relaxation_from_memory: forbidden

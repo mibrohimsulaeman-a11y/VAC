@@ -1,115 +1,52 @@
-name: Rust CI
+name: CI
 
-# Semua validasi berat (build/clippy/test) dijalankan di sini, BUKAN di mesin lokal.
 on:
   push:
     branches: [main]
   pull_request:
-  workflow_dispatch:
-
-# Batalkan run lama pada ref yang sama biar hemat menit & antrian.
-concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    branches: [main, beta]
 
 env:
   CARGO_TERM_COLOR: always
-  # Incremental percuma di runner ephemeral, cuma numpukin disk/cache.
-  CARGO_INCREMENTAL: "0"
-  RUST_BACKTRACE: "1"
-  # Hormati rustc-wrapper=sccache dari .cargo/config.toml, pakai GitHub Actions cache sebagai backend.
-  RUSTC_WRAPPER: sccache
-  SCCACHE_GHA_ENABLED: "true"
-
-# Workspace Rust ada di subfolder vac-rs.
-defaults:
-  run:
-    working-directory: vac-rs
 
 jobs:
-  fmt:
-    name: rustfmt
+  rust-ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install toolchain
-        uses: dtolnay/rust-toolchain@1.95.0
-        with:
-          components: rustfmt
-      # fmt tidak mengompilasi apa pun, jadi sccache tidak diperlukan di sini.
-      - name: cargo fmt --check
-        env:
-          RUSTC_WRAPPER: ""
-        run: cargo fmt --all --check
 
-  clippy:
-    name: clippy (-D warnings)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Free disk space
-        uses: jlumbroso/free-disk-space@v1.3.1
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@master
         with:
-          tool-cache: false
-          large-packages: false
-          docker-images: true
-          swap-storage: false
-      - name: Install toolchain
-        uses: dtolnay/rust-toolchain@1.95.0
-        with:
-          components: clippy, rustfmt, rust-src
-      - name: Setup sccache
-        uses: mozilla-actions/sccache-action@v0.0.10
-      - name: Cache cargo registry & git
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry/index
-            ~/.cargo/registry/cache
-            ~/.cargo/git/db
-          key: cargo-${{ runner.os }}-${{ hashFiles('vac-rs/Cargo.lock') }}
-          restore-keys: |
-            cargo-${{ runner.os }}-
-      - name: cargo clippy
-        run: cargo clippy --workspace --all-targets --profile ci-test -- -D warnings
-      - name: sccache stats
-        run: sccache --show-stats
+          toolchain: "1.94.1"
+          components: rustfmt, clippy
 
-  test:
-    name: nextest ${{ matrix.partition }}/4
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        partition: [1, 2, 3, 4]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Free disk space
-        uses: jlumbroso/free-disk-space@v1.3.1
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
         with:
-          tool-cache: false
-          large-packages: false
-          docker-images: true
-          swap-storage: false
-      - name: Install toolchain
-        uses: dtolnay/rust-toolchain@1.95.0
-        with:
-          components: clippy, rustfmt, rust-src
-      - name: Setup sccache
-        uses: mozilla-actions/sccache-action@v0.0.10
-      - name: Install nextest
-        uses: taiki-e/install-action@nextest
-      - name: Cache cargo registry & git
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry/index
-            ~/.cargo/registry/cache
-            ~/.cargo/git/db
-          key: cargo-${{ runner.os }}-${{ hashFiles('vac-rs/Cargo.lock') }}
-          restore-keys: |
-            cargo-${{ runner.os }}-
-      - name: cargo nextest run (partition ${{ matrix.partition }}/4)
-        run: cargo nextest run --workspace --profile ci --cargo-profile ci-test --partition count:${{ matrix.partition }}/4
-      - name: sccache stats
-        run: sccache --show-stats
+          cache-targets: false
+          workspaces: ./vac-rs -> target
+          key: rust-ci-${{ hashFiles('vac-rs/Cargo.lock') }}
+
+      - name: Format Check
+        run: cargo fmt --manifest-path vac-rs/Cargo.toml -- --check
+
+      - name: Lint
+        run: cargo clippy --manifest-path vac-rs/Cargo.toml --workspace --all-targets -- -D warnings
+
+      - name: Build
+        run: cargo build --manifest-path vac-rs/Cargo.toml --verbose
+
+      - name: Test
+        run: cargo test --manifest-path vac-rs/Cargo.toml --workspace --verbose
+
+      - name: Test (feature-gated)
+        run: |
+          cargo test --manifest-path vac-rs/Cargo.toml -p vac-foundation --features sqlite --verbose
+          cargo test --manifest-path vac-rs/Cargo.toml -p vac --features libsql-test --verbose
+          cargo test --manifest-path vac-rs/Cargo.toml -p vac-messaging-gateway --features libsql-test --verbose
+          cargo test --manifest-path vac-rs/Cargo.toml -p vac-provider-core --features network-tests --verbose
+
+      - name: Free build artifacts before cache save
+        if: always()
+        run: rm -rf vac-rs/target

@@ -1,0 +1,40 @@
+schema_version: 2
+kind: capability
+id: vac.control_plane.evidence
+title: Evidence Chain
+readiness:
+  declared: partial
+  computed: partial
+  effective: partial
+  reason: "real_signing_not_implemented"
+  blockers:
+    - real_signing_not_implemented
+  last_checked_at: "2026-06-10T04:30:00Z"
+owner:
+  crate: vac-rs/crates/control-plane/vac-evidence
+  module: vac_rs/crates/control_plane/vac_evidence
+ownership:
+  targets:
+    - kind: path
+      include:
+        - vac-rs/crates/control-plane/vac-evidence/**
+policy:
+  risk: high
+  mutates_files: false
+  network: false
+  redaction: true
+  approval_required_for: []
+surfaces:
+  cli:
+    enabled: true
+    commands:
+      - vac doctor evidence .
+  palette: true
+  tui:
+    route: /capabilities
+validation:
+  gates:
+    - registry.schema_check
+  commands: []
+docs:
+  - docs/workflow-control-plane/VAC_V1_5_REPO_ARCHITECTURE.md

@@ -1,0 +1,15 @@
+schema_version: 1
+kind: intent_spec
+id: intent.vac.tui.operator_console
+status: confirmed
+source: uploaded_mockups
+business_processes:
+  - id: vac.tui.first_launch_idle_agent_approval_runtime
+    description: "VAC TUI follows the supplied mockup family for first launch, idle, agent working, destructive approval, and runtime jobs."
+    required_capability: vac.surfaces.tui
+    invariants:
+      - model_display_reads_app_state
+      - token_display_reads_usage_state
+      - vil_label_not_used
+      - upstream_agent_brand_not_used_on_public_surface
+      - runtime_jobs_not_sample_seeded

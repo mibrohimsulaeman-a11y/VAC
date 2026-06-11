@@ -1,0 +1,25 @@
+schema_version: 1
+kind: intent_spec
+id: intent.workspace.vac
+status: confirmed
+source: operator_requested_migration
+business_processes:
+  - id: vac.operator.interactive_agent
+    description: Operator can run an agentic CLI/TUI session with bounded approvals, model usage visibility, and local control-plane context.
+    required_capability: vac.surfaces.tui
+    invariants:
+      - active_model_must_come_from_runtime_state
+      - tui_must_not_hardcode_mock_runtime_jobs
+      - raw_yaml_must_not_authorize_runtime
+  - id: vac.runtime.jobs_monitor
+    description: Operator can inspect real one-shot, cron, and filewatch runtime jobs or an honest empty state.
+    required_capability: vac.runtime.jobs
+    invariants:
+      - jobs_must_come_from_runtime_registry
+      - destructive_actions_require_approval
+expected_code:
+  modules:
+    - vac-rs/crates/surfaces/vac-tui
+    - vac-rs/crates/runtime/vac-runtime-jobs
+out_of_scope:
+  - claiming cargo build or clippy passed in this sandbox slice

@@ -1,0 +1,13 @@
+[package]
+name = "vac-jcs"
+version = { workspace = true }
+edition = { workspace = true }
+description = "Central canonical JSON hashing utilities for VAC audit/runtime bindings."
+license = { workspace = true }
+
+[dependencies]
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,0 +1,844 @@
+use std::path::Path;
+use std::process::Command;
+use std::sync::Arc;
+
+use crate::config::AppConfig;
+use clap::{CommandFactory, Subcommand};
+use serde::{Deserialize, Serialize};
+use vac_remote_service::{AgentClient, AgentClientConfig, AgentProvider, VacCloudConfig};
+
+pub mod acp;
+pub mod agent;
+pub mod ak;
+pub mod auth;
+pub mod auto_update;
+pub mod autopilot;
+pub mod board;
+pub mod browser;
+pub mod control_plane;
+pub mod mcp;
+pub mod sessions;
+pub mod warden;
+pub mod watch;
+
+use autopilot::{StartArgs, StopArgs};
+
+pub use auth::AuthCommands;
+pub use autopilot::AutopilotCommands;
+pub use mcp::McpCommands;
+pub use sessions::SessionsCommands;
+
+/// Frontmatter structure for rulebook metadata
+#[derive(Deserialize, Serialize)]
+struct RulebookFrontmatter {
+    uri: String,
+    description: String,
+    #[serde(default)]
+    tags: Vec<String>,
+}
+
+/// Parse rulebook metadata from markdown content with YAML frontmatter
+/// Expects frontmatter with uri, description, and tags
+/// Returns (uri, description, tags, content_without_frontmatter)
+fn parse_rulebook_metadata(content: &str) -> Result<(String, String, Vec<String>, String), String> {
+    // Check if content starts with frontmatter (---)
+    let content = content.trim_start();
+    if !content.starts_with("---") {
+        return Err("Rulebook file must start with YAML frontmatter (---) containing uri, description, and tags".into());
+    }
+
+    // Find the end of frontmatter
+    let rest = &content[3..]; // Skip first "---"
+    let end_pos = rest
+        .find("\n---")
+        .ok_or("Frontmatter must end with '---'")?;
+
+    let frontmatter_yaml = &rest[..end_pos];
+
+    // Parse YAML frontmatter
+    let frontmatter: RulebookFrontmatter = serde_yaml::from_str(frontmatter_yaml)
+        .map_err(|e| format!("Failed to parse YAML frontmatter: {}", e))?;
+
+    // Extract content after frontmatter (skip the closing "---" and any leading whitespace)
+    let content_body = rest[end_pos + 4..].trim_start().to_string();
+
+    Ok((
+        frontmatter.uri,
+        frontmatter.description,
+        frontmatter.tags,
+        content_body,
+    ))
+}
+
+#[derive(Subcommand, PartialEq)]
+pub enum ConfigCommands {
+    /// List and select profiles interactively
+    #[command(name = "list", alias = "ls")]
+    List,
+    /// Show current configuration
+    Show,
+    /// Print a complete sample configuration file
+    Sample,
+    /// Create a new profile
+    New,
+}
+
+#[derive(Subcommand, PartialEq)]
+pub enum RulebookCommands {
+    /// Get a specific rulebook or list all rulebooks
+    Get {
+        /// Rulebook URI (optional - if not provided, lists all rulebooks)
+        uri: Option<String>,
+    },
+    /// Apply/create a rulebook from a markdown file
+    Apply {
+        /// Path to the markdown file containing the rulebook
+        file_path: String,
+    },
+    /// Delete a rulebook
+    Delete {
+        /// Rulebook URI to delete
+        uri: String,
+    },
+}
+
+#[derive(Subcommand, PartialEq)]
+pub enum Commands {
+    /// Get CLI Version
+    Version,
+    /// Login to VAC (DEPRECATED: use `vac auth login -p vac` instead)
+    #[command(hide = true)]
+    Login {
+        /// API key for authentication
+        #[arg(long, env("VAC_API_KEY"))]
+        api_key: String,
+    },
+
+    /// Logout from VAC (DEPRECATED: use `vac auth logout -p vac` instead)
+    #[command(hide = true)]
+    Logout,
+
+    /// Start Agent Client Protocol server (for editor integration)
+    ///
+    Acp {
+        /// Read system prompt from file
+        #[arg(long = "system-prompt-file")]
+        system_prompt_file: Option<String>,
+    },
+
+    /// Set configuration values
+    Set {
+        /// Set machine name for device identification
+        #[arg(long = "machine-name")]
+        machine_name: Option<String>,
+        /// Enable or disable auto-appending .vac to .gitignore files
+        #[arg(long = "auto-append-gitignore")]
+        auto_append_gitignore: Option<bool>,
+    },
+
+    /// Configuration management commands
+    #[command(subcommand)]
+    Config(ConfigCommands),
+
+    /// Rulebook management commands
+    #[command(subcommand, alias = "rb")]
+    Rulebooks(RulebookCommands),
+
+    /// Get current account
+    Account,
+
+    /// Analyze your infrastructure setup or run assessment-grounded init checkpoint
+    Init {
+        /// Run the VAC v1.5 assessment-grounded init flow instead of plain interactive init.
+        #[arg(long = "assess", default_value_t = false)]
+        assess: bool,
+    },
+
+    /// Compile control-plane authoring manifests into runtime JSON.
+    #[command(subcommand)]
+    Compile(control_plane::CompileCommands),
+
+    /// Run a VAC doctor gate such as registry, compiled, index, intent, assessment, spec-sync, or release.
+    Doctor { gate: String, path: Option<String> },
+
+    /// Run intent-vs-code/baseline assessment against existing .vac specs.
+    Assess { path: Option<String> },
+
+    /// Detect spec/manifest/readiness drift and write reconciliation proposals.
+    #[command(name = "spec-sync")]
+    SpecSync { path: Option<String> },
+
+    /// MCP commands
+    #[command(subcommand)]
+    Mcp(McpCommands),
+
+    /// Provider authentication commands (OAuth, API keys)
+    #[command(subcommand)]
+    Auth(AuthCommands),
+
+    /// VAC Warden wraps coding agents to apply security policies and limit their capabilities
+    Warden {
+        /// Environment variables to pass to container
+        #[arg(short, long, action = clap::ArgAction::Append)]
+        env: Vec<String>,
+        /// Additional volumes to mount
+        #[arg(short, long, action = clap::ArgAction::Append)]
+        volume: Vec<String>,
+        #[command(subcommand)]
+        command: Option<warden::WardenCommands>,
+    },
+    /// Task board for tracking complex work (cards, checklists, comments)
+    /// Run `vac board --help` for available commands.
+    #[command(disable_help_flag = true)]
+    Board {
+        /// Arguments to pass to the board plugin
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
+    },
+    /// Browser automation CLI - control a real browser from the command line
+    /// Run `vac browser --help` for available commands.
+    #[command(disable_help_flag = true)]
+    Browser {
+        /// Arguments to pass to the browser plugin
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
+    },
+
+    /// Local persistent agent knowledge store
+    #[command(
+        subcommand,
+        about = "Persistent knowledge store operations",
+        long_about = ak::AK_LONG_ABOUT,
+        after_help = ak::AK_AFTER_HELP
+    )]
+    Ak(ak::AkCommands),
+    /// Update VAC Agent to the latest version
+    Update {
+        /// Internal flag used by startup auto-update to suppress terminal output.
+        #[arg(long, hide = true)]
+        background: bool,
+    },
+
+    /// Autonomous 24/7 lifecycle commands
+    #[command(subcommand)]
+    Autopilot(AutopilotCommands),
+
+    /// List and inspect past sessions
+    #[command(subcommand, alias = "session")]
+    Sessions(SessionsCommands),
+
+    /// Start autopilot — auto-configures on first run (alias: vac autopilot up)
+    Up {
+        #[command(flatten)]
+        args: StartArgs,
+    },
+
+    /// Alias for `vac autopilot down`
+    Down {
+        #[command(flatten)]
+        args: StopArgs,
+    },
+
+    /// Generate shell completion scripts
+    ///
+    /// Prints a completion script for the given shell to stdout. Source or
+    /// install it according to your shell's documentation.
+    Completion {
+        /// Shell to generate completions for
+        #[arg(value_enum)]
+        shell: clap_complete::Shell,
+    },
+}
+
+async fn build_agent_client(config: &AppConfig) -> Result<AgentClient, String> {
+    // Use credential resolution with auth.toml fallback chain
+    // Refresh OAuth tokens in parallel to minimize startup delay
+    let providers = config.get_llm_provider_config_async().await;
+
+    let vac = config
+        .get_vac_remote_service_key()
+        .map(|api_key| VacCloudConfig {
+            api_key,
+            api_endpoint: config.api_endpoint.clone(),
+        });
+
+    AgentClient::new(AgentClientConfig {
+        vac,
+        providers,
+        store_path: None,
+        hook_registry: None,
+    })
+    .await
+    .map_err(|e| format!("Failed to create agent client: {}", e))
+}
+
+async fn get_client(config: &AppConfig) -> Result<Arc<dyn AgentProvider>, String> {
+    Ok(Arc::new(build_agent_client(config).await?))
+}
+
+/// Helper function to convert AppConfig's config_path to Option<&Path>
+fn get_config_path_option(config: &AppConfig) -> Option<&Path> {
+    if config.config_path.is_empty() {
+        None
+    } else {
+        Some(Path::new(&config.config_path))
+    }
+}
+
+impl Commands {
+    pub fn requires_auth(&self) -> bool {
+        !matches!(
+            self,
+            Commands::Login { .. }
+                | Commands::Logout
+                | Commands::Set { .. }
+                | Commands::Config(_)
+                | Commands::Version
+                | Commands::Completion { .. }
+                | Commands::Update { .. }
+                | Commands::Acp { .. }
+                | Commands::Auth(_)
+                | Commands::Autopilot(_)
+                | Commands::Up { .. }
+                | Commands::Down { .. }
+                | Commands::Ak(_)
+                | Commands::Init { .. }
+                | Commands::Compile(_)
+                | Commands::Doctor { .. }
+                | Commands::Assess { .. }
+                | Commands::SpecSync { .. }
+        )
+    }
+    pub async fn run(self, config: AppConfig) -> Result<(), String> {
+        match self {
+            Commands::Mcp(command) => {
+                command.run(config).await?;
+            }
+            Commands::Login { api_key } => {
+                // Show deprecation warning
+                eprintln!("\x1b[33mWarning: 'vac login' is deprecated.\x1b[0m");
+                eprintln!("Please use: \x1b[1;34mvac auth login --provider vac\x1b[0m");
+                eprintln!();
+
+                let mut updated_config = config.clone();
+                updated_config.api_key = Some(api_key);
+
+                updated_config
+                    .save()
+                    .map_err(|e| format!("Failed to save config: {}", e))?;
+            }
+            Commands::Logout => {
+                // Show deprecation warning
+                eprintln!("\x1b[33mWarning: 'vac logout' is deprecated.\x1b[0m");
+                eprintln!("Please use: \x1b[1;34mvac auth logout --provider vac\x1b[0m");
+                eprintln!();
+
+                let mut updated_config = config.clone();
+                updated_config.api_key = None;
+
+                updated_config
+                    .save()
+                    .map_err(|e| format!("Failed to save config: {}", e))?;
+            }
+            Commands::Set {
+                machine_name,
+                auto_append_gitignore,
+            } => {
+                let mut updated_config = config.clone();
+                let mut config_updated = false;
+
+                if let Some(name) = machine_name {
+                    updated_config.machine_name = Some(name.clone());
+                    config_updated = true;
+                    println!("Machine name set to: {}", name);
+                }
+
+                if let Some(append) = auto_append_gitignore {
+                    updated_config.auto_append_gitignore = Some(append);
+                    config_updated = true;
+                    println!("Auto-appending .vac to .gitignore: {}", append);
+                }
+
+                if config_updated {
+                    updated_config
+                        .save()
+                        .map_err(|e| format!("Failed to save config: {}", e))?;
+                } else {
+                    println!("No configuration option provided. Available options:");
+                    println!(
+                        "  --machine-name <name>        Set machine name for device identification"
+                    );
+                    println!(
+                        "  --auto-append-gitignore <bool>  Enable/disable auto-appending .vac to .gitignore"
+                    );
+                }
+            }
+            Commands::Config(config_command) => {
+                match config_command {
+                    ConfigCommands::List => {
+                        // Interactive profile selection menu
+                        use crate::onboarding::menu::select_profile_interactive;
+                        let config_path = get_config_path_option(&config);
+                        if let Some(selected_profile) =
+                            select_profile_interactive(config_path).await
+                        {
+                            if selected_profile == "CREATE_NEW_PROFILE" {
+                                // Create new profile
+                                use crate::onboarding::{OnboardingMode, run_onboarding};
+                                let mut mutable_config = config.clone();
+                                run_onboarding(&mut mutable_config, OnboardingMode::New).await;
+
+                                // Ask if user wants to continue to vac
+                                use crate::onboarding::menu::prompt_yes_no;
+                                use crate::onboarding::navigation::NavResult;
+                                if let NavResult::Forward(Some(true)) =
+                                    prompt_yes_no("Continue to vac?", true)
+                                {
+                                    // Re-execute vac with the new profile
+                                    let new_profile = mutable_config.profile_name.clone();
+                                    re_execute_vac_with_profile(
+                                        &new_profile,
+                                        get_config_path_option(&config),
+                                    );
+                                }
+                            } else {
+                                // Switch to selected profile
+                                re_execute_vac_with_profile(
+                                    &selected_profile,
+                                    get_config_path_option(&config),
+                                );
+                            }
+                        }
+                    }
+                    ConfigCommands::Show => {
+                        println!("Current configuration:");
+                        println!("  Profile: {}", config.profile_name);
+                        println!(
+                            "  Machine name: {}",
+                            config.machine_name.as_deref().unwrap_or("(not set)")
+                        );
+                        println!(
+                            "  Auto-append .vac to .gitignore: {}",
+                            config.auto_append_gitignore.unwrap_or(true)
+                        );
+                        println!("  API endpoint: {}", config.api_endpoint);
+                        let api_key_display = match &config.api_key {
+                            Some(key) if !key.is_empty() => "***".to_string(),
+                            _ => "(not set)".to_string(),
+                        };
+                        println!("  API key: {}", api_key_display);
+                    }
+                    ConfigCommands::Sample => {
+                        print_sample_config();
+                    }
+                    ConfigCommands::New => {
+                        use crate::onboarding::{OnboardingMode, run_onboarding};
+                        let mut mutable_config = config.clone();
+                        run_onboarding(&mut mutable_config, OnboardingMode::New).await;
+
+                        use crate::onboarding::menu::prompt_yes_no;
+                        use crate::onboarding::navigation::NavResult;
+                        if let NavResult::Forward(Some(true)) =
+                            prompt_yes_no("Continue to vac?", true)
+                        {
+                            let new_profile = mutable_config.profile_name.clone();
+                            re_execute_vac_with_profile(
+                                &new_profile,
+                                get_config_path_option(&config),
+                            );
+                        }
+                    }
+                }
+            }
+            Commands::Rulebooks(rulebook_command) => {
+                let client = get_client(&config).await?;
+                match rulebook_command {
+                    RulebookCommands::Get { uri } => {
+                        if let Some(uri) = uri {
+                            // Get specific rulebook and output in apply-compatible format
+                            let rulebook = client.get_rulebook_by_uri(&uri).await?;
+
+                            // Create frontmatter struct
+                            let frontmatter = RulebookFrontmatter {
+                                uri: rulebook.uri,
+                                description: rulebook.description,
+                                tags: rulebook.tags,
+                            };
+
+                            // Serialize frontmatter to YAML
+                            let yaml = serde_yaml::to_string(&frontmatter)
+                                .map_err(|e| format!("Failed to serialize frontmatter: {}", e))?;
+
+                            // Output in apply-compatible format with YAML frontmatter
+                            println!("---");
+                            print!("{}", yaml.trim());
+                            println!("\n---");
+                            println!("{}", rulebook.content);
+                        } else {
+                            // List all rulebooks
+                            let rulebooks = client.list_rulebooks().await?;
+                            if rulebooks.is_empty() {
+                                println!("No rulebooks found.");
+                            } else {
+                                println!("Rulebooks:\n");
+                                for rb in rulebooks {
+                                    println!("  - URI: {}", rb.uri);
+                                    println!("    Description: {}", rb.description);
+                                    println!("    Tags: {}", rb.tags.join(", "));
+                                    println!("    Visibility: {:?}", rb.visibility);
+                                }
+                            }
+                        }
+                    }
+                    RulebookCommands::Apply { file_path } => {
+                        // Read the markdown file
+                        let content = std::fs::read_to_string(file_path)
+                            .map_err(|e| format!("Failed to read file: {}", e))?;
+
+                        // Parse frontmatter to extract metadata and content body
+                        let (uri, description, tags, content_body) =
+                            parse_rulebook_metadata(&content)?;
+
+                        // Create the rulebook with content body (without frontmatter)
+                        client
+                            .create_rulebook(&uri, &description, &content_body, tags, None)
+                            .await?;
+
+                        println!("✓ Rulebook created/updated successfully");
+                        println!("  URI: {}", uri);
+                    }
+                    RulebookCommands::Delete { uri } => {
+                        client.delete_rulebook(&uri).await?;
+                        println!("✓ Rulebook deleted: {}", uri);
+                    }
+                }
+            }
+            Commands::Account => {
+                let client = get_client(&config).await?;
+                let data = client.get_my_account().await?;
+                println!("{}", data.to_text());
+            }
+            Commands::Init { assess } => {
+                if assess {
+                    control_plane::run_assess(Some(".".to_string())).await?;
+                } else {
+                    // Handled in main: starts interactive session with init prompt sent on start
+                    unreachable!("vac init is handled before Commands::run()")
+                }
+            }
+            Commands::Compile(command) => {
+                control_plane::run_compile(command).await?;
+            }
+            Commands::Doctor { gate, path } => {
+                control_plane::run_doctor(gate, path).await?;
+            }
+            Commands::Assess { path } => {
+                control_plane::run_assess(path).await?;
+            }
+            Commands::SpecSync { path } => {
+                control_plane::run_spec_sync(path).await?;
+            }
+            Commands::Version => {
+                println!(
+                    "vac v{} (https://github.com/Vastar-AI/vac)",
+                    env!("CARGO_PKG_VERSION")
+                );
+            }
+            Commands::Warden {
+                env,
+                volume,
+                command,
+            } => {
+                match command {
+                    Some(warden_command) => {
+                        warden::WardenCommands::run(warden_command, config).await?;
+                    }
+                    None => {
+                        // Default behavior: run warden with preconfigured setup
+                        warden::run_default_warden(config, volume, env).await?;
+                    }
+                }
+            }
+            Commands::Board { args } => {
+                board::run_board(args).await?;
+            }
+            Commands::Browser { args } => {
+                browser::run_browser(args).await?;
+            }
+            Commands::Ak(command) => {
+                command.run(config)?;
+            }
+            Commands::Update { background } => {
+                auto_update::run_auto_update(background).await?;
+            }
+            Commands::Autopilot(autopilot_command) => {
+                autopilot_command.run(config).await?;
+            }
+            Commands::Sessions(sessions_command) => {
+                sessions_command.run(config).await?;
+            }
+            Commands::Up { args } => {
+                AutopilotCommands::Up {
+                    args,
+                    from_service: false,
+                }
+                .run(config)
+                .await?;
+            }
+            Commands::Down { args } => {
+                AutopilotCommands::Down { args }.run(config).await?;
+            }
+            Commands::Auth(auth_command) => {
+                auth_command.run(config).await?;
+            }
+            Commands::Acp { system_prompt_file } => {
+                // Force auto-update before starting ACP session (no prompt)
+                use crate::utils::check_update::force_auto_update;
+                match force_auto_update().await {
+                    Ok(true) => {
+                        if let Err(e) = auto_update::restart_current_process() {
+                            eprintln!("Failed to restart after update: {}", e);
+                            std::process::exit(1);
+                        }
+                        return Ok(());
+                    }
+                    Ok(false) => {}
+                    Err(e) => {
+                        // Log error but continue - don't block ACP if update check fails
+                        eprintln!("Update check failed: {}", e);
+                    }
+                }
+
+                let system_prompt = if let Some(system_prompt_file_path) = &system_prompt_file {
+                    match std::fs::read_to_string(system_prompt_file_path) {
+                        Ok(content) => {
+                            println!(
+                                "📖 Reading system prompt from file: {}",
+                                system_prompt_file_path
+                            );
+                            Some(content.trim().to_string())
+                        }
+                        Err(e) => {
+                            eprintln!(
+                                "Failed to read system prompt file '{}': {}",
+                                system_prompt_file_path, e
+                            );
+                            None
+                        }
+                    }
+                } else {
+                    None
+                };
+                // Start ACP agent
+                let (tx, _rx) = tokio::sync::mpsc::unbounded_channel();
+                let agent =
+                    match crate::commands::acp::VACAcpAgent::new(config, tx, system_prompt).await {
+                        Ok(agent) => agent,
+                        Err(e) => {
+                            eprintln!("Failed to create ACP agent: {}", e);
+                            std::process::exit(1);
+                        }
+                    };
+
+                if let Err(e) = agent.run_stdio().await {
+                    eprintln!("ACP agent failed: {}", e);
+                    std::process::exit(1);
+                }
+            }
+            Commands::Completion { shell } => {
+                clap_complete::generate(
+                    shell,
+                    &mut crate::Cli::command(),
+                    "vac",
+                    &mut std::io::stdout(),
+                );
+            }
+        }
+        Ok(())
+    }
+}
+
+fn print_sample_config() {
+    println!(
+        r#"# VAC Configuration File
+
+# Profile-based configuration allows different settings for different environments
+[profiles]
+
+# Special 'all' profile - settings that apply to ALL profiles as defaults
+# Individual profiles can override these settings
+[profiles.all]
+api_endpoint = "https://api.vastar.ai/vac"
+# Common tools that should be available across all profiles
+allowed_tools = ["view", "search_docs", "load_skill", "local_code_search"]
+# Conservative auto-approve list that works for all environments
+auto_approve = ["view", "search_docs", "load_skill"]
+
+[profiles.all.rulebooks]
+# Common rulebook patterns for all profiles
+include = ["vac://yourdomain.com/common/**"]
+exclude = ["vac://yourdomain.com/archive/**"]
+include_tags = ["common", "shared"]
+exclude_tags = ["archived", "obsolete"]
+
+# Default profile - used when no specific profile is selected
+# Inherits from 'all' profile and can override specific settings
+[profiles.default]
+api_key = "your_api_key_here"
+
+# Extends the 'all' profile's allowed_tools with additional development tools
+allowed_tools = ["view", "search_docs", "load_skill", "local_code_search", "create", "str_replace", "run_command"]
+
+# Inherits auto_approve from 'all' profile (view, search_docs, load_skill)
+# No need to redefine unless you want to override
+
+# Rulebook filtering configuration
+[profiles.default.rulebooks]
+# URI patterns to include (supports glob patterns like * and **)
+include = ["vac://yourdomain.com/*", "vac://**/*.md"]
+
+# URI patterns to exclude (supports glob patterns)
+exclude = ["vac://restricted.domain.com/**"]
+
+# Tags to include - only rulebooks with these tags will be loaded
+include_tags = ["terraform", "kubernetes", "security"]
+
+# Tags to exclude - rulebooks with these tags will be filtered out
+exclude_tags = ["deprecated", "experimental"]
+
+# Warden (runtime security) configuration
+# When enabled, the main 'vac' command will automatically run with Warden security enforcer
+# This provides isolation and security policies for the agent execution
+[profiles.default.warden]
+enabled = true
+volumes = [
+    # working directory
+    "./:/agent:ro",
+
+    # cloud credentials (read-only)
+    "~/.aws:/home/agent/.aws:ro",
+    "~/.config/gcloud:/home/agent/.config/gcloud:ro",
+    "~/.digitalocean:/home/agent/.digitalocean:ro",
+    "~/.azure:/home/agent/.azure:ro",
+    "~/.kube:/home/agent/.kube:ro",
+]
+
+# Production profile - stricter settings for production environments
+# Inherits from 'all' profile but restricts tools for safety
+[profiles.production]
+api_key = "prod_api_key_here"
+
+# Restricts allowed_tools to only read-only operations (overrides 'all' profile)
+allowed_tools = ["view", "search_docs", "load_skill"]
+
+# Uses the same conservative auto_approve list from 'all' profile
+# No need to redefine since 'all' profile already has safe defaults
+
+[profiles.production.rulebooks]
+# Only include production-ready rulebooks
+include = ["vac://yourdomain.com/prod/**"]
+exclude = ["vac://yourdomain.com/dev/**", "vac://yourdomain.com/test/**"]
+include_tags = ["production", "stable"]
+exclude_tags = ["dev", "test", "experimental"]
+
+# Development profile - more permissive settings for development
+# Inherits from 'all' profile and extends with development-specific tools
+[profiles.development]
+api_key = "dev_api_key_here"
+
+# Extends 'all' profile's allowed_tools with write operations for development
+allowed_tools = ["view", "search_docs", "load_skill", "local_code_search", "create", "str_replace", "run_command"]
+
+# Extends 'all' profile's auto_approve with additional development tools
+auto_approve = ["view", "search_docs", "load_skill", "create"]
+
+[profiles.development.rulebooks]
+# Include development and test rulebooks
+include = ["vac://yourdomain.com/dev/**", "vac://yourdomain.com/test/**"]
+exclude = []
+include_tags = ["dev", "test", "experimental"]
+exclude_tags = []
+
+# Global settings that apply to all profiles
+[settings]
+# Machine name for device identification
+machine_name = "my-development-machine"
+
+# Automatically append .vac to .gitignore files
+auto_append_gitignore = true
+
+# Preferred external editor for /editor command (vim, nvim, nano, code, etc.)
+editor = "nano"
+"#
+    );
+}
+
+/// Re-execute vac with a specific profile
+fn re_execute_vac_with_profile(profile: &str, config_path: Option<&std::path::Path>) {
+    let mut cmd = Command::new("vac");
+    if !profile.is_empty() {
+        cmd.arg("--profile").arg(profile);
+    }
+    if let Some(config_path) = config_path {
+        cmd.arg("--config").arg(config_path);
+    }
+
+    // Preserve other args but skip "config" subcommand
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    let mut skip_next = false;
+    for arg in args {
+        if skip_next {
+            skip_next = false;
+            continue;
+        }
+        // Skip "config" subcommand and its value
+        if arg == "config" {
+            skip_next = true;
+            continue;
+        }
+        // Skip --profile and --config if they exist (we're setting them explicitly)
+        if arg == "--profile" || arg == "--config" {
+            skip_next = true;
+            continue;
+        }
+        // Skip the value after --profile= or --config=
+        if arg.starts_with("--profile=") || arg.starts_with("--config=") {
+            continue;
+        }
+        cmd.arg(arg);
+    }
+
+    let status = cmd.status();
+    match status {
+        Ok(s) if s.success() => {
+            std::process::exit(s.code().unwrap_or(0));
+        }
+        Ok(s) => {
+            std::process::exit(s.code().unwrap_or(1));
+        }
+        Err(_) => {
+            std::process::exit(1);
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn up_defaults_to_background_mode() {
+        let args = StartArgs {
+            bind: "127.0.0.1:4096".to_string(),
+            show_token: false,
+            no_auth: false,
+            model: None,
+            auto_approve_all: false,
+            foreground: false,
+            non_interactive: false,
+            force: false,
+        };
+        // Without --foreground, args.foreground should be false (background/service mode)
+        assert!(!args.foreground);
+    }
+}

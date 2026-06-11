@@ -1,0 +1,50 @@
+schema_version: 2
+kind: capability
+id: vac.control_plane.readiness
+title: VAC Readiness Governance
+readiness:
+  declared: ready
+  computed: ready
+  effective: ready
+  reason: "sandbox static implementation; TV cargo gates pending"
+  blockers:
+    - tv_cargo_build_pending
+  last_checked_at: "2026-06-10T03:40:42Z"
+owner:
+  crate: vac-readiness
+  module: root
+ownership:
+  targets:
+    - kind: path
+      include:
+        - vac-rs/crates/control-plane/vac-readiness/**
+      exclude:
+        - vac-rs/crates/control-plane/vac-readiness/target/**
+policy:
+  risk: medium
+  mutates_files: true
+  network: false
+  redaction: true
+  approval_required_for:
+    - filesystem_delete
+    - execute_process
+surfaces:
+  cli:
+    enabled: true
+    commands:
+      - "/capabilities"
+  palette: true
+  tui:
+    route: "/capabilities"
+states: [empty, loading, success, failure]
+validation:
+  gates:
+    - sv.static.validate
+  commands:
+    - id: sv.static.validate
+      runner: python
+      args: ["scripts/sv_static_validate.py"]
+      risk: safe_read
+      approval: never
+docs:
+  - docs/workflow-control-plane/VAC_V1_5_ARCHITECTURE.md

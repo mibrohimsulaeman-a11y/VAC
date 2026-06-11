@@ -1,6 +1,0 @@
-schema_version: 1
-kind: test_assertion
-id: security.absolute-path-write
-attack: absolute_path_write
-expected: rejected
-diagnostic_required: true

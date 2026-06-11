@@ -1,5 +1,0 @@
-vac-rs/core/src/control_plane/mod.rs
-vac-rs/tui/src/lib.rs
-vac-rs/vendor/serde/src/lib.rs
-target/debug/build.o
-docs/vac-init/VAC_INIT_EXECUTION_PLAN.md

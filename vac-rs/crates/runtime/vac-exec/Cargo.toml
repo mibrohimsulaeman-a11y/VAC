@@ -1,0 +1,12 @@
+[package]
+name = "vac-exec"
+version = { workspace = true }
+edition = { workspace = true }
+description = { workspace = true }
+license = { workspace = true }
+
+[dependencies]
+serde = { workspace = true }
+
+[lints]
+workspace = true

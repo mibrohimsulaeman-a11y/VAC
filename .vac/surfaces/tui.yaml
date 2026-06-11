@@ -1,10 +1,35 @@
 schema_version: 1
 kind: surface
 id: surface.tui
-title: TUI surface
+title: VAC Operator TUI routes
+capabilities:
+- vac.surfaces.tui
+- vac.runtime.jobs
+- vac.runtime.approval
+- vac.control_plane.assessment
+- vac.control_plane.spec_sync
 routes:
-  - { kind: tui, path: "/",             capability: vac.chat,      status: ready }
-  - { kind: tui, path: "/capabilities", capability: vac.tui,       status: ready }
-  - { kind: tui, path: "/workflow",     capability: vac.workflow,  status: ready }
-  - { kind: tui, path: "/activity",     capability: vac.sessions,  status: ready }
-  - { kind: tui, path: "/approvals",    capability: vac.approvals, status: ready }
+- kind: tui
+  command: /chat
+  capability: vac.surfaces.tui
+  owner: vac-rs/crates/surfaces/vac-tui
+  visible: true
+  status: ready
+- kind: tui
+  command: /runtime
+  capability: vac.runtime.jobs
+  owner: vac-rs/crates/runtime/vac-runtime-jobs
+  visible: true
+  status: partial
+- kind: tui
+  command: /assessment
+  capability: vac.control_plane.assessment
+  owner: vac-rs/crates/control-plane/vac-assessment
+  visible: true
+  status: partial
+- kind: tui
+  command: /spec-sync
+  capability: vac.control_plane.spec_sync
+  owner: vac-rs/crates/control-plane/vac-spec-sync
+  visible: true
+  status: partial

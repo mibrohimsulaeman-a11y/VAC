@@ -1,9 +1,20 @@
 schema_version: 1
 kind: surface
 id: surface.slash
-title: Slash commands
+title: VAC Slash commands
+capabilities:
+  - vac.surfaces.tui
+  - vac.runtime.jobs
 routes:
-  - { kind: slash, command: "/approvals", capability: vac.approvals, status: ready }
-  - { kind: slash, command: "/review",    capability: vac.approvals, status: ready }
-  - { kind: slash, command: "/agent",     capability: vac.chat,      status: ready }
-  - { kind: slash, command: "/why",        capability: vac.runtime,   status: ready }
+  - kind: slash
+    command: /runtime
+    capability: vac.runtime.jobs
+    owner: vac-rs/crates/surfaces/vac-tui
+    visible: true
+    status: partial
+  - kind: slash
+    command: /capabilities
+    capability: vac.control_plane.registry
+    owner: vac-rs/crates/surfaces/vac-tui
+    visible: true
+    status: planned

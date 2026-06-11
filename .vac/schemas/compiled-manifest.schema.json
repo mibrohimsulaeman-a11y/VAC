@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "VAC compiled manifest snapshot",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "kind",
+    "id",
+    "source_hashes",
+    "jcs_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer"
+    },
+    "kind": {
+      "const": "compiled_manifest"
+    },
+    "id": {
+      "type": "string"
+    },
+    "source_hashes": {
+      "type": "array"
+    },
+    "jcs_hash": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+schema_version: 1
+kind: intent_spec
+id: intent.vac_tui_runtime_rebrand
+status: confirmed
+source: operator_confirmed
+business_processes:
+  - id: tui.runtime_jobs
+    description: "Operator can inspect one-shot, cron, and filewatch jobs from real runtime registry state."
+    required_capability: vac.runtime.jobs
+    invariants:
+      - no_mock_runtime_jobs
+      - no_hardcoded_model_name
+      - runtime_status_from_compiled_json_or_honest_empty_state
+  - id: tui.capability_readiness
+    description: "Operator can inspect declared, computed, and effective capability readiness."
+    required_capability: vac.control_plane.readiness
+    invariants:
+      - effective_must_not_exceed_computed
+      - dashboard_declared_is_not_runtime_authority
+  - id: tui.approval_destructive
+    description: "Destructive shell approval is surfaced with command, cwd, risk, policy, and one-shot decision actions."
+    required_capability: vac.runtime.shell_approval
+    invariants:
+      - delete_requires_explicit_approval
+      - approval_bindings_are_visible
+expected_code:
+  modules:
+    - vac-rs/crates/surfaces/vac-tui/src/services/vac_operator.rs
+out_of_scope:
+  - cargo_build_green_in_sandbox
+  - L2_broker_enforcement

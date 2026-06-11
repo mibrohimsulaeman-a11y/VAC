@@ -1,0 +1,13 @@
+[package]
+name = "vac-state"
+version = { workspace = true }
+edition = { workspace = true }
+description = "Shared state snapshots consumed by VAC surfaces"
+license = { workspace = true }
+
+[dependencies]
+serde = { workspace = true }
+vac-types = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "kind": "vac_runtime_realpath_e2e_fixture",
+  "id": "fixture.runtime.v15.audit_closure.realpath",
+  "cases": [
+    {
+      "id": "agent_mutating_tool_without_plan_blocked",
+      "expected": "blocked_pre_plan",
+      "assertion": "BoundRuntimeToolBoundary denies mutating/process tool calls when vac_runtime plan/artifacts are absent."
+    },
+    {
+      "id": "agent_mutating_tool_with_plan_gets_stamped",
+      "expected": "vac_bound_approval_attached",
+      "assertion": "Allowed mutating MCP calls are stamped before ToolExecutor::execute_tool_call."
+    },
+    {
+      "id": "mcp_command_without_vac_bound_approval_blocked",
+      "expected": "VAC_BOUND_APPROVAL_REQUIRED",
+      "assertion": "MCP process tools fail closed without bound runtime proof."
+    },
+    {
+      "id": "mcp_command_with_shell_metachar_blocked",
+      "expected": "VAC_STRUCTURED_COMMAND_REQUIRED",
+      "assertion": "Free-form shell syntax is denied before local command spawn."
+    },
+    {
+      "id": "mcp_file_mutation_without_approval_blocked",
+      "expected": "VAC_BOUND_APPROVAL_REQUIRED",
+      "assertion": "create/str_replace/remove reject direct file mutation without pre_patch_gate proof."
+    },
+    {
+      "id": "completion_lock_blocks_mutating_without_closeout",
+      "expected": "blocked_completion_lock",
+      "assertion": "Agent cannot emit a clean done after mutating activity without closeout/completion lock."
+    },
+    {
+      "id": "evidence_store_has_cas_merkle",
+      "expected": "cas_append_and_merkle_root_contract",
+      "assertion": "Evidence v2 store models per-capability CAS append, xrefs, and Merkle roots."
+    },
+    {
+      "id": "memory_cannot_relax_policy",
+      "expected": "false",
+      "assertion": "Memory remains a planning hint and cannot relax policy gates."
+    }
+  ]
+}

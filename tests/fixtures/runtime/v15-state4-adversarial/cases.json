@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "kind": "vac_runtime_state4_adversarial_fixture",
+  "id": "fixture.runtime.v15.state4.adversarial",
+  "cases": [
+    {
+      "id": "tool_supplied_policy_decision_rejected",
+      "expected": "block_pre_command"
+    },
+    {
+      "id": "compiled_policy_computed_inside_runtime",
+      "expected": "runtime_compute_policy"
+    },
+    {
+      "id": "unregistered_runner_denied",
+      "expected": "block_pre_command"
+    },
+    {
+      "id": "patch_current_file_text_rejected",
+      "expected": "block_pre_patch"
+    },
+    {
+      "id": "patch_file_text_before_rejected",
+      "expected": "block_pre_patch"
+    },
+    {
+      "id": "patch_broker_reads_workspace_preimage",
+      "expected": "actual_workspace_read"
+    },
+    {
+      "id": "replace_all_requires_separate_bounded_operation",
+      "expected": "block_pre_patch"
+    },
+    {
+      "id": "view_requires_read_plan_or_approval",
+      "expected": "block_pre_read"
+    },
+    {
+      "id": "view_remote_credentials_require_policy",
+      "expected": "approval_or_block_pre_read"
+    },
+    {
+      "id": "view_output_redacted_before_model",
+      "expected": "redacted_result"
+    },
+    {
+      "id": "broker_session_bootstrap_attaches_vac_runtime",
+      "expected": "metadata_bootstrap"
+    },
+    {
+      "id": "compiled_registry_contains_policy_and_read_authority",
+      "expected": "runtime_snapshot_has_policy_command_read_authority"
+    },
+    {
+      "id": "git_refs_use_git_blob_oid_not_content_sha",
+      "expected": "git_hash_object_oid"
+    },
+    {
+      "id": "checkpoint_manifest_self_count_hygiene",
+      "expected": "final_tree_count"
+    }
+  ]
+}

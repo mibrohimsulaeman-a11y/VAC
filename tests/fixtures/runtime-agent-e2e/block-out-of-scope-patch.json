@@ -1,0 +1,16 @@
+{
+  "name": "out-of-scope-patch",
+  "expect": "blocked",
+  "registry": {
+    "authority": "compiled_json",
+    "compiled_snapshot_current": true,
+    "deterministic_index_current": true,
+    "policy_loaded": true,
+    "conformance_level": "l1",
+    "capability": {"id": "vac.runtime.agent_loop", "readiness": {"declared": "ready", "computed": "ready", "effective": "ready"}, "owned_paths": ["vac-rs/crates/runtime/vac-agent-loop/**"]}
+  },
+  "plan": {"status": "approved", "capability": "vac.runtime.agent_loop", "allowed_file": "vac-rs/crates/runtime/vac-agent-loop/src/bound_runtime.rs", "forbidden_files": [], "approval_required": false, "approval_approved": true, "bounds": {"max_patches": 1, "max_new_files": 0, "max_line_delta": 10}},
+  "patch": {"path": "README.md", "line_start": 1, "line_end": 1, "lines_added": 1, "lines_removed": 0, "creates_new_file": false},
+  "command": {"runner": "python3", "args": ["ok"], "risk": "safe_read", "approval": "never"},
+  "closeout": {"artifacts_complete": true, "evidence_valid": true, "compiled_json_snapshot_current": true, "no_critical_spec_drift": true, "ownership_clean": true, "assessment_span_grounded": true}
+}

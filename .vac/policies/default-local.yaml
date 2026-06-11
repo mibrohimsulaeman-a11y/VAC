@@ -1,18 +1,38 @@
 schema_version: 1
 kind: policy
-id: vac.default-local
-title: Default local policy
-default_decision: approval_required
+id: vac.policy.default_local
+title: VAC default local policy
+default_decision: deny
 rules:
-  - id: read-project
-    match: { action: filesystem_read, path: project }
+  - id: vac.policy.allow_read_workspace
+    match:
+      action: filesystem_read
+      path: workspace
     decision: allow
-    reason: Read-only project inspection is allowed.
-  - id: write-project
-    match: { action: filesystem_write, path: project }
+    reason: Read-only source inspection is required for deterministic index and TUI status.
+  - id: vac.policy.approval_for_delete
+    match:
+      action: filesystem_delete
+      path: workspace
     decision: approval_required
-    reason: File writes require operator approval.
-  - id: deny-secrets
-    match: { data_class: secret_like }
+    reason: Destructive filesystem action must use the approval popup.
+  - id: vac.policy.approval_for_process
+    match:
+      action: execute_process
+      path: workspace
+    decision: approval_required
+    reason: Process execution is gated by structured-command policy.
+  - id: vac.policy.approval_for_network_https
+    match:
+      action: network_access
+      network:
+        host: "*"
+        protocol: https
+    decision: approval_required
+    reason: Network reads are governed actions; HTTPS transport alone is not authorization.
+  - id: vac.policy.deny_credentials
+    match:
+      action: credential_read
+      data_class: secret_like
     decision: deny
-    reason: Secret-like values cannot be exposed.
+    reason: Credentials must not enter memory/evidence/TUI render paths.

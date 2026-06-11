@@ -1,0 +1,15 @@
+[package]
+name = "vac-paths"
+version = { workspace = true }
+edition = { workspace = true }
+description = "VAC workspace and control-plane path helpers"
+license = { workspace = true }
+
+[dependencies]
+vac-brand = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,0 +1,54 @@
+schema_version: 2
+kind: capability
+id: vac.control_plane.registry
+title: VAC v1.5 Control Plane Registry
+readiness:
+  declared: ready
+  computed: partial
+  effective: partial
+  reason: SV implementation scaffold complete; TV cargo gates intentionally deferred
+  blockers:
+  - compiled_snapshot_static_only
+  last_checked_at: '2026-06-10T03:41:46Z'
+owner:
+  crate: vac-control-plane
+  module: root
+ownership:
+  targets:
+  - kind: path
+    include:
+    - .vac/**
+policy:
+  risk: medium
+  mutates_files: true
+  network: false
+  redaction: true
+  approval_required_for:
+  - filesystem_delete
+  - execute_process
+surfaces:
+  tui:
+    route: /capabilities
+  palette: true
+  cli:
+    enabled: true
+    commands:
+    - /capabilities
+validation:
+  gates:
+  - vac.static.structure
+  - vac.static.no_mock_tui
+  commands:
+  - id: vac.static.gate
+    runner: vac-script-runner
+    args:
+    - --script-id
+    - vac.static.gate
+    risk: safe_read
+    approval: policy
+    script_binding:
+      script_id: vac.static.gate
+      broker_owned: true
+      immutable_path: true
+docs:
+- docs/workflow-control-plane/VAC_V1_5_ARCHITECTURE_MIGRATION.md

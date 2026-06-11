@@ -1,0 +1,37 @@
+pub mod auth;
+pub mod checkpoint_store;
+pub mod context;
+pub mod error;
+pub mod event_log;
+pub mod idempotency;
+pub mod message_bridge;
+pub mod openapi;
+pub mod routes;
+pub mod sandbox;
+pub mod session_actor;
+pub mod session_manager;
+pub mod state;
+pub mod types;
+
+pub use auth::AuthConfig;
+pub use checkpoint_store::CheckpointStore;
+pub use context::{
+    ContextBudget, ContextFile, ContextPriority, EnvironmentContext, GitContext, ProjectContext,
+    SessionContext, SessionContextBuilder,
+};
+pub use error::SessionManagerError;
+pub use event_log::{EventEnvelope, EventLog, EventSubscription, GapDetected};
+pub use idempotency::{IdempotencyRequest, IdempotencyStore, LookupResult, StoredResponse};
+pub use openapi::generate_openapi;
+pub use routes::{protected_router, public_router, router};
+pub use sandbox::{
+    PersistentSandbox, SandboxConfig, SandboxHealth, SandboxMode, SandboxUserMapping,
+    SandboxedMcpServer,
+};
+pub use session_actor::{build_checkpoint_envelope, build_run_context, spawn_session_actor};
+pub use session_manager::SessionManager;
+pub use state::AppState;
+pub use types::{AutoApproveOverride, RunConfig, RunOverrides, SessionHandle, SessionRuntimeState};
+pub use vac_agent_loop::{
+    SAFE_AUTOPILOT_TOOLS, ToolApprovalAction, ToolApprovalPolicy, strip_tool_prefix,
+};

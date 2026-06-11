@@ -1,7 +1,0 @@
----
-source: crates/surfaces/tui/src/history_cell/split_006_finalmessageseparator.rs.inc
-assertion_line: 1115
-expression: rendered
----
-• Called search.find_docs({"query":"ratatui styling","limit":3})
-  └ Found styling guidance in styles.md

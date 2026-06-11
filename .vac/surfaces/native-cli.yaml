@@ -1,0 +1,13 @@
+schema_version: 1
+kind: surface
+id: surface.cli.native
+title: VAC native CLI surfaces
+capabilities:
+  - vac.surfaces.cli
+routes:
+  - kind: cli
+    command: vac
+    capability: vac.surfaces.cli
+    owner: vac-cli
+    visible: true
+    status: partial

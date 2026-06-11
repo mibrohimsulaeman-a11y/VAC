@@ -1,0 +1,42 @@
+schema_version: 1
+kind: surface
+id: surface.operator
+title: VAC Operator Surfaces
+capabilities:
+- vac.control_plane.assessment
+- vac.control_plane.registry
+- vac.control_plane.spec_sync
+- vac.runtime.jobs
+- vac.surfaces.cli
+- vac.surfaces.tui
+routes:
+- kind: cli
+  command: vac
+  capability: vac.surfaces.cli
+  owner: vac-cli
+  visible: true
+  status: ready
+- kind: tui
+  command: /runtime
+  capability: vac.runtime.jobs
+  owner: vac-tui
+  visible: true
+  status: partial
+- kind: tui
+  command: /capabilities
+  capability: vac.control_plane.registry
+  owner: vac-tui
+  visible: true
+  status: partial
+- kind: tui
+  command: /assessment
+  capability: vac.control_plane.assessment
+  owner: vac-tui
+  visible: true
+  status: partial
+- kind: tui
+  command: /spec-sync
+  capability: vac.control_plane.spec_sync
+  owner: vac-tui
+  visible: true
+  status: partial

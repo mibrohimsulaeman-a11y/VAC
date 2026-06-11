@@ -1,99 +1,42 @@
-# deps
-# Node.js dependencies
-node_modules
-.pnpm-store
-.pnpm-debug.log
-
-# Keep pnpm-lock.yaml
-!pnpm-lock.yaml
-
-# build
-dist/
-bazel-*
-user.bazelrc
-build/
-out/
-storybook-static/
-
-# ignore README for publishing
-vac-cli/README.md
-
-# ignore Nix derivation results
-result
-
-# editor
-.vscode/
-.idea/
-.history/
-.zed/
-*.swp
-*~
-
-# cli tools
-CLAUDE.md
-.claude/
-AGENTS.override.md
-
-# caches
-.cache/
-.turbo/
-.parcel-cache/
-.eslintcache
-.nyc_output/
-.jest/
-*.tsbuildinfo
-
-# logs
+target/
+vac-rs/target/
+debug.log
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# env
-.env*
-!.env.example
-.venv/
-
-# package
-*.tgz
-
-# ci
-.vercel/
-.netlify/
-
-# patches
-apply_patch/
-
-# coverage
-coverage/
-
-# personal files
-personal/
-
-# os
+.pi
 .DS_Store
-Thumbs.db
-Icon?
-.Spotlight-V100/
+debug_acp.sh
+PR_Description.md
+experiments/
 
-# Unwanted package managers
-.yarn/
-yarn.lock
+# VAC local/regenerable state
+.vac/cache/**
+!.vac/cache/.gitkeep
+.vac/memories/*.db
+.vac/session*
+.vac/registry/sessions/*/working/**
 
-# release
-package.json-e
-session.ts-e
-CHANGELOG.ignore.md
 
-# nix related
-.direnv
-.envrc
-
-# Python bytecode files
-__pycache__/
-*.pyc
-
-# capabilities/build is a real crate (vac-capability-build), not a build-output dir.
-# The generic "build/" rule above would otherwise drop it from git and break cargo metadata in CI.
-!vac-rs/crates/capabilities/build/
-!vac-rs/crates/capabilities/build/**
+# VAC v1.9 generated/local runtime state
+.vac/db/*.db
+.vac/db/*.db-*
+!.vac/db/.gitignore
+.vac/cache/**
+!.vac/cache/.gitkeep
+!.vac/cache/README.md
+.vac/exports/**
+!.vac/exports/.gitkeep
+!.vac/exports/README.md
+.vac/index/**
+.vac/assessment/**
+.vac/registry/compiled/**
+.vac/evidence/**
+.vac/registry/evidence/**
+.vac/plans/**
+!.vac/plans/runtime-v15-audit-closure.yaml
+!.vac/plans/runtime-v15-reaudit-closure.yaml
+.vac/ledger/**
+!.vac/ledger/runtime-v15-reaudit-closure.yaml
+.vac/registry/spec-sync/**
+.vac/registry/sessions/**
+.vac/registry/approvals/**
+.vac/registry/runtime/*.json

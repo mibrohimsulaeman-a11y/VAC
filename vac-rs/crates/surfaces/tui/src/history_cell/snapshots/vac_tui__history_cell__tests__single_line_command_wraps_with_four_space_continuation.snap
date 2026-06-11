@@ -1,9 +1,0 @@
----
-source: crates/surfaces/tui/src/history_cell/split_006_finalmessageseparator.rs.inc
-assertion_line: 1668
-expression: rendered
----
-• Ran a_very_long_token_
-  │ without_spaces_to_
-  │ force_wrapping
-  └ (no output)

@@ -1,0 +1,16 @@
+schema_version: 1
+kind: workflow
+id: maintenance.spec-sync
+status: partial
+title: SpecSync reconciliation
+steps:
+  - id: scan_changed_code
+    uses: capability.spec.scan_changed_code
+  - id: map_to_capabilities
+    uses: capability.ownership.map_changed_files
+  - id: detect_drift
+    uses: capability.spec.detect_drift
+  - id: request_operator_review
+    uses: capability.approval.request
+  - id: compile_canonical_json
+    uses: capability.registry.compile_snapshot

@@ -1,5 +1,0 @@
----
-source: core/src/local_runtime/tests_serde.rs
-expression: "ApprovalDecision::Timeout"
----
-"timeout"

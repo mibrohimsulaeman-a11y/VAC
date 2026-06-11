@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "jobs": {
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "id",
+    "jobs"
+  ],
+  "title": "VAC Runtime Jobs Snapshot",
+  "type": "object"
+}

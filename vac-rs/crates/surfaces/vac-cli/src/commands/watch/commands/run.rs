@@ -1,0 +1,2730 @@
+//! Autopilot run command - runs the autopilot service in foreground mode.
+//!
+//! This is the main entry point for the autopilot service, which:
+//! 1. Loads and validates configuration
+//! 2. Initializes the SQLite database
+//! 3. Sets autopilot state (PID, start time)
+//! 4. Registers all schedules with the scheduler
+//! 5. Runs the scheduler loop
+//! 6. Handles graceful shutdown on SIGTERM/SIGINT
+
+use crate::commands::watch::db::RELOAD_SENTINEL;
+use crate::commands::watch::reconciler::{
+    RegisteredSchedule, ScheduleSnapshot, reconcile_schedules,
+};
+use crate::commands::watch::{
+    AgentServerConnection, INTERACTIVE_DELEGATED_NOTE, InteractionMode, ListRunsFilter, RunStatus,
+    ScheduleConfig, ScheduleDb, Scheduler, SpawnConfig, assemble_prompt,
+    build_schedule_caller_context, is_process_running, run_check_script, spawn_agent,
+};
+use chrono::{DateTime, Utc};
+use croner::Cron;
+use serde::Deserialize;
+use std::collections::{HashMap, HashSet};
+use std::path::Path;
+use std::str::FromStr;
+use std::sync::{Arc, OnceLock};
+use std::time::{Duration, SystemTime};
+use tokio::signal;
+use tokio::sync::{Mutex, RwLock, mpsc};
+use tracing::{error, info, warn};
+use vac_foundation::utils::sanitize_text_output;
+use vac_messaging_gateway::client::{AutoApproveOverride, RunOverrides};
+
+const HEARTBEAT_STALE_SECONDS: i64 = 120;
+const HEARTBEAT_UPDATE_INTERVAL_SECONDS: u64 = 30;
+const INTERACTIVE_STATUS_POLL_INTERVAL_SECONDS: u64 = 15;
+const INTERACTIVE_MAX_RUN_AGE_HOURS: i64 = 24;
+const INTERACTIVE_RUN_MAX_AGE_GRACE_SECONDS: i64 = 60 * 60;
+const MAX_GATEWAY_CHECK_OUTPUT_CHARS: usize = 4_000;
+
+static WATCH_HTTP_CLIENT: OnceLock<reqwest::Client> = OnceLock::new();
+
+/// Run the autopilot service in foreground mode.
+///
+/// This function blocks until the autopilot service receives a shutdown signal (SIGTERM/SIGINT).
+/// Scheduled agents run via the co-hosted agent server API.
+pub async fn run_scheduler(server: AgentServerConnection) -> Result<(), String> {
+    print_banner();
+
+    // Load and validate configuration
+    let mut config =
+        ScheduleConfig::load_default().map_err(|e| format!("Failed to load config: {}", e))?;
+
+    // Inject the runtime-generated gateway token so the scheduler can
+    // authenticate against the co-hosted gateway API (/v1/gateway/send).
+    // The token is ephemeral (generated each `vac up`) and never persisted.
+    config.apply_runtime_gateway_credentials(&server.url, &server.token);
+
+    info!(
+        schedules = config.schedules.len(),
+        "Configuration loaded successfully"
+    );
+
+    // Initialize database directory
+    let db_path = config.db_path();
+    if let Some(parent) = db_path.parent() {
+        std::fs::create_dir_all(parent)
+            .map_err(|e| format!("Failed to create database directory: {}", e))?;
+    }
+
+    // Check for existing autopilot service via PID file
+    let pid_file = db_path
+        .parent()
+        .unwrap_or(std::path::Path::new("."))
+        .join("autopilot.pid");
+    if let Some(existing_pid) = check_existing_autopilot(&pid_file) {
+        return Err(format!(
+            "Another autopilot instance is already running (PID {}). \
+             Stop it first with 'kill {}' or remove the stale PID file at {}",
+            existing_pid,
+            existing_pid,
+            pid_file.display()
+        ));
+    }
+
+    // Write PID file
+    let pid = std::process::id();
+    std::fs::write(&pid_file, pid.to_string())
+        .map_err(|e| format!("Failed to write PID file: {}", e))?;
+
+    // Ensure PID file is cleaned up on exit
+    let pid_file_cleanup = pid_file.clone();
+
+    let db_path_str = db_path
+        .to_str()
+        .ok_or_else(|| "Invalid database path".to_string())?;
+
+    let db = ScheduleDb::new(db_path_str)
+        .await
+        .map_err(|e| format!("Failed to initialize database: {}", e))?;
+
+    let persisted_state = db.get_autopilot_state().await.map_err(|e| {
+        let _ = std::fs::remove_file(&pid_file_cleanup);
+        format!("Failed to read existing autopilot state: {}", e)
+    })?;
+
+    if let Err(message) = validate_prior_scheduler_state(persisted_state, Utc::now()) {
+        let _ = std::fs::remove_file(&pid_file_cleanup);
+        return Err(message);
+    }
+
+    // Crash recovery: stale in-progress runs can be left behind by hard crashes.
+    match db.clean_stale_runs().await {
+        Ok(0) => {}
+        Ok(count) => {
+            info!(count = count, "Cleaned stale runs from previous crash");
+            print_event(
+                "clean",
+                "autopilot",
+                &format!("Recovered {} stale run(s) from previous crash", count),
+            );
+        }
+        Err(e) => {
+            let _ = std::fs::remove_file(&pid_file_cleanup);
+            return Err(format!(
+                "Failed to clean stale runs at startup (refusing to continue): {}",
+                e
+            ));
+        }
+    }
+
+    // Set autopilot state
+    db.set_autopilot_state(pid as i64)
+        .await
+        .map_err(|e| format!("Failed to set autopilot state: {}", e))?;
+
+    info!(pid = pid, db_path = %db_path.display(), "Autopilot state initialized");
+
+    // Print config summary
+    print_config_summary(&config, pid as i64);
+
+    // Keep configuration in shared state so pollers can read reloaded schedules.
+    let config_state = Arc::new(RwLock::new(Arc::new(config.clone())));
+
+    // Create scheduler (returns scheduler and event receiver)
+    let (mut scheduler, mut event_rx) = Scheduler::new()
+        .await
+        .map_err(|e| format!("Failed to create scheduler: {}", e))?;
+
+    // Register enabled schedules and collect info for display + reconciliation snapshot.
+    let mut registered_schedules = Vec::new();
+    let mut registered = HashMap::new();
+    for schedule in &config.schedules {
+        if !schedule.enabled {
+            info!(schedule = %schedule.name, "Skipping disabled schedule");
+            continue;
+        }
+
+        match scheduler.register_schedule(schedule.clone()).await {
+            Ok(job_id) => {
+                info!(schedule = %schedule.name, cron = %schedule.cron, "Registered schedule");
+                registered_schedules.push(schedule.clone());
+                registered.insert(
+                    schedule.name.clone(),
+                    RegisteredSchedule {
+                        cron: schedule.cron.clone(),
+                        job_id,
+                    },
+                );
+            }
+            Err(e) => {
+                error!(schedule = %schedule.name, error = %e, "Failed to register schedule, skipping");
+                eprintln!(
+                    "  \x1b[31m✗\x1b[0m {} - failed to register: {}",
+                    schedule.name, e
+                );
+            }
+        }
+    }
+
+    scheduler
+        .start()
+        .await
+        .map_err(|e| format!("Failed to start scheduler: {}", e))?;
+
+    info!("Scheduler started, waiting for schedules...");
+    print_schedules_table(&registered_schedules);
+
+    let scheduler = Arc::new(Mutex::new(scheduler));
+    let schedule_snapshot = Arc::new(Mutex::new(ScheduleSnapshot { registered }));
+
+    let db = Arc::new(db);
+    let server = Arc::new(server);
+
+    let config_path = crate::commands::watch::config::expand_tilde(
+        crate::commands::watch::config::VAC_AUTOPILOT_CONFIG_PATH,
+    );
+    let initial_config_mtime = file_mtime(&config_path).await;
+
+    // Shutdown signal bridge.
+    let (shutdown_tx, mut shutdown_rx) = mpsc::channel::<()>(1);
+    tokio::spawn(async move {
+        wait_for_shutdown_signal().await;
+        let _ = shutdown_tx.send(()).await;
+    });
+
+    // Spawn heartbeat updater.
+    let db_heartbeat = Arc::clone(&db);
+    let heartbeat_updater = tokio::spawn(async move {
+        let mut interval =
+            tokio::time::interval(Duration::from_secs(HEARTBEAT_UPDATE_INTERVAL_SECONDS));
+        interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+
+        loop {
+            interval.tick().await;
+            if let Err(e) = db_heartbeat.update_heartbeat().await {
+                warn!(error = %e, "Failed to update autopilot heartbeat");
+            }
+        }
+    });
+
+    // Spawn pending schedule poller for manual schedule fires + config hot-reload signals.
+    let db_clone2 = Arc::clone(&db);
+    let config_clone2 = Arc::clone(&config_state);
+    let scheduler_clone2 = Arc::clone(&scheduler);
+    let snapshot_clone2 = Arc::clone(&schedule_snapshot);
+    let config_path_clone = config_path.clone();
+    let server_clone2 = Arc::clone(&server);
+    let pending_poller = tokio::spawn(async move {
+        let mut interval = tokio::time::interval(std::time::Duration::from_secs(1));
+        let mut last_mtime = initial_config_mtime;
+        let mut mtime_check_counter: u8 = 0;
+
+        loop {
+            interval.tick().await;
+
+            match db_clone2.pop_pending_schedules().await {
+                Ok(pending) => {
+                    let mut reload_requested = false;
+
+                    for pending_schedule in pending {
+                        if pending_schedule.schedule_name == RELOAD_SENTINEL {
+                            reload_requested = true;
+                            continue;
+                        }
+
+                        let (schedule_opt, config_for_event) = {
+                            let cfg = config_clone2.read().await;
+                            let found = cfg
+                                .schedules
+                                .iter()
+                                .find(|s| s.name == pending_schedule.schedule_name)
+                                .cloned();
+                            (found, Arc::clone(&cfg))
+                        };
+
+                        if let Some(schedule) = schedule_opt {
+                            if !schedule.enabled {
+                                info!(schedule = %schedule.name, "Manual schedule ignored because it is disabled");
+                                continue;
+                            }
+
+                            let db = Arc::clone(&db_clone2);
+                            let config = config_for_event;
+                            let server = Arc::clone(&server_clone2);
+
+                            tokio::spawn(async move {
+                                info!(schedule = %schedule.name, "Manual schedule fired");
+                                print_event("fire", &schedule.name, "Manual schedule fired");
+                                if let Err(e) = handle_schedule_event(
+                                    &db,
+                                    config.as_ref(),
+                                    &schedule,
+                                    &server,
+                                    true,
+                                )
+                                .await
+                                {
+                                    error!(
+                                        schedule = %schedule.name,
+                                        error = %e,
+                                        "Failed to handle manual schedule event"
+                                    );
+                                }
+                            });
+                        } else {
+                            warn!(
+                                schedule = %pending_schedule.schedule_name,
+                                "Pending schedule not found in config, skipping"
+                            );
+                        }
+                    }
+
+                    if reload_requested {
+                        let success = trigger_config_reload(
+                            &scheduler_clone2,
+                            &config_clone2,
+                            &snapshot_clone2,
+                            &config_path_clone,
+                            &server_clone2,
+                        )
+                        .await;
+                        if success {
+                            last_mtime = file_mtime(&config_path_clone).await;
+                        }
+                    }
+                }
+                Err(e) => {
+                    warn!(error = %e, "Failed to poll pending schedules");
+                }
+            }
+
+            mtime_check_counter = mtime_check_counter.saturating_add(1);
+            if mtime_check_counter >= 5 {
+                mtime_check_counter = 0;
+                let current_mtime = file_mtime(&config_path_clone).await;
+
+                if current_mtime != last_mtime {
+                    // Always advance last_mtime so permanent rejections (e.g.
+                    // db_path changed) don't re-trigger every 5 seconds. If
+                    // the file is edited again the mtime will change once more
+                    // and we will retry.
+                    last_mtime = current_mtime;
+                    info!("Config file mtime changed, reloading schedules");
+                    trigger_config_reload(
+                        &scheduler_clone2,
+                        &config_clone2,
+                        &snapshot_clone2,
+                        &config_path_clone,
+                        &server_clone2,
+                    )
+                    .await;
+                }
+            }
+        }
+    });
+
+    // Spawn interactive session status poller.
+    let db_clone3 = Arc::clone(&db);
+    let config_clone3 = Arc::clone(&config_state);
+    let interactive_status_poller = tokio::spawn(async move {
+        let mut interval = tokio::time::interval(Duration::from_secs(
+            INTERACTIVE_STATUS_POLL_INTERVAL_SECONDS,
+        ));
+
+        loop {
+            interval.tick().await;
+
+            let config = {
+                let cfg = config_clone3.read().await;
+                Arc::clone(&cfg)
+            };
+
+            if let Err(error) = reconcile_interactive_runs(&db_clone3, config.as_ref()).await {
+                warn!(error = %error, "Failed to reconcile interactive watch runs");
+            }
+        }
+    });
+
+    info!("Autopilot running. Press Ctrl+C to stop.");
+
+    // Main loop: schedule events + shutdown.
+    loop {
+        tokio::select! {
+            _ = shutdown_rx.recv() => {
+                break;
+            }
+            maybe_event = event_rx.recv() => {
+                match maybe_event {
+                    Some(event) => {
+                        let db = Arc::clone(&db);
+                        let config = {
+                            let cfg = config_state.read().await;
+                            Arc::clone(&cfg)
+                        };
+                        let server = Arc::clone(&server);
+                        tokio::spawn(async move {
+                            if let Err(e) = handle_schedule_event(&db, config.as_ref(), &event.schedule, &server, false).await {
+                                error!(schedule = %event.schedule.name, error = %e, "Failed to handle schedule event");
+                            }
+                        });
+                    }
+                    None => {
+                        warn!("Scheduler event channel closed unexpectedly");
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    println!();
+    println!("\x1b[33mShutdown signal received, stopping autopilot service...\x1b[0m");
+    info!("Shutdown signal received, stopping autopilot service...");
+
+    {
+        let mut scheduler_guard = scheduler.lock().await;
+        if let Err(e) = scheduler_guard.shutdown().await {
+            warn!(error = %e, "Failed to shutdown scheduler");
+        }
+    }
+
+    heartbeat_updater.abort();
+    pending_poller.abort();
+    interactive_status_poller.abort();
+
+    // Clear autopilot state
+    if let Err(e) = db.clear_autopilot_state().await {
+        warn!(error = %e, "Failed to clear autopilot state");
+    }
+
+    // Remove PID file
+    if let Err(e) = std::fs::remove_file(&pid_file_cleanup) {
+        warn!(error = %e, "Failed to remove PID file");
+    }
+
+    println!("\x1b[32mAutopilot stopped.\x1b[0m");
+    info!("Autopilot stopped");
+    Ok(())
+}
+
+async fn trigger_config_reload(
+    scheduler: &Arc<Mutex<Scheduler>>,
+    config: &Arc<RwLock<Arc<ScheduleConfig>>>,
+    snapshot: &Arc<Mutex<ScheduleSnapshot>>,
+    config_path: &Path,
+    server: &AgentServerConnection,
+) -> bool {
+    trigger_config_reload_with_loader(scheduler, config, snapshot, server, || {
+        ScheduleConfig::load(config_path)
+    })
+    .await
+}
+
+async fn trigger_config_reload_with_loader<F>(
+    scheduler: &Arc<Mutex<Scheduler>>,
+    config: &Arc<RwLock<Arc<ScheduleConfig>>>,
+    snapshot: &Arc<Mutex<ScheduleSnapshot>>,
+    server: &AgentServerConnection,
+    load_config: F,
+) -> bool
+where
+    F: Fn() -> Result<ScheduleConfig, crate::commands::watch::config::ConfigError>,
+{
+    let mut new_config = match load_config() {
+        Ok(config) => config,
+        Err(error) => {
+            warn!(error = %error, "Config reload failed (keeping current schedules)");
+            return false;
+        }
+    };
+
+    // Re-apply runtime gateway credentials — disk values are never authoritative
+    // for the ephemeral token generated at `vac up` time.
+    new_config.apply_runtime_gateway_credentials(&server.url, &server.token);
+
+    let current_db_path = {
+        let config_guard = config.read().await;
+        config_guard.db_path()
+    };
+
+    if new_config.db_path() != current_db_path {
+        warn!(
+            old = %current_db_path.display(),
+            new = %new_config.db_path().display(),
+            "Ignoring hot-reload because db_path changed; restart required"
+        );
+        return false;
+    }
+
+    // NOTE: snapshot is cloned before acquiring the scheduler lock. This is
+    // safe because this function is only called from the single pending_poller
+    // task — no concurrent caller can mutate the snapshot between the clone
+    // and the lock acquisition below.
+    let current_snapshot = {
+        let snapshot_guard = snapshot.lock().await;
+        snapshot_guard.clone()
+    };
+
+    let mut scheduler_guard = scheduler.lock().await;
+    let new_snapshot = reconcile_schedules(
+        &mut scheduler_guard,
+        &current_snapshot,
+        &new_config.schedules,
+    )
+    .await;
+    let active_count = new_snapshot.registered.len();
+    drop(scheduler_guard);
+
+    {
+        let mut snapshot_guard = snapshot.lock().await;
+        *snapshot_guard = new_snapshot;
+    }
+
+    {
+        let mut config_guard = config.write().await;
+        *config_guard = Arc::new(new_config);
+    }
+
+    print_event(
+        "reload",
+        "autopilot",
+        &format!("Config reloaded: {} schedules active", active_count),
+    );
+
+    true
+}
+
+async fn file_mtime(path: &Path) -> Option<SystemTime> {
+    tokio::fs::metadata(path)
+        .await
+        .ok()
+        .and_then(|metadata| metadata.modified().ok())
+}
+
+fn validate_prior_scheduler_state(
+    state: Option<crate::commands::watch::db::SchedulerState>,
+    now: DateTime<Utc>,
+) -> Result<(), String> {
+    let Some(state) = state else {
+        return Ok(());
+    };
+
+    let Ok(pid) = u32::try_from(state.pid) else {
+        return Ok(());
+    };
+
+    if !is_process_running(pid) {
+        return Ok(());
+    }
+
+    let heartbeat_age_seconds = now
+        .signed_duration_since(state.last_heartbeat)
+        .num_seconds()
+        .max(0);
+
+    if heartbeat_age_seconds <= HEARTBEAT_STALE_SECONDS {
+        return Err(format!(
+            "Another autopilot instance appears active (PID {}, heartbeat {}s ago). Stop it first.",
+            state.pid, heartbeat_age_seconds
+        ));
+    }
+
+    Err(format!(
+        "Autopilot state PID {} is still running but heartbeat is stale ({}s). Refusing startup to avoid marking active runs as failed.",
+        state.pid, heartbeat_age_seconds
+    ))
+}
+
+/// Handle a schedule event by running the check script and spawning the agent if needed.
+async fn handle_schedule_event(
+    db: &ScheduleDb,
+    config: &ScheduleConfig,
+    schedule: &crate::commands::watch::Schedule,
+    server: &AgentServerConnection,
+    manual: bool,
+) -> Result<(), String> {
+    // Singleton guard: skip if this schedule already has a running run
+    match db.has_running_run(&schedule.name).await {
+        Ok(true) => {
+            info!(
+                schedule = %schedule.name,
+                "Skipping: previous run still in progress"
+            );
+            print_event(
+                "skip",
+                &schedule.name,
+                "Skipped (previous run still in progress)",
+            );
+            return Ok(());
+        }
+        Ok(false) => {} // No running run, proceed
+        Err(e) => {
+            warn!(
+                schedule = %schedule.name,
+                error = %e,
+                "Failed to check for running runs, proceeding anyway"
+            );
+        }
+    }
+
+    info!(schedule = %schedule.name, "Schedule fired");
+    print_event("fire", &schedule.name, "Schedule fired");
+
+    // Insert a new run record
+    let run_id = db
+        .insert_run(&schedule.name)
+        .await
+        .map_err(|e| format!("Failed to insert run: {}", e))?;
+
+    // Run check script if defined
+    let check_result = if let Some(check_path) = &schedule.check {
+        let expanded_path = crate::commands::watch::config::expand_tilde(check_path);
+        let timeout = schedule.effective_check_timeout(&config.defaults);
+
+        info!(
+            schedule = %schedule.name,
+            check_script = %expanded_path.display(),
+            "Running check script"
+        );
+        print_event(
+            "check",
+            &schedule.name,
+            &format!("Running check: {}", expanded_path.display()),
+        );
+
+        match run_check_script(&expanded_path, timeout).await {
+            Ok(result) => {
+                // Update run with check result
+                let exit_code = result.exit_code.unwrap_or(-1);
+                db.update_run_check_result(
+                    run_id,
+                    exit_code,
+                    &result.stdout,
+                    &result.stderr,
+                    result.timed_out,
+                )
+                .await
+                .map_err(|e| format!("Failed to update check result: {}", e))?;
+
+                if result.timed_out {
+                    warn!(schedule = %schedule.name, "Check script timed out");
+                    print_event("timeout", &schedule.name, "Check script timed out");
+                    db.update_run_finished(
+                        run_id,
+                        RunStatus::Failed,
+                        Some("Check script timed out"),
+                        None,
+                        None,
+                    )
+                    .await
+                    .map_err(|e| format!("Failed to update run status: {}", e))?;
+                    return Ok(());
+                }
+
+                // Determine if we should trigger based on trigger_on setting
+                let exit_code = result.exit_code.unwrap_or(-1);
+                let trigger_on = schedule.effective_trigger_on(&config.defaults);
+                let should_trigger = trigger_on.should_trigger(exit_code);
+
+                if !should_trigger {
+                    info!(
+                        schedule = %schedule.name,
+                        exit_code = exit_code,
+                        trigger_on = %trigger_on,
+                        "Check script did not meet trigger condition"
+                    );
+                    print_event(
+                        "skip",
+                        &schedule.name,
+                        &format!(
+                            "Skipped (exit {} does not match trigger_on={})",
+                            exit_code, trigger_on
+                        ),
+                    );
+                    db.update_run_finished(run_id, RunStatus::Skipped, None, None, None)
+                        .await
+                        .map_err(|e| format!("Failed to update run status: {}", e))?;
+                    return Ok(());
+                }
+
+                info!(
+                    schedule = %schedule.name,
+                    exit_code = exit_code,
+                    trigger_on = %trigger_on,
+                    "Check script met trigger condition"
+                );
+
+                Some(result)
+            }
+            Err(e) => {
+                error!(schedule = %schedule.name, error = %e, "Failed to run check script");
+                print_event("fail", &schedule.name, &format!("Check error: {}", e));
+                db.update_run_finished(
+                    run_id,
+                    RunStatus::Failed,
+                    Some(&format!("Check script error: {}", e)),
+                    None,
+                    None,
+                )
+                .await
+                .map_err(|e| format!("Failed to update run status: {}", e))?;
+                return Ok(());
+            }
+        }
+    } else {
+        None
+    };
+
+    // Assemble prompt + structured caller context
+    let prompt = assemble_prompt(schedule, check_result.as_ref());
+    let caller_context = build_schedule_caller_context(schedule, check_result.as_ref());
+
+    if schedule.interaction == InteractionMode::Interactive {
+        match try_start_interactive_session(
+            config,
+            schedule,
+            check_result.as_ref(),
+            &prompt,
+            manual,
+        )
+        .await
+        {
+            Ok(Some(session_id)) => {
+                db.update_run_interactive_started(run_id, &session_id, INTERACTIVE_DELEGATED_NOTE)
+                    .await
+                    .map_err(|e| format!("Failed to persist interactive session id: {}", e))?;
+
+                print_event(
+                    "done",
+                    &schedule.name,
+                    &format!("Interactive session started ({})", session_id),
+                );
+                return Ok(());
+            }
+            Ok(None) => {
+                info!(
+                    schedule = %schedule.name,
+                    "Interactive mode skipped (missing gateway notifications config); falling back to silent mode"
+                );
+            }
+            Err(error) => {
+                warn!(
+                    schedule = %schedule.name,
+                    error = %error,
+                    "Interactive mode failed; falling back to silent mode"
+                );
+            }
+        }
+    }
+
+    info!(schedule = %schedule.name, "Waking agent");
+    print_event("agent", &schedule.name, "Spawning agent...");
+
+    let profile_name = schedule.effective_profile(&config.defaults).to_string();
+    let (profile_overrides, profile_allowed_tools) =
+        resolve_schedule_profile_overrides(&profile_name, server);
+
+    // Spawn agent
+    let spawn_config = SpawnConfig {
+        prompt,
+        profile: profile_name,
+        timeout: schedule.effective_timeout(&config.defaults),
+        workdir: None,
+        enable_slack_tools: schedule.effective_enable_slack_tools(&config.defaults),
+        enable_subagents: schedule.effective_enable_subagents(&config.defaults),
+        pause_on_approval: schedule.effective_pause_on_approval(&config.defaults),
+        sandbox: schedule.effective_sandbox(&config.defaults),
+        caller_context,
+        allowed_tools: profile_allowed_tools
+            .unwrap_or_else(|| server.default_allowed_tools.clone()),
+        overrides: profile_overrides,
+        server: server.clone(),
+    };
+
+    match spawn_agent(spawn_config).await {
+        Ok(result) => {
+            // Update run with agent session info
+            if let Some(session_id) = &result.session_id {
+                db.update_run_agent_started(run_id, session_id)
+                    .await
+                    .map_err(|e| format!("Failed to update agent session: {}", e))?;
+            }
+
+            if let Some(checkpoint_id) = &result.checkpoint_id {
+                db.update_run_checkpoint(run_id, checkpoint_id)
+                    .await
+                    .map_err(|e| format!("Failed to update checkpoint: {}", e))?;
+            }
+
+            // Determine final status and print event
+            let (status, error_msg) = if result.timed_out {
+                print_event("timeout", &schedule.name, "Agent timed out");
+                (RunStatus::TimedOut, Some("Agent timed out".to_string()))
+            } else if result.is_paused() {
+                let resume_hint = result
+                    .resume_hint
+                    .as_deref()
+                    .unwrap_or("vac autopilot schedule inspect <run_id>");
+                print_event(
+                    "pause",
+                    &schedule.name,
+                    &format!("Agent paused - resume with: {}", resume_hint),
+                );
+                (RunStatus::Paused, None)
+            } else if result.success() {
+                print_event("done", &schedule.name, "Agent completed successfully");
+                (RunStatus::Completed, None)
+            } else {
+                print_event(
+                    "fail",
+                    &schedule.name,
+                    &format!("Agent failed (exit {:?})", result.exit_code),
+                );
+                (
+                    RunStatus::Failed,
+                    Some(format!("Agent exited with code {:?}", result.exit_code)),
+                )
+            };
+
+            // Store agent output (truncate if too large, respecting unicode boundaries)
+            let stdout = if result.stdout.is_empty() {
+                None
+            } else {
+                Some(truncate_string(&result.stdout, 100_000))
+            };
+            let stderr = if result.stderr.is_empty() {
+                None
+            } else {
+                Some(truncate_string(&result.stderr, 100_000))
+            };
+
+            db.update_run_finished(
+                run_id,
+                status,
+                error_msg.as_deref(),
+                stdout.as_deref(),
+                stderr.as_deref(),
+            )
+            .await
+            .map_err(|e| format!("Failed to update run status: {}", e))?;
+
+            maybe_send_notification(config, schedule, &result, check_result.as_ref(), None).await;
+
+            info!(
+                schedule = %schedule.name,
+                status = ?status,
+                session_id = ?result.session_id,
+                paused = result.is_paused(),
+                "Agent completed"
+            );
+        }
+        Err(e) => {
+            error!(schedule = %schedule.name, error = %e, "Failed to spawn agent");
+            print_event(
+                "fail",
+                &schedule.name,
+                &format!("Failed to spawn agent: {}", e),
+            );
+            db.update_run_finished(
+                run_id,
+                RunStatus::Failed,
+                Some(&format!("Failed to spawn agent: {}", e)),
+                None,
+                None,
+            )
+            .await
+            .map_err(|e| format!("Failed to update run status: {}", e))?;
+
+            maybe_send_notification(
+                config,
+                schedule,
+                &crate::commands::watch::agent::AgentResult {
+                    exit_code: Some(1),
+                    session_id: None,
+                    checkpoint_id: None,
+                    timed_out: false,
+                    paused: false,
+                    pause_reason: None,
+                    resume_hint: None,
+                    stdout: String::new(),
+                    stderr: format!("Failed to spawn agent: {}", e),
+                },
+                check_result.as_ref(),
+                Some(&format!("Failed to spawn agent: {}", e)),
+            )
+            .await;
+        }
+    }
+
+    Ok(())
+}
+
+fn resolve_schedule_profile_overrides(
+    profile_name: &str,
+    server: &AgentServerConnection,
+) -> (Option<RunOverrides>, Option<HashSet<String>>) {
+    let Some(resolved) = crate::config::profile_resolver::resolve_profile_run_overrides(
+        profile_name,
+        Some(server.config_path.as_str()),
+    ) else {
+        return (None, None);
+    };
+
+    let normalized_model = resolved.model.and_then(|model| {
+        if model.trim().is_empty() {
+            None
+        } else {
+            Some(model)
+        }
+    });
+
+    let normalized_auto_approve = resolved
+        .auto_approve
+        .map(|tools| AutoApproveOverride::AllowList(normalize_tool_list(tools)));
+
+    let normalized_allowed_tools = resolved.allowed_tools.map(normalize_allowed_tools);
+
+    let overrides = RunOverrides {
+        model: normalized_model,
+        auto_approve: normalized_auto_approve,
+        system_prompt: resolved.system_prompt,
+        max_turns: resolved.max_turns,
+    };
+
+    let overrides = if overrides.is_empty() {
+        None
+    } else {
+        Some(overrides)
+    };
+
+    (overrides, normalized_allowed_tools)
+}
+
+fn normalize_tool_list(tools: Vec<String>) -> Vec<String> {
+    tools
+        .into_iter()
+        .filter_map(|tool| {
+            let normalized = vac_broker::strip_tool_prefix(&tool).trim().to_string();
+            if normalized.is_empty() {
+                None
+            } else {
+                Some(normalized)
+            }
+        })
+        .collect::<std::collections::BTreeSet<_>>()
+        .into_iter()
+        .collect()
+}
+
+fn normalize_allowed_tools(tools: Vec<String>) -> HashSet<String> {
+    normalize_tool_list(tools).into_iter().collect()
+}
+
+#[derive(Debug, Deserialize)]
+struct GatewaySendResponse {
+    #[serde(default)]
+    session_id: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct GatewaySessionStatusResponse {
+    active: bool,
+}
+
+async fn try_start_interactive_session(
+    config: &ScheduleConfig,
+    schedule: &crate::commands::watch::Schedule,
+    check_result: Option<&crate::commands::watch::CheckResult>,
+    prompt: &str,
+    manual: bool,
+) -> Result<Option<String>, String> {
+    let Some(notifications) = &config.notifications else {
+        return Ok(None);
+    };
+
+    let Some(delivery) = schedule.effective_delivery(notifications) else {
+        return Ok(None);
+    };
+
+    let caller_context = build_interactive_caller_context(schedule, check_result);
+    let check_output = normalized_check_output(check_result);
+    let trigger_text = format_trigger_text(&schedule.name, check_result, manual);
+    let payload = serde_json::json!({
+        "channel": delivery.channel,
+        "target": build_gateway_target(&delivery),
+        "text": trigger_text,
+        "context": {
+            "schedule": schedule.name,
+            "check_output": check_output,
+            "status": "triggered"
+        },
+        "interactive": {
+            "prompt": prompt,
+            "caller_context": caller_context,
+            "sandbox": schedule.effective_sandbox(&config.defaults),
+            "timeout": schedule.effective_timeout(&config.defaults).as_secs(),
+            "title": schedule.name,
+        }
+    });
+
+    match post_gateway_send(notifications, &payload).await {
+        Ok(response) => Ok(response.session_id),
+        Err(error) => Err(error),
+    }
+}
+
+fn format_trigger_text(
+    schedule_name: &str,
+    check_result: Option<&crate::commands::watch::CheckResult>,
+    manual: bool,
+) -> String {
+    if manual {
+        return format!("👤 Schedule **{schedule_name}** manual trigger");
+    }
+
+    match check_result {
+        Some(result) => {
+            let exit_code = result.exit_code.unwrap_or(-1);
+            if result.passed() {
+                format!("⏩ Schedule **{schedule_name}** check passed (exit {exit_code})")
+            } else {
+                format!("⚠️ Schedule **{schedule_name}** check failed (exit {exit_code})")
+            }
+        }
+        None => format!("🕐 Schedule **{schedule_name}** triggered"),
+    }
+}
+
+fn build_interactive_caller_context(
+    schedule: &crate::commands::watch::Schedule,
+    check_result: Option<&crate::commands::watch::CheckResult>,
+) -> Vec<serde_json::Value> {
+    let mut items = vec![serde_json::json!({
+        "name": "schedule",
+        "priority": "high",
+        "content": format!("Schedule '{}' fired", schedule.name),
+    })];
+
+    if let Some(check_result) = check_result {
+        items.push(serde_json::json!({
+            "name": "check_exit_code",
+            "priority": "high",
+            "content": check_result.exit_code.unwrap_or(-1).to_string(),
+        }));
+
+        if let Some(check_output) = normalized_check_output(Some(check_result)) {
+            items.push(serde_json::json!({
+                "name": "check_output",
+                "priority": "high",
+                "content": check_output,
+            }));
+        }
+    }
+
+    items
+}
+
+fn normalized_check_output(
+    check_result: Option<&crate::commands::watch::CheckResult>,
+) -> Option<String> {
+    check_result
+        .map(|value| sanitize_text_output(value.stdout.trim()))
+        .filter(|value| !value.is_empty())
+        .map(|value| truncate_string(&value, MAX_GATEWAY_CHECK_OUTPUT_CHARS))
+}
+
+fn watch_http_client() -> Result<&'static reqwest::Client, String> {
+    if let Some(client) = WATCH_HTTP_CLIENT.get() {
+        return Ok(client);
+    }
+
+    let client = reqwest::Client::builder()
+        .connect_timeout(Duration::from_secs(3))
+        .timeout(Duration::from_secs(10))
+        .build()
+        .map_err(|error| format!("failed to create gateway HTTP client: {}", error))?;
+
+    let _ = WATCH_HTTP_CLIENT.set(client);
+
+    WATCH_HTTP_CLIENT
+        .get()
+        .ok_or_else(|| "failed to initialize watch HTTP client".to_string())
+}
+
+async fn post_gateway_send(
+    notifications: &crate::commands::watch::config::NotificationConfig,
+    payload: &serde_json::Value,
+) -> Result<GatewaySendResponse, String> {
+    let client = watch_http_client()?;
+
+    let mut request = client.post(format!("{}/v1/gateway/send", notifications.gateway_url));
+
+    if let Some(token) = notifications.gateway_token.as_deref()
+        && !token.is_empty()
+    {
+        request = request.bearer_auth(token);
+    }
+
+    let response = request
+        .json(payload)
+        .send()
+        .await
+        .map_err(|error| format!("gateway send request failed: {}", error))?;
+
+    let status = response.status();
+    if !status.is_success() {
+        let body = response.text().await.unwrap_or_default();
+        return Err(format!(
+            "gateway send request returned {}: {}",
+            status, body
+        ));
+    }
+
+    response
+        .json::<GatewaySendResponse>()
+        .await
+        .map_err(|error| format!("failed to decode gateway response: {}", error))
+}
+
+async fn get_gateway_session_status(
+    notifications: &crate::commands::watch::config::NotificationConfig,
+    session_id: &str,
+) -> Result<Option<GatewaySessionStatusResponse>, String> {
+    let client = watch_http_client()?;
+    let mut request = client.get(format!(
+        "{}/v1/gateway/sessions/{}",
+        notifications.gateway_url, session_id
+    ));
+
+    if let Some(token) = notifications.gateway_token.as_deref()
+        && !token.is_empty()
+    {
+        request = request.bearer_auth(token);
+    }
+
+    let response = request
+        .send()
+        .await
+        .map_err(|error| format!("gateway session status request failed: {}", error))?;
+
+    let status = response.status();
+    if status == reqwest::StatusCode::NOT_FOUND {
+        return Ok(None);
+    }
+
+    if !status.is_success() {
+        let body = response.text().await.unwrap_or_default();
+        return Err(format!(
+            "gateway session status request returned {}: {}",
+            status, body
+        ));
+    }
+
+    response
+        .json::<GatewaySessionStatusResponse>()
+        .await
+        .map(Some)
+        .map_err(|error| {
+            format!(
+                "failed to decode gateway session status response: {}",
+                error
+            )
+        })
+}
+
+async fn reconcile_interactive_runs(
+    db: &ScheduleDb,
+    config: &ScheduleConfig,
+) -> Result<(), String> {
+    let Some(notifications) = &config.notifications else {
+        return Ok(());
+    };
+
+    let page_limit: u32 = 200;
+    let mut offset: u32 = 0;
+    let mut runs = Vec::new();
+
+    loop {
+        let filter = ListRunsFilter {
+            status: Some(RunStatus::Running),
+            limit: Some(page_limit),
+            offset: Some(offset),
+            ..Default::default()
+        };
+
+        let page = db
+            .list_runs(&filter)
+            .await
+            .map_err(|error| format!("failed to list running runs: {}", error))?;
+
+        if page.is_empty() {
+            break;
+        }
+
+        let page_count = page.len();
+        runs.extend(page);
+
+        if page_count < page_limit as usize {
+            break;
+        }
+
+        offset = offset.saturating_add(page_limit);
+    }
+
+    for run in runs {
+        if !run.interactive_delegated {
+            continue;
+        }
+
+        let Some(session_id) = run.agent_session_id.as_deref() else {
+            continue;
+        };
+
+        let run_age = Utc::now().signed_duration_since(run.started_at);
+        let run_expired = run_age > interactive_run_max_age(config, &run.schedule_name);
+
+        match get_gateway_session_status(notifications, session_id).await {
+            Ok(Some(status)) if status.active && !run_expired => {}
+            Ok(Some(status)) if status.active && run_expired => {
+                warn!(
+                    run_id = run.id,
+                    session_id = %session_id,
+                    age_hours = run_age.num_hours(),
+                    "Interactive run exceeded max age while still active; marking failed"
+                );
+                db.update_run_finished(
+                    run.id,
+                    RunStatus::TimedOut,
+                    Some("Interactive gateway session exceeded max age"),
+                    None,
+                    None,
+                )
+                .await
+                .map_err(|error| {
+                    format!("failed to finalize expired interactive run: {}", error)
+                })?;
+            }
+            Ok(Some(_status)) => {
+                db.update_run_finished(
+                    run.id,
+                    RunStatus::Completed,
+                    Some("Interactive gateway session completed"),
+                    None,
+                    None,
+                )
+                .await
+                .map_err(|error| format!("failed to finalize interactive run: {}", error))?;
+            }
+            Ok(None) => {
+                db.update_run_finished(
+                    run.id,
+                    RunStatus::Failed,
+                    Some("Interactive gateway session not found"),
+                    None,
+                    None,
+                )
+                .await
+                .map_err(|error| {
+                    format!("failed to finalize missing interactive run: {}", error)
+                })?;
+            }
+            Err(error) if run_expired => {
+                warn!(
+                    run_id = run.id,
+                    session_id = %session_id,
+                    age_hours = run_age.num_hours(),
+                    error = %error,
+                    "Failed to fetch interactive status for expired run; marking timed out"
+                );
+                db.update_run_finished(
+                    run.id,
+                    RunStatus::TimedOut,
+                    Some("Interactive gateway session status unavailable beyond max age"),
+                    None,
+                    None,
+                )
+                .await
+                .map_err(|db_error| {
+                    format!(
+                        "failed to finalize expired interactive run after status errors: {}",
+                        db_error
+                    )
+                })?;
+            }
+            Err(error) => {
+                warn!(
+                    run_id = run.id,
+                    session_id = %session_id,
+                    error = %error,
+                    "Failed to fetch interactive gateway session status"
+                );
+            }
+        }
+    }
+
+    Ok(())
+}
+
+fn interactive_run_max_age(config: &ScheduleConfig, schedule_name: &str) -> chrono::Duration {
+    let fallback_seconds = INTERACTIVE_MAX_RUN_AGE_HOURS.saturating_mul(60 * 60);
+
+    let schedule_timeout_seconds = config
+        .schedules
+        .iter()
+        .find(|schedule| schedule.name == schedule_name)
+        .map(|schedule| schedule.effective_timeout(&config.defaults).as_secs())
+        .and_then(|seconds| i64::try_from(seconds).ok())
+        .unwrap_or(fallback_seconds);
+
+    let timeout_with_grace =
+        schedule_timeout_seconds.saturating_add(INTERACTIVE_RUN_MAX_AGE_GRACE_SECONDS);
+    let max_age_seconds = timeout_with_grace.max(fallback_seconds);
+
+    chrono::Duration::seconds(max_age_seconds)
+}
+
+async fn maybe_send_notification(
+    config: &ScheduleConfig,
+    schedule: &crate::commands::watch::Schedule,
+    result: &crate::commands::watch::agent::AgentResult,
+    check_result: Option<&crate::commands::watch::CheckResult>,
+    error_override: Option<&str>,
+) {
+    let Some(notifications) = &config.notifications else {
+        return;
+    };
+
+    let success = result.success();
+    if !notifications.should_notify(schedule, success) {
+        return;
+    }
+
+    let Some(delivery) = schedule.effective_delivery(notifications) else {
+        warn!(schedule = %schedule.name, "Notification enabled but delivery target is missing");
+        return;
+    };
+
+    let text = format_notification(schedule, result, check_result, error_override);
+    let check_output = normalized_check_output(check_result);
+    let context = serde_json::json!({
+        "schedule": schedule.name,
+        "summary": extract_summary(result, error_override),
+        "check_output": check_output,
+        "status": if success { "completed" } else { "failed" },
+    });
+
+    let payload = serde_json::json!({
+        "channel": delivery.channel,
+        "target": build_gateway_target(&delivery),
+        "text": text,
+        "context": context,
+    });
+
+    if let Err(error) = post_gateway_send(notifications, &payload).await {
+        warn!(
+            schedule = %schedule.name,
+            error = %error,
+            "Failed to send watch notification"
+        );
+    }
+}
+
+fn build_gateway_target(delivery: &crate::commands::watch::DeliveryConfig) -> serde_json::Value {
+    match delivery.channel.as_str() {
+        "telegram" => serde_json::json!({ "chat_id": delivery.chat_id }),
+        "discord" => serde_json::json!({ "channel_id": delivery.chat_id }),
+        "slack" => serde_json::json!({ "channel": delivery.chat_id }),
+        _ => serde_json::json!({ "chat_id": delivery.chat_id }),
+    }
+}
+
+fn format_notification(
+    schedule: &crate::commands::watch::Schedule,
+    result: &crate::commands::watch::agent::AgentResult,
+    check_result: Option<&crate::commands::watch::CheckResult>,
+    error_override: Option<&str>,
+) -> String {
+    let emoji = if result.success() { "✅" } else { "❌" };
+    let status = if result.success() {
+        "completed"
+    } else {
+        "failed"
+    };
+
+    let mut text = format!("{} {} {}\n", emoji, schedule.name, status);
+
+    if let Some(check) = check_result
+        && let Some(exit) = check.exit_code
+    {
+        text.push_str(&format!("Check exit code: {}\n", exit));
+    }
+
+    let summary = extract_summary(result, error_override);
+    if !summary.is_empty() {
+        text.push('\n');
+        text.push_str(&summary);
+    }
+
+    text
+}
+
+fn extract_summary(
+    result: &crate::commands::watch::agent::AgentResult,
+    error_override: Option<&str>,
+) -> String {
+    if let Some(error) = error_override {
+        return sanitize_and_truncate(error, 500);
+    }
+
+    if !result.stdout.trim().is_empty() {
+        return sanitize_and_truncate(result.stdout.trim(), 500);
+    }
+
+    if !result.stderr.trim().is_empty() {
+        return sanitize_and_truncate(result.stderr.trim(), 500);
+    }
+
+    String::new()
+}
+
+fn sanitize_and_truncate(text: &str, max_bytes: usize) -> String {
+    let sanitized = sanitize_text_output(text);
+    truncate_string(&sanitized, max_bytes)
+}
+
+/// Truncate a string to a maximum length, respecting char boundaries.
+fn truncate_string(s: &str, max_len: usize) -> String {
+    if s.chars().count() <= max_len {
+        return s.to_string();
+    }
+
+    let truncated: String = s.chars().take(max_len).collect();
+    format!("{}... (truncated)", truncated)
+}
+
+/// Wait for SIGTERM, SIGINT, or SIGHUP signal.
+async fn wait_for_shutdown_signal() {
+    let ctrl_c = async {
+        if let Err(e) = signal::ctrl_c().await {
+            tracing::error!(error = %e, "Failed to install Ctrl+C handler");
+        }
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        match signal::unix::signal(signal::unix::SignalKind::terminate()) {
+            Ok(mut sig) => {
+                sig.recv().await;
+            }
+            Err(e) => {
+                tracing::error!(error = %e, "Failed to install SIGTERM handler");
+            }
+        }
+    };
+
+    #[cfg(unix)]
+    let hangup = async {
+        match signal::unix::signal(signal::unix::SignalKind::hangup()) {
+            Ok(mut sig) => {
+                sig.recv().await;
+            }
+            Err(e) => {
+                tracing::error!(error = %e, "Failed to install SIGHUP handler");
+            }
+        }
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    #[cfg(not(unix))]
+    let hangup = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+        _ = hangup => {},
+    }
+}
+
+/// Check if an existing autopilot service is running by reading the PID file.
+/// Returns Some(pid) if an autopilot service is running, None otherwise.
+fn check_existing_autopilot(pid_file: &std::path::Path) -> Option<u32> {
+    let pid_str = std::fs::read_to_string(pid_file).ok()?;
+    let pid: u32 = pid_str.trim().parse().ok()?;
+
+    // Check if process is actually running
+    if is_process_running(pid) {
+        Some(pid)
+    } else {
+        // Stale PID file - remove it
+        let _ = std::fs::remove_file(pid_file);
+        None
+    }
+}
+
+// ============================================================================
+// Console output helpers for foreground mode
+// ============================================================================
+
+/// Print startup banner.
+fn print_banner() {
+    println!();
+    println!("\x1b[1;36m+-------------------------------------+\x1b[0m");
+    println!(
+        "\x1b[1;36m|\x1b[0m   \x1b[1mVAC Autopilot\x1b[0m                      \x1b[1;36m|\x1b[0m"
+    );
+    println!("\x1b[1;36m|\x1b[0m   Autonomous Agent Scheduler        \x1b[1;36m|\x1b[0m");
+    println!("\x1b[1;36m+-------------------------------------+\x1b[0m");
+    println!();
+}
+
+/// Print configuration summary.
+fn print_config_summary(config: &ScheduleConfig, pid: i64) {
+    println!("\x1b[1mConfiguration:\x1b[0m");
+    println!("  PID:        {}", pid);
+    println!("  Database:   {}", config.db_path().display());
+    println!("  Log dir:    {}", config.log_dir().display());
+    println!("  Profile:    {}", config.defaults.profile);
+    println!(
+        "  Timeout:    {}",
+        humantime::format_duration(config.defaults.timeout)
+    );
+    println!();
+}
+
+/// Print registered schedules table with next run times.
+fn print_schedules_table(schedules: &[crate::commands::watch::Schedule]) {
+    if schedules.is_empty() {
+        println!("\x1b[33mNo schedules registered.\x1b[0m");
+        println!();
+        return;
+    }
+
+    println!("\x1b[1mRegistered Schedules ({}):\x1b[0m", schedules.len());
+    println!("  {:<24} {:<18} {:<24}", "NAME", "CRON", "NEXT RUN");
+    println!("  {}", "-".repeat(66));
+
+    for trigger in schedules {
+        let next_run = calculate_next_run(&trigger.cron)
+            .map(|dt| format_relative_time(&dt))
+            .unwrap_or_else(|| "invalid".to_string());
+
+        println!(
+            "  {:<24} {:<18} {}",
+            truncate(&trigger.name, 24),
+            truncate(&trigger.cron, 18),
+            next_run
+        );
+    }
+
+    println!();
+    println!("\x1b[32mAutopilot running.\x1b[0m Press \x1b[1mCtrl+C\x1b[0m to stop.");
+    println!();
+    println!("\x1b[2m--- Event Log ---\x1b[0m");
+    println!();
+}
+
+/// Calculate the next run time for a cron expression.
+fn calculate_next_run(schedule: &str) -> Option<DateTime<Utc>> {
+    let cron = Cron::from_str(schedule).ok()?;
+    cron.find_next_occurrence(&Utc::now(), false).ok()
+}
+
+/// Format datetime as relative time (e.g., "in 5m 30s").
+fn format_relative_time(dt: &DateTime<Utc>) -> String {
+    let now = Utc::now();
+    let duration = dt.signed_duration_since(now);
+
+    if duration.num_seconds() < 0 {
+        return "now".to_string();
+    }
+
+    let total_secs = duration.num_seconds();
+    let hours = total_secs / 3600;
+    let mins = (total_secs % 3600) / 60;
+    let secs = total_secs % 60;
+
+    if hours > 0 {
+        format!("in {}h {}m", hours, mins)
+    } else if mins > 0 {
+        format!("in {}m {}s", mins, secs)
+    } else {
+        format!("in {}s", secs)
+    }
+}
+
+/// Truncate a string to a maximum length, respecting unicode character boundaries.
+fn truncate(s: &str, max_len: usize) -> String {
+    if s.chars().count() <= max_len {
+        s.to_string()
+    } else {
+        let truncated: String = s.chars().take(max_len.saturating_sub(3)).collect();
+        format!("{}...", truncated)
+    }
+}
+
+/// Print a timestamped event to the console.
+#[allow(dead_code)]
+fn print_event(event_type: &str, trigger_name: &str, message: &str) {
+    let timestamp = Utc::now().format("%H:%M:%S");
+    let (color, symbol) = match event_type {
+        "fire" => ("\x1b[33m", ">>"),
+        "check" => ("\x1b[36m", "?"),
+        "skip" => ("\x1b[2m", "--"),
+        "agent" => ("\x1b[35m", "=>"),
+        "pause" => ("\x1b[33m", "||"),
+        "done" => ("\x1b[32m", "OK"),
+        "fail" => ("\x1b[31m", "XX"),
+        "timeout" => ("\x1b[31m", "TO"),
+        "clean" => ("\x1b[34m", "RC"),
+        "reload" => ("\x1b[34m", "RL"),
+        _ => ("\x1b[0m", ".."),
+    };
+    println!(
+        "{}{} [{}] {}: {}\x1b[0m",
+        color, symbol, timestamp, trigger_name, message
+    );
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        MAX_GATEWAY_CHECK_OUTPUT_CHARS, build_interactive_caller_context, interactive_run_max_age,
+        normalized_check_output, resolve_schedule_profile_overrides,
+        trigger_config_reload_with_loader, validate_prior_scheduler_state,
+    };
+    use crate::commands::watch::config::{ScheduleDefaults, ScheduleSettings};
+    use crate::commands::watch::db::{RELOAD_SENTINEL, SchedulerState};
+    use crate::commands::watch::reconciler::{RegisteredSchedule, ScheduleSnapshot};
+    use crate::commands::watch::{
+        AgentServerConnection, CheckResult, InteractionMode, Schedule, ScheduleConfig, ScheduleDb,
+        Scheduler,
+    };
+    use chrono::{Duration, Utc};
+    use std::collections::{HashMap, HashSet};
+    use std::path::{Path, PathBuf};
+    use std::sync::Arc;
+    use std::time::Duration as StdDuration;
+    use tempfile::tempdir;
+    use tokio::sync::{Mutex as AsyncMutex, RwLock, mpsc};
+
+    fn dummy_server() -> AgentServerConnection {
+        AgentServerConnection {
+            url: "http://127.0.0.1:4096".to_string(),
+            token: "test-token".to_string(),
+            model: None,
+            default_allowed_tools: HashSet::new(),
+            boot_profile: "default".to_string(),
+            config_path: String::new(),
+        }
+    }
+
+    fn escape_toml_string(value: &Path) -> String {
+        value.to_string_lossy().replace('\\', "\\\\")
+    }
+
+    fn write_autopilot_config(path: &Path, db_path: &Path, schedules: &[(&str, &str, bool)]) {
+        let log_dir = db_path.parent().unwrap_or(Path::new(".")).join("logs");
+
+        let mut content = String::new();
+        content.push_str("[watch]\n");
+        content.push_str(&format!("db_path = \"{}\"\n", escape_toml_string(db_path)));
+        content.push_str(&format!(
+            "log_dir = \"{}\"\n\n",
+            escape_toml_string(&log_dir)
+        ));
+
+        for (name, cron, enabled) in schedules {
+            content.push_str("[[schedules]]\n");
+            content.push_str(&format!("name = \"{}\"\n", name));
+            content.push_str(&format!("cron = \"{}\"\n", cron));
+            content.push_str("prompt = \"test prompt\"\n");
+            content.push_str(&format!("enabled = {}\n\n", enabled));
+        }
+
+        std::fs::write(path, content).expect("failed to write autopilot config");
+    }
+
+    async fn build_runtime_state(
+        config: &ScheduleConfig,
+    ) -> (
+        Arc<AsyncMutex<Scheduler>>,
+        Arc<AsyncMutex<ScheduleSnapshot>>,
+        Arc<RwLock<Arc<ScheduleConfig>>>,
+        mpsc::Receiver<crate::commands::watch::scheduler::SchedulerEvent>,
+    ) {
+        let (mut scheduler_inner, event_rx) =
+            Scheduler::new().await.expect("failed to create scheduler");
+
+        let mut registered = HashMap::new();
+        for schedule in &config.schedules {
+            if !schedule.enabled {
+                continue;
+            }
+            let job_id = scheduler_inner
+                .register_schedule(schedule.clone())
+                .await
+                .expect("failed to register initial schedule");
+            registered.insert(
+                schedule.name.clone(),
+                RegisteredSchedule {
+                    cron: schedule.cron.clone(),
+                    job_id,
+                },
+            );
+        }
+
+        scheduler_inner
+            .start()
+            .await
+            .expect("failed to start scheduler");
+
+        let scheduler = Arc::new(AsyncMutex::new(scheduler_inner));
+        let snapshot = Arc::new(AsyncMutex::new(ScheduleSnapshot { registered }));
+        let config_state = Arc::new(RwLock::new(Arc::new(config.clone())));
+
+        (scheduler, snapshot, config_state, event_rx)
+    }
+
+    #[test]
+    fn test_validate_prior_scheduler_state_blocks_when_pid_running_and_heartbeat_fresh() {
+        let now = Utc::now();
+        let state = SchedulerState {
+            started_at: now - Duration::seconds(30),
+            pid: i64::from(std::process::id()),
+            last_heartbeat: now - Duration::seconds(5),
+        };
+
+        let result = validate_prior_scheduler_state(Some(state), now);
+        assert!(result.is_err());
+
+        let message = result.expect_err("expected active-instance guard error");
+        assert!(
+            message.contains("appears active"),
+            "unexpected guard message: {message}"
+        );
+    }
+
+    #[tokio::test]
+    async fn test_config_reload_signal_applies_mutated_file_without_scheduler_restart() {
+        let temp = tempdir().expect("failed to create temp directory");
+        let config_path = temp.path().join("autopilot.toml");
+        let db_path = temp.path().join("autopilot.db");
+
+        write_autopilot_config(&config_path, &db_path, &[("alpha", "*/10 * * * *", true)]);
+
+        let config = ScheduleConfig::load(&config_path).expect("failed to load initial config");
+        let (scheduler, snapshot, config_state, _event_rx) = build_runtime_state(&config).await;
+
+        let db = ScheduleDb::new(db_path.to_str().expect("db path should be valid utf8"))
+            .await
+            .expect("failed to open schedule db");
+
+        write_autopilot_config(
+            &config_path,
+            &db_path,
+            &[
+                ("alpha", "*/10 * * * *", true),
+                ("beta", "*/15 * * * *", true),
+            ],
+        );
+
+        db.request_config_reload()
+            .await
+            .expect("failed to request config reload");
+        let pending = db
+            .pop_pending_schedules()
+            .await
+            .expect("failed to pop pending schedules");
+        assert!(
+            pending
+                .iter()
+                .any(|item| item.schedule_name == RELOAD_SENTINEL)
+        );
+
+        let loader_path = config_path.clone();
+        let server = dummy_server();
+        trigger_config_reload_with_loader(
+            &scheduler,
+            &config_state,
+            &snapshot,
+            &server,
+            move || ScheduleConfig::load(&loader_path),
+        )
+        .await;
+
+        let snapshot_guard = snapshot.lock().await;
+        assert_eq!(snapshot_guard.registered.len(), 2);
+        assert!(snapshot_guard.registered.contains_key("alpha"));
+
+        assert!(snapshot_guard.registered.contains_key("beta"));
+        drop(snapshot_guard);
+
+        let scheduler_guard = scheduler.lock().await;
+        assert_eq!(scheduler_guard.job_count(), 2);
+        drop(scheduler_guard);
+
+        let mut scheduler_guard = scheduler.lock().await;
+        scheduler_guard
+            .shutdown()
+            .await
+            .expect("failed to shutdown scheduler");
+    }
+
+    #[tokio::test]
+    async fn test_config_reload_ignores_db_path_changes() {
+        let temp = tempdir().expect("failed to create temp directory");
+        let config_path = temp.path().join("autopilot.toml");
+        let db_path = temp.path().join("autopilot.db");
+
+        write_autopilot_config(&config_path, &db_path, &[("alpha", "*/10 * * * *", true)]);
+
+        let config = ScheduleConfig::load(&config_path).expect("failed to load initial config");
+        let (scheduler, snapshot, config_state, _event_rx) = build_runtime_state(&config).await;
+
+        let changed_db_path: PathBuf = temp.path().join("other.db");
+        let mut changed_config = config.clone();
+        changed_config.watch.db_path = changed_db_path.to_string_lossy().to_string();
+
+        let server = dummy_server();
+        let success = trigger_config_reload_with_loader(
+            &scheduler,
+            &config_state,
+            &snapshot,
+            &server,
+            move || Ok(changed_config.clone()),
+        )
+        .await;
+        assert!(!success, "db_path change should be rejected");
+
+        let snapshot_guard = snapshot.lock().await;
+        assert_eq!(snapshot_guard.registered.len(), 1);
+        assert!(snapshot_guard.registered.contains_key("alpha"));
+        drop(snapshot_guard);
+
+        let config_guard = config_state.read().await;
+        assert_eq!(config_guard.db_path(), db_path);
+        drop(config_guard);
+
+        let scheduler_guard = scheduler.lock().await;
+        assert_eq!(scheduler_guard.job_count(), 1);
+        drop(scheduler_guard);
+
+        let mut scheduler_guard = scheduler.lock().await;
+        scheduler_guard
+            .shutdown()
+            .await
+            .expect("failed to shutdown scheduler");
+    }
+
+    #[tokio::test]
+    async fn test_config_reload_returns_false_on_parse_error() {
+        let temp = tempdir().expect("failed to create temp directory");
+        let config_path = temp.path().join("autopilot.toml");
+        let db_path = temp.path().join("autopilot.db");
+
+        write_autopilot_config(&config_path, &db_path, &[("alpha", "*/10 * * * *", true)]);
+
+        let config = ScheduleConfig::load(&config_path).expect("failed to load initial config");
+        let (scheduler, snapshot, config_state, _event_rx) = build_runtime_state(&config).await;
+
+        let server = dummy_server();
+        let success = trigger_config_reload_with_loader(
+            &scheduler,
+            &config_state,
+            &snapshot,
+            &server,
+            || {
+                Err(crate::commands::watch::config::ConfigError::ReadError(
+                    std::io::Error::new(std::io::ErrorKind::NotFound, "simulated read failure"),
+                ))
+            },
+        )
+        .await;
+        assert!(!success, "parse failure should return false");
+
+        // State unchanged.
+        let snapshot_guard = snapshot.lock().await;
+        assert_eq!(snapshot_guard.registered.len(), 1);
+        drop(snapshot_guard);
+
+        let mut scheduler_guard = scheduler.lock().await;
+        scheduler_guard
+            .shutdown()
+            .await
+            .expect("failed to shutdown scheduler");
+    }
+
+    #[tokio::test]
+    async fn test_config_reload_removes_schedule() {
+        let temp = tempdir().expect("failed to create temp directory");
+        let config_path = temp.path().join("autopilot.toml");
+        let db_path = temp.path().join("autopilot.db");
+
+        write_autopilot_config(
+            &config_path,
+            &db_path,
+            &[
+                ("alpha", "*/10 * * * *", true),
+                ("beta", "*/15 * * * *", true),
+            ],
+        );
+
+        let config = ScheduleConfig::load(&config_path).expect("failed to load initial config");
+        let (scheduler, snapshot, config_state, _event_rx) = build_runtime_state(&config).await;
+
+        // Remove beta from config file.
+        write_autopilot_config(&config_path, &db_path, &[("alpha", "*/10 * * * *", true)]);
+
+        let loader_path = config_path.clone();
+        let server = dummy_server();
+        let success = trigger_config_reload_with_loader(
+            &scheduler,
+            &config_state,
+            &snapshot,
+            &server,
+            move || ScheduleConfig::load(&loader_path),
+        )
+        .await;
+        assert!(success);
+
+        let snapshot_guard = snapshot.lock().await;
+        assert_eq!(snapshot_guard.registered.len(), 1);
+        assert!(snapshot_guard.registered.contains_key("alpha"));
+        assert!(!snapshot_guard.registered.contains_key("beta"));
+        drop(snapshot_guard);
+
+        let scheduler_guard = scheduler.lock().await;
+        assert_eq!(scheduler_guard.job_count(), 1);
+        drop(scheduler_guard);
+
+        let mut scheduler_guard = scheduler.lock().await;
+        scheduler_guard
+            .shutdown()
+            .await
+            .expect("failed to shutdown scheduler");
+    }
+
+    #[tokio::test]
+    async fn test_config_reload_disables_schedule() {
+        let temp = tempdir().expect("failed to create temp directory");
+        let config_path = temp.path().join("autopilot.toml");
+        let db_path = temp.path().join("autopilot.db");
+
+        write_autopilot_config(
+            &config_path,
+            &db_path,
+            &[
+                ("alpha", "*/10 * * * *", true),
+                ("beta", "*/15 * * * *", true),
+            ],
+        );
+
+        let config = ScheduleConfig::load(&config_path).expect("failed to load initial config");
+        let (scheduler, snapshot, config_state, _event_rx) = build_runtime_state(&config).await;
+
+        // Disable beta.
+        write_autopilot_config(
+            &config_path,
+            &db_path,
+            &[
+                ("alpha", "*/10 * * * *", true),
+                ("beta", "*/15 * * * *", false),
+            ],
+        );
+
+        let loader_path = config_path.clone();
+        let server = dummy_server();
+        let success = trigger_config_reload_with_loader(
+            &scheduler,
+            &config_state,
+            &snapshot,
+            &server,
+            move || ScheduleConfig::load(&loader_path),
+        )
+        .await;
+        assert!(success);
+
+        let snapshot_guard = snapshot.lock().await;
+        assert_eq!(snapshot_guard.registered.len(), 1);
+        assert!(snapshot_guard.registered.contains_key("alpha"));
+        assert!(
+            !snapshot_guard.registered.contains_key("beta"),
+            "disabled schedule should be unregistered"
+        );
+        drop(snapshot_guard);
+
+        let mut scheduler_guard = scheduler.lock().await;
+        assert_eq!(scheduler_guard.job_count(), 1);
+        scheduler_guard
+            .shutdown()
+            .await
+            .expect("failed to shutdown scheduler");
+    }
+
+    #[tokio::test]
+    async fn test_config_reload_reenables_schedule() {
+        let temp = tempdir().expect("failed to create temp directory");
+        let config_path = temp.path().join("autopilot.toml");
+        let db_path = temp.path().join("autopilot.db");
+
+        write_autopilot_config(
+            &config_path,
+            &db_path,
+            &[
+                ("alpha", "*/10 * * * *", true),
+                ("beta", "*/15 * * * *", true),
+            ],
+        );
+
+        let config = ScheduleConfig::load(&config_path).expect("failed to load initial config");
+        let (scheduler, snapshot, config_state, _event_rx) = build_runtime_state(&config).await;
+
+        // Disable beta.
+        write_autopilot_config(
+            &config_path,
+            &db_path,
+            &[
+                ("alpha", "*/10 * * * *", true),
+                ("beta", "*/15 * * * *", false),
+            ],
+        );
+        let loader_path = config_path.clone();
+        let server = dummy_server();
+        trigger_config_reload_with_loader(
+            &scheduler,
+            &config_state,
+            &snapshot,
+            &server,
+            move || ScheduleConfig::load(&loader_path),
+        )
+        .await;
+
+        let snapshot_guard = snapshot.lock().await;
+        assert!(!snapshot_guard.registered.contains_key("beta"));
+        drop(snapshot_guard);
+
+        // Re-enable beta.
+        write_autopilot_config(
+            &config_path,
+            &db_path,
+            &[
+                ("alpha", "*/10 * * * *", true),
+                ("beta", "*/15 * * * *", true),
+            ],
+        );
+        let loader_path2 = config_path.clone();
+        let success = trigger_config_reload_with_loader(
+            &scheduler,
+            &config_state,
+            &snapshot,
+            &server,
+            move || ScheduleConfig::load(&loader_path2),
+        )
+        .await;
+        assert!(success);
+
+        let snapshot_guard = snapshot.lock().await;
+        assert_eq!(snapshot_guard.registered.len(), 2);
+        assert!(snapshot_guard.registered.contains_key("alpha"));
+        assert!(
+            snapshot_guard.registered.contains_key("beta"),
+            "re-enabled schedule should be registered"
+        );
+        drop(snapshot_guard);
+
+        let mut scheduler_guard = scheduler.lock().await;
+        assert_eq!(scheduler_guard.job_count(), 2);
+        scheduler_guard
+            .shutdown()
+            .await
+            .expect("failed to shutdown scheduler");
+    }
+
+    fn sample_schedule_for_context(name: &str) -> Schedule {
+        Schedule {
+            name: name.to_string(),
+            cron: "0 * * * *".to_string(),
+            check: None,
+            check_timeout: None,
+            trigger_on: None,
+            prompt: "test prompt".to_string(),
+            profile: None,
+            board_id: None,
+            timeout: None,
+            enable_slack_tools: None,
+            enable_subagents: None,
+            pause_on_approval: None,
+            sandbox: None,
+            notify_on: None,
+            notify_channel: None,
+            notify_chat_id: None,
+            interaction: InteractionMode::Interactive,
+            enabled: true,
+        }
+    }
+
+    #[test]
+    fn test_interactive_caller_context_includes_schedule_and_check_output() {
+        let schedule = sample_schedule_for_context("disk-cleanup");
+        let check = CheckResult {
+            exit_code: Some(1),
+            stdout: "disk usage 91%".to_string(),
+            stderr: String::new(),
+            timed_out: false,
+        };
+
+        let context = build_interactive_caller_context(&schedule, Some(&check));
+        assert_eq!(context.len(), 3);
+        assert_eq!(context[0]["name"], "schedule");
+        assert_eq!(context[1]["name"], "check_exit_code");
+        assert_eq!(context[2]["name"], "check_output");
+    }
+
+    #[test]
+    fn test_normalized_check_output_truncates_large_stdout() {
+        let large = "x".repeat(MAX_GATEWAY_CHECK_OUTPUT_CHARS + 100);
+        let check = CheckResult {
+            exit_code: Some(1),
+            stdout: large,
+            stderr: String::new(),
+            timed_out: false,
+        };
+
+        let normalized = normalized_check_output(Some(&check)).expect("output should exist");
+        assert!(normalized.contains("truncated"));
+        assert!(normalized.chars().count() > MAX_GATEWAY_CHECK_OUTPUT_CHARS);
+    }
+
+    #[test]
+    fn test_interactive_run_max_age_uses_schedule_timeout_when_larger_than_default() {
+        let config = ScheduleConfig {
+            watch: ScheduleSettings::default(),
+            defaults: ScheduleDefaults::default(),
+            notifications: None,
+            schedules: vec![Schedule {
+                timeout: Some(StdDuration::from_secs(48 * 60 * 60)),
+                ..sample_schedule_for_context("long-run")
+            }],
+        };
+
+        let max_age = interactive_run_max_age(&config, "long-run");
+        assert!(max_age.num_hours() >= 49);
+    }
+
+    #[test]
+    fn test_interactive_run_max_age_uses_default_floor_for_unknown_schedule() {
+        let config = ScheduleConfig {
+            watch: ScheduleSettings::default(),
+            defaults: ScheduleDefaults::default(),
+            notifications: None,
+            schedules: Vec::new(),
+        };
+        let max_age = interactive_run_max_age(&config, "missing");
+
+        assert!(max_age.num_hours() >= 24);
+    }
+
+    #[test]
+    fn test_resolve_schedule_profile_overrides_uses_profile_specific_values() {
+        let temp = tempdir().expect("failed to create temp directory");
+        let config_path = temp.path().join("config.toml");
+
+        let config = r#"
+[settings]
+editor = "nano"
+
+[profiles.default]
+api_key = "default-key"
+model = "openai/default-model"
+allowed_tools = ["view"]
+auto_approve = ["view"]
+
+[profiles.production]
+api_key = "prod-key"
+model = "anthropic/claude-sonnet-4-5"
+allowed_tools = ["vac__run_command", "  "]
+auto_approve = ["vac__view"]
+system_prompt = "production prompt"
+max_turns = 24
+"#;
+
+        std::fs::write(&config_path, config).expect("failed to write config");
+
+        let server = AgentServerConnection {
+            url: "http://127.0.0.1:4096".to_string(),
+            token: String::new(),
+            model: Some("openai/default-model".to_string()),
+            default_allowed_tools: HashSet::from(["view".to_string()]),
+            boot_profile: "default".to_string(),
+            config_path: config_path.to_string_lossy().to_string(),
+        };
+
+        let (overrides, allowed_tools) = resolve_schedule_profile_overrides("production", &server);
+
+        let overrides = overrides.expect("expected run overrides");
+        assert_eq!(
+            overrides.model.as_deref(),
+            Some("anthropic/claude-sonnet-4-5")
+        );
+        assert!(matches!(
+            overrides.auto_approve,
+            Some(vac_messaging_gateway::client::AutoApproveOverride::AllowList(_))
+        ));
+        assert_eq!(
+            overrides.system_prompt.as_deref(),
+            Some("production prompt")
+        );
+        assert_eq!(overrides.max_turns, Some(24));
+
+        let allowed_tools = allowed_tools.expect("expected allowed tools override");
+        assert!(allowed_tools.contains("run_command"));
+    }
+
+    #[test]
+    fn test_resolve_schedule_profile_overrides_includes_default_profile_values() {
+        let temp = tempdir().expect("failed to create temp directory");
+        let config_path = temp.path().join("config-default-profile.toml");
+
+        let config = r#"
+[settings]
+editor = "nano"
+
+[profiles.default]
+api_key = "default-key"
+model = "openai/default-model"
+auto_approve = ["view"]
+"#;
+
+        std::fs::write(&config_path, config).expect("failed to write config");
+
+        let server = AgentServerConnection {
+            url: "http://127.0.0.1:4096".to_string(),
+            token: String::new(),
+            model: Some("openai/default-model".to_string()),
+            default_allowed_tools: HashSet::from(["view".to_string()]),
+            boot_profile: "default".to_string(),
+            config_path: config_path.to_string_lossy().to_string(),
+        };
+
+        let (overrides, _allowed_tools) = resolve_schedule_profile_overrides("default", &server);
+        let overrides = overrides.expect("expected default profile overrides");
+        assert_eq!(overrides.model.as_deref(), Some("openai/default-model"));
+    }
+
+    #[test]
+    fn test_resolve_schedule_profile_overrides_preserves_empty_allowed_tools_as_allow_all() {
+        let temp = tempdir().expect("failed to create temp directory");
+        let config_path = temp.path().join("config-empty-tools.toml");
+
+        let config = r#"
+[settings]
+editor = "nano"
+
+[profiles.default]
+api_key = "default-key"
+
+[profiles.production]
+api_key = "prod-key"
+allowed_tools = []
+auto_approve = []
+"#;
+
+        std::fs::write(&config_path, config).expect("failed to write config");
+
+        let server = AgentServerConnection {
+            url: "http://127.0.0.1:4096".to_string(),
+            token: String::new(),
+            model: Some("openai/default-model".to_string()),
+            default_allowed_tools: HashSet::from(["view".to_string()]),
+            boot_profile: "default".to_string(),
+            config_path: config_path.to_string_lossy().to_string(),
+        };
+
+        let (overrides, allowed_tools) = resolve_schedule_profile_overrides("production", &server);
+        let allowed_tools = allowed_tools.expect("expected explicit allow-all override");
+        assert!(allowed_tools.is_empty());
+
+        let overrides = overrides.expect("expected run overrides");
+        assert!(matches!(
+            overrides.auto_approve,
+            Some(vac_messaging_gateway::client::AutoApproveOverride::AllowList(ref tools)) if tools.is_empty()
+        ));
+    }
+
+    // ========================================================================
+    // Gateway credential injection integration tests
+    // ========================================================================
+
+    /// Write a config with a [notifications] section. The gateway_token field
+    /// is intentionally omitted (or stale) to simulate what's on disk.
+    fn write_autopilot_config_with_notifications(
+        path: &Path,
+        db_path: &Path,
+        schedules: &[(&str, &str, bool)],
+        gateway_url: &str,
+        gateway_token: Option<&str>,
+    ) {
+        let log_dir = db_path.parent().unwrap_or(Path::new(".")).join("logs");
+
+        let mut content = String::new();
+        content.push_str("[watch]\n");
+        content.push_str(&format!("db_path = \"{}\"\n", escape_toml_string(db_path)));
+        content.push_str(&format!(
+            "log_dir = \"{}\"\n\n",
+            escape_toml_string(&log_dir)
+        ));
+
+        content.push_str("[notifications]\n");
+        content.push_str(&format!("gateway_url = \"{}\"\n", gateway_url));
+        if let Some(token) = gateway_token {
+            content.push_str(&format!("gateway_token = \"{}\"\n", token));
+        }
+        content.push_str("channel = \"slack\"\n");
+        content.push_str("chat_id = \"#ops\"\n\n");
+
+        for (name, cron, enabled) in schedules {
+            content.push_str("[[schedules]]\n");
+            content.push_str(&format!("name = \"{}\"\n", name));
+            content.push_str(&format!("cron = \"{}\"\n", cron));
+            content.push_str("prompt = \"test prompt\"\n");
+            content.push_str(&format!("enabled = {}\n\n", enabled));
+        }
+
+        std::fs::write(path, content).expect("failed to write autopilot config");
+    }
+
+    #[tokio::test]
+    async fn test_config_reload_preserves_runtime_gateway_token() {
+        // Simulates: disk config has no gateway_token, runtime injects one,
+        // then a hot-reload from disk should re-inject the runtime token.
+        let temp = tempdir().expect("failed to create temp directory");
+        let config_path = temp.path().join("autopilot.toml");
+        let db_path = temp.path().join("autopilot.db");
+
+        write_autopilot_config_with_notifications(
+            &config_path,
+            &db_path,
+            &[("alpha", "*/10 * * * *", true)],
+            "http://127.0.0.1:4096",
+            None, // no token on disk — the real-world default
+        );
+
+        let config = ScheduleConfig::load(&config_path).expect("failed to load initial config");
+        let (scheduler, snapshot, config_state, _event_rx) = build_runtime_state(&config).await;
+
+        let server = AgentServerConnection {
+            url: "http://127.0.0.1:4096".to_string(),
+            token: "ephemeral-runtime-token-42".to_string(),
+            model: None,
+            default_allowed_tools: HashSet::new(),
+            boot_profile: "default".to_string(),
+            config_path: "/tmp/config.toml".to_string(),
+        };
+
+        // Reload from disk (simulates mtime change trigger).
+        let loader_path = config_path.clone();
+        let success = trigger_config_reload_with_loader(
+            &scheduler,
+            &config_state,
+            &snapshot,
+            &server,
+            move || ScheduleConfig::load(&loader_path),
+        )
+        .await;
+        assert!(success, "reload should succeed");
+
+        // Verify the in-memory config has the runtime token injected.
+        let config_guard = config_state.read().await;
+        let notifications = config_guard
+            .notifications
+            .as_ref()
+            .expect("notifications should exist after reload");
+        assert_eq!(
+            notifications.gateway_token.as_deref(),
+            Some("ephemeral-runtime-token-42"),
+            "runtime gateway token must survive config reload from disk"
+        );
+        assert_eq!(
+            notifications.gateway_url, "http://127.0.0.1:4096",
+            "gateway URL should be preserved"
+        );
+        drop(config_guard);
+
+        let mut scheduler_guard = scheduler.lock().await;
+        scheduler_guard
+            .shutdown()
+            .await
+            .expect("failed to shutdown scheduler");
+    }
+
+    #[tokio::test]
+    async fn test_config_reload_overwrites_stale_disk_token() {
+        // Simulates: someone manually wrote a gateway_token into the TOML
+        // (perhaps from a previous run). The reload must replace it with the
+        // current runtime token.
+        let temp = tempdir().expect("failed to create temp directory");
+        let config_path = temp.path().join("autopilot.toml");
+        let db_path = temp.path().join("autopilot.db");
+
+        write_autopilot_config_with_notifications(
+            &config_path,
+            &db_path,
+            &[("alpha", "*/10 * * * *", true)],
+            "http://127.0.0.1:4096",
+            Some("stale-token-from-yesterday"), // stale on disk
+        );
+
+        let config = ScheduleConfig::load(&config_path).expect("failed to load initial config");
+        let (scheduler, snapshot, config_state, _event_rx) = build_runtime_state(&config).await;
+
+        let server = AgentServerConnection {
+            url: "http://127.0.0.1:4096".to_string(),
+            token: "todays-fresh-token".to_string(),
+            model: None,
+            default_allowed_tools: HashSet::new(),
+            boot_profile: "default".to_string(),
+            config_path: "/tmp/config.toml".to_string(),
+        };
+
+        let loader_path = config_path.clone();
+        let success = trigger_config_reload_with_loader(
+            &scheduler,
+            &config_state,
+            &snapshot,
+            &server,
+            move || ScheduleConfig::load(&loader_path),
+        )
+        .await;
+        assert!(success);
+
+        let config_guard = config_state.read().await;
+        let notifications = config_guard
+            .notifications
+            .as_ref()
+            .expect("notifications should exist");
+        assert_eq!(
+            notifications.gateway_token.as_deref(),
+            Some("todays-fresh-token"),
+            "stale disk token must be replaced by runtime token after reload"
+        );
+        drop(config_guard);
+
+        let mut scheduler_guard = scheduler.lock().await;
+        scheduler_guard
+            .shutdown()
+            .await
+            .expect("failed to shutdown scheduler");
+    }
+
+    #[tokio::test]
+    async fn test_config_reload_replaces_stale_loopback_gateway_url() {
+        let temp = tempdir().expect("failed to create temp directory");
+        let config_path = temp.path().join("autopilot.toml");
+        let db_path = temp.path().join("autopilot.db");
+
+        write_autopilot_config_with_notifications(
+            &config_path,
+            &db_path,
+            &[("alpha", "*/10 * * * *", true)],
+            "http://127.0.0.1:4096",
+            None,
+        );
+
+        let config = ScheduleConfig::load(&config_path).expect("failed to load initial config");
+        let (scheduler, snapshot, config_state, _event_rx) = build_runtime_state(&config).await;
+
+        let server = AgentServerConnection {
+            url: "http://127.0.0.1:4097".to_string(),
+            token: "runtime-token".to_string(),
+            model: None,
+            default_allowed_tools: HashSet::new(),
+            boot_profile: "default".to_string(),
+            config_path: "/tmp/config.toml".to_string(),
+        };
+
+        let loader_path = config_path.clone();
+        let success = trigger_config_reload_with_loader(
+            &scheduler,
+            &config_state,
+            &snapshot,
+            &server,
+            move || ScheduleConfig::load(&loader_path),
+        )
+        .await;
+        assert!(success);
+
+        let config_guard = config_state.read().await;
+        let notifications = config_guard
+            .notifications
+            .as_ref()
+            .expect("notifications should exist");
+        assert_eq!(
+            notifications.gateway_url, "http://127.0.0.1:4097",
+            "loopback gateway URL must follow the current runtime server URL after reload"
+        );
+        assert_eq!(
+            notifications.gateway_token.as_deref(),
+            Some("runtime-token")
+        );
+        drop(config_guard);
+
+        let mut scheduler_guard = scheduler.lock().await;
+        scheduler_guard
+            .shutdown()
+            .await
+            .expect("failed to shutdown scheduler");
+    }
+
+    #[tokio::test]
+    async fn test_config_reload_preserves_custom_external_gateway_url() {
+        // Users may point notifications at an external gateway (not loopback).
+        // The reload must preserve their custom URL, only injecting the token.
+        let temp = tempdir().expect("failed to create temp directory");
+        let config_path = temp.path().join("autopilot.toml");
+        let db_path = temp.path().join("autopilot.db");
+
+        write_autopilot_config_with_notifications(
+            &config_path,
+            &db_path,
+            &[("alpha", "*/10 * * * *", true)],
+            "https://gateway.prod.example.com",
+            None,
+        );
+
+        let config = ScheduleConfig::load(&config_path).expect("failed to load initial config");
+        let (scheduler, snapshot, config_state, _event_rx) = build_runtime_state(&config).await;
+
+        let server = AgentServerConnection {
+            url: "http://127.0.0.1:4096".to_string(),
+            token: "runtime-token".to_string(),
+            model: None,
+            default_allowed_tools: HashSet::new(),
+            boot_profile: "default".to_string(),
+            config_path: "/tmp/config.toml".to_string(),
+        };
+
+        let loader_path = config_path.clone();
+        let success = trigger_config_reload_with_loader(
+            &scheduler,
+            &config_state,
+            &snapshot,
+            &server,
+            move || ScheduleConfig::load(&loader_path),
+        )
+        .await;
+        assert!(success);
+
+        let config_guard = config_state.read().await;
+        let notifications = config_guard
+            .notifications
+            .as_ref()
+            .expect("notifications should exist");
+        assert_eq!(
+            notifications.gateway_url, "https://gateway.prod.example.com",
+            "custom external gateway URL must not be overwritten by loopback URL"
+        );
+        assert_eq!(
+            notifications.gateway_token.as_deref(),
+            Some("runtime-token"),
+        );
+        drop(config_guard);
+
+        let mut scheduler_guard = scheduler.lock().await;
+        scheduler_guard
+            .shutdown()
+            .await
+            .expect("failed to shutdown scheduler");
+    }
+
+    #[tokio::test]
+    async fn test_config_reload_without_notifications_section_is_safe() {
+        // Config has no [notifications] at all. Reload should not fabricate one.
+        let temp = tempdir().expect("failed to create temp directory");
+        let config_path = temp.path().join("autopilot.toml");
+        let db_path = temp.path().join("autopilot.db");
+
+        write_autopilot_config(&config_path, &db_path, &[("alpha", "*/10 * * * *", true)]);
+
+        let config = ScheduleConfig::load(&config_path).expect("failed to load initial config");
+        let (scheduler, snapshot, config_state, _event_rx) = build_runtime_state(&config).await;
+
+        let server = AgentServerConnection {
+            url: "http://127.0.0.1:4096".to_string(),
+            token: "runtime-token".to_string(),
+            model: None,
+            default_allowed_tools: HashSet::new(),
+            boot_profile: "default".to_string(),
+            config_path: "/tmp/config.toml".to_string(),
+        };
+
+        let loader_path = config_path.clone();
+        let success = trigger_config_reload_with_loader(
+            &scheduler,
+            &config_state,
+            &snapshot,
+            &server,
+            move || ScheduleConfig::load(&loader_path),
+        )
+        .await;
+        assert!(success);
+
+        let config_guard = config_state.read().await;
+        assert!(
+            config_guard.notifications.is_none(),
+            "should not create a notifications section when none exists on disk"
+        );
+        drop(config_guard);
+
+        let mut scheduler_guard = scheduler.lock().await;
+        scheduler_guard
+            .shutdown()
+            .await
+            .expect("failed to shutdown scheduler");
+    }
+
+    #[tokio::test]
+    async fn test_consecutive_reloads_always_carry_runtime_token() {
+        // Simulates multiple hot-reloads in succession (schedule edits).
+        // Each reload reads disk (no token) but the runtime token must persist.
+        let temp = tempdir().expect("failed to create temp directory");
+        let config_path = temp.path().join("autopilot.toml");
+        let db_path = temp.path().join("autopilot.db");
+
+        write_autopilot_config_with_notifications(
+            &config_path,
+            &db_path,
+            &[("alpha", "*/10 * * * *", true)],
+            "http://127.0.0.1:4096",
+            None,
+        );
+
+        let config = ScheduleConfig::load(&config_path).expect("failed to load initial config");
+        let (scheduler, snapshot, config_state, _event_rx) = build_runtime_state(&config).await;
+
+        let server = AgentServerConnection {
+            url: "http://127.0.0.1:4096".to_string(),
+            token: "stable-runtime-token".to_string(),
+            model: None,
+            default_allowed_tools: HashSet::new(),
+            boot_profile: "default".to_string(),
+            config_path: "/tmp/config.toml".to_string(),
+        };
+
+        // Reload #1: add a schedule
+        write_autopilot_config_with_notifications(
+            &config_path,
+            &db_path,
+            &[
+                ("alpha", "*/10 * * * *", true),
+                ("beta", "*/5 * * * *", true),
+            ],
+            "http://127.0.0.1:4096",
+            None, // disk still has no token
+        );
+
+        let loader_path1 = config_path.clone();
+        trigger_config_reload_with_loader(
+            &scheduler,
+            &config_state,
+            &snapshot,
+            &server,
+            move || ScheduleConfig::load(&loader_path1),
+        )
+        .await;
+
+        {
+            let guard = config_state.read().await;
+            let n = guard
+                .notifications
+                .as_ref()
+                .expect("notifications should exist");
+            assert_eq!(n.gateway_token.as_deref(), Some("stable-runtime-token"));
+            assert_eq!(guard.schedules.len(), 2);
+        }
+
+        // Reload #2: remove a schedule
+        write_autopilot_config_with_notifications(
+            &config_path,
+            &db_path,
+            &[("alpha", "*/10 * * * *", true)],
+            "http://127.0.0.1:4096",
+            None, // still no token
+        );
+
+        let loader_path2 = config_path.clone();
+        trigger_config_reload_with_loader(
+            &scheduler,
+            &config_state,
+            &snapshot,
+            &server,
+            move || ScheduleConfig::load(&loader_path2),
+        )
+        .await;
+
+        {
+            let guard = config_state.read().await;
+            let n = guard
+                .notifications
+                .as_ref()
+                .expect("notifications should exist");
+            assert_eq!(
+                n.gateway_token.as_deref(),
+                Some("stable-runtime-token"),
+                "runtime token must survive consecutive reloads from disk"
+            );
+            assert_eq!(guard.schedules.len(), 1);
+        }
+
+        // Reload #3: someone writes a different token to disk (should be overridden)
+        write_autopilot_config_with_notifications(
+            &config_path,
+            &db_path,
+            &[("alpha", "*/10 * * * *", true)],
+            "http://127.0.0.1:4096",
+            Some("someone-wrote-a-token-to-disk"),
+        );
+
+        let loader_path3 = config_path.clone();
+        trigger_config_reload_with_loader(
+            &scheduler,
+            &config_state,
+            &snapshot,
+            &server,
+            move || ScheduleConfig::load(&loader_path3),
+        )
+        .await;
+
+        {
+            let guard = config_state.read().await;
+            let n = guard
+                .notifications
+                .as_ref()
+                .expect("notifications should exist");
+            assert_eq!(
+                n.gateway_token.as_deref(),
+                Some("stable-runtime-token"),
+                "disk token must always be overridden by runtime token"
+            );
+        }
+
+        let mut scheduler_guard = scheduler.lock().await;
+        scheduler_guard
+            .shutdown()
+            .await
+            .expect("failed to shutdown scheduler");
+    }
+}

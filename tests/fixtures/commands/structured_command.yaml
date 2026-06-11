@@ -1,5 +1,0 @@
-id: cargo.test.fixture
-runner: cargo
-args: ["test", "fixture"]
-risk: execute_process
-approval: policy

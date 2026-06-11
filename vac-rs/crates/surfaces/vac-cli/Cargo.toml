@@ -1,0 +1,107 @@
+[package]
+name = "vac-cli"
+version = { workspace = true }
+edition = "2024"
+description = { workspace = true }
+license = { workspace = true }
+readme = "../../../../README.md"
+
+
+[[bin]]
+name = "vac"
+path = "src/main.rs"
+
+[features]
+default = ["bedrock"]
+bedrock = ["vac-foundation/bedrock", "vac-provider-core/bedrock"]
+jemalloc = ["dep:tikv-jemallocator"]
+libsql-test = []
+
+[dependencies]
+vac-assessment = { workspace = true }
+vac-index = { workspace = true }
+vac-spec-sync = { workspace = true }
+vac-doctor = { workspace = true }
+vac-evidence = { workspace = true }
+vac-registry-compiler = { workspace = true }
+vac-readiness = { workspace = true }
+vac-jcs = { workspace = true }
+vac-state = { workspace = true }
+vac-remote-service = { workspace = true }
+vac-mcp-server = { workspace = true }
+vac-mcp-client = { workspace = true }
+vac-mcp-config = { workspace = true }
+vac-mcp-proxy = { workspace = true }
+vac-tui = { workspace = true }
+vac-foundation = { workspace = true, features = ["sqlite"] }
+vac-broker = { workspace = true }
+vac-messaging-gateway = { workspace = true }
+vac-ak = { workspace = true }
+vac-provider-core = { workspace = true }
+tracing = { workspace = true }
+tracing-appender = { workspace = true }
+tracing-subscriber = { workspace = true }
+rmcp = { workspace = true }
+clap = { version = "4.5.23", features = ["derive", "env"] }
+clap_complete = "4.6.0"
+config = "0.14.1"
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+serde_yaml = "0.9"
+toml = "0.8.19"
+tokio = { workspace = true }
+axum = { workspace = true }
+uuid = { workspace = true }
+futures-util = { workspace = true }
+chrono = { workspace = true }
+reqwest = { workspace = true }
+walkdir = { workspace = true }
+rpassword = "7.3"
+names = "0.14.0"
+tar = "0.4"
+flate2 = "1.1"
+zip = "4.2"
+rand = { workspace = true }
+rustls = { workspace = true }
+crossterm = { workspace = true }
+open = { workspace = true }
+glob = "0.3"
+# ACP dependencies
+agent-client-protocol = { version = "0.9.3", features = ["unstable_session_model"] }
+jsonrpc-core = "18.0.0"
+jsonrpc-derive = "18.0.0"
+tokio-util = { version = "0.7", features = ["compat"] }
+log = { workspace = true }
+regex = { workspace = true }
+async-trait = { workspace = true }
+base64 = "0.22"
+dirs = "5.0"
+semver = "1.0"
+croner = "3.0"
+humantime-serde = "1.1"
+humantime = "2.1"
+thiserror = "2.0"
+libc = "0.2"
+libsql = { workspace = true }
+tokio-cron-scheduler = "0.15"
+which = "7.0"
+ignore = { workspace = true }
+grep-regex = { workspace = true }
+grep-searcher = { workspace = true }
+
+# jemalloc replaces musl's default allocator which aggressively munmap's pages,
+# causing use-after-free SIGSEGV in libsql's sqlite3Close() on Linux musl targets.
+# `unprefixed_malloc_on_supported_platforms` makes jemalloc provide the actual
+# malloc/free symbols, overriding musl's allocator for ALL code in the process
+# (including SQLite's embedded C code compiled via libsql-ffi). Without this,
+# only Rust allocations go through jemalloc while SQLite's sqlite3Malloc still
+# calls musl's aggressive allocator.
+tikv-jemallocator = { version = "0.6", features = ["unprefixed_malloc_on_supported_platforms"], optional = true }
+
+[dev-dependencies]
+tempfile = "3"
+test-case = "3"
+
+[lints]
+workspace = true

@@ -1,0 +1,37 @@
+{
+  "enabled": true,
+  "default_policy": "Prompt",
+  "tools": {
+    "load_skill": "Auto",
+    "run_command::vac::config::show": "Auto",
+    "run_command": "Prompt",
+    "get_task_details": "Auto",
+    "generate_password": "Auto",
+    "run_command::vac::account": "Auto",
+    "remove": "Prompt",
+    "dynamic_subagent_task": "Prompt",
+    "view": "Auto",
+    "run_command::vac::version": "Auto",
+    "search_memory": "Auto",
+    "get_all_tasks": "Auto",
+    "wait_for_tasks": "Auto",
+    "generate_code": "Prompt",
+    "run_remote_command": "Prompt",
+    "cancel_task": "Prompt",
+    "str_replace": "Prompt",
+    "run_command::vac::ak": "Auto",
+    "search_docs": "Auto",
+    "run_command::vac::completion": "Auto",
+    "run_command::vac::config::sample": "Auto",
+    "run_command::vac::sessions": "Auto",
+    "create": "Prompt",
+    "local_code_search": "Auto",
+    "run_command_task": "Prompt",
+    "run_remote_command_task": "Prompt"
+  },
+  "command_patterns": {
+    "safe_readonly": [],
+    "sensitive_destructive": [],
+    "interactive_required": []
+  }
+}

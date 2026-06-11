@@ -1,0 +1,74 @@
+//! Configuration saving utilities
+
+use crate::config::{ConfigFile, ProfileConfig, ProviderType};
+use std::fs;
+use std::path::PathBuf;
+use vac_foundation::telemetry::{TelemetryEvent, capture_event};
+
+/// Telemetry settings returned after saving a profile
+#[derive(Clone, Debug, Default)]
+pub struct TelemetrySettings {
+    pub anonymous_id: Option<String>,
+    pub collect_telemetry: Option<bool>,
+}
+
+/// Save profile configuration to a named profile
+/// Returns telemetry settings that may have been generated
+pub fn save_to_profile(
+    config_path: &str,
+    profile_name: &str,
+    profile: ProfileConfig,
+) -> Result<TelemetrySettings, String> {
+    let path = PathBuf::from(config_path);
+
+    // Load existing config or create new
+    let mut config_file = if path.exists() {
+        let content =
+            fs::read_to_string(&path).map_err(|e| format!("Failed to read config file: {}", e))?;
+        toml::from_str::<ConfigFile>(&content)
+            .map_err(|e| format!("Failed to parse config file: {}", e))?
+    } else {
+        ConfigFile::default()
+    };
+
+    let is_local_provider = matches!(profile.provider, Some(ProviderType::Local));
+    let is_first_telemetry_setup = config_file.settings.anonymous_id.is_none();
+
+    if is_local_provider && config_file.settings.anonymous_id.is_none() {
+        config_file.settings.anonymous_id = Some(uuid::Uuid::new_v4().to_string());
+    }
+    if is_local_provider && config_file.settings.collect_telemetry.is_none() {
+        config_file.settings.collect_telemetry = Some(true);
+    }
+
+    config_file
+        .profiles
+        .insert(profile_name.to_string(), profile);
+
+    // Update readonly profile to match the current default profile
+    // This ensures readonly always mirrors default's provider settings
+    config_file.update_readonly();
+
+    // Save config file (uses atomic write with 0600 permissions for security)
+    config_file
+        .save_to(&path)
+        .map_err(|e| format!("Failed to save config file: {}", e))?;
+
+    if is_local_provider
+        && is_first_telemetry_setup
+        && let Some(ref anonymous_id) = config_file.settings.anonymous_id
+        && config_file.settings.collect_telemetry.unwrap_or(true)
+    {
+        capture_event(
+            anonymous_id,
+            config_file.settings.machine_name.as_deref(),
+            true,
+            TelemetryEvent::FirstOpen,
+        );
+    }
+
+    Ok(TelemetrySettings {
+        anonymous_id: config_file.settings.anonymous_id,
+        collect_telemetry: config_file.settings.collect_telemetry,
+    })
+}

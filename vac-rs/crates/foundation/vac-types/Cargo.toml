@@ -1,0 +1,13 @@
+[package]
+name = "vac-types"
+version = { workspace = true }
+edition = { workspace = true }
+description = "Shared VAC identifiers and hash types"
+license = { workspace = true }
+
+[dependencies]
+serde = { workspace = true }
+sha2 = { workspace = true }
+
+[lints]
+workspace = true

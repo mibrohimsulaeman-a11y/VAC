@@ -1,0 +1,55 @@
+pub mod approval_bar;
+pub mod auto_approve;
+pub mod auto_approve_popup;
+pub mod banner;
+pub mod bash_block;
+pub mod board_tasks;
+pub mod changeset;
+pub mod clipboard_paste;
+pub mod commands;
+pub mod custom_commands;
+pub mod detect_term;
+pub mod editor;
+pub mod file_changes_popup;
+pub mod file_diff;
+pub mod file_search;
+pub mod handlers;
+pub mod helper_block;
+pub mod helper_dropdown;
+pub mod hint_helper;
+pub mod image_upload;
+pub mod layout;
+pub mod markdown_renderer;
+pub mod message;
+pub mod message_action_popup;
+pub mod message_pattern;
+pub mod model_switcher;
+pub mod placeholder_prompts;
+pub mod plan;
+pub mod plan_comments;
+pub mod plan_review;
+pub mod policy_persistence_popup;
+pub mod profile_switcher;
+pub mod registry_transaction;
+pub mod rulebook_switcher;
+pub mod shell_mode;
+pub mod shell_popup;
+pub mod shortcuts_popup;
+pub mod side_panel;
+pub mod syntax_highlighter;
+pub mod text_selection;
+pub mod textarea;
+pub mod toast;
+pub mod todo_extractor;
+pub mod update;
+pub mod widget_selection;
+pub mod wrapping;
+
+// VAC v1.5 canonical operator renderer. New runtime/status/capability/assessment/spec-sync UI work must land here.
+pub mod vac_operator;
+
+// legacy non-default renderer kept temporarily for TV repair/visual diff only; use services::vac_operator for the canonical operator console path.
+pub mod operator_console;
+
+// legacy non-default renderer support module; use services::vac_operator for new VAC operator UI work.
+pub mod vac_operator_console;

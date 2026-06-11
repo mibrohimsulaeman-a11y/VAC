@@ -1,0 +1,54 @@
+schema_version: 2
+kind: capability
+id: vac.surfaces.cli
+title: VAC CLI Surface
+readiness:
+  declared: ready
+  computed: partial
+  effective: partial
+  reason: SV implementation scaffold complete; TV cargo gates intentionally deferred
+  blockers:
+  - cargo_gates_not_evaluated
+  last_checked_at: '2026-06-10T03:41:46Z'
+owner:
+  crate: vac-cli
+  module: root
+ownership:
+  targets:
+  - kind: path
+    include:
+    - vac-rs/crates/surfaces/vac-cli/**
+policy:
+  risk: medium
+  mutates_files: true
+  network: false
+  redaction: true
+  approval_required_for:
+  - filesystem_delete
+  - execute_process
+surfaces:
+  tui:
+    route: vac
+  palette: true
+  cli:
+    enabled: true
+    commands:
+    - vac
+validation:
+  gates:
+  - vac.static.structure
+  - vac.static.no_mock_tui
+  commands:
+  - id: vac.static.gate
+    runner: vac-script-runner
+    args:
+    - --script-id
+    - vac.static.gate
+    risk: safe_read
+    approval: policy
+    script_binding:
+      script_id: vac.static.gate
+      broker_owned: true
+      immutable_path: true
+docs:
+- README.md

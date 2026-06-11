@@ -1,90 +1,90 @@
-# VAC (Vastar Agentic CLI)
+# VAC — Vastar Agentic CLI
 
-VAC is the developer agent control plane and terminal user interface (TUI) for Vastar. It enables end-to-end execution of agentic workflows with granular policy control, validation gating, and approval workflows.
+VAC is a local-first, manifest-driven agentic CLI/TUI for controlled software workspaces. The current development baseline is **VAC v1.9**: `.vac/` stores small tracked authority manifests, `vac-rs/` is the Rust workspace, `vac-cli/` is the JS/npm launcher, and generated/runtime state is split away from the clean source checkpoint.
 
----
+## Current v1.9 architecture state
 
-## 🚀 Product Structure & Topology
-
-The project is structured as a mono-repository with the following key components:
-
-- **Product Command / Entry Point:** `vac` (compiled from CLI surface)
-- **Terminal User Interface (TUI):** [vac-rs/crates/surfaces/tui](file:///home/emp/Documents/VAC/vastar-agentic-cli/vac-rs/crates/surfaces/tui)
-- **Command Line Interface (CLI):** [vac-rs/crates/surfaces/cli](file:///home/emp/Documents/VAC/vastar-agentic-cli/vac-rs/crates/surfaces/cli)
-- **Control Plane & Core Logic:** [vac-rs/crates/control-plane](file:///home/emp/Documents/VAC/vastar-agentic-cli/vac-rs/crates/control-plane)
-- **Package Launcher:** [vac-cli/bin/vac.js](file:///home/emp/Documents/VAC/vastar-agentic-cli/vac-cli/bin/vac.js)
-
----
-
-## 🛠️ Rust Development & Test Loop
-
-> [!IMPORTANT]
-> **MANDATORY RULES FOR ALL DEVELOPERS AND AGENTIC WORKERS:**
-> 1. **NEVER use `cargo test`** unless absolutely necessary or explicitly instructed. Always use `cargo nextest run` (which runs tests in parallel and is significantly faster).
-> 2. **ALWAYS use sccache**. The project contains a `.cargo/config.toml` that forces `sccache`. Do not disable it or bypass it.
-> 3. **DO NOT use separate target directories** (such as `--target-dir /tmp/vac-validate-target` or any custom target folder outside the workspace). All builds and tests MUST run inside the standard workspace `target` directory to ensure full caching and prevent workspace littering.
-
-### 1. Build and Run Directly
-Avoid using repeated `cargo run` invocations for CLI checks. Instead, build the binary once and invoke the built executable directly:
-```bash
-# Build the CLI
-cargo build --manifest-path vac-rs/Cargo.toml -p vac-cli
-
-# Run doctor checks directly
-./vac-rs/target/debug/vac doctor registry .
-./vac-rs/target/debug/vac doctor policy .
-./vac-rs/target/debug/vac doctor surfaces .
-./vac-rs/target/debug/vac doctor workflow .
+```text
+.vac/
+  capabilities/ policies/ workflows/ surfaces/ specs/confirmed/ schemas/ migrations/  # tracked authority
+  db/runtime.db                                                                    # ignored local SQLite journal
+  cache/compiled/                                                                  # ignored compiled runtime snapshot cache
+  exports/                                                                         # optional state/debug exports
+vac-rs/
+  core/
+  crates/{foundation,control-plane,runtime,surfaces,providers,integrations,capabilities}/
+vac-cli/                                                                           # npm/native-binary launcher only
 ```
 
-### 2. Targeted Unit Testing
-Run the narrowest relevant test filter to avoid long recompilations:
+VAC v1.9 separates storage classes:
+
+- YAML and schemas under `.vac/{capabilities,policies,workflows,surfaces,specs/confirmed,schemas,migrations}` are the tracked authority plane.
+- Compiled JSON is runtime cache/DB state under `.vac/cache/compiled` by default; legacy `.vac/registry/compiled` is only a generated mirror/export compatibility path.
+- Runtime plans, todo state, decisions, validation state, SpecSync proposals, and local evidence hints belong in `.vac/db/runtime.db`, not source-controlled session files.
+- `.vac/index`, `.vac/assessment`, evidence logs, ledgers, and state-specific closure artifacts are generated state/export material and are excluded from the clean source ZIP.
+
+Server and gateway code were not deleted. They are optional VAC boundaries:
+
+- `vac-rs/crates/runtime/vac-broker` for mediated broker/service execution.
+- `vac-rs/crates/integrations/vac-messaging-gateway` for channel integrations.
+- `vac-rs/crates/integrations/vac-remote-service` for remote-service adapters.
+
+Local VAC control-plane runtime remains the default. Enforcement is still **L1 cooperative/advisory** until broker/OS sandbox custody is implemented and verified.
+
+## Continue from a sandbox checkpoint
+
+This checkpoint does not claim a published container or release binary. Use the supplied source checkpoint.
+
 ```bash
-cargo nextest run --manifest-path vac-rs/Cargo.toml -p vac-surface-tui surface_route_catalog::tests
+unzip vac-runtime-v19-storage-cleanup-source-clean.zip -d vac
+cd vac
+bash scripts/vac-v19-final-sv-gate.sh
 ```
 
-### 3. Key Environment Variables
-- **`VAC_BUILD_CHECK_REPO_ROOT`**: Points the workflow runner to the repository root directory (necessary for cargo build-checks inside tests to locate the main workspace).
-  ```bash
-  VAC_BUILD_CHECK_REPO_ROOT=$(pwd) cargo nextest run --manifest-path vac-rs/Cargo.toml -p vac-surface-tui
-  ```
-- **`VAC_SKIP_BUILD_CHECK`**: Set to `true`/`1` to bypass cargo compilation checks in workflow runner tests.
+For generated audit replay, unpack the paired state export beside the source tree or inspect it separately:
 
-### 4. Interactive Snapshot Testing
-VAC uses `insta` for TUI assertion snapshots. If layout changes occur, review and accept snapshots via:
 ```bash
-cd vac-rs
-cargo insta accept
+unzip vac-runtime-v19-storage-cleanup-state-export.zip -d vac-state-export
 ```
 
-### 5. Tiered Test Profiles (cargo-nextest)
-Tests are classified by tier in `vac-rs/.config/nextest.toml` so the default loop stays fast:
+## Build locally after the TV fix loop
 
-| Profile | Scope | Command |
-| --- | --- | --- |
-| `default` | Tier 0 only (core + capabilities + foundation), excludes snapshot/live | `cargo nextest run` |
-| `ci` | All tests except `test(/live_/)` | `cargo nextest run --profile ci` |
-| `ui` | `vac-surface-tui` only | `cargo nextest run --profile ui` |
-| `live` | Only `test(/live_/)` (ignored) | `cargo nextest run --profile live --run-ignored only` |
-
-- `default` is intentionally small/fast for the daily inner loop; heavier tiers (control-plane, runtime, providers, integrations, surfaces) run on-demand or via `ci`.
-- Snapshot/live/perf_bench tests are excluded from `default` via `default-filter` plus the `heavy-serial` test-group.
-- CI (`.github/workflows/ci.yml`) runs `--profile ci` across 4 partitions, so the full suite stays validated.
-- Note: command-line filtersets are intersected with a profile's `default-filter`; pass `--ignore-default-filter` to override.
-
----
-
-## 🎛️ Control Plane & Declarative Registry
-
-The declarative product control plane lives under [docs/workflow-control-plane/INDEX.md](file:///home/emp/Documents/VAC/vastar-agentic-cli/docs/workflow-control-plane/INDEX.md) and the `.vac/` folder.
-
-All features must follow these core guidelines:
-1. **Capability Manifest First:** Add/update capability manifests under `.vac/capabilities/` before introducing backend-only behavior.
-2. **TUI/CLI Reachability:** Every capability must be exposed or visible in either the CLI commands or TUI routes.
-3. **Reasoning & Status Alignment:** Maintain clear `status` mappings (`ready`, `partial`, `planned`). `partial` statuses must specify a `reason` (e.g., `"Under development"`).
-
-### Self-Check Validation
-Before opening a pull request, verify index links and manifest integrity:
 ```bash
-./vac-rs/target/debug/vac doctor docs .
+cargo metadata --manifest-path vac-rs/Cargo.toml --locked
+cargo build --manifest-path vac-rs/Cargo.toml --release -p vac-cli
+./vac-rs/target/release/vac
 ```
+
+Cargo metadata/fmt/check/clippy/test are **TV-Pending / NotEvaluated** unless those commands are actually run in the target environment.
+
+## v1.9 static gates
+
+```bash
+python3 scripts/check-v19-storage-classes.py .
+python3 scripts/check-v19-runtime-db-schema.py .
+python3 scripts/package-v19-checkpoint.py . /mnt/data vac-runtime-v19-storage-cleanup
+python3 scripts/check-v19-package-hygiene.py /mnt/data/vac-runtime-v19-storage-cleanup-source-clean.zip /mnt/data/vac-runtime-v19-storage-cleanup-state-export.zip
+```
+
+`bash scripts/vac-static-gate.sh` still runs the broader source/static SV gate, but this is not a cargo/build substitute.
+
+## Container policy
+
+No published container image is claimed by this checkpoint. For local experiments only:
+
+```bash
+docker build -t vac-local:dev .
+docker run --rm -it -v "$(pwd)":/workspace -w /workspace vac-local:dev
+```
+
+After CI publication, the intended namespace is `ghcr.io/vastar-ai/vac:<version>`. Do not document a `latest` image as available until CI publishes and verifies it.
+
+## Autopilot retrospect schedule
+
+Use the bundled retrospect skill as the canonical prompt for a nightly local retrospective:
+
+```bash
+vac autopilot schedule add --name retrospect --cron "0 3 * * *" --prompt "$(vac ak skill retrospect)"
+```
+
+This is a local cooperative L1 workflow helper. It does not claim L2 broker/OS enforcement.

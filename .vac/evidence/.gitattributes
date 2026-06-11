@@ -1,2 +1,0 @@
-# Evidence is append-only and machine-generated; never auto-merge.
-*.evidence.yaml -merge -diff
