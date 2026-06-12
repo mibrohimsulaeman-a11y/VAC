@@ -393,6 +393,16 @@ fn render_first_launch(f: &mut Frame, area: Rect, state: &AppState, registry: &R
     f.render_widget(Paragraph::new(lines), inset(area, 2, 1));
 }
 
+fn plan_mode_indicator_line() -> Line<'static> {
+    Line::from(Span::styled(
+        "plan mode active — draft/review before execution",
+        Style::default()
+            .fg(ThemeColors::highlight_fg())
+            .bg(ThemeColors::highlight_bg())
+            .add_modifier(Modifier::BOLD),
+    ))
+}
+
 fn render_idle(f: &mut Frame, area: Rect, state: &mut AppState, registry: &RegistrySnapshot) {
     if !state.messages_scrolling_state.messages.is_empty() {
         render_conversation_stream(f, area, state);
@@ -443,7 +453,11 @@ fn render_idle(f: &mut Frame, area: Rect, state: &mut AppState, registry: &Regis
         ]),
         Line::from(""),
     ];
-    append_recent_tasks(&mut lines, state, area.height.saturating_sub(7) as usize);
+    if state.plan_mode_state.is_active {
+        lines.push(plan_mode_indicator_line());
+        lines.push(Line::from(""));
+    }
+    append_recent_tasks(&mut lines, state, area.height.saturating_sub(9) as usize);
     f.render_widget(Paragraph::new(lines), inset(area, 2, 1));
 }
 
@@ -453,17 +467,29 @@ fn render_agent_working(f: &mut Frame, area: Rect, state: &mut AppState) {
 
 fn render_conversation_stream(f: &mut Frame, area: Rect, state: &mut AppState) {
     let width = area.width.saturating_sub(2) as usize;
+    let reserved_rows = if state.plan_mode_state.is_active {
+        2
+    } else {
+        0
+    };
+    let message_rows = (area.height as usize).saturating_sub(reserved_rows);
     let mut lines = get_wrapped_message_lines_cached(state, width)
         .into_iter()
         .rev()
-        .take(area.height as usize)
+        .take(message_rows)
         .collect::<Vec<_>>();
     lines.reverse();
-    if lines.is_empty() {
+    if lines.is_empty() && message_rows > 0 {
         lines.push(Line::from(Span::styled(
             "agent is preparing the first response…",
             Style::default().fg(ThemeColors::muted()),
         )));
+    }
+    if state.plan_mode_state.is_active {
+        if area.height > 1 {
+            lines.push(Line::from(""));
+        }
+        lines.push(plan_mode_indicator_line());
     }
     f.render_widget(Paragraph::new(lines), area);
 }

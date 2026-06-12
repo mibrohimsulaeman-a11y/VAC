@@ -121,6 +121,50 @@ fn flush_pending_user_messages_if_idle(
     }
 }
 
+fn close_composer_locking_overlays(state: &mut AppState) {
+    state.input_state.show_helper_dropdown = false;
+    state.command_palette_state.is_visible = false;
+    state.model_switcher_state.is_visible = false;
+    state.profile_switcher_state.show_profile_switcher = false;
+    state.rulebook_switcher_state.show_rulebook_switcher = false;
+    state.shortcuts_panel_state.is_visible = false;
+    state.file_changes_popup_state.is_visible = false;
+    state.tool_approval_popup_state.is_visible = false;
+}
+
+fn push_plan_lifecycle_message(state: &mut AppState, label: &'static str) {
+    state
+        .messages_scrolling_state
+        .messages
+        .push(crate::services::message::Message::info(label, None));
+    state.messages_scrolling_state.scroll_to_bottom = true;
+    state.messages_scrolling_state.stay_at_bottom = true;
+    crate::services::message::invalidate_message_lines_cache(state);
+}
+
+fn handle_toggle_plan_review(state: &mut AppState, output_tx: &Sender<OutputEvent>) {
+    close_composer_locking_overlays(state);
+    state.vac_operator_state.route = crate::services::vac_operator::VacOperatorRoute::Review;
+
+    if state.plan_mode_state.is_active {
+        state.plan_review_state.is_visible = !state.plan_review_state.is_visible;
+        let label = if state.plan_review_state.is_visible {
+            "Plan review opened. Press Shift+Tab again to return to the feed."
+        } else {
+            "Plan review closed. Plan mode remains active."
+        };
+        push_plan_lifecycle_message(state, label);
+    } else {
+        state.plan_mode_state.is_active = true;
+        state.plan_review_state.is_visible = false;
+        push_plan_lifecycle_message(
+            state,
+            "Plan mode enabled. Draft the approach first; execution remains gated by VAC runtime policy.",
+        );
+        let _ = output_tx.try_send(OutputEvent::PlanModeActivated(None));
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 pub fn update(
     state: &mut AppState,
@@ -365,10 +409,12 @@ pub fn update(
             }
         } else {
             match event {
-                InputEvent::HandleEsc
-                | InputEvent::PlanReviewClose
-                | InputEvent::TogglePlanReview => {
+                InputEvent::HandleEsc | InputEvent::PlanReviewClose => {
                     crate::services::plan_review::close_plan_review(state);
+                    return;
+                }
+                InputEvent::TogglePlanReview => {
+                    handle_toggle_plan_review(state, output_tx);
                     return;
                 }
                 InputEvent::Up | InputEvent::ScrollUp | InputEvent::PlanReviewCursorUp => {
@@ -1537,14 +1583,7 @@ pub fn update(
 
         // Plan review events
         InputEvent::TogglePlanReview => {
-            if state.plan_review_state.is_visible {
-                crate::services::plan_review::close_plan_review(state);
-            } else if state.plan_mode_state.is_active {
-                crate::services::plan_review::open_plan_review(state);
-            } else {
-                // Fall through to command palette when not in plan mode
-                popup::handle_show_command_palette(state);
-            }
+            handle_toggle_plan_review(state, output_tx);
         }
         InputEvent::PlanReviewClose => {
             crate::services::plan_review::close_plan_review(state);

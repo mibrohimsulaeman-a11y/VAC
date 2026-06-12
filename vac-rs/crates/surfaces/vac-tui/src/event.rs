@@ -11,6 +11,7 @@ pub fn map_crossterm_event_to_input_event(event: Event) -> Option<InputEvent> {
                 KeyCode::Char('v') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                     Some(InputEvent::HandleClipboardImagePaste)
                 }
+                KeyCode::Char('\u{3}') => Some(InputEvent::AttemptQuit),
                 KeyCode::Char('c') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                     Some(InputEvent::AttemptQuit)
                 }
@@ -66,6 +67,7 @@ pub fn map_crossterm_event_to_input_event(event: Event) -> Option<InputEvent> {
                 KeyCode::Char('d') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                     Some(InputEvent::RulebookSwitcherDeselectAll)
                 }
+                KeyCode::Char('\u{15}') => Some(InputEvent::InputDelete),
                 KeyCode::Char('u') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                     Some(InputEvent::InputDelete)
                 }

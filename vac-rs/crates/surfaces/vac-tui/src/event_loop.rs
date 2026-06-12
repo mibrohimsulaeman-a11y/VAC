@@ -202,7 +202,167 @@ pub async fn run_tui(
             state.quit_intent_state.ctrl_c_pressed_once = false;
             state.quit_intent_state.ctrl_c_timer = None;
         }
+
         tokio::select! {
+                   biased;
+
+               event = internal_rx.recv() => {
+
+                let Some(event) = event else {
+                    should_quit = true;
+                    continue;
+                };
+
+                if let InputEvent::ToggleMouseCapture = event {
+                    #[cfg(unix)]
+                    toggle_mouse_capture_with_redraw(&mut terminal, &mut state)?;
+                    continue;
+                }
+                if let InputEvent::Quit = event {
+                    if state.configuration_state.auto_approve_manager.has_unsaved_changes()
+                        && !state.approval_settings_persistence_state.is_visible
+                    {
+                        state.approval_settings_persistence_state.is_visible = true;
+                        state.approval_settings_persistence_state.selected = 0;
+                        state.approval_settings_persistence_state.trigger = ApprovalSettingsPersistenceTrigger::Quit;
+                    } else {
+                        should_quit = true;
+                    }
+                } else {
+                    let term_size = terminal.size()?;
+                    // Calculate main area width accounting for side panel
+                    let main_area_width = if state.side_panel_state.is_shown {
+                        term_size.width.saturating_sub(32 + 1) // side panel width + margin
+                    } else {
+                        term_size.width
+                    };
+                    let term_rect = ratatui::layout::Rect::new(0, 0, main_area_width, term_size.height);
+                    let input_height = 3;
+                    let margin_height = 2;
+                    let dropdown_showing = state.input_state.show_helper_dropdown
+                        && ((!state.input_state.filtered_helpers.is_empty() && state.input().starts_with('/'))
+                            || !state.input_state.filtered_files.is_empty());
+                    let dropdown_height = if dropdown_showing {
+                        state.input_state.filtered_helpers.len() as u16
+                    } else {
+                        0
+                    };
+                    let hint_height = if dropdown_showing { 0 } else { margin_height };
+                    let banner_h = crate::services::banner::banner_height(&state);
+                    let outer_chunks = ratatui::layout::Layout::default()
+                        .direction(ratatui::layout::Direction::Vertical)
+                        .constraints([
+                            ratatui::layout::Constraint::Length(banner_h), // banner (0 if no message)
+                            ratatui::layout::Constraint::Min(1), // messages
+                            ratatui::layout::Constraint::Length(1), // loading indicator
+                            ratatui::layout::Constraint::Length(input_height as u16),
+                            ratatui::layout::Constraint::Length(dropdown_height),
+                            ratatui::layout::Constraint::Length(hint_height),
+                        ])
+                        .split(term_rect);
+                    // Subtract 2 for padding (matches view.rs padded_message_area)
+                    let message_area_width = outer_chunks[1].width.saturating_sub(2) as usize;
+                    let message_area_height = outer_chunks[1].height as usize;
+                    if let InputEvent::EmergencyClearTerminal = event {
+                        emergency_clear_and_redraw(&mut terminal, &mut state)?;
+                        continue;
+                    }
+
+                   // Batch scroll events: if this is a scroll event, drain any pending scroll events
+                   // and combine them into a single scroll operation for better performance
+                   if matches!(event, InputEvent::ScrollUp | InputEvent::ScrollDown) {
+                       pending_scroll_up = 0;
+                       pending_scroll_down = 0;
+
+                       // Count the initial event
+                       match event {
+                           InputEvent::ScrollUp => pending_scroll_up += 1,
+                           InputEvent::ScrollDown => pending_scroll_down += 1,
+                           _ => {}
+                       }
+
+                       // Drain any additional scroll events from the channel (non-blocking)
+                       let mut other_event: Option<InputEvent> = None;
+                       while let Ok(next_event) = internal_rx.try_recv() {
+                           match next_event {
+                               InputEvent::ScrollUp => pending_scroll_up += 1,
+                               InputEvent::ScrollDown => pending_scroll_down += 1,
+                               // Non-scroll event - save it for later
+                               other => {
+                                   other_event = Some(other);
+                                   break;
+                               }
+                           }
+                       }
+
+                       // Process net scroll (combine up and down into single direction)
+                       let net_scroll = pending_scroll_down - pending_scroll_up;
+                       if net_scroll > 0 {
+                           // More downs than ups - scroll down by accumulated amount
+                           for _ in 0..net_scroll {
+                               crate::services::update::update(&mut state, InputEvent::ScrollDown, message_area_height, message_area_width, &internal_tx, &output_tx, cancel_tx.clone(), &shell_event_tx, term_size);
+                           }
+                       } else if net_scroll < 0 {
+                           // More ups than downs - scroll up by accumulated amount
+                           for _ in 0..(-net_scroll) {
+                               crate::services::update::update(&mut state, InputEvent::ScrollUp, message_area_height, message_area_width, &internal_tx, &output_tx, cancel_tx.clone(), &shell_event_tx, term_size);
+                           }
+                       }
+
+                       // If we encountered a non-scroll event, process it too
+                       if let Some(other) = other_event {
+                           crate::services::update::update(&mut state, other, message_area_height, message_area_width, &internal_tx, &output_tx, cancel_tx.clone(), &shell_event_tx, term_size);
+                       }
+                   } else {
+                       crate::services::update::update(&mut state, event, message_area_height, message_area_width, &internal_tx, &output_tx, cancel_tx.clone(), &shell_event_tx, term_size);
+                   }
+                   state.poll_file_search_results();
+
+                        // Handle pending editor open request
+                         if let Some(file_path) = state.side_panel_state.pending_editor_open.take() {
+                             // Pause input thread to avoid stealing input from editor
+                             input_paused.store(true, Ordering::Relaxed);
+                             // Small delay to ensure input thread cycle completes
+                             std::thread::sleep(Duration::from_millis(10));
+
+                             // Disable mouse capture before opening editor to prevent weird input
+                             let was_mouse_capture_enabled = state.terminal_ui_state.mouse_capture_enabled;
+                             if was_mouse_capture_enabled {
+                                 let _ = execute!(std::io::stdout(), DisableMouseCapture);
+                                 state.terminal_ui_state.mouse_capture_enabled = false;
+                             }
+
+                             match crate::services::editor::open_in_editor(
+                                 &mut terminal,
+                                 &state.side_panel_state.editor_command,
+                                 &file_path,
+                                 None,
+                             ) {
+                                 Ok(()) => {
+                                     // Editor closed successfully
+                                 }
+                                 Err(error) => {
+                                     // Show error message
+                                     state.messages_scrolling_state.messages.push(Message::info(
+                                         format!("Failed to open editor: {}", error),
+                                          Some(ratatui::style::Style::default().fg(ThemeColors::red())),
+                                     ));
+                                 }
+                             }
+
+                             // Restore mouse capture if it was enabled before
+                             if was_mouse_capture_enabled {
+                                 let _ = execute!(std::io::stdout(), EnableMouseCapture);
+                                 state.terminal_ui_state.mouse_capture_enabled = true;
+                             }
+
+                             // Resume input thread
+                             input_paused.store(false, Ordering::Relaxed);
+                         }
+
+                        state.update_session_empty_status();
+                    }
+                }
                event = input_rx.recv() => {
                 let Some(event) = event else {
                     should_quit = true;
@@ -469,163 +629,6 @@ pub async fn run_tui(
                         }
                    }
                }
-               event = internal_rx.recv() => {
-
-                let Some(event) = event else {
-                    should_quit = true;
-                    continue;
-                };
-
-                if let InputEvent::ToggleMouseCapture = event {
-                    #[cfg(unix)]
-                    toggle_mouse_capture_with_redraw(&mut terminal, &mut state)?;
-                    continue;
-                }
-                if let InputEvent::Quit = event {
-                    if state.configuration_state.auto_approve_manager.has_unsaved_changes()
-                        && !state.approval_settings_persistence_state.is_visible
-                    {
-                        state.approval_settings_persistence_state.is_visible = true;
-                        state.approval_settings_persistence_state.selected = 0;
-                        state.approval_settings_persistence_state.trigger = ApprovalSettingsPersistenceTrigger::Quit;
-                    } else {
-                        should_quit = true;
-                    }
-                } else {
-                    let term_size = terminal.size()?;
-                    // Calculate main area width accounting for side panel
-                    let main_area_width = if state.side_panel_state.is_shown {
-                        term_size.width.saturating_sub(32 + 1) // side panel width + margin
-                    } else {
-                        term_size.width
-                    };
-                    let term_rect = ratatui::layout::Rect::new(0, 0, main_area_width, term_size.height);
-                    let input_height = 3;
-                    let margin_height = 2;
-                    let dropdown_showing = state.input_state.show_helper_dropdown
-                        && ((!state.input_state.filtered_helpers.is_empty() && state.input().starts_with('/'))
-                            || !state.input_state.filtered_files.is_empty());
-                    let dropdown_height = if dropdown_showing {
-                        state.input_state.filtered_helpers.len() as u16
-                    } else {
-                        0
-                    };
-                    let hint_height = if dropdown_showing { 0 } else { margin_height };
-                    let banner_h = crate::services::banner::banner_height(&state);
-                    let outer_chunks = ratatui::layout::Layout::default()
-                        .direction(ratatui::layout::Direction::Vertical)
-                        .constraints([
-                            ratatui::layout::Constraint::Length(banner_h), // banner (0 if no message)
-                            ratatui::layout::Constraint::Min(1), // messages
-                            ratatui::layout::Constraint::Length(1), // loading indicator
-                            ratatui::layout::Constraint::Length(input_height as u16),
-                            ratatui::layout::Constraint::Length(dropdown_height),
-                            ratatui::layout::Constraint::Length(hint_height),
-                        ])
-                        .split(term_rect);
-                    // Subtract 2 for padding (matches view.rs padded_message_area)
-                    let message_area_width = outer_chunks[1].width.saturating_sub(2) as usize;
-                    let message_area_height = outer_chunks[1].height as usize;
-                    if let InputEvent::EmergencyClearTerminal = event {
-                        emergency_clear_and_redraw(&mut terminal, &mut state)?;
-                        continue;
-                    }
-
-                   // Batch scroll events: if this is a scroll event, drain any pending scroll events
-                   // and combine them into a single scroll operation for better performance
-                   if matches!(event, InputEvent::ScrollUp | InputEvent::ScrollDown) {
-                       pending_scroll_up = 0;
-                       pending_scroll_down = 0;
-
-                       // Count the initial event
-                       match event {
-                           InputEvent::ScrollUp => pending_scroll_up += 1,
-                           InputEvent::ScrollDown => pending_scroll_down += 1,
-                           _ => {}
-                       }
-
-                       // Drain any additional scroll events from the channel (non-blocking)
-                       let mut other_event: Option<InputEvent> = None;
-                       while let Ok(next_event) = internal_rx.try_recv() {
-                           match next_event {
-                               InputEvent::ScrollUp => pending_scroll_up += 1,
-                               InputEvent::ScrollDown => pending_scroll_down += 1,
-                               // Non-scroll event - save it for later
-                               other => {
-                                   other_event = Some(other);
-                                   break;
-                               }
-                           }
-                       }
-
-                       // Process net scroll (combine up and down into single direction)
-                       let net_scroll = pending_scroll_down - pending_scroll_up;
-                       if net_scroll > 0 {
-                           // More downs than ups - scroll down by accumulated amount
-                           for _ in 0..net_scroll {
-                               crate::services::update::update(&mut state, InputEvent::ScrollDown, message_area_height, message_area_width, &internal_tx, &output_tx, cancel_tx.clone(), &shell_event_tx, term_size);
-                           }
-                       } else if net_scroll < 0 {
-                           // More ups than downs - scroll up by accumulated amount
-                           for _ in 0..(-net_scroll) {
-                               crate::services::update::update(&mut state, InputEvent::ScrollUp, message_area_height, message_area_width, &internal_tx, &output_tx, cancel_tx.clone(), &shell_event_tx, term_size);
-                           }
-                       }
-
-                       // If we encountered a non-scroll event, process it too
-                       if let Some(other) = other_event {
-                           crate::services::update::update(&mut state, other, message_area_height, message_area_width, &internal_tx, &output_tx, cancel_tx.clone(), &shell_event_tx, term_size);
-                       }
-                   } else {
-                       crate::services::update::update(&mut state, event, message_area_height, message_area_width, &internal_tx, &output_tx, cancel_tx.clone(), &shell_event_tx, term_size);
-                   }
-                   state.poll_file_search_results();
-
-                        // Handle pending editor open request
-                         if let Some(file_path) = state.side_panel_state.pending_editor_open.take() {
-                             // Pause input thread to avoid stealing input from editor
-                             input_paused.store(true, Ordering::Relaxed);
-                             // Small delay to ensure input thread cycle completes
-                             std::thread::sleep(Duration::from_millis(10));
-
-                             // Disable mouse capture before opening editor to prevent weird input
-                             let was_mouse_capture_enabled = state.terminal_ui_state.mouse_capture_enabled;
-                             if was_mouse_capture_enabled {
-                                 let _ = execute!(std::io::stdout(), DisableMouseCapture);
-                                 state.terminal_ui_state.mouse_capture_enabled = false;
-                             }
-
-                             match crate::services::editor::open_in_editor(
-                                 &mut terminal,
-                                 &state.side_panel_state.editor_command,
-                                 &file_path,
-                                 None,
-                             ) {
-                                 Ok(()) => {
-                                     // Editor closed successfully
-                                 }
-                                 Err(error) => {
-                                     // Show error message
-                                     state.messages_scrolling_state.messages.push(Message::info(
-                                         format!("Failed to open editor: {}", error),
-                                          Some(ratatui::style::Style::default().fg(ThemeColors::red())),
-                                     ));
-                                 }
-                             }
-
-                             // Restore mouse capture if it was enabled before
-                             if was_mouse_capture_enabled {
-                                 let _ = execute!(std::io::stdout(), EnableMouseCapture);
-                                 state.terminal_ui_state.mouse_capture_enabled = true;
-                             }
-
-                             // Resume input thread
-                             input_paused.store(false, Ordering::Relaxed);
-                         }
-
-                        state.update_session_empty_status();
-                    }
-                }
                _ = spinner_interval.tick() => {
                    // Also check double Ctrl+C timer expiry on every tick
                    if state.quit_intent_state.ctrl_c_pressed_once

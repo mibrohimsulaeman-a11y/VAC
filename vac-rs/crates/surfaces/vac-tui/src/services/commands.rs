@@ -606,19 +606,11 @@ pub fn execute_command(command_id: CommandId<'_>, ctx: CommandContext) -> Result
             Ok(())
         }
         "/plan" => {
-            // Already in plan mode? Show a message instead
-            if ctx.state.plan_mode_state.is_active {
-                crate::services::helper_block::push_styled_message(
-                    ctx.state,
-                    " Already in plan mode. Use ctrl+p to review the plan.",
-                    ThemeColors::yellow(),
-                    "⚠ ",
-                    ThemeColors::yellow(),
-                );
-                ctx.state.input_state.text_area.set_text("");
-                ctx.state.input_state.show_helper_dropdown = false;
-                return Ok(());
-            }
+            let plan_status = if ctx.state.plan_mode_state.is_active {
+                "Plan mode already active — draft/review before execution; Shift+Tab toggles plan review."
+            } else {
+                "Plan mode enabled. Draft/review before execution; Shift+Tab toggles plan review."
+            };
 
             // Parse optional inline prompt: "/plan deploy auth service" → Some("deploy auth service")
             let input = ctx.state.input().trim().to_string();
@@ -630,6 +622,20 @@ pub fn execute_command(command_id: CommandId<'_>, ctx: CommandContext) -> Result
 
             ctx.state.input_state.text_area.set_text("");
             ctx.state.input_state.show_helper_dropdown = false;
+            ctx.state.command_palette_state.is_visible = false;
+            ctx.state.plan_mode_state.is_active = true;
+            ctx.state.vac_operator_state.route = VacOperatorRoute::Review;
+            ctx.state
+                .messages_scrolling_state
+                .messages
+                .push(Message::info(plan_status, None));
+            ctx.state.messages_scrolling_state.scroll_to_bottom = true;
+            ctx.state.messages_scrolling_state.stay_at_bottom = true;
+            crate::services::message::invalidate_message_lines_cache(ctx.state);
+
+            if plan_status.starts_with("Plan mode already active") {
+                return Ok(());
+            }
 
             // Check for existing plan — show modal if one exists
             let session_dir = std::path::Path::new(".vac/registry/sessions/current");
