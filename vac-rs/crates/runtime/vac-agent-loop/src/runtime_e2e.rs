@@ -1,8 +1,8 @@
-//! End-to-end harness for the VAC v1.5 bounded agent runtime.
+//! End-to-end harness for the VAC v1.9 bounded runtime projection contract.
 //!
 //! The harness is provider-free. It validates that an agent-like task can only
 //! progress when compiled runtime state, a valid Semantic Plan, locked
-//! task/spec/todo artifacts, bounded patches, structured commands, validation,
+//! runtime-journal projections, bounded patches, structured commands, validation,
 //! evidence, SpecSync/readiness/ownership/assessment, and the Completion Lock all
 //! agree. Real model streaming stays outside this module; this is the runtime
 //! boundary contract.
@@ -435,7 +435,7 @@ mod tests {
     }
 
     #[test]
-    fn e2e_completion_lock_blocks_open_todo() {
+    fn e2e_completion_lock_blocks_open_runtime_journal_projection_todo() {
         let mut i = input(RuntimeAuthority::CompiledJson);
         i.closeout.artifacts.todo.state = TodoArtifactState::Open;
         i.closeout.artifacts.todo.items[0].checked = false;

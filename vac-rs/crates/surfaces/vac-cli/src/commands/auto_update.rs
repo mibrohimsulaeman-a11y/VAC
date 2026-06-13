@@ -586,7 +586,7 @@ async fn update_binary_atomic(
     )
 }
 
-#[cfg(test)]
+#[cfg(all(test, unix))]
 mod tests {
     use super::*;
     use tempfile::TempDir;

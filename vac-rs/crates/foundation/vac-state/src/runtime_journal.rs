@@ -161,3 +161,113 @@ fn blocked(reason: &str) -> RuntimeJournalAppendDecision {
         writes_manifest_bound_record: false,
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const RUNTIME_DB_MIGRATION_SQL: &str =
+        include_str!("../../../../../.vac/migrations/runtime-db/0001_runtime_journal.sql");
+
+    fn binding(hash: &str) -> RuntimeManifestBinding {
+        RuntimeManifestBinding {
+            manifest_set_hash: hash.to_string(),
+            compiled_snapshot_id: "snapshot.test".to_string(),
+            git_head: Some("0123456789abcdef0123456789abcdef01234567".to_string()),
+            git_dirty_tree_hash: Some("sha256:dirty".to_string()),
+        }
+    }
+
+    fn event_draft(hash: &str) -> RuntimeJournalEventDraft {
+        RuntimeJournalEventDraft {
+            session_id: "session.test".to_string(),
+            phase: "plan_draft".to_string(),
+            event_type: "runtime_projection_written".to_string(),
+            severity: "info".to_string(),
+            summary: "runtime projection was written from manifest-bound journal state".to_string(),
+            manifest_binding: binding(hash),
+            payload_cbor_sha256: Some("sha256:payload".to_string()),
+            trust_claim_override: None,
+            proof_ref: None,
+        }
+    }
+
+    fn create_table_statement(sql: &str, table: &str) -> String {
+        let needle = format!("CREATE TABLE IF NOT EXISTS {table}");
+        let start = sql
+            .find(&needle)
+            .unwrap_or_else(|| panic!("missing table statement for {table}"));
+        let rest = &sql[start..];
+        let end = rest
+            .find(";\n")
+            .map(|idx| idx + 1)
+            .unwrap_or(rest.len());
+        rest[..end].to_string()
+    }
+
+    #[test]
+    fn migration_declares_v19_runtime_journal_tables_and_pragmas() {
+        assert!(runtime_db_migration_has_required_tables(RUNTIME_DB_MIGRATION_SQL).is_empty());
+        assert!(runtime_db_migration_has_required_pragmas(RUNTIME_DB_MIGRATION_SQL).is_empty());
+    }
+
+    #[test]
+    fn runtime_state_tables_are_manifest_bound() {
+        for table in [
+            "runtime_sessions",
+            "runtime_events",
+            "runtime_decisions",
+            "runtime_plan_revisions",
+            "runtime_validation_summaries",
+            "runtime_evidence_hints",
+            "runtime_specsync_proposals",
+        ] {
+            let statement = create_table_statement(RUNTIME_DB_MIGRATION_SQL, table);
+            assert!(
+                statement.contains("manifest_set_hash TEXT NOT NULL"),
+                "{table} must carry manifest_set_hash to authorize future work"
+            );
+        }
+
+        for table in ["runtime_sessions", "runtime_plan_revisions"] {
+            let statement = create_table_statement(RUNTIME_DB_MIGRATION_SQL, table);
+            assert!(
+                statement.contains("compiled_snapshot_id TEXT NOT NULL"),
+                "{table} must carry compiled_snapshot_id for snapshot provenance"
+            );
+        }
+    }
+
+    #[test]
+    fn runtime_journal_write_plan_requires_begin_immediate_and_wal() {
+        let plan = runtime_journal_write_plan();
+        assert_eq!(plan.transaction_mode, "BEGIN IMMEDIATE");
+        assert!(plan.pragmas.contains(&"PRAGMA journal_mode = WAL;"));
+        assert!(plan.pragmas.contains(&"PRAGMA foreign_keys = ON;"));
+        assert!(plan.pragmas.contains(&"PRAGMA busy_timeout = 5000;"));
+        assert!(plan.lease_sql.starts_with("BEGIN IMMEDIATE;"));
+        assert!(plan.lease_sql.contains("heartbeat_counter"));
+        assert!(plan.sequence_sql.contains("RETURNING next_seq - 1"));
+        assert!(plan.insert_event_sql.contains("manifest_set_hash"));
+    }
+
+    #[test]
+    fn runtime_event_append_requires_current_manifest_binding() {
+        let current_hash = "sha256:current";
+
+        let stale = evaluate_runtime_event_append(&event_draft("sha256:old"), current_hash);
+        assert!(!stale.allow);
+        assert!(stale.reason.contains("stale manifest_set_hash"));
+        assert!(!stale.writes_manifest_bound_record);
+
+        let missing = evaluate_runtime_event_append(&event_draft(""), current_hash);
+        assert!(!missing.allow);
+        assert!(missing.reason.contains("missing manifest_set_hash"));
+
+        let current = evaluate_runtime_event_append(&event_draft(current_hash), current_hash);
+        assert!(current.allow);
+        assert_eq!(current.required_transaction, "BEGIN IMMEDIATE");
+        assert!(current.writes_manifest_bound_record);
+    }
+}

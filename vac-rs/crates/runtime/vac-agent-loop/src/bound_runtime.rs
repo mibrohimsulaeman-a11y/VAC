@@ -1,9 +1,9 @@
-//! VAC v1.5 bounded runtime contract.
+//! VAC v1.9 bounded runtime projection contract.
 //!
 //! This module is intentionally independent from provider I/O. It models the
 //! runtime behavior that must surround an agent run: compiled-registry intake,
-//! pre-plan/pre-patch/pre-command gates, mandatory session artifacts, evidence
-//! close-out, and the v1.5 completion lock. The existing async agent loop can
+//! pre-plan/pre-patch/pre-command gates, runtime-journal projections, evidence
+//! close-out, and the compatibility completion lock. The existing async agent loop can
 //! remain provider/tool focused while broker or CLI/TUI layers instantiate this
 //! controller as the execution boundary.
 
@@ -2161,7 +2161,7 @@ mod tests {
     }
 
     #[test]
-    fn completion_lock_blocks_missing_todo() {
+    fn completion_lock_blocks_nonterminal_runtime_projection_todo() {
         let mut closeout = successful_closeout("s1", "plan.ok", "evidence.ok");
         closeout.artifacts.todo.state = TodoArtifactState::Open;
         closeout.artifacts.todo.items[0].checked = false;

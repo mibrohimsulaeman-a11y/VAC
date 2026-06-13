@@ -2827,9 +2827,9 @@ mod tests {
             };
 
             let result = extract_full_command_arguments(&tool_call);
-            println!(
-                "Input: '{}' -> Output: '{}' (Expected: '{}')",
-                input, result, expected
+            assert_eq!(
+                result, expected,
+                "unexpected formatted command arguments for input: {input:?}"
             );
         }
     }

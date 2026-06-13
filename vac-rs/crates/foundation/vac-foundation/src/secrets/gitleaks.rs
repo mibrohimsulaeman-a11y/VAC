@@ -809,132 +809,67 @@ mod tests {
     }
 
     #[test]
-    fn test_debug_privacy_mode_aws() {
-        let test_input = "AWS_ACCOUNT_ID=987654321098"; // Different from allowlist
-
-        // Test with privacy mode
-        let secrets_privacy = detect_secrets(test_input, None, true);
-        println!("Privacy mode detected {} secrets", secrets_privacy.len());
-        for secret in &secrets_privacy {
-            println!(
-                "  Rule: {}, Value: '{}', Pos: {}-{}",
-                secret.rule_id, secret.value, secret.start_pos, secret.end_pos
-            );
-        }
-
-        // Test without privacy mode
-        let secrets_regular = detect_secrets(test_input, None, false);
-        println!("Regular mode detected {} secrets", secrets_regular.len());
-        for secret in &secrets_regular {
-            println!(
-                "  Rule: {}, Value: '{}', Pos: {}-{}",
-                secret.rule_id, secret.value, secret.start_pos, secret.end_pos
-            );
-        }
-
-        // Check if privacy config loaded properly
+    fn privacy_mode_detects_aws_account_id_rule() {
+        let test_input = "AWS_ACCOUNT_ID=987654321098";
         let config_with_privacy = &*GITLEAKS_CONFIG_WITH_PRIVACY;
         let aws_rule = config_with_privacy
             .rules
             .iter()
-            .find(|r| r.id == "aws-account-id");
-        println!("AWS rule found: {}", aws_rule.is_some());
-        if let Some(rule) = aws_rule {
-            println!("AWS rule keywords: {:?}", rule.keywords);
-            if let Some(regex) = &rule.compiled_regex {
-                println!("AWS rule regex compiled: yes");
-                let test_matches: Vec<_> = regex.find_iter(test_input).collect();
-                println!("Direct regex matches: {}", test_matches.len());
-                for mat in test_matches {
-                    println!("  Match: '{}'", mat.as_str());
-                }
+            .find(|rule| rule.id == "aws-account-id")
+            .expect("privacy config should include aws-account-id rule");
 
-                // Test keyword filtering
-                let contains_keywords = contains_any_keyword(test_input, &rule.keywords);
-                println!("Contains keywords: {}", contains_keywords);
+        assert!(
+            aws_rule.compiled_regex.is_some(),
+            "aws-account-id rule should compile in privacy mode"
+        );
+        assert!(
+            contains_any_keyword(test_input, &aws_rule.keywords),
+            "AWS_ACCOUNT_ID input should pass keyword filtering"
+        );
 
-                // Test capture groups
-                if let Some(captures) = regex.captures(test_input) {
-                    println!("Capture groups found: {}", captures.len());
-                    for (i, cap) in captures.iter().enumerate() {
-                        if let Some(cap) = cap {
-                            println!("  Capture {}: '{}'", i, cap.as_str());
-                        }
-                    }
-                } else {
-                    println!("No capture groups found");
-                }
+        let secrets_privacy = detect_secrets(test_input, None, true);
+        assert!(
+            secrets_privacy
+                .iter()
+                .any(|secret| secret.rule_id == "aws-account-id"),
+            "privacy mode should detect AWS account IDs"
+        );
 
-                // Test entropy if there are captures
-                for mat in regex.find_iter(test_input) {
-                    if let Some(captures) = regex.captures_at(test_input, mat.start())
-                        && let Some(capture) = captures.get(1)
-                    {
-                        let entropy = calculate_entropy(capture.as_str());
-                        println!(
-                            "  Entropy of first capture '{}': {:.2} (threshold: {:?})",
-                            capture.as_str(),
-                            entropy,
-                            rule.entropy
-                        );
-                    }
-                }
-            } else {
-                println!("AWS rule regex compiled: no");
-            }
-        }
+        let secrets_regular = detect_secrets(test_input, None, false);
+        assert!(
+            secrets_regular
+                .iter()
+                .all(|secret| secret.rule_id != "aws-account-id"),
+            "regular mode should not use the privacy-only aws-account-id rule"
+        );
     }
 
     #[test]
-    fn test_debug_privacy_mode_ip() {
+    fn privacy_mode_detects_public_ipv4_rule_in_context() {
         let test_input = "SERVER_IP=8.8.8.8";
-
-        // Test with privacy mode
-        let secrets_privacy = detect_secrets(test_input, None, true);
-        println!("Privacy mode detected {} secrets", secrets_privacy.len());
-        for secret in &secrets_privacy {
-            println!(
-                "  Rule: {}, Value: '{}', Pos: {}-{}",
-                secret.rule_id, secret.value, secret.start_pos, secret.end_pos
-            );
-        }
-
-        // Check if privacy config loaded properly
         let config_with_privacy = &*GITLEAKS_CONFIG_WITH_PRIVACY;
         let ip_rule = config_with_privacy
             .rules
             .iter()
-            .find(|r| r.id == "public-ipv4");
-        println!("IP rule found: {}", ip_rule.is_some());
-        if let Some(rule) = ip_rule {
-            println!("IP rule keywords: {:?}", rule.keywords);
-            if let Some(regex) = &rule.compiled_regex {
-                println!("IP rule regex compiled: yes");
-                let test_matches: Vec<_> = regex.find_iter(test_input).collect();
-                println!("Direct regex matches: {}", test_matches.len());
-                for mat in test_matches {
-                    println!("  Match: '{}'", mat.as_str());
-                }
+            .find(|rule| rule.id == "public-ipv4")
+            .expect("privacy config should include public-ipv4 rule");
 
-                // Test keyword filtering
-                let contains_keywords = contains_any_keyword(test_input, &rule.keywords);
-                println!("Contains keywords: {}", contains_keywords);
+        assert!(
+            ip_rule.compiled_regex.is_some(),
+            "public-ipv4 rule should compile in privacy mode"
+        );
+        assert!(
+            contains_any_keyword(test_input, &ip_rule.keywords),
+            "SERVER_IP input should pass public-ipv4 keyword filtering"
+        );
 
-                // Test capture groups
-                if let Some(captures) = regex.captures(test_input) {
-                    println!("Capture groups found: {}", captures.len());
-                    for (i, cap) in captures.iter().enumerate() {
-                        if let Some(cap) = cap {
-                            println!("  Capture {}: '{}'", i, cap.as_str());
-                        }
-                    }
-                } else {
-                    println!("No capture groups found");
-                }
-            } else {
-                println!("IP rule regex compiled: no");
-            }
-        }
+        let secrets_privacy = detect_secrets(test_input, None, true);
+        assert!(
+            secrets_privacy
+                .iter()
+                .any(|secret| secret.rule_id == "public-ipv4" && secret.value == "8.8.8.8"),
+            "privacy mode should detect contextual public IPv4 values"
+        );
     }
 
     #[test]
@@ -992,49 +927,35 @@ mod tests {
     }
 
     #[test]
-    fn test_standalone_ip_detection() {
-        println!("=== TESTING STANDALONE IP DETECTION ===");
-
-        // Test standalone IP that should be detected
+    fn standalone_public_ipv4_detection_matches_context_detection() {
         let standalone_ip = "16.170.172.114";
-        let secrets = detect_secrets(standalone_ip, None, true);
+        let contextual_ip = "SERVER_IP=16.170.172.114";
 
-        println!(
-            "Standalone IP '{}' detected {} secrets",
-            standalone_ip,
-            secrets.len()
+        let standalone = detect_secrets(standalone_ip, None, true);
+        assert!(
+            standalone
+                .iter()
+                .any(|secret| secret.rule_id == "public-ipv4" && secret.value == standalone_ip),
+            "privacy mode should detect standalone public IPv4 values"
         );
-        for secret in &secrets {
-            println!("  Rule: {}, Value: '{}'", secret.rule_id, secret.value);
-        }
 
-        // Test IP with context that should be detected
-        let ip_with_context = "SERVER_IP=16.170.172.114";
-        let secrets_with_context = detect_secrets(ip_with_context, None, true);
-
-        println!(
-            "IP with context '{}' detected {} secrets",
-            ip_with_context,
-            secrets_with_context.len()
+        let contextual = detect_secrets(contextual_ip, None, true);
+        assert!(
+            contextual
+                .iter()
+                .any(|secret| secret.rule_id == "public-ipv4" && secret.value == standalone_ip),
+            "privacy mode should detect public IPv4 values in assignment context"
         );
-        for secret in &secrets_with_context {
-            println!("  Rule: {}, Value: '{}'", secret.rule_id, secret.value);
-        }
 
-        // Test keyword filtering
-        let config = &*GITLEAKS_CONFIG_WITH_PRIVACY;
-        let ip_rule = config.rules.iter().find(|r| r.id == "public-ipv4");
-        if let Some(rule) = ip_rule {
-            println!("IP rule keywords: {:?}", rule.keywords);
-            println!(
-                "Standalone IP contains keywords: {}",
-                contains_any_keyword(standalone_ip, &rule.keywords)
-            );
-            println!(
-                "IP with context contains keywords: {}",
-                contains_any_keyword(ip_with_context, &rule.keywords)
-            );
-        }
+        let ip_rule = GITLEAKS_CONFIG_WITH_PRIVACY
+            .rules
+            .iter()
+            .find(|rule| rule.id == "public-ipv4")
+            .expect("privacy config should include public-ipv4 rule");
+        assert!(
+            contains_any_keyword(contextual_ip, &ip_rule.keywords),
+            "contextual public IP should satisfy public-ipv4 keyword filtering"
+        );
     }
 
     #[test]

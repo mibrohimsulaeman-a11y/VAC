@@ -54,6 +54,39 @@ fn readme_autopilot_one_liner_matches_retrospect_prompt() {
     );
 }
 
+#[cfg(windows)]
+#[test]
+fn windows_spawned_vac_ak_skill_does_not_stack_overflow() {
+    let temp_dir = tempfile::TempDir::new().expect("temp dir");
+    let home = temp_dir.path();
+
+    let output = Command::new(env!("CARGO_BIN_EXE_vac"))
+        .arg("ak")
+        .arg("skill")
+        .arg("retrospect")
+        .env("HOME", home)
+        .env("USERPROFILE", home)
+        .env_remove("VAC_PROFILE")
+        .output()
+        .expect("spawn vac ak skill retrospect on Windows");
+
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        output.status.success(),
+        "spawned vac ak skill retrospect failed: stdout={} stderr={}",
+        String::from_utf8_lossy(&output.stdout),
+        stderr
+    );
+    assert!(
+        !stderr.contains("overflowed its stack"),
+        "spawned vac.exe must not stack overflow on Windows"
+    );
+    assert_eq!(
+        String::from_utf8_lossy(&output.stdout).trim_end_matches('\n'),
+        RETROSPECT_MARKDOWN.trim_end_matches('\n')
+    );
+}
+
 #[test]
 fn ak_search_tree_bootstraps_default_config_on_clean_home() {
     let temp_dir = tempfile::TempDir::new().expect("temp dir");

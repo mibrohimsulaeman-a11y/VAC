@@ -447,3 +447,72 @@ fn read_json(path: &Path) -> Result<Value, String> {
         fs::read_to_string(path).map_err(|err| format!("cannot read {}: {err}", path.display()))?;
     serde_json::from_str(&raw).map_err(|err| format!("cannot parse {}: {err}", path.display()))
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn temp_workspace(name: &str) -> PathBuf {
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system time")
+            .as_nanos();
+        let root = std::env::temp_dir().join(format!("vac-agent-loop-{name}-{nonce}"));
+        fs::create_dir_all(&root).expect("create temp workspace");
+        root
+    }
+
+    #[test]
+    fn missing_session_records_compile_to_nonterminal_runtime_projections() {
+        let root = temp_workspace("projection");
+        let bootstrap = VacRuntimeMetadataBootstrap::new(&root);
+        bootstrap
+            .compile_session_runtime_artifacts("session.projection")
+            .expect("compile runtime projections");
+
+        let session_dir = root.join(".vac/registry/sessions/session.projection");
+        let artifacts = read_json(&session_dir.join("artifacts.json")).expect("read artifacts");
+        let closeout = read_json(&session_dir.join("closeout.json")).expect("read closeout");
+
+        assert_eq!(artifacts["task"]["state"], "needs_discussion");
+        assert_eq!(artifacts["spec"]["state"], "needs_discussion");
+        assert_eq!(artifacts["todo"]["state"], "needs_discussion");
+        assert_eq!(closeout["evidence"]["valid"], false);
+        assert_eq!(
+            closeout["blocking_reason"],
+            "bootstrap-placeholder-artifacts-are-not-completion-authority"
+        );
+        assert!(
+            closeout["explicit_open_question"]
+                .as_str()
+                .expect("open question")
+                .contains("runtime must pause")
+        );
+    }
+
+    #[test]
+    fn runtime_projection_writer_preserves_existing_session_plan() {
+        let root = temp_workspace("preserve-plan");
+        let session_dir = root.join(".vac/registry/sessions/session.keep");
+        fs::create_dir_all(&session_dir).expect("create session dir");
+        fs::write(
+            session_dir.join("plan.json"),
+            r#"{"id":"plan.preexisting","status":"approved","capability":"vac.runtime.agent_loop"}"#,
+        )
+        .expect("write existing plan");
+
+        let bootstrap = VacRuntimeMetadataBootstrap::new(&root);
+        bootstrap
+            .compile_session_runtime_artifacts("session.keep")
+            .expect("compile runtime projections");
+
+        let plan = read_json(&session_dir.join("plan.json")).expect("read preserved plan");
+        let artifacts = read_json(&session_dir.join("artifacts.json")).expect("read artifacts");
+
+        assert_eq!(plan["id"], "plan.preexisting");
+        assert_eq!(artifacts["task"]["state"], "needs_discussion");
+        assert_eq!(artifacts["todo"]["items"][0]["checked"], false);
+    }
+}

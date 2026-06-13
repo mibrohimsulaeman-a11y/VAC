@@ -425,345 +425,60 @@ mod tests {
     }
 
     #[test]
-    fn test_debug_generic_api_key() {
-        let config = &*GITLEAKS_CONFIG;
-
-        // Find the generic-api-key rule
-        let generic_rule = config.rules.iter().find(|r| r.id == "generic-api-key");
-        if let Some(rule) = generic_rule {
-            println!("Generic API Key Rule:");
-            println!("  Regex: {:?}", rule.regex);
-            println!("  Entropy: {:?}", rule.entropy);
-            println!("  Keywords: {:?}", rule.keywords);
-
-            // Test the regex directly first
-            if let Some(regex_pattern) = &rule.regex {
-                if let Ok(regex) = Regex::new(regex_pattern) {
-                    let test_input = format!("API_KEY={}", fake_api_key_long());
-                    println!("\nTesting regex directly:");
-                    println!("  Input: {}", test_input);
-
-                    for mat in regex.find_iter(&test_input) {
-                        println!("  Raw match: '{}'", mat.as_str());
-                        println!("  Match position: {}-{}", mat.start(), mat.end());
-
-                        // Check captures
-                        if let Some(captures) = regex.captures(mat.as_str()) {
-                            for (i, cap) in captures.iter().enumerate() {
-                                if let Some(cap) = cap {
-                                    println!("  Capture {}: '{}'", i, cap.as_str());
-                                    if i == 1 {
-                                        let entropy = calculate_entropy(cap.as_str());
-                                        println!("  Entropy of capture 1: {:.2}", entropy);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                println!("  No regex pattern (path-based rule)");
-            }
-
-            // Test various input patterns
-            let test_inputs = vec![
-                format!("API_KEY={}", fake_api_key_long()),
-                "api_key=RaNd0mH1ghEnTr0pyV4luE567890abcdef".to_string(),
-                format!("access_key={}", fake_secret_token_long()),
-                "secret_token=1234567890abcdef1234567890abcdef".to_string(),
-                "password=9k2L8pMvB3nQ7rX1ZdF5GhJwY4AsPo6C".to_string(),
-            ];
-
-            for input in test_inputs {
-                println!("\nTesting input: {}", input);
-                let result = redact_secrets(&input, None, &HashMap::new(), false);
-                println!("  Detected secrets: {}", result.redaction_map.len());
-                if !result.redaction_map.is_empty() {
-                    println!("  Redacted: {}", result.redacted_string);
-                }
-            }
-        } else {
-            println!("Generic API key rule not found!");
-        }
-    }
-
-    #[test]
-    fn test_simple_regex_match() {
-        // Test a very simple case that should definitely match
-        let input = "key=abcdefghijklmnop";
-        println!("Testing simple input: {}", input);
-
+    fn generic_api_key_rule_is_compiled_and_detects_high_entropy_values() {
         let config = &*GITLEAKS_CONFIG;
         let generic_rule = config
             .rules
             .iter()
-            .find(|r| r.id == "generic-api-key")
-            .unwrap();
+            .find(|rule| rule.id == "generic-api-key")
+            .expect("generic-api-key rule should be present");
 
-        if let Some(regex_pattern) = &generic_rule.regex {
-            if let Ok(regex) = Regex::new(regex_pattern) {
-                println!("Regex pattern: {}", regex_pattern);
+        assert!(
+            generic_rule.compiled_regex.is_some(),
+            "generic-api-key rule must have a compiled regex"
+        );
+        assert!(
+            generic_rule
+                .keywords
+                .iter()
+                .any(|keyword| keyword.eq_ignore_ascii_case("key")),
+            "generic-api-key rule must stay keyword-gated by key-like inputs"
+        );
 
-                if regex.is_match(input) {
-                    println!("✓ Regex MATCHES the input!");
+        let secret = fake_api_key_long();
+        let input = format!("API_KEY={secret}");
+        let result = redact_secrets(&input, None, &HashMap::new(), false);
 
-                    for mat in regex.find_iter(input) {
-                        println!("Match found: '{}'", mat.as_str());
-
-                        if let Some(captures) = regex.captures(mat.as_str()) {
-                            println!("Full capture groups:");
-                            for (i, cap) in captures.iter().enumerate() {
-                                if let Some(cap) = cap {
-                                    println!("  Group {}: '{}'", i, cap.as_str());
-                                    if i == 1 {
-                                        let entropy = calculate_entropy(cap.as_str());
-                                        println!("  Entropy: {:.2} (threshold: 3.5)", entropy);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    println!("✗ Regex does NOT match the input");
-                }
-            }
-        } else {
-            println!("Rule has no regex pattern (path-based rule)");
-        }
-
-        // Also test the full redact_secrets function
-        let result = redact_secrets(input, None, &HashMap::new(), false);
-        println!(
-            "Full function result: {} secrets detected",
-            result.redaction_map.len()
+        assert!(
+            !result.redaction_map.is_empty(),
+            "high-entropy API_KEY input should be detected by generic redaction"
+        );
+        assert!(
+            !result.redacted_string.contains(&secret),
+            "redacted output must not contain the original secret value"
+        );
+        assert!(
+            result.redacted_string.contains("[REDACTED_SECRET:"),
+            "redacted output should include a stable redaction marker"
         );
     }
 
     #[test]
-    fn test_regex_breakdown() {
-        let config = &*GITLEAKS_CONFIG;
-        let generic_rule = config
-            .rules
-            .iter()
-            .find(|r| r.id == "generic-api-key")
-            .unwrap();
+    fn generic_api_key_keyword_filtering_selects_relevant_rules() {
+        let no_keyword_input = "export DATABASE_URL=localhost PORT=3000 DEBUG=true";
+        let api_input = format!("export API_KEY={}", fake_api_key());
 
-        if let Some(regex_pattern) = &generic_rule.regex {
-            println!("Full regex: {}", regex_pattern);
+        let no_keyword_rules = count_rules_that_would_process(no_keyword_input);
+        let api_rules = count_rules_that_would_process(&api_input);
 
-            // Let's break down the regex and test each part
-            let test_inputs = vec![
-                "key=abcdefghijklmnop",
-                "api_key=abcdefghijklmnop",
-                "secret=abcdefghijklmnop",
-                "token=abcdefghijklmnop",
-                "password=abcdefghijklmnop",
-                "access_key=abcdefghijklmnop",
-            ];
-
-            for input in test_inputs {
-                println!("\nTesting: '{}'", input);
-
-                // Test if the regex matches at all
-                if let Ok(regex) = Regex::new(regex_pattern) {
-                    let matches: Vec<_> = regex.find_iter(input).collect();
-                    println!("  Matches found: {}", matches.len());
-
-                    for (i, mat) in matches.iter().enumerate() {
-                        println!("  Match {}: '{}'", i, mat.as_str());
-
-                        // Test captures
-                        if let Some(captures) = regex.captures(mat.as_str()) {
-                            for (j, cap) in captures.iter().enumerate() {
-                                if let Some(cap) = cap {
-                                    println!("    Capture {}: '{}'", j, cap.as_str());
-                                    if j == 1 {
-                                        let entropy = calculate_entropy(cap.as_str());
-                                        println!("    Entropy: {:.2} (threshold: 3.5)", entropy);
-                                        if entropy >= 3.5 {
-                                            println!("    ✓ Entropy check PASSED");
-                                        } else {
-                                            println!("    ✗ Entropy check FAILED");
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            println!("Rule has no regex pattern (path-based rule)");
-        }
-
-        // Also test with a known working pattern from AWS
-        println!("\nTesting AWS pattern that we know works:");
-        let aws_input = format!("AWS_ACCESS_KEY_ID={}", fake_aws_access_key_example());
-        println!("Input: {}", aws_input);
-
-        let aws_rule = config
-            .rules
-            .iter()
-            .find(|r| r.id == "aws-access-token")
-            .unwrap();
-        if let Some(aws_regex_pattern) = &aws_rule.regex {
-            if let Ok(regex) = Regex::new(aws_regex_pattern) {
-                for mat in regex.find_iter(&aws_input) {
-                    println!("AWS Match: '{}'", mat.as_str());
-                    if let Some(captures) = regex.captures(mat.as_str()) {
-                        for (i, cap) in captures.iter().enumerate() {
-                            if let Some(cap) = cap {
-                                println!("  AWS Capture {}: '{}'", i, cap.as_str());
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            println!("AWS rule has no regex pattern");
-        }
-    }
-
-    #[test]
-    fn test_working_api_key_patterns() {
-        let config = &*GITLEAKS_CONFIG;
-        let generic_rule = config
-            .rules
-            .iter()
-            .find(|r| r.id == "generic-api-key")
-            .unwrap();
-
-        // Get the compiled regex
-        let regex = generic_rule
-            .compiled_regex
-            .as_ref()
-            .expect("Regex should be compiled");
-
-        // Create test patterns that should match the regex structure
-        let test_inputs = vec![
-            // Pattern: prefix + keyword + separator + value + terminator
-            format!("myapp_api_key = \"{}\"", fake_api_key()),
-            format!("export SECRET_TOKEN={}", fake_secret_token()),
-            "app.auth.password: 9k2L8pMvB3nQ7rX1ZdF5GhJwY4AsPo6C8mN".to_string(),
-            "config.access_key=\"RaNd0mH1ghEnTr0pyV4luE567890abcdef\";".to_string(),
-            "DB_CREDENTIALS=xy9mP2nQ8rT4vW7yZ3cF6hJ1lN5sAdefghij".to_string(),
-        ];
-
-        for input in test_inputs {
-            println!("\nTesting: '{}'", input);
-
-            let matches: Vec<_> = regex.find_iter(&input).collect();
-            println!("  Matches found: {}", matches.len());
-
-            for (i, mat) in matches.iter().enumerate() {
-                println!("  Match {}: '{}'", i, mat.as_str());
-
-                if let Some(captures) = regex.captures(mat.as_str()) {
-                    for (j, cap) in captures.iter().enumerate() {
-                        if let Some(cap) = cap {
-                            println!("    Capture {}: '{}'", j, cap.as_str());
-                            if j == 1 {
-                                let entropy = calculate_entropy(cap.as_str());
-                                println!("    Entropy: {:.2} (threshold: 3.5)", entropy);
-
-                                // Also check if it would be allowed by allowlists
-                                let allowed = should_allow_match(
-                                    &input,
-                                    None,
-                                    mat.as_str(),
-                                    mat.start(),
-                                    mat.end(),
-                                    generic_rule,
-                                    &config.allowlist,
-                                );
-                                println!("    Allowed by allowlist: {}", allowed);
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Test the full redact_secrets function
-            let result = redact_secrets(&input, None, &HashMap::new(), false);
-            println!(
-                "  Full function detected: {} secrets",
-                result.redaction_map.len()
-            );
-            if !result.redaction_map.is_empty() {
-                println!("  Redacted result: {}", result.redacted_string);
-            }
-        }
-    }
-
-    #[test]
-    fn test_regex_components() {
-        // Test individual components of the generic API key regex
-        let test_input = format!("export API_KEY={}", fake_secret_token());
-        println!("Testing input: {}", test_input);
-
-        // Test simpler regex patterns step by step
-        let test_patterns = vec![
-            (r"API_KEY", "Simple keyword match"),
-            (r"(?i)api_key", "Case insensitive keyword"),
-            (r"(?i).*key.*", "Any text with 'key'"),
-            (r"(?i).*key\s*=", "Key with equals"),
-            (r"(?i).*key\s*=\s*\w+", "Key with value"),
-            (
-                r"(?i)[\w.-]*(?:key).*?=.*?(\w{10,})",
-                "Complex pattern with capture",
-            ),
-        ];
-
-        for (pattern, description) in test_patterns {
-            println!("\nTesting pattern: {} ({})", pattern, description);
-
-            match Regex::new(pattern) {
-                Ok(regex) => {
-                    if regex.is_match(&test_input) {
-                        println!("  ✓ MATCHES");
-                        for mat in regex.find_iter(&test_input) {
-                            println!("    Full match: '{}'", mat.as_str());
-                        }
-                        if let Some(captures) = regex.captures(&test_input) {
-                            for (i, cap) in captures.iter().enumerate() {
-                                if let Some(cap) = cap {
-                                    println!("    Capture {}: '{}'", i, cap.as_str());
-                                }
-                            }
-                        }
-                    } else {
-                        println!("  ✗ NO MATCH");
-                    }
-                }
-                Err(e) => println!("  Error: {}", e),
-            }
-        }
-
-        // Test if there's an issue with the actual gitleaks regex compilation
-        let config = &*GITLEAKS_CONFIG;
-        let generic_rule = config
-            .rules
-            .iter()
-            .find(|r| r.id == "generic-api-key")
-            .unwrap();
-
-        println!("\nTesting actual gitleaks regex:");
-        if let Some(regex_pattern) = &generic_rule.regex {
-            match Regex::new(regex_pattern) {
-                Ok(regex) => {
-                    println!("  ✓ Regex compiles successfully");
-                    println!("  Testing against: {}", test_input);
-                    if regex.is_match(&test_input) {
-                        println!("  ✓ MATCHES");
-                    } else {
-                        println!("  ✗ NO MATCH");
-                    }
-                }
-                Err(e) => println!("  ✗ Regex compilation error: {}", e),
-            }
-        } else {
-            println!("  Rule has no regex pattern (path-based rule)");
-        }
+        assert!(
+            api_rules.iter().any(|rule| rule == "generic-api-key"),
+            "API_KEY input should route through the generic-api-key rule"
+        );
+        assert!(
+            api_rules.len() > no_keyword_rules.len(),
+            "keyword-bearing input should process more candidate rules than ordinary config text"
+        );
     }
 
     #[test]
@@ -1102,240 +817,27 @@ mod tests {
     }
 
     #[test]
-    fn test_debug_missing_secrets() {
-        println!("=== DEBUGGING MISSING SECRETS ===");
+    fn generic_allowlist_filters_placeholders_but_preserves_real_secret_detection() {
+        let real_secret = fake_secret_token();
+        let real_input = format!("SECRET_TOKEN={real_secret}");
+        let real_result = redact_secrets(&real_input, None, &HashMap::new(), false);
 
-        let test_cases = vec![
-            format!("SECRET_TOKEN={}", fake_secret_token()),
-            format!("PASSWORD={}", fake_password_secret()),
-        ];
+        assert!(
+            !real_result.redaction_map.is_empty(),
+            "high-entropy SECRET_TOKEN input should still be detected"
+        );
+        assert!(
+            !real_result.redacted_string.contains(&real_secret),
+            "detected secret value should be removed from redacted output"
+        );
 
-        for input in test_cases {
-            println!("\nTesting: {}", input);
-
-            // Check entropy first
-            let parts: Vec<&str> = input.split('=').collect();
-            if parts.len() == 2 {
-                let secret_value = parts[1];
-                let entropy = calculate_entropy(secret_value);
-                println!("  Secret value: '{}'", secret_value);
-                println!("  Entropy: {:.2} (threshold: 3.5)", entropy);
-
-                if entropy >= 3.5 {
-                    println!("  ✓ Entropy check PASSED");
-                } else {
-                    println!("  ✗ Entropy check FAILED - this is why it's not detected");
-                }
-            }
-
-            // Test the fallback regex directly
-            if let Ok(regex) = create_simple_api_key_regex() {
-                println!("  Testing fallback regex:");
-                if regex.is_match(&input) {
-                    println!("    ✓ Fallback regex MATCHES");
-                    for mat in regex.find_iter(&input) {
-                        println!("    Match: '{}'", mat.as_str());
-                        if let Some(captures) = regex.captures(mat.as_str()) {
-                            for (i, cap) in captures.iter().enumerate() {
-                                if let Some(cap) = cap {
-                                    println!("      Capture {}: '{}'", i, cap.as_str());
-                                }
-                            }
-                        }
-
-                        // Test allowlist checking
-                        let config = &*GITLEAKS_CONFIG;
-                        let generic_rule = config
-                            .rules
-                            .iter()
-                            .find(|r| r.id == "generic-api-key")
-                            .unwrap();
-                        let allowed = should_allow_match(
-                            &input,
-                            None,
-                            mat.as_str(),
-                            mat.start(),
-                            mat.end(),
-                            generic_rule,
-                            &config.allowlist,
-                        );
-                        println!("      Allowed by allowlist: {}", allowed);
-                        if allowed {
-                            println!(
-                                "      ✗ FILTERED OUT by allowlist - this is why it's not detected"
-                            );
-                        }
-                    }
-                } else {
-                    println!("    ✗ Fallback regex does NOT match");
-                }
-            }
-
-            // Test full detection
-            let result = redact_secrets(&input, None, &HashMap::new(), false);
-            println!(
-                "  Full detection result: {} secrets",
-                result.redaction_map.len()
+        for placeholder in ["PASSWORD=password123", "API_KEY=example_key"] {
+            let placeholder_result = redact_secrets(placeholder, None, &HashMap::new(), false);
+            assert!(
+                placeholder_result.redaction_map.is_empty(),
+                "obvious placeholder input should be allowlisted: {placeholder}"
             );
-        }
-    }
-
-    #[test]
-    fn test_debug_allowlist_filtering() {
-        println!("=== DEBUGGING ALLOWLIST FILTERING ===");
-
-        let test_cases = vec![
-            format!("SECRET_TOKEN={}", fake_secret_token()),
-            format!("PASSWORD={}", fake_password_secret()),
-        ];
-
-        let config = &*GITLEAKS_CONFIG;
-        let generic_rule = config
-            .rules
-            .iter()
-            .find(|r| r.id == "generic-api-key")
-            .unwrap();
-
-        for input in test_cases {
-            println!("\nAnalyzing: {}", input);
-
-            if let Ok(regex) = create_simple_api_key_regex() {
-                for mat in regex.find_iter(&input) {
-                    let match_text = mat.as_str();
-                    println!("  Match: '{}'", match_text);
-
-                    // Test global allowlist
-                    if let Some(global_allowlist) = &config.allowlist {
-                        println!("  Checking global allowlist:");
-
-                        // Test global regex patterns
-                        if let Some(regexes) = &global_allowlist.regexes {
-                            for (i, pattern) in regexes.iter().enumerate() {
-                                if let Ok(regex) = Regex::new(pattern)
-                                    && regex.is_match(match_text)
-                                {
-                                    println!("    ✗ FILTERED by global regex {}: '{}'", i, pattern);
-                                }
-                            }
-                        }
-
-                        // Test global stopwords
-                        if let Some(stopwords) = &global_allowlist.stopwords {
-                            for stopword in stopwords {
-                                if match_text.to_lowercase().contains(&stopword.to_lowercase()) {
-                                    println!("    ✗ FILTERED by global stopword: '{}'", stopword);
-                                }
-                            }
-                        }
-                    }
-
-                    // Test rule-specific allowlists
-                    if let Some(rule_allowlists) = &generic_rule.allowlists {
-                        for (rule_idx, allowlist) in rule_allowlists.iter().enumerate() {
-                            println!("  Checking rule allowlist {}:", rule_idx);
-
-                            // Test rule regex patterns
-                            if let Some(regexes) = &allowlist.regexes {
-                                for (i, pattern) in regexes.iter().enumerate() {
-                                    if let Ok(regex) = Regex::new(pattern)
-                                        && regex.is_match(match_text)
-                                    {
-                                        println!(
-                                            "    ✗ FILTERED by rule regex {}: '{}'",
-                                            i, pattern
-                                        );
-                                    }
-                                }
-                            }
-
-                            // Test rule stopwords
-                            if let Some(stopwords) = &allowlist.stopwords {
-                                for stopword in stopwords {
-                                    if match_text.to_lowercase().contains(&stopword.to_lowercase())
-                                    {
-                                        println!("    ✗ FILTERED by rule stopword: '{}'", stopword);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    #[test]
-    fn test_debug_new_allowlist_logic() {
-        println!("=== DEBUGGING NEW ALLOWLIST LOGIC ===");
-
-        let test_cases = vec![
-            format!("SECRET_TOKEN={}", fake_secret_token()),
-            format!("PASSWORD={}", fake_password_secret()),
-            "PASSWORD=password123".to_string(), // Should be filtered
-            "API_KEY=example_key".to_string(),  // Should be filtered
-        ];
-
-        let config = &*GITLEAKS_CONFIG;
-        let generic_rule = config
-            .rules
-            .iter()
-            .find(|r| r.id == "generic-api-key")
-            .unwrap();
-
-        for input in test_cases {
-            println!("\nTesting: {}", input);
-
-            if let Ok(regex) = create_simple_api_key_regex() {
-                for mat in regex.find_iter(&input) {
-                    let match_text = mat.as_str();
-                    println!("  Match: '{}'", match_text);
-
-                    // Parse the KEY=VALUE
-                    if let Some((_, value)) = match_text.split_once('=') {
-                        println!("    Value: '{}'", value);
-
-                        // Test specific stopwords
-                        let test_stopwords = ["token", "password", "super", "word"];
-                        for stopword in test_stopwords {
-                            let value_lower = value.to_lowercase();
-                            let stopword_lower = stopword.to_lowercase();
-
-                            if value_lower == stopword_lower {
-                                println!("    '{}' - Exact match: YES", stopword);
-                            } else if value.len() < 15 && value_lower.contains(&stopword_lower) {
-                                let without_stopword = value_lower.replace(&stopword_lower, "");
-                                let is_simple = without_stopword.chars().all(|c| {
-                                    c.is_ascii_digit() || "!@#$%^&*()_+-=[]{}|;:,.<>?".contains(c)
-                                });
-                                println!(
-                                    "    '{}' - Short+contains: len={}, without='{}', simple={}",
-                                    stopword,
-                                    value.len(),
-                                    without_stopword,
-                                    is_simple
-                                );
-                            } else {
-                                println!("    '{}' - No filter", stopword);
-                            }
-                        }
-                    }
-
-                    // Test the actual allowlist
-                    if let Some(rule_allowlists) = &generic_rule.allowlists {
-                        for (rule_idx, allowlist) in rule_allowlists.iter().enumerate() {
-                            let allowed = is_allowed_by_rule_allowlist(
-                                &input,
-                                None,
-                                match_text,
-                                mat.start(),
-                                mat.end(),
-                                allowlist,
-                            );
-                            println!("  Rule allowlist {}: allowed = {}", rule_idx, allowed);
-                        }
-                    }
-                }
-            }
+            assert_eq!(placeholder_result.redacted_string, placeholder);
         }
     }
 
