@@ -43,7 +43,7 @@ jobs:
       - name: Test (feature-gated)
         run: |
           cargo test --manifest-path vac-rs/Cargo.toml -p vac-foundation --features sqlite --verbose
-          cargo test --manifest-path vac-rs/Cargo.toml -p vac --features libsql-test --verbose
+          cargo test --manifest-path vac-rs/Cargo.toml -p vac-cli --features libsql-test --verbose
           cargo test --manifest-path vac-rs/Cargo.toml -p vac-messaging-gateway --features libsql-test --verbose
           cargo test --manifest-path vac-rs/Cargo.toml -p vac-provider-core --features network-tests --verbose
 
