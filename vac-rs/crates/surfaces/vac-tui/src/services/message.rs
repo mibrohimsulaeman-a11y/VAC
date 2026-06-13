@@ -2812,7 +2812,7 @@ mod tests {
                 "action = view\n\ntarget = file.txt",
             ),
             (r#"path: ".", mode: "list""#, "path = ., mode = list"),
-            ("", "function_name=test"),
+            ("", "{}"),
         ];
 
         for (input, expected) in test_cases {
