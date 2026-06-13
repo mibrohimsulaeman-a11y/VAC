@@ -1,0 +1,5 @@
+# Windows debug/test builds of the full VAC CLI construct a large command tree
+# and can overflow the MSVC default process stack when integration tests spawn
+# the `vac` binary. Keep this target-scoped so Unix builds are unaffected.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "link-arg=/STACK:8388608"]
