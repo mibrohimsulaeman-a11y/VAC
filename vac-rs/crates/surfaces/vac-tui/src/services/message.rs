@@ -2804,14 +2804,14 @@ mod tests {
     fn test_various_formats() {
         // Test cases based on your examples
         let test_cases = vec![
-            (r#"{"path":"."}"#, "path=."),
-            (r#"{"confidence":1.0}"#, "confidence=1.0"),
-            (r#"{"command":"ls -la"}"#, "command=ls -la"),
+            (r#"{"path":"."}"#, "path = ."),
+            (r#"{"confidence":1.0}"#, "confidence = 1.0"),
+            (r#"{"command":"ls -la"}"#, "command = ls -la"),
             (
                 r#"{"action":"view","target":"file.txt"}"#,
-                "action=view, target=file.txt",
+                "action = view\n\ntarget = file.txt",
             ),
-            (r#"path: ".", mode: "list""#, "path=., mode=list"),
+            (r#"path: ".", mode: "list""#, "path = ., mode = list"),
             ("", "function_name=test"),
         ];
 
