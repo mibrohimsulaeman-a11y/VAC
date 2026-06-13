@@ -40,6 +40,9 @@ jobs:
       - name: Test
         run: cargo test --manifest-path vac-rs/Cargo.toml --workspace --verbose
 
+      - name: Free build artifacts before feature-gated tests
+        run: cargo clean --manifest-path vac-rs/Cargo.toml
+
       - name: Test (feature-gated)
         run: |
           cargo test --manifest-path vac-rs/Cargo.toml -p vac-foundation --features sqlite --verbose
