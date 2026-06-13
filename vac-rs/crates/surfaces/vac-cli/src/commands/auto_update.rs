@@ -636,20 +636,29 @@ mod tests {
         let sentinel = temp_dir.path().join("still-alive");
 
         write_executable_script(&current_exe, "#!/bin/sh\necho old-binary\n");
-        write_executable_script(&extracted_binary, "#!/bin/sh\necho new-binary\n");
+        std::fs::copy(
+            std::env::current_exe().expect("current test binary"),
+            &extracted_binary,
+        )
+        .expect("copy real executable fixture");
 
+        let expected_bytes = std::fs::read(&extracted_binary).expect("read executable fixture");
         apply_downloaded_binary_update(&current_exe, &extracted_binary, "v9.9.9", true, false)
             .expect("update succeeds");
 
         std::fs::write(&sentinel, "alive").expect("write sentinel");
         assert!(sentinel.exists(), "test process should still be alive");
+        assert_eq!(
+            std::fs::read(&current_exe).expect("read swapped binary"),
+            expected_bytes,
+            "atomic replacement should install the downloaded executable bytes"
+        );
 
         let output = Command::new(&current_exe)
             .arg("--help")
             .output()
             .expect("run swapped binary");
         assert!(output.status.success());
-        assert!(String::from_utf8_lossy(&output.stdout).contains("new-binary"));
     }
 
     #[cfg(unix)]
