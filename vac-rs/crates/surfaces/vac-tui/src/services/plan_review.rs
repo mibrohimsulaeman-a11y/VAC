@@ -22,7 +22,7 @@ use std::collections::HashMap;
 
 /// Open the plan review overlay, loading content and comments from disk.
 pub fn open_plan_review(state: &mut AppState) {
-    let session_dir = std::path::Path::new(".vac/session");
+    let session_dir = crate::services::plan::current_plan_session_dir();
 
     // Load plan content
     let plan_path = crate::services::plan::plan_file_path(session_dir);

@@ -152,15 +152,24 @@ pub async fn run_tui(
     }
 
     let internal_tx_thread = internal_tx.clone();
-    // Create atomic pause flag for input thread
+    // Create atomic pause/stop flags for input thread. The stop flag is required
+    // because a native Rust thread keeps the process alive after the TUI future
+    // returns; relying on a failed channel send is insufficient when no further
+    // terminal input arrives.
     let input_paused = Arc::new(AtomicBool::new(false));
     let input_paused_thread = input_paused.clone();
+    let input_should_stop = Arc::new(AtomicBool::new(false));
+    let input_should_stop_thread = input_should_stop.clone();
 
     // Spawn input handling thread
     // This thread reads from crossterm and converts to internal events
     // It must be pausable when we yield terminal control to external programs (like nano/vim)
     std::thread::spawn(move || {
         loop {
+            if input_should_stop_thread.load(Ordering::Relaxed) {
+                break;
+            }
+
             // Check if we should pause input reading
             if input_paused_thread.load(Ordering::Relaxed) {
                 std::thread::sleep(Duration::from_millis(50));
@@ -185,503 +194,95 @@ pub async fn run_tui(
     // Main async update/view loop
     terminal.draw(|f| view(f, &mut state))?;
     let mut should_quit = false;
-
-    // Scroll batching: count consecutive scroll events to process in one frame
-    // These are reset at the start of each scroll batch
-    #[allow(unused_assignments)]
-    let mut pending_scroll_up: i32 = 0;
-    #[allow(unused_assignments)]
-    let mut pending_scroll_down: i32 = 0;
+    let mut prefer_backend_after_internal = false;
 
     loop {
-        // Check if double Ctrl+C timer expired
-        if state.quit_intent_state.ctrl_c_pressed_once
-            && let Some(timer) = state.quit_intent_state.ctrl_c_timer
-            && std::time::Instant::now() > timer
-        {
-            state.quit_intent_state.ctrl_c_pressed_once = false;
-            state.quit_intent_state.ctrl_c_timer = None;
-        }
+        expire_quit_intent(&mut state);
 
-        tokio::select! {
-                   biased;
+        if prefer_backend_after_internal {
+            tokio::select! {
+                biased;
 
-               event = internal_rx.recv() => {
-
-                let Some(event) = event else {
-                    should_quit = true;
-                    continue;
-                };
-
-                if let InputEvent::ToggleMouseCapture = event {
-                    #[cfg(unix)]
-                    toggle_mouse_capture_with_redraw(&mut terminal, &mut state)?;
-                    continue;
-                }
-                if let InputEvent::Quit = event {
-                    if state.configuration_state.auto_approve_manager.has_unsaved_changes()
-                        && !state.approval_settings_persistence_state.is_visible
-                    {
-                        state.approval_settings_persistence_state.is_visible = true;
-                        state.approval_settings_persistence_state.selected = 0;
-                        state.approval_settings_persistence_state.trigger = ApprovalSettingsPersistenceTrigger::Quit;
-                    } else {
+                event = input_rx.recv() => {
+                    prefer_backend_after_internal = false;
+                    if dispatch_inbound_backend_event(
+                        &mut terminal,
+                        &mut state,
+                        event,
+                        &internal_tx,
+                        &output_tx,
+                        cancel_tx.clone(),
+                        &shell_event_tx,
+                        input_paused.as_ref(),
+                    ).await? {
                         should_quit = true;
                     }
-                } else {
-                    let term_size = terminal.size()?;
-                    // Calculate main area width accounting for side panel
-                    let main_area_width = if state.side_panel_state.is_shown {
-                        term_size.width.saturating_sub(32 + 1) // side panel width + margin
-                    } else {
-                        term_size.width
-                    };
-                    let term_rect = ratatui::layout::Rect::new(0, 0, main_area_width, term_size.height);
-                    let input_height = 3;
-                    let margin_height = 2;
-                    let dropdown_showing = state.input_state.show_helper_dropdown
-                        && ((!state.input_state.filtered_helpers.is_empty() && state.input().starts_with('/'))
-                            || !state.input_state.filtered_files.is_empty());
-                    let dropdown_height = if dropdown_showing {
-                        state.input_state.filtered_helpers.len() as u16
-                    } else {
-                        0
-                    };
-                    let hint_height = if dropdown_showing { 0 } else { margin_height };
-                    let banner_h = crate::services::banner::banner_height(&state);
-                    let outer_chunks = ratatui::layout::Layout::default()
-                        .direction(ratatui::layout::Direction::Vertical)
-                        .constraints([
-                            ratatui::layout::Constraint::Length(banner_h), // banner (0 if no message)
-                            ratatui::layout::Constraint::Min(1), // messages
-                            ratatui::layout::Constraint::Length(1), // loading indicator
-                            ratatui::layout::Constraint::Length(input_height as u16),
-                            ratatui::layout::Constraint::Length(dropdown_height),
-                            ratatui::layout::Constraint::Length(hint_height),
-                        ])
-                        .split(term_rect);
-                    // Subtract 2 for padding (matches view.rs padded_message_area)
-                    let message_area_width = outer_chunks[1].width.saturating_sub(2) as usize;
-                    let message_area_height = outer_chunks[1].height as usize;
-                    if let InputEvent::EmergencyClearTerminal = event {
-                        emergency_clear_and_redraw(&mut terminal, &mut state)?;
-                        continue;
-                    }
-
-                   // Batch scroll events: if this is a scroll event, drain any pending scroll events
-                   // and combine them into a single scroll operation for better performance
-                   if matches!(event, InputEvent::ScrollUp | InputEvent::ScrollDown) {
-                       pending_scroll_up = 0;
-                       pending_scroll_down = 0;
-
-                       // Count the initial event
-                       match event {
-                           InputEvent::ScrollUp => pending_scroll_up += 1,
-                           InputEvent::ScrollDown => pending_scroll_down += 1,
-                           _ => {}
-                       }
-
-                       // Drain any additional scroll events from the channel (non-blocking)
-                       let mut other_event: Option<InputEvent> = None;
-                       while let Ok(next_event) = internal_rx.try_recv() {
-                           match next_event {
-                               InputEvent::ScrollUp => pending_scroll_up += 1,
-                               InputEvent::ScrollDown => pending_scroll_down += 1,
-                               // Non-scroll event - save it for later
-                               other => {
-                                   other_event = Some(other);
-                                   break;
-                               }
-                           }
-                       }
-
-                       // Process net scroll (combine up and down into single direction)
-                       let net_scroll = pending_scroll_down - pending_scroll_up;
-                       if net_scroll > 0 {
-                           // More downs than ups - scroll down by accumulated amount
-                           for _ in 0..net_scroll {
-                               crate::services::update::update(&mut state, InputEvent::ScrollDown, message_area_height, message_area_width, &internal_tx, &output_tx, cancel_tx.clone(), &shell_event_tx, term_size);
-                           }
-                       } else if net_scroll < 0 {
-                           // More ups than downs - scroll up by accumulated amount
-                           for _ in 0..(-net_scroll) {
-                               crate::services::update::update(&mut state, InputEvent::ScrollUp, message_area_height, message_area_width, &internal_tx, &output_tx, cancel_tx.clone(), &shell_event_tx, term_size);
-                           }
-                       }
-
-                       // If we encountered a non-scroll event, process it too
-                       if let Some(other) = other_event {
-                           crate::services::update::update(&mut state, other, message_area_height, message_area_width, &internal_tx, &output_tx, cancel_tx.clone(), &shell_event_tx, term_size);
-                       }
-                   } else {
-                       crate::services::update::update(&mut state, event, message_area_height, message_area_width, &internal_tx, &output_tx, cancel_tx.clone(), &shell_event_tx, term_size);
-                   }
-                   state.poll_file_search_results();
-
-                        // Handle pending editor open request
-                         if let Some(file_path) = state.side_panel_state.pending_editor_open.take() {
-                             // Pause input thread to avoid stealing input from editor
-                             input_paused.store(true, Ordering::Relaxed);
-                             // Small delay to ensure input thread cycle completes
-                             std::thread::sleep(Duration::from_millis(10));
-
-                             // Disable mouse capture before opening editor to prevent weird input
-                             let was_mouse_capture_enabled = state.terminal_ui_state.mouse_capture_enabled;
-                             if was_mouse_capture_enabled {
-                                 let _ = execute!(std::io::stdout(), DisableMouseCapture);
-                                 state.terminal_ui_state.mouse_capture_enabled = false;
-                             }
-
-                             match crate::services::editor::open_in_editor(
-                                 &mut terminal,
-                                 &state.side_panel_state.editor_command,
-                                 &file_path,
-                                 None,
-                             ) {
-                                 Ok(()) => {
-                                     // Editor closed successfully
-                                 }
-                                 Err(error) => {
-                                     // Show error message
-                                     state.messages_scrolling_state.messages.push(Message::info(
-                                         format!("Failed to open editor: {}", error),
-                                          Some(ratatui::style::Style::default().fg(ThemeColors::red())),
-                                     ));
-                                 }
-                             }
-
-                             // Restore mouse capture if it was enabled before
-                             if was_mouse_capture_enabled {
-                                 let _ = execute!(std::io::stdout(), EnableMouseCapture);
-                                 state.terminal_ui_state.mouse_capture_enabled = true;
-                             }
-
-                             // Resume input thread
-                             input_paused.store(false, Ordering::Relaxed);
-                         }
-
-                        state.update_session_empty_status();
+                }
+                event = internal_rx.recv() => {
+                    prefer_backend_after_internal = true;
+                    if dispatch_inbound_internal_input_event(
+                        &mut terminal,
+                        &mut state,
+                        event,
+                        &mut internal_rx,
+                        &internal_tx,
+                        &output_tx,
+                        cancel_tx.clone(),
+                        &shell_event_tx,
+                        input_paused.as_ref(),
+                    )? {
+                        should_quit = true;
                     }
                 }
-               event = input_rx.recv() => {
-                let Some(event) = event else {
-                    should_quit = true;
-                    continue;
-                };
-                   if matches!(event, InputEvent::ShellOutput(_) | InputEvent::ShellError(_) |
-                   InputEvent::ShellWaitingForInput | InputEvent::ShellCompleted(_) | InputEvent::ShellClear) {
-            // These are shell events, forward them to the shell channel
-            let _ = shell_event_tx.send(event).await;
-            continue;
+                _ = spinner_interval.tick() => {
+                    handle_spinner_tick(&mut state);
+                    terminal.draw(|f| view(f, &mut state))?;
+                }
+            }
+        } else {
+            tokio::select! {
+                biased;
+
+                event = internal_rx.recv() => {
+                    prefer_backend_after_internal = true;
+                    if dispatch_inbound_internal_input_event(
+                        &mut terminal,
+                        &mut state,
+                        event,
+                        &mut internal_rx,
+                        &internal_tx,
+                        &output_tx,
+                        cancel_tx.clone(),
+                        &shell_event_tx,
+                        input_paused.as_ref(),
+                    )? {
+                        should_quit = true;
+                    }
+                }
+                event = input_rx.recv() => {
+                    if dispatch_inbound_backend_event(
+                        &mut terminal,
+                        &mut state,
+                        event,
+                        &internal_tx,
+                        &output_tx,
+                        cancel_tx.clone(),
+                        &shell_event_tx,
+                        input_paused.as_ref(),
+                    ).await? {
+                        should_quit = true;
+                    }
+                }
+                _ = spinner_interval.tick() => {
+                    handle_spinner_tick(&mut state);
+                    terminal.draw(|f| view(f, &mut state))?;
+                }
+            }
         }
-                   if let InputEvent::EmergencyClearTerminal = event {
-                    emergency_clear_and_redraw(&mut terminal, &mut state)?;
-                    continue;
-                   }
-                   if let InputEvent::RunToolCall(tool_call) = &event {
-                       // Calculate actual message area dimensions (same as view.rs)
-                       let main_area_width = if state.side_panel_state.is_shown {
-                           term_size.width.saturating_sub(32 + 1)
-                       } else {
-                           term_size.width
-                       };
-                       let term_rect = ratatui::layout::Rect::new(0, 0, main_area_width, term_size.height);
-                       let margin_height: u16 = 2;
-                       let dropdown_showing = state.input_state.show_helper_dropdown
-                           && ((!state.input_state.filtered_helpers.is_empty() && state.input().starts_with('/'))
-                               || !state.input_state.filtered_files.is_empty());
-                       let hint_height = if dropdown_showing { 0 } else { margin_height };
 
-                       // Account for approval bar height (will be shown after this tool call)
-                       // The approval bar will be visible, so input and dropdown are hidden
-                       let approval_bar_height = state.dialog_approval_state.approval_bar.calculate_height(term_rect.width).max(7); // Use expected height
-
-                       let banner_h = crate::services::banner::banner_height(&state);
-                        let outer_chunks = ratatui::layout::Layout::default()
-                             .direction(ratatui::layout::Direction::Vertical)
-                             .constraints([
-                                 ratatui::layout::Constraint::Length(banner_h), // banner (0 if no message)
-                                 ratatui::layout::Constraint::Min(1), // messages
-                                 ratatui::layout::Constraint::Length(1), // loading
-                                 ratatui::layout::Constraint::Length(0), // shell popup
-                                 ratatui::layout::Constraint::Length(approval_bar_height), // approval bar
-                                 ratatui::layout::Constraint::Length(0), // input (hidden when approval bar visible)
-                                 ratatui::layout::Constraint::Length(0), // dropdown (hidden when approval bar visible)
-                                 ratatui::layout::Constraint::Length(hint_height), // hint
-                             ])
-                             .split(term_rect);
-                         let message_area_width = outer_chunks[1].width.saturating_sub(2) as usize;
-                         let message_area_height = outer_chunks[1].height as usize;
-
-                       crate::services::update::update(&mut state, InputEvent::ShowConfirmationDialog(tool_call.clone()), message_area_height, message_area_width, &internal_tx, &output_tx, cancel_tx.clone(), &shell_event_tx, term_size);
-                       state.poll_file_search_results();
-                       terminal.draw(|f| view(f, &mut state))?;
-                       continue;
-                   }
-                   if let InputEvent::ToolResult(ref tool_call_result) = event {
-                       clear_streaming_tool_results(&mut state);
-
-                       // Clear cancel_requested now that the final result has arrived
-                       state.tool_call_state.cancel_requested = false;
-
-                       // For run_command, also remove any message that matches the tool call ID
-                       // (handles case where streaming message uses tool_call_id directly)
-                       // The tool call ID is a String, but message IDs are Uuid
-                       if let Ok(tool_call_uuid) = uuid::Uuid::parse_str(&tool_call_result.call.id) {
-                           state.messages_scrolling_state.messages.retain(|m| m.id != tool_call_uuid);
-                       }
-
-                       state.session_tool_calls_state.session_tool_calls_queue.insert(tool_call_result.call.id.clone(), ToolCallStatus::Executed);
-                       update_session_tool_calls_queue(&mut state, tool_call_result);
-                       let tool_name = strip_tool_name(&tool_call_result.call.function.name);
-
-                       let is_fg_cmd = matches!(tool_name, "run_command" | "run_remote_command");
-                       if tool_call_result.status == ToolCallResultStatus::Cancelled && is_fg_cmd {
-                           state.tool_call_state.latest_tool_call = Some(tool_call_result.call.clone());
-                       }
-                       // Determine the state for command tools
-                       let is_cancelled = tool_call_result.status == ToolCallResultStatus::Cancelled;
-                       let is_error = tool_call_result.status == ToolCallResultStatus::Error;
-
-                       if (is_cancelled || is_error) && !is_fg_cmd {
-                           // For non-command tools with cancelled/error, use old renderer
-                           state.messages_scrolling_state.messages.push(Message::render_result_border_block(tool_call_result.clone()));
-                           state.messages_scrolling_state.messages.push(Message::render_full_content_message(tool_call_result.clone()));
-                       } else {
-                           match tool_name {
-                               "str_replace" | "create" => {
-                                   // TUI: Show diff result block with yellow border (is_collapsed: None)
-                                   state.messages_scrolling_state.messages.push(Message::render_result_border_block(tool_call_result.clone()));
-                                   // Full screen popup: Show diff-only view without border (is_collapsed: Some(true))
-                                   // Use render_full_content_message which stores the full ToolCallResult including the result
-                                   // (needed for extracting line numbers from the diff output)
-                                   state.messages_scrolling_state.messages.push(Message::render_full_content_message(tool_call_result.clone()));
-                               }
-                               "run_command_task" | "run_remote_command_task" => {
-                                   // TUI: bordered result block (is_collapsed: None)
-                                   state.messages_scrolling_state.messages.push(Message::render_result_border_block(tool_call_result.clone()));
-                                   // Full screen popup: full content without border (is_collapsed: Some(true))
-                                   state.messages_scrolling_state.messages.push(Message::render_full_content_message(tool_call_result.clone()));
-                               }
-                                "run_command" | "run_remote_command" => {
-                                    // Use unified run command block with appropriate state
-                                    let command = crate::services::handlers::shell::extract_command_from_tool_call(&tool_call_result.call)
-                                        .unwrap_or_else(|_| "command".to_string());
-                                    let run_state = if is_error {
-                                        crate::services::bash_block::RunCommandState::Error
-                                    } else if is_cancelled {
-                                        // Cancelled could be user rejection or actual cancellation
-                                        // Use Cancelled for now (user pressed ESC during execution)
-                                        crate::services::bash_block::RunCommandState::Cancelled
-                                    } else {
-                                        crate::services::bash_block::RunCommandState::Completed
-                                    };
-
-                                    let run_cmd_msg = Message::render_run_command_block(
-                                        command,
-                                        Some(tool_call_result.result.clone()),
-                                        run_state,
-                                        None,
-                                    );
-                                    let popup_msg = Message::render_full_content_message(tool_call_result.clone());
-
-                                    // If shell is visible/running, insert cancelled block BEFORE the shell message
-                                    // so the order is: cancelled command -> shell box
-                                    if is_cancelled && state.shell_popup_state.is_visible {
-                                        if let Some(shell_msg_id) = state.shell_session_state.interactive_shell_message_id {
-                                            // Find the position of the shell message
-                                            if let Some(pos) = state.messages_scrolling_state.messages.iter().position(|m| m.id == shell_msg_id) {
-                                                // Insert cancelled block and popup before shell message
-                                                state.messages_scrolling_state.messages.insert(pos, popup_msg);
-                                                state.messages_scrolling_state.messages.insert(pos, run_cmd_msg);
-                                            } else {
-                                                // Shell message not found, just push normally
-                                                state.messages_scrolling_state.messages.push(run_cmd_msg);
-                                                state.messages_scrolling_state.messages.push(popup_msg);
-                                            }
-                                        } else {
-                                            // No shell message ID, just push normally
-                                            state.messages_scrolling_state.messages.push(run_cmd_msg);
-                                            state.messages_scrolling_state.messages.push(popup_msg);
-                                        }
-                                    } else {
-                                        // Normal case: just push to the end
-                                        state.messages_scrolling_state.messages.push(run_cmd_msg);
-                                        state.messages_scrolling_state.messages.push(popup_msg);
-                                    }
-                                }
-                                "read" | "view" | "read_file" => {
-                                    // View file tool - show compact view with file icon and line count
-                                    // Extract file path and optional grep/glob from tool call arguments
-                                    let (file_path, grep, glob) = crate::services::handlers::tool::extract_view_params_from_tool_call(&tool_call_result.call);
-                                    let file_path = file_path.unwrap_or_else(|| "file".to_string());
-                                    let total_lines = tool_call_result.result.lines().count();
-                                    state.messages_scrolling_state.messages.push(Message::render_view_file_block(file_path.clone(), total_lines, grep.clone(), glob.clone()));
-                                    // Full screen popup: same compact view without borders
-                                    state.messages_scrolling_state.messages.push(Message::render_view_file_block_popup(file_path, total_lines, grep, glob));
-                                }
-                               _ => {
-                                   // TUI: collapsed command message - last 3 lines (is_collapsed: None)
-                                   state.messages_scrolling_state.messages.push(Message::render_collapsed_command_message(tool_call_result.clone()));
-                                   // Full screen popup: full content (is_collapsed: Some(true))
-                                   state.messages_scrolling_state.messages.push(Message::render_full_content_message(tool_call_result.clone()));
-                               }
-                           }
-
-                           // Handle file changes for the Changeset (only for non-cancelled/error)
-                           if !is_cancelled && !is_error {
-                               handle_tool_result(&mut state, tool_call_result.clone());
-                           }
-                       }
-                       // Invalidate cache and scroll to bottom to show the result
-                       crate::services::message::invalidate_message_lines_cache(&mut state);
-                       state.messages_scrolling_state.stay_at_bottom = true;
-
-                       // Refresh board tasks after tool execution (agent may have updated tasks)
-                       // Always trigger refresh - the handler will extract agent_id from messages if needed
-                       let _ = internal_tx.try_send(InputEvent::RefreshBoardTasks);
-                   }
-                   if let InputEvent::ToggleMouseCapture = event {
-                       #[cfg(unix)]
-                       toggle_mouse_capture_with_redraw(&mut terminal, &mut state)?;
-                       continue;
-                   }
-
-                    if let InputEvent::Quit = event {
-                        if state.configuration_state.auto_approve_manager.has_unsaved_changes()
-                            && !state.approval_settings_persistence_state.is_visible
-                        {
-                            // Show persistence modal instead of quitting
-                            state.approval_settings_persistence_state.is_visible = true;
-                            state.approval_settings_persistence_state.selected = 0;
-                            state.approval_settings_persistence_state.trigger = ApprovalSettingsPersistenceTrigger::Quit;
-                        } else {
-                            should_quit = true;
-                        }
-                    } else {
-                       // Calculate main area width accounting for side panel
-                       let main_area_width = if state.side_panel_state.is_shown {
-                           term_size.width.saturating_sub(32 + 1) // side panel width + margin
-                       } else {
-                           term_size.width
-                       };
-                       let term_rect = ratatui::layout::Rect::new(0, 0, main_area_width, term_size.height);
-                       let input_height = 3;
-                       let margin_height = 2;
-                       let dropdown_showing = state.input_state.show_helper_dropdown
-                           && ((!state.input_state.filtered_helpers.is_empty() && state.input().starts_with('/'))
-                               || !state.input_state.filtered_files.is_empty());
-                        let dropdown_height = if dropdown_showing {
-                            state.input_state.filtered_helpers.len() as u16
-                        } else {
-                            0
-                        };
-                         let hint_height = if dropdown_showing { 0 } else { margin_height };
-                        let banner_h = crate::services::banner::banner_height(&state);
-                        let outer_chunks = ratatui::layout::Layout::default()
-                            .direction(ratatui::layout::Direction::Vertical)
-                            .constraints([
-                                ratatui::layout::Constraint::Length(banner_h), // banner (0 if no message)
-                                ratatui::layout::Constraint::Min(1), // messages
-                                ratatui::layout::Constraint::Length(1), // loading indicator
-                                ratatui::layout::Constraint::Length(input_height as u16),
-                                ratatui::layout::Constraint::Length(dropdown_height),
-                                ratatui::layout::Constraint::Length(hint_height),
-                            ])
-                            .split(term_rect);
-                        // Subtract 2 for padding (matches view.rs padded_message_area)
-                        let message_area_width = outer_chunks[1].width.saturating_sub(2) as usize;
-                        let message_area_height = outer_chunks[1].height as usize;
-                         crate::services::update::update(&mut state, event, message_area_height, message_area_width, &internal_tx, &output_tx, cancel_tx.clone(), &shell_event_tx, term_size);
-                         state.poll_file_search_results();
-                        // Handle pending editor open request
-                       if let Some(file_path) = state.side_panel_state.pending_editor_open.take() {
-                           // Disable mouse capture before opening editor to prevent weird input
-                           let was_mouse_capture_enabled = state.terminal_ui_state.mouse_capture_enabled;
-                           if was_mouse_capture_enabled {
-                               let _ = execute!(std::io::stdout(), DisableMouseCapture);
-                               state.terminal_ui_state.mouse_capture_enabled = false;
-                           }
-
-                           match crate::services::editor::open_in_editor(
-                               &mut terminal,
-                               &state.side_panel_state.editor_command,
-                               &file_path,
-                               None,
-                           ) {
-                               Ok(()) => {
-                                   // Editor closed successfully
-                               }
-                               Err(error) => {
-                                   // Show error message
-                                   state.messages_scrolling_state.messages.push(Message::info(
-                                       format!("Failed to open editor: {}", error),
-                                        Some(ratatui::style::Style::default().fg(ThemeColors::red())),
-                                    ));
-                                }
-                            }
-
-                            // Restore mouse capture if it was enabled before
-                            if was_mouse_capture_enabled {
-                                let _ = execute!(std::io::stdout(), EnableMouseCapture);
-                                state.terminal_ui_state.mouse_capture_enabled = true;
-                            }
-                        }
-                   }
-               }
-               _ = spinner_interval.tick() => {
-                   // Also check double Ctrl+C timer expiry on every tick
-                   if state.quit_intent_state.ctrl_c_pressed_once
-                       && let Some(timer) = state.quit_intent_state.ctrl_c_timer
-                           && std::time::Instant::now() > timer {
-                               state.quit_intent_state.ctrl_c_pressed_once = false;
-                               state.quit_intent_state.ctrl_c_timer = None;
-                           }
-                   state.loading_state.spinner_frame = state.loading_state.spinner_frame.wrapping_add(1);
-                   // Update shell cursor blink (toggles every ~5 ticks = 500ms)
-                   crate::services::shell_popup::update_cursor_blink(&mut state);
-                   state.poll_file_search_results();
-
-                   // Poll plan file and handle status transitions
-                   if let Some((old_status, new_status)) = state.poll_plan_file() {
-                       use crate::services::plan::PlanStatus;
-                       match new_status {
-                           PlanStatus::PendingReview => {
-                               // Auto-open plan review when agent sets status to pending_review
-                               if !state.plan_mode_state.review_auto_opened {
-                                   state.plan_mode_state.review_auto_opened = true;
-                                   crate::services::plan_review::open_plan_review(&mut state);
-                                   // Show system message
-                                   crate::services::helper_block::push_styled_message(
-                                       &mut state,
-                                       " Plan ready for review. Opening reviewer... (ctrl+p to toggle)",
-                                        ThemeColors::cyan(),
-                                        ">> ",
-                                        ThemeColors::cyan(),
-                                   );
-                               }
-                           }
-                           PlanStatus::Approved => {
-                               // External approval (e.g. agent set it) — no extra state to update
-                               let _ = old_status; // suppress unused warning
-                           }
-                           PlanStatus::Drafting => {
-                               // New revision — reset auto-open flag so next pending_review triggers it
-                               state.plan_mode_state.review_auto_opened = false;
-                           }
-                       }
-                   }
-
-                   // Auto-scroll during drag selection when mouse is at viewport edges
-                   crate::services::handlers::tick_selection_auto_scroll(&mut state);
-
-                   terminal.draw(|f| view(f, &mut state))?;
-               }
-           }
         if should_quit {
             break;
         }
-        // Check if terminal clear was requested (e.g., after shell popup closes)
         if state.shell_popup_state.needs_terminal_clear {
             state.shell_popup_state.needs_terminal_clear = false;
             emergency_clear_and_redraw(&mut terminal, &mut state)?;
@@ -691,6 +292,7 @@ pub async fn run_tui(
         terminal.draw(|f| view(f, &mut state))?;
     }
 
+    input_should_stop.store(true, Ordering::Relaxed);
     let _ = shutdown_tx.send(());
     crossterm::terminal::disable_raw_mode()?;
     execute!(
@@ -699,6 +301,652 @@ pub async fn run_tui(
         DisableBracketedPaste,
         DisableMouseCapture
     )?;
+    Ok(())
+}
+
+#[derive(Clone, Copy)]
+struct MessageAreaDimensions {
+    width: usize,
+    height: usize,
+    term_size: ratatui::layout::Size,
+}
+
+const MAX_INTERNAL_INPUT_DRAIN_PER_FRAME: usize = 64;
+
+fn expire_quit_intent(state: &mut AppState) {
+    if state.quit_intent_state.ctrl_c_pressed_once
+        && let Some(timer) = state.quit_intent_state.ctrl_c_timer
+        && std::time::Instant::now() > timer
+    {
+        state.quit_intent_state.ctrl_c_pressed_once = false;
+        state.quit_intent_state.ctrl_c_timer = None;
+    }
+}
+
+fn is_shell_event(event: &InputEvent) -> bool {
+    matches!(
+        event,
+        InputEvent::ShellOutput(_)
+            | InputEvent::ShellError(_)
+            | InputEvent::ShellWaitingForInput
+            | InputEvent::ShellCompleted(_)
+            | InputEvent::ShellClear
+    )
+}
+
+fn handle_quit_event(state: &mut AppState) -> bool {
+    if state
+        .configuration_state
+        .auto_approve_manager
+        .has_unsaved_changes()
+        && !state.approval_settings_persistence_state.is_visible
+    {
+        state.approval_settings_persistence_state.is_visible = true;
+        state.approval_settings_persistence_state.selected = 0;
+        state.approval_settings_persistence_state.trigger =
+            ApprovalSettingsPersistenceTrigger::Quit;
+        false
+    } else {
+        true
+    }
+}
+
+fn compute_main_term_rect(
+    state: &AppState,
+    term_size: ratatui::layout::Size,
+) -> ratatui::layout::Rect {
+    let main_area_width = if state.side_panel_state.is_shown {
+        term_size.width.saturating_sub(32 + 1)
+    } else {
+        term_size.width
+    };
+    ratatui::layout::Rect::new(0, 0, main_area_width, term_size.height)
+}
+
+fn compute_message_area(
+    state: &AppState,
+    term_size: ratatui::layout::Size,
+) -> MessageAreaDimensions {
+    let term_rect = compute_main_term_rect(state, term_size);
+    let input_height: u16 = 3;
+    let margin_height: u16 = 2;
+    let dropdown_showing = state.input_state.show_helper_dropdown
+        && ((!state.input_state.filtered_helpers.is_empty() && state.input().starts_with('/'))
+            || !state.input_state.filtered_files.is_empty());
+    let dropdown_height = if dropdown_showing {
+        state.input_state.filtered_helpers.len() as u16
+    } else {
+        0
+    };
+    let hint_height = if dropdown_showing { 0 } else { margin_height };
+    let banner_h = crate::services::banner::banner_height(state);
+    let outer_chunks = ratatui::layout::Layout::default()
+        .direction(ratatui::layout::Direction::Vertical)
+        .constraints([
+            ratatui::layout::Constraint::Length(banner_h),
+            ratatui::layout::Constraint::Min(1),
+            ratatui::layout::Constraint::Length(1),
+            ratatui::layout::Constraint::Length(input_height),
+            ratatui::layout::Constraint::Length(dropdown_height),
+            ratatui::layout::Constraint::Length(hint_height),
+        ])
+        .split(term_rect);
+
+    MessageAreaDimensions {
+        width: outer_chunks[1].width.saturating_sub(2) as usize,
+        height: outer_chunks[1].height as usize,
+        term_size,
+    }
+}
+
+fn compute_tool_confirmation_message_area(
+    state: &AppState,
+    term_size: ratatui::layout::Size,
+) -> MessageAreaDimensions {
+    let term_rect = compute_main_term_rect(state, term_size);
+    let margin_height: u16 = 2;
+    let dropdown_showing = state.input_state.show_helper_dropdown
+        && ((!state.input_state.filtered_helpers.is_empty() && state.input().starts_with('/'))
+            || !state.input_state.filtered_files.is_empty());
+    let hint_height = if dropdown_showing { 0 } else { margin_height };
+    let approval_bar_height = state
+        .dialog_approval_state
+        .approval_bar
+        .calculate_height(term_rect.width)
+        .max(7);
+    let banner_h = crate::services::banner::banner_height(state);
+    let outer_chunks = ratatui::layout::Layout::default()
+        .direction(ratatui::layout::Direction::Vertical)
+        .constraints([
+            ratatui::layout::Constraint::Length(banner_h),
+            ratatui::layout::Constraint::Min(1),
+            ratatui::layout::Constraint::Length(1),
+            ratatui::layout::Constraint::Length(0),
+            ratatui::layout::Constraint::Length(approval_bar_height),
+            ratatui::layout::Constraint::Length(0),
+            ratatui::layout::Constraint::Length(0),
+            ratatui::layout::Constraint::Length(hint_height),
+        ])
+        .split(term_rect);
+
+    MessageAreaDimensions {
+        width: outer_chunks[1].width.saturating_sub(2) as usize,
+        height: outer_chunks[1].height as usize,
+        term_size,
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn dispatch_update_event(
+    state: &mut AppState,
+    event: InputEvent,
+    area: MessageAreaDimensions,
+    internal_tx: &Sender<InputEvent>,
+    output_tx: &Sender<OutputEvent>,
+    cancel_tx: Option<tokio::sync::broadcast::Sender<()>>,
+    shell_event_tx: &Sender<InputEvent>,
+) {
+    crate::services::update::update(
+        state,
+        event,
+        area.height,
+        area.width,
+        internal_tx,
+        output_tx,
+        cancel_tx,
+        shell_event_tx,
+        area.term_size,
+    );
+}
+
+#[allow(clippy::too_many_arguments)]
+fn dispatch_internal_input_event<B: ratatui::backend::Backend>(
+    terminal: &mut Terminal<B>,
+    state: &mut AppState,
+    event: InputEvent,
+    internal_rx: &mut Receiver<InputEvent>,
+    internal_tx: &Sender<InputEvent>,
+    output_tx: &Sender<OutputEvent>,
+    cancel_tx: Option<tokio::sync::broadcast::Sender<()>>,
+    shell_event_tx: &Sender<InputEvent>,
+    input_paused: &AtomicBool,
+) -> io::Result<bool> {
+    match event {
+        InputEvent::ToggleMouseCapture => {
+            #[cfg(unix)]
+            toggle_mouse_capture_with_redraw(terminal, state)?;
+            return Ok(false);
+        }
+        InputEvent::EmergencyClearTerminal => {
+            emergency_clear_and_redraw(terminal, state)?;
+            return Ok(false);
+        }
+        InputEvent::Quit => return Ok(handle_quit_event(state)),
+        other => {
+            let term_size = terminal.size()?;
+            let area = compute_message_area(state, term_size);
+            if matches!(&other, InputEvent::ScrollUp | InputEvent::ScrollDown) {
+                if let Some(deferred_event) = dispatch_scroll_batch(
+                    state,
+                    other,
+                    area,
+                    internal_rx,
+                    internal_tx,
+                    output_tx,
+                    cancel_tx.clone(),
+                    shell_event_tx,
+                ) && dispatch_internal_input_event(
+                    terminal,
+                    state,
+                    deferred_event,
+                    internal_rx,
+                    internal_tx,
+                    output_tx,
+                    cancel_tx,
+                    shell_event_tx,
+                    input_paused,
+                )? {
+                    return Ok(true);
+                }
+            } else {
+                dispatch_update_event(
+                    state,
+                    other,
+                    area,
+                    internal_tx,
+                    output_tx,
+                    cancel_tx,
+                    shell_event_tx,
+                );
+            }
+        }
+    }
+
+    state.poll_file_search_results();
+    handle_pending_editor_open(terminal, state, input_paused)?;
+    state.update_session_empty_status();
+    Ok(false)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn dispatch_inbound_internal_input_event<B: ratatui::backend::Backend>(
+    terminal: &mut Terminal<B>,
+    state: &mut AppState,
+    event: Option<InputEvent>,
+    internal_rx: &mut Receiver<InputEvent>,
+    internal_tx: &Sender<InputEvent>,
+    output_tx: &Sender<OutputEvent>,
+    cancel_tx: Option<tokio::sync::broadcast::Sender<()>>,
+    shell_event_tx: &Sender<InputEvent>,
+    input_paused: &AtomicBool,
+) -> io::Result<bool> {
+    let Some(event) = event else {
+        return Ok(true);
+    };
+
+    dispatch_internal_input_event(
+        terminal,
+        state,
+        event,
+        internal_rx,
+        internal_tx,
+        output_tx,
+        cancel_tx,
+        shell_event_tx,
+        input_paused,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn dispatch_inbound_backend_event<B: ratatui::backend::Backend>(
+    terminal: &mut Terminal<B>,
+    state: &mut AppState,
+    event: Option<InputEvent>,
+    internal_tx: &Sender<InputEvent>,
+    output_tx: &Sender<OutputEvent>,
+    cancel_tx: Option<tokio::sync::broadcast::Sender<()>>,
+    shell_event_tx: &Sender<InputEvent>,
+    input_paused: &AtomicBool,
+) -> io::Result<bool> {
+    let Some(event) = event else {
+        return Ok(true);
+    };
+
+    if is_shell_event(&event) {
+        let _ = shell_event_tx.send(event).await;
+        return Ok(false);
+    }
+
+    dispatch_backend_event(
+        terminal,
+        state,
+        event,
+        internal_tx,
+        output_tx,
+        cancel_tx,
+        shell_event_tx,
+        input_paused,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn dispatch_scroll_batch(
+    state: &mut AppState,
+    initial_event: InputEvent,
+    area: MessageAreaDimensions,
+    internal_rx: &mut Receiver<InputEvent>,
+    internal_tx: &Sender<InputEvent>,
+    output_tx: &Sender<OutputEvent>,
+    cancel_tx: Option<tokio::sync::broadcast::Sender<()>>,
+    shell_event_tx: &Sender<InputEvent>,
+) -> Option<InputEvent> {
+    let mut pending_scroll_up: i32 = 0;
+    let mut pending_scroll_down: i32 = 0;
+
+    match &initial_event {
+        InputEvent::ScrollUp => pending_scroll_up += 1,
+        InputEvent::ScrollDown => pending_scroll_down += 1,
+        _ => return Some(initial_event),
+    }
+
+    let mut deferred_event = None;
+    for _ in 0..MAX_INTERNAL_INPUT_DRAIN_PER_FRAME.saturating_sub(1) {
+        match internal_rx.try_recv() {
+            Ok(InputEvent::ScrollUp) => pending_scroll_up += 1,
+            Ok(InputEvent::ScrollDown) => pending_scroll_down += 1,
+            Ok(other) => {
+                deferred_event = Some(other);
+                break;
+            }
+            Err(_) => break,
+        }
+    }
+
+    let net_scroll = pending_scroll_down - pending_scroll_up;
+    for _ in 0..net_scroll.unsigned_abs() {
+        let event = if net_scroll > 0 {
+            InputEvent::ScrollDown
+        } else {
+            InputEvent::ScrollUp
+        };
+        dispatch_update_event(
+            state,
+            event,
+            area,
+            internal_tx,
+            output_tx,
+            cancel_tx.clone(),
+            shell_event_tx,
+        );
+    }
+
+    deferred_event
+}
+
+#[allow(clippy::too_many_arguments)]
+fn dispatch_backend_event<B: ratatui::backend::Backend>(
+    terminal: &mut Terminal<B>,
+    state: &mut AppState,
+    event: InputEvent,
+    internal_tx: &Sender<InputEvent>,
+    output_tx: &Sender<OutputEvent>,
+    cancel_tx: Option<tokio::sync::broadcast::Sender<()>>,
+    shell_event_tx: &Sender<InputEvent>,
+    input_paused: &AtomicBool,
+) -> io::Result<bool> {
+    if matches!(&event, InputEvent::EmergencyClearTerminal) {
+        emergency_clear_and_redraw(terminal, state)?;
+        return Ok(false);
+    }
+
+    if let InputEvent::RunToolCall(tool_call) = &event {
+        let term_size = terminal.size()?;
+        let area = compute_tool_confirmation_message_area(state, term_size);
+        dispatch_update_event(
+            state,
+            InputEvent::ShowConfirmationDialog(tool_call.clone()),
+            area,
+            internal_tx,
+            output_tx,
+            cancel_tx,
+            shell_event_tx,
+        );
+        state.poll_file_search_results();
+        terminal.draw(|f| view(f, state))?;
+        return Ok(false);
+    }
+
+    if let InputEvent::ToolResult(tool_call_result) = &event {
+        handle_backend_tool_result(state, tool_call_result, internal_tx);
+    }
+
+    if matches!(&event, InputEvent::ToggleMouseCapture) {
+        #[cfg(unix)]
+        toggle_mouse_capture_with_redraw(terminal, state)?;
+        return Ok(false);
+    }
+
+    if matches!(&event, InputEvent::Quit) {
+        return Ok(handle_quit_event(state));
+    }
+
+    let term_size = terminal.size()?;
+    let area = compute_message_area(state, term_size);
+    dispatch_update_event(
+        state,
+        event,
+        area,
+        internal_tx,
+        output_tx,
+        cancel_tx,
+        shell_event_tx,
+    );
+    state.poll_file_search_results();
+    handle_pending_editor_open(terminal, state, input_paused)?;
+    state.update_session_empty_status();
+    Ok(false)
+}
+
+fn handle_backend_tool_result(
+    state: &mut AppState,
+    tool_call_result: &vac_foundation::models::integrations::openai::ToolCallResult,
+    internal_tx: &Sender<InputEvent>,
+) {
+    clear_streaming_tool_results(state);
+
+    state.tool_call_state.cancel_requested = false;
+
+    if let Ok(tool_call_uuid) = uuid::Uuid::parse_str(&tool_call_result.call.id) {
+        state
+            .messages_scrolling_state
+            .messages
+            .retain(|m| m.id != tool_call_uuid);
+    }
+
+    state
+        .session_tool_calls_state
+        .session_tool_calls_queue
+        .insert(tool_call_result.call.id.clone(), ToolCallStatus::Executed);
+    update_session_tool_calls_queue(state, tool_call_result);
+    let tool_name = strip_tool_name(&tool_call_result.call.function.name);
+
+    let is_fg_cmd = matches!(tool_name, "run_command" | "run_remote_command");
+    if tool_call_result.status == ToolCallResultStatus::Cancelled && is_fg_cmd {
+        state.tool_call_state.latest_tool_call = Some(tool_call_result.call.clone());
+    }
+
+    let is_cancelled = tool_call_result.status == ToolCallResultStatus::Cancelled;
+    let is_error = tool_call_result.status == ToolCallResultStatus::Error;
+
+    if (is_cancelled || is_error) && !is_fg_cmd {
+        state
+            .messages_scrolling_state
+            .messages
+            .push(Message::render_result_border_block(
+                tool_call_result.clone(),
+            ));
+        state
+            .messages_scrolling_state
+            .messages
+            .push(Message::render_full_content_message(
+                tool_call_result.clone(),
+            ));
+    } else {
+        match tool_name {
+            "str_replace" | "create" => {
+                state
+                    .messages_scrolling_state
+                    .messages
+                    .push(Message::render_result_border_block(
+                        tool_call_result.clone(),
+                    ));
+                state
+                    .messages_scrolling_state
+                    .messages
+                    .push(Message::render_full_content_message(
+                        tool_call_result.clone(),
+                    ));
+            }
+            "run_command_task" | "run_remote_command_task" => {
+                state
+                    .messages_scrolling_state
+                    .messages
+                    .push(Message::render_result_border_block(
+                        tool_call_result.clone(),
+                    ));
+                state
+                    .messages_scrolling_state
+                    .messages
+                    .push(Message::render_full_content_message(
+                        tool_call_result.clone(),
+                    ));
+            }
+            "run_command" | "run_remote_command" => {
+                let command = crate::services::handlers::shell::extract_command_from_tool_call(
+                    &tool_call_result.call,
+                )
+                .unwrap_or_else(|_| "command".to_string());
+                let run_state = if is_error {
+                    crate::services::bash_block::RunCommandState::Error
+                } else if is_cancelled {
+                    crate::services::bash_block::RunCommandState::Cancelled
+                } else {
+                    crate::services::bash_block::RunCommandState::Completed
+                };
+
+                let run_cmd_msg = Message::render_run_command_block(
+                    command,
+                    Some(tool_call_result.result.clone()),
+                    run_state,
+                    None,
+                );
+                let popup_msg = Message::render_full_content_message(tool_call_result.clone());
+
+                if is_cancelled && state.shell_popup_state.is_visible {
+                    if let Some(shell_msg_id) =
+                        state.shell_session_state.interactive_shell_message_id
+                    {
+                        if let Some(pos) = state
+                            .messages_scrolling_state
+                            .messages
+                            .iter()
+                            .position(|m| m.id == shell_msg_id)
+                        {
+                            state
+                                .messages_scrolling_state
+                                .messages
+                                .insert(pos, popup_msg);
+                            state
+                                .messages_scrolling_state
+                                .messages
+                                .insert(pos, run_cmd_msg);
+                        } else {
+                            state.messages_scrolling_state.messages.push(run_cmd_msg);
+                            state.messages_scrolling_state.messages.push(popup_msg);
+                        }
+                    } else {
+                        state.messages_scrolling_state.messages.push(run_cmd_msg);
+                        state.messages_scrolling_state.messages.push(popup_msg);
+                    }
+                } else {
+                    state.messages_scrolling_state.messages.push(run_cmd_msg);
+                    state.messages_scrolling_state.messages.push(popup_msg);
+                }
+            }
+            "read" | "view" | "read_file" => {
+                let (file_path, grep, glob) =
+                    crate::services::handlers::tool::extract_view_params_from_tool_call(
+                        &tool_call_result.call,
+                    );
+                let file_path = file_path.unwrap_or_else(|| "file".to_string());
+                let total_lines = tool_call_result.result.lines().count();
+                state
+                    .messages_scrolling_state
+                    .messages
+                    .push(Message::render_view_file_block(
+                        file_path.clone(),
+                        total_lines,
+                        grep.clone(),
+                        glob.clone(),
+                    ));
+                state.messages_scrolling_state.messages.push(
+                    Message::render_view_file_block_popup(file_path, total_lines, grep, glob),
+                );
+            }
+            _ => {
+                state.messages_scrolling_state.messages.push(
+                    Message::render_collapsed_command_message(tool_call_result.clone()),
+                );
+                state
+                    .messages_scrolling_state
+                    .messages
+                    .push(Message::render_full_content_message(
+                        tool_call_result.clone(),
+                    ));
+            }
+        }
+
+        if !is_cancelled && !is_error {
+            handle_tool_result(state, tool_call_result.clone());
+        }
+    }
+
+    crate::services::message::invalidate_message_lines_cache(state);
+    state.messages_scrolling_state.stay_at_bottom = true;
+
+    let _ = internal_tx.try_send(InputEvent::RefreshBoardTasks);
+}
+
+fn handle_spinner_tick(state: &mut AppState) {
+    expire_quit_intent(state);
+    state.loading_state.spinner_frame = state.loading_state.spinner_frame.wrapping_add(1);
+    crate::services::shell_popup::update_cursor_blink(state);
+    state.poll_file_search_results();
+
+    if let Some((old_status, new_status)) = state.poll_plan_file() {
+        use crate::services::plan::PlanStatus;
+        match new_status {
+            PlanStatus::PendingReview => {
+                if !state.plan_mode_state.review_auto_opened {
+                    state.plan_mode_state.review_auto_opened = true;
+                    crate::services::plan_review::open_plan_review(state);
+                    crate::services::helper_block::push_styled_message(
+                        state,
+                        " Plan ready for review. Opening reviewer... (ctrl+p to toggle)",
+                        ThemeColors::cyan(),
+                        ">> ",
+                        ThemeColors::cyan(),
+                    );
+                }
+            }
+            PlanStatus::Approved => {
+                let _ = old_status;
+            }
+            PlanStatus::Drafting => {
+                state.plan_mode_state.review_auto_opened = false;
+            }
+        }
+    }
+
+    crate::services::handlers::tick_selection_auto_scroll(state);
+}
+
+fn handle_pending_editor_open<B: ratatui::backend::Backend>(
+    terminal: &mut Terminal<B>,
+    state: &mut AppState,
+    input_paused: &AtomicBool,
+) -> io::Result<()> {
+    let Some(file_path) = state.side_panel_state.pending_editor_open.take() else {
+        return Ok(());
+    };
+
+    input_paused.store(true, Ordering::Relaxed);
+    std::thread::sleep(Duration::from_millis(10));
+
+    let was_mouse_capture_enabled = state.terminal_ui_state.mouse_capture_enabled;
+    if was_mouse_capture_enabled {
+        let _ = execute!(std::io::stdout(), DisableMouseCapture);
+        state.terminal_ui_state.mouse_capture_enabled = false;
+    }
+
+    if let Err(error) = crate::services::editor::open_in_editor(
+        terminal,
+        &state.side_panel_state.editor_command,
+        &file_path,
+        None,
+    ) {
+        state.messages_scrolling_state.messages.push(Message::info(
+            format!("Failed to open editor: {}", error),
+            Some(ratatui::style::Style::default().fg(ThemeColors::red())),
+        ));
+    }
+
+    if was_mouse_capture_enabled {
+        let _ = execute!(std::io::stdout(), EnableMouseCapture);
+        state.terminal_ui_state.mouse_capture_enabled = true;
+    }
+
+    input_paused.store(false, Ordering::Relaxed);
     Ok(())
 }
 

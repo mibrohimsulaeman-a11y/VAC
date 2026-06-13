@@ -308,7 +308,7 @@ impl AppState {
             return None;
         }
 
-        let session_dir = std::path::Path::new(".vac/registry/sessions/current");
+        let session_dir = crate::services::plan::current_plan_session_dir();
         let path = plan::plan_file_path(session_dir);
 
         let Ok(content) = std::fs::read_to_string(&path) else {

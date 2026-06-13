@@ -193,3 +193,27 @@ pub fn map_crossterm_event_to_input_event(event: Event) -> Option<InputEvent> {
         _ => None,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crossterm::event::{KeyEvent, KeyModifiers};
+
+    #[test]
+    fn backtab_maps_to_plan_review_toggle() {
+        let event = Event::Key(KeyEvent::new(KeyCode::BackTab, KeyModifiers::SHIFT));
+        assert!(matches!(
+            map_crossterm_event_to_input_event(event),
+            Some(InputEvent::TogglePlanReview)
+        ));
+    }
+
+    #[test]
+    fn ctrl_p_maps_to_same_plan_review_toggle_path() {
+        let event = Event::Key(KeyEvent::new(KeyCode::Char('p'), KeyModifiers::CONTROL));
+        assert!(matches!(
+            map_crossterm_event_to_input_event(event),
+            Some(InputEvent::TogglePlanReview)
+        ));
+    }
+}

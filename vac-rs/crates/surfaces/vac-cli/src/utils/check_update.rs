@@ -126,6 +126,10 @@ fn format_changelog(body: &str) -> String {
 }
 
 pub async fn check_update(current_version: &str) -> Result<(), Box<dyn Error>> {
+    if std::env::var("VAC_SKIP_AUTO_UPDATE").is_ok() {
+        return Ok(());
+    }
+
     let release = get_latest_release().await?;
     if is_newer_version(current_version, &release.tag_name) {
         let blue = CliColors::blue();
@@ -193,6 +197,10 @@ pub async fn get_latest_release() -> Result<LatestRelease, Box<dyn Error>> {
 }
 
 pub async fn get_latest_cli_version() -> Result<String, Box<dyn Error>> {
+    if std::env::var("VAC_SKIP_AUTO_UPDATE").is_ok() {
+        return Err("auto-update check skipped".into());
+    }
+
     let release = get_latest_release().await?;
     Ok(release.tag_name)
 }

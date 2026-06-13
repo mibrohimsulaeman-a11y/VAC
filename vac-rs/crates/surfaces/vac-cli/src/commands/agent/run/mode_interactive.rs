@@ -1631,9 +1631,34 @@ pub async fn run_interactive(
             ))
         });
 
-        // Wait for all tasks to finish
-        let (client_res, _, _) = tokio::try_join!(client_handle, tui_handle, mcp_progress_handle)
-            .map_err(|e| e.to_string())?;
+        // Wait for interactive shutdown. A clean user quit completes the TUI
+        // first; any remaining backend/client relay tasks are no longer useful
+        // and may otherwise keep the process alive while waiting on channels.
+        let mut client_handle = client_handle;
+        let mut tui_handle = tui_handle;
+        let mcp_progress_handle = mcp_progress_handle;
+        let client_res = tokio::select! {
+            tui_join = &mut tui_handle => {
+                tui_join.map_err(|e| e.to_string())??;
+                client_handle.abort();
+                mcp_progress_handle.abort();
+                return Ok(());
+            }
+            client_join = &mut client_handle => {
+                let client_res = match client_join.map_err(|e| e.to_string())? {
+                    Ok(client_res) => client_res,
+                    Err(error) if error == "channel closed" => {
+                        tui_handle.await.map_err(|e| e.to_string())??;
+                        mcp_progress_handle.abort();
+                        return Ok(());
+                    }
+                    Err(error) => return Err(error),
+                };
+                tui_handle.await.map_err(|e| e.to_string())??;
+                mcp_progress_handle.await.map_err(|e| e.to_string())?;
+                client_res
+            }
+        };
 
         let (
             final_messages,
@@ -1641,7 +1666,7 @@ pub async fn run_interactive(
             profile_switch_config,
             final_usage,
             final_model_name,
-        ) = client_res?;
+        ) = client_res;
 
         // Check if profile switch was requested
         if let Some(new_config) = profile_switch_config {

@@ -331,7 +331,7 @@ pub fn update(
             }
             InputEvent::InputChanged('n') => {
                 // Start new — archive existing plan, then activate
-                let session_dir = std::path::Path::new(".vac/session");
+                let session_dir = crate::services::plan::current_plan_session_dir();
                 crate::services::plan::archive_plan_file(session_dir);
                 if let Some(prompt) = state.plan_mode_state.existing_prompt.take() {
                     let _ =

@@ -47,6 +47,13 @@ message = read("vac-rs/crates/surfaces/vac-tui/src/services/handlers/message.rs"
 popup = read("vac-rs/crates/surfaces/vac-tui/src/services/handlers/popup.rs")
 event = read("vac-rs/crates/surfaces/vac-tui/src/event.rs")
 commands = read("vac-rs/crates/surfaces/vac-tui/src/services/commands.rs")
+event_loop = read("vac-rs/crates/surfaces/vac-tui/src/event_loop.rs")
+plan = read("vac-rs/crates/surfaces/vac-tui/src/services/plan.rs")
+plan_review = read("vac-rs/crates/surfaces/vac-tui/src/services/plan_review.rs")
+app = read("vac-rs/crates/surfaces/vac-tui/src/app.rs")
+wrapping = read("vac-rs/crates/surfaces/vac-tui/src/services/wrapping.rs")
+secret_manager = read("vac-rs/crates/foundation/vac-foundation/src/secret_manager.rs")
+pty_smoke = read("scripts/pty-tui-lifecycle-smoke.py")
 
 handle_toggle = function_body(handlers, "fn handle_toggle_plan_review")
 close_overlays = function_body(handlers, "fn close_composer_locking_overlays")
@@ -57,6 +64,60 @@ render_feed = function_body(operator, "fn render_conversation_stream")
 plan_start = commands.find('"/plan" => {')
 plan_end = commands.find('"/init" => {', plan_start) if plan_start >= 0 else -1
 plan_branch = commands[plan_start:plan_end] if plan_start >= 0 and plan_end > plan_start else ""
+
+
+# Production maturity guards added after the lifecycle audit.
+require(
+    "secret_manager_no_global_keyword_fast_path",
+    "content_has_redaction_candidate" not in secret_manager
+    and "CANDIDATE_MARKERS" not in secret_manager
+    and "if !self.redact_secrets" in secret_manager
+    and "redact_secrets(content, path" in secret_manager,
+)
+require(
+    "canonical_plan_session_dir_declared",
+    "pub const PLAN_SESSION_DIR: &str = \".vac/session\"" in plan
+    and "pub fn current_plan_session_dir()" in plan,
+)
+require(
+    "plan_paths_use_canonical_session_dir",
+    ".vac/registry/sessions/current" not in commands
+    and ".vac/registry/sessions/current" not in app
+    and "current_plan_session_dir()" in commands
+    and "current_plan_session_dir()" in app
+    and "current_plan_session_dir()" in plan_review
+    and "current_plan_session_dir()" in handlers,
+)
+require(
+    "event_loop_lifecycle_dispatch_helpers",
+    all(
+        token in event_loop
+        for token in [
+            "fn compute_message_area(",
+            "fn handle_quit_event(",
+            "fn handle_pending_editor_open",
+            "fn dispatch_internal_input_event",
+            "fn dispatch_backend_event",
+            "MAX_INTERNAL_INPUT_DRAIN_PER_FRAME",
+            "prefer_backend_after_internal",
+            "if prefer_backend_after_internal",
+            "fn dispatch_inbound_backend_event",
+        ]
+    ),
+)
+require(
+    "wrapping_no_unsafe_offset_or_owned_panic",
+    "offset_from" not in wrapping
+    and "unexpected owned string" not in wrapping
+    and "locate_wrapped_range" in wrapping,
+)
+require(
+    "official_pty_smoke_gate_present",
+    "VAC TUI PTY lifecycle smoke" in pty_smoke
+    and "entered_alt_screen" in pty_smoke
+    and "shift_tab_or_plan_visible" in pty_smoke
+    and "plain_text_echo_visible" in pty_smoke,
+)
 
 # Shift+Tab must be a real source path, not only a doc/static key legend.
 require(

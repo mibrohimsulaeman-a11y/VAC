@@ -15,6 +15,10 @@ pub struct ProbeResult {
 
 /// Run all discovery probes in parallel and return combined output.
 pub async fn run_all() -> String {
+    if std::env::var("VAC_TUI_SMOKE").is_ok() || std::env::var("VAC_SKIP_DISCOVERY").is_ok() {
+        return String::new();
+    }
+
     let mut set: JoinSet<ProbeResult> = JoinSet::new();
 
     let home = dirs::home_dir();

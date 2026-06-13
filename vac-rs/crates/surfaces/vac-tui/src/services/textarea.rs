@@ -55,6 +55,18 @@ impl Default for TextArea {
 }
 
 impl TextArea {
+    fn previous_char_boundary(text: &str, mut index: usize) -> usize {
+        index = index.min(text.len());
+        while index > 0 && !text.is_char_boundary(index) {
+            index -= 1;
+        }
+        index
+    }
+
+    fn wrapped_range_content_end(&self, range: &Range<usize>) -> usize {
+        Self::previous_char_boundary(&self.text, range.end.saturating_sub(1))
+    }
+
     pub fn new() -> Self {
         Self {
             text: String::new(),
@@ -737,7 +749,7 @@ impl TextArea {
                     if idx > 0 {
                         let prev = &lines[idx - 1];
                         let line_start = prev.start;
-                        let line_end = prev.end.saturating_sub(1);
+                        let line_end = self.wrapped_range_content_end(prev);
                         Some((target_col, Some((line_start, line_end))))
                     } else {
                         Some((target_col, None))
@@ -800,7 +812,7 @@ impl TextArea {
                     if idx + 1 < lines.len() {
                         let next = &lines[idx + 1];
                         let line_start = next.start;
-                        let line_end = next.end.saturating_sub(1);
+                        let line_end = self.wrapped_range_content_end(next);
                         Some((target_col, Some((line_start, line_end))))
                     } else {
                         Some((target_col, None))
@@ -1224,7 +1236,7 @@ impl TextArea {
         for (row, idx) in range.clone().enumerate() {
             let r = &lines[idx];
             let y = area.y + row as u16;
-            let line_range = r.start..r.end - 1;
+            let line_range = r.start..self.wrapped_range_content_end(r);
 
             // Draw prefix only on the first line, spaces for continuation lines
             if row == 0 {

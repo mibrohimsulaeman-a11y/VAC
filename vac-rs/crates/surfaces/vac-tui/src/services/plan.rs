@@ -13,6 +13,18 @@ use std::path::{Path, PathBuf};
 /// Plan file path relative to session directory.
 pub const PLAN_FILENAME: &str = "plan.md";
 
+/// Canonical TUI/CLI plan session directory relative to the project root.
+///
+/// The plan-mode prompt instructs the agent to write `.vac/session/plan.md`;
+/// all TUI detection, polling, review, and archive paths must use the same
+/// directory to avoid split lifecycle state.
+pub const PLAN_SESSION_DIR: &str = ".vac/session";
+
+/// Return the canonical plan session directory.
+pub fn current_plan_session_dir() -> &'static Path {
+    Path::new(PLAN_SESSION_DIR)
+}
+
 // ─── PlanStatus ──────────────────────────────────────────────────────────────
 
 /// Status of the plan as set in the YAML front matter.

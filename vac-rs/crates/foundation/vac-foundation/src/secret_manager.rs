@@ -11,35 +11,6 @@ pub struct SecretManager {
     privacy_mode: bool,
 }
 
-fn content_has_redaction_candidate(content: &str, privacy_mode: bool) -> bool {
-    if content.is_empty() {
-        return false;
-    }
-
-    if privacy_mode {
-        return true;
-    }
-
-    let lower = content.to_ascii_lowercase();
-    let bytes = lower.as_bytes();
-    const CANDIDATE_MARKERS: &[&[u8]] = &[
-        b"api",
-        b"auth",
-        b"bearer",
-        &[99, 114, 101, 100, 101, 110, 116, 105, 97, 108],
-        b"key",
-        &[112, 97, 115, 115, 119, 111, 114, 100],
-        &[112, 114, 105, 118, 97, 116, 101],
-        &[115, 101, 99, 114, 101, 116],
-        &[116, 111, 107, 101, 110],
-        b"-----begin",
-    ];
-
-    CANDIDATE_MARKERS.iter().any(|marker| {
-        !marker.is_empty() && bytes.windows(marker.len()).any(|window| window == *marker)
-    })
-}
-
 impl SecretManager {
     pub fn new(redact_secrets: bool, privacy_mode: bool) -> Self {
         Self {
@@ -105,9 +76,14 @@ impl SecretManager {
         restore_secrets(input, &redaction_map)
     }
 
-    /// Redact secrets and add to session map
+    /// Redact secrets and add to session map.
+    ///
+    /// This deliberately does not use a foundation-level keyword fast-path. The
+    /// detector already applies per-rule keyword prefilters from the compiled
+    /// gitleaks config; adding a coarse global marker gate here can silently
+    /// skip valid detector rules such as raw credential patterns.
     pub fn redact_and_store_secrets(&self, content: &str, path: Option<&str>) -> String {
-        if !self.redact_secrets || !content_has_redaction_candidate(content, self.privacy_mode) {
+        if !self.redact_secrets {
             return content.to_string();
         }
 
@@ -135,32 +111,5 @@ impl SecretManager {
         self.add_to_session_redaction_map(&redaction_result.redaction_map);
 
         redaction_result.redacted_string
-    }
-}
-
-#[cfg(test)]
-mod redaction_candidate_tests {
-    use super::content_has_redaction_candidate;
-
-    #[test]
-    fn plain_chat_text_does_not_trigger_candidate_scan() {
-        assert!(!content_has_redaction_candidate(
-            "hello from pty smoke",
-            false
-        ));
-    }
-
-    #[test]
-    fn candidate_words_trigger_scan() {
-        assert!(content_has_redaction_candidate("key marker", false));
-        assert!(content_has_redaction_candidate("auth marker", false));
-    }
-
-    #[test]
-    fn privacy_mode_keeps_scan_enabled() {
-        assert!(content_has_redaction_candidate(
-            "hello from pty smoke",
-            true
-        ));
     }
 }

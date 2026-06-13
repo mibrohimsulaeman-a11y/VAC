@@ -26,22 +26,90 @@ pub fn push_owned_lines(src: &[Line<'_>], out: &mut Vec<Line<'static>>) {
     }
 }
 
+fn previous_char_boundary(text: &str, mut index: usize) -> usize {
+    index = index.min(text.len());
+    while index > 0 && !text.is_char_boundary(index) {
+        index -= 1;
+    }
+    index
+}
+
+fn advance_by_chars(text: &str, start: usize, char_count: usize) -> usize {
+    let start = previous_char_boundary(text, start);
+    text[start..]
+        .char_indices()
+        .nth(char_count)
+        .map(|(offset, _)| start + offset)
+        .unwrap_or(text.len())
+}
+
+fn locate_wrapped_range(text: &str, rendered: &str, cursor: usize) -> Range<usize> {
+    let cursor = previous_char_boundary(text, cursor);
+    if rendered.is_empty() {
+        return cursor..cursor;
+    }
+
+    if let Some(tail) = text.get(cursor..)
+        && let Some(offset) = tail.find(rendered)
+    {
+        let start = cursor + offset;
+        return start..start + rendered.len();
+    }
+
+    if let Some(start) = text.find(rendered) {
+        return start..start + rendered.len();
+    }
+
+    // `textwrap` may return an owned string when options inject indentation or
+    // otherwise transform the display line. In that case there is no exact
+    // borrowed slice to point at. Return a safe, char-boundary fallback range
+    // over the same number of displayed characters instead of panicking in the
+    // renderer path.
+    let end = advance_by_chars(text, cursor, rendered.chars().count());
+    cursor..end
+}
+
+fn content_end_with_trailing_spaces(text: &str, range: &Range<usize>) -> usize {
+    let mut end = previous_char_boundary(text, range.end);
+    while end < text.len() {
+        let Some(ch) = text[end..].chars().next() else {
+            break;
+        };
+        if ch != ' ' {
+            break;
+        }
+        end += ch.len_utf8();
+    }
+    end
+}
+
+fn range_with_trailing_space_sentinel(text: &str, range: Range<usize>) -> Range<usize> {
+    let start = previous_char_boundary(text, range.start);
+    let end = content_end_with_trailing_spaces(text, &range);
+
+    // TextArea cursor math historically expects a sentinel after each wrapped
+    // row. Keep the sentinel for compatibility, but make it land on a valid
+    // char boundary for Unicode input instead of a raw byte offset.
+    let sentinel_end = if end < text.len() {
+        advance_by_chars(text, end, 1)
+    } else {
+        text.len().saturating_add(1)
+    };
+    start..sentinel_end.min(text.len().saturating_add(1))
+}
+
 pub(crate) fn wrap_ranges<'a, O>(text: &str, width_or_options: O) -> Vec<Range<usize>>
 where
     O: Into<Options<'a>>,
 {
     let opts = width_or_options.into();
+    let mut cursor = 0usize;
     let mut lines: Vec<Range<usize>> = Vec::new();
     for line in textwrap::wrap(text, opts).iter() {
-        match line {
-            std::borrow::Cow::Borrowed(slice) => {
-                let start = unsafe { slice.as_ptr().offset_from(text.as_ptr()) as usize };
-                let end = start + slice.len();
-                let trailing_spaces = text[end..].chars().take_while(|c| *c == ' ').count();
-                lines.push(start..end + trailing_spaces + 1);
-            }
-            std::borrow::Cow::Owned(_) => panic!("wrap_ranges: unexpected owned string"),
-        }
+        let range = locate_wrapped_range(text, line.as_ref(), cursor);
+        cursor = content_end_with_trailing_spaces(text, &range);
+        let range = range_with_trailing_space_sentinel(text, range);
+        lines.push(range);
     }
     lines
 }
@@ -54,16 +122,12 @@ where
     O: Into<Options<'a>>,
 {
     let opts = width_or_options.into();
+    let mut cursor = 0usize;
     let mut lines: Vec<Range<usize>> = Vec::new();
     for line in textwrap::wrap(text, opts).iter() {
-        match line {
-            std::borrow::Cow::Borrowed(slice) => {
-                let start = unsafe { slice.as_ptr().offset_from(text.as_ptr()) as usize };
-                let end = start + slice.len();
-                lines.push(start..end);
-            }
-            std::borrow::Cow::Owned(_) => panic!("wrap_ranges_trim: unexpected owned string"),
-        }
+        let range = locate_wrapped_range(text, line.as_ref(), cursor);
+        cursor = previous_char_boundary(text, range.end.min(text.len()));
+        lines.push(range);
     }
     lines
 }
@@ -328,5 +392,37 @@ fn slice_line_spans<'a>(
         style: original.style,
         alignment: original.alignment,
         spans: acc,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn wrap_ranges_trim_handles_owned_textwrap_lines() {
+        let text = "abcdef ghij";
+        let ranges = wrap_ranges_trim(
+            text,
+            Options::new(5).initial_indent("> ").subsequent_indent("> "),
+        );
+
+        assert!(!ranges.is_empty());
+        assert!(ranges.iter().all(|range| range.start <= range.end));
+        assert!(ranges.iter().all(|range| range.end <= text.len()));
+    }
+
+    #[test]
+    fn wrap_ranges_handles_unicode_without_mid_scalar_bounds() {
+        let text = "αβ γδ εζ";
+        let ranges = wrap_ranges(text, Options::new(4));
+
+        assert!(!ranges.is_empty());
+        for range in ranges {
+            assert!(range.start <= range.end);
+            assert!(range.end <= text.len() + 1);
+            assert!(text.is_char_boundary(range.start));
+            assert!(range.end == text.len() + 1 || text.is_char_boundary(range.end));
+        }
     }
 }

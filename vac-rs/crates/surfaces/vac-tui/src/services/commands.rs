@@ -638,7 +638,7 @@ pub fn execute_command(command_id: CommandId<'_>, ctx: CommandContext) -> Result
             }
 
             // Check for existing plan — show modal if one exists
-            let session_dir = std::path::Path::new(".vac/registry/sessions/current");
+            let session_dir = crate::services::plan::current_plan_session_dir();
             if crate::services::plan::plan_file_exists(session_dir) {
                 let meta = crate::services::plan::read_plan_file(session_dir).map(|(m, _)| m);
                 ctx.state.plan_mode_state.existing_prompt = Some(crate::app::ExistingPlanPrompt {
