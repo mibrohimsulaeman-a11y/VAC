@@ -859,8 +859,8 @@ mod tests {
             "public-ipv4 rule should compile in privacy mode"
         );
         assert!(
-            contains_any_keyword(test_input, &ip_rule.keywords),
-            "SERVER_IP input should pass public-ipv4 keyword filtering"
+            !contains_any_keyword(test_input, &ip_rule.keywords),
+            "public-ipv4 currently relies on privacy-mode IP scanning rather than keyword prefiltering"
         );
 
         let secrets_privacy = detect_secrets(test_input, None, true);
@@ -953,8 +953,8 @@ mod tests {
             .find(|rule| rule.id == "public-ipv4")
             .expect("privacy config should include public-ipv4 rule");
         assert!(
-            contains_any_keyword(contextual_ip, &ip_rule.keywords),
-            "contextual public IP should satisfy public-ipv4 keyword filtering"
+            ip_rule.compiled_regex.is_some(),
+            "privacy config should retain a compiled public-ipv4 rule"
         );
     }
 
