@@ -448,7 +448,6 @@ fn read_json(path: &Path) -> Result<Value, String> {
     serde_json::from_str(&raw).map_err(|err| format!("cannot parse {}: {err}", path.display()))
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;

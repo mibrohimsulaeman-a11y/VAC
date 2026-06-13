@@ -162,7 +162,6 @@ fn blocked(reason: &str) -> RuntimeJournalAppendDecision {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -199,10 +198,7 @@ mod tests {
             .find(&needle)
             .unwrap_or_else(|| panic!("missing table statement for {table}"));
         let rest = &sql[start..];
-        let end = rest
-            .find(";\n")
-            .map(|idx| idx + 1)
-            .unwrap_or(rest.len());
+        let end = rest.find(";\n").map(|idx| idx + 1).unwrap_or(rest.len());
         rest[..end].to_string()
     }
 
