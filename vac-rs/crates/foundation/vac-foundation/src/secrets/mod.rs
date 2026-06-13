@@ -255,12 +255,7 @@ fn generate_redaction_key(rule_id: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use regex::Regex;
-
-    use crate::secrets::gitleaks::{
-        GITLEAKS_CONFIG, calculate_entropy, contains_any_keyword, create_simple_api_key_regex,
-        is_allowed_by_rule_allowlist, should_allow_match,
-    };
+    use crate::secrets::gitleaks::{GITLEAKS_CONFIG, contains_any_keyword};
 
     use super::*;
 
@@ -294,10 +289,6 @@ mod tests {
 
     fn fake_secret_token() -> String {
         ["Kx9mP2nQ8rT4", "vW7yZ3cF6hJ1", "lN5sA0bD8eF"].concat()
-    }
-
-    fn fake_secret_token_long() -> String {
-        ["Kx9mP2nQ8rT4", "vW7yZ3cF6hJ1", "lN5sA0bD8eF2gH5jK"].concat()
     }
 
     fn fake_password_secret() -> String {
