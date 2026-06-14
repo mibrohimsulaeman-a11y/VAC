@@ -1,0 +1,9 @@
+{
+  "fixture_id": "v19.index.crlf_normalization",
+  "lf_text": "fn demo() {\n    println!(\"ok\");\n}\n",
+  "crlf_text": "fn demo() {\r\n    println!(\"ok\");\r\n}\r\n",
+  "expected": {
+    "raw_span_sha256_equal": false,
+    "normalized_fingerprint_equal": true
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "fixture_id": "v19.missing_code.triad",
+  "cases": [
+    {
+      "case_id": "absent_full_coverage",
+      "coverage": {
+        "required_coverage_bps": 10000,
+        "actual_coverage_bps": 10000,
+        "low_confidence_residues": [],
+        "residues_ruled_irrelevant": []
+      },
+      "expected_result": "absent"
+    },
+    {
+      "case_id": "low_confidence_residue_prevents_absent",
+      "coverage": {
+        "required_coverage_bps": 10000,
+        "actual_coverage_bps": 10000,
+        "low_confidence_residues": ["src/generated.rs:macro residue"],
+        "residues_ruled_irrelevant": []
+      },
+      "expected_result": "not_found_in_index"
+    },
+    {
+      "case_id": "coverage_insufficient",
+      "coverage": {
+        "required_coverage_bps": 10000,
+        "actual_coverage_bps": 8500,
+        "low_confidence_residues": [],
+        "residues_ruled_irrelevant": []
+      },
+      "expected_result": "coverage_insufficient"
+    }
+  ]
+}

@@ -139,6 +139,63 @@ pub fn bidirectional_gap_analysis(
     findings
 }
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum MissingCodeProofResult {
+    Absent,
+    NotFoundInIndex,
+    CoverageInsufficient,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct MissingCodeCoverage {
+    pub required_coverage_bps: u16,
+    pub actual_coverage_bps: u16,
+    #[serde(default)]
+    pub low_confidence_residues: Vec<String>,
+    #[serde(default)]
+    pub residues_ruled_irrelevant: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct MissingCodeProof {
+    pub coverage_set_id: String,
+    pub query_spec_hash: String,
+    pub searched_roots: Vec<String>,
+    pub excluded_roots: Vec<String>,
+    pub required_record_types: Vec<String>,
+    pub coverage: MissingCodeCoverage,
+}
+
+impl MissingCodeCoverage {
+    #[must_use]
+    pub fn all_low_confidence_residues_ruled_irrelevant(&self) -> bool {
+        self.low_confidence_residues.iter().all(|residue| {
+            self.residues_ruled_irrelevant
+                .iter()
+                .any(|ruled| ruled == residue)
+        })
+    }
+}
+
+#[must_use]
+pub fn evaluate_missing_code_proof(proof: &MissingCodeProof) -> MissingCodeProofResult {
+    if proof.coverage.actual_coverage_bps < proof.coverage.required_coverage_bps
+        || proof.coverage.required_coverage_bps == 0
+        || proof.required_record_types.is_empty()
+        || proof.searched_roots.is_empty()
+    {
+        return MissingCodeProofResult::CoverageInsufficient;
+    }
+    if !proof
+        .coverage
+        .all_low_confidence_residues_ruled_irrelevant()
+    {
+        return MissingCodeProofResult::NotFoundInIndex;
+    }
+    MissingCodeProofResult::Absent
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct AssessmentBaselineSummary {
     pub files_indexed: u64,
@@ -314,4 +371,57 @@ pub fn validate_gap_report_value(value: &serde_json::Value) -> AssessmentAuthori
 #[must_use]
 pub fn p1_blocks_without_waiver(summary: &AssessmentAuthoritySummary, waiver_count: u64) -> bool {
     summary.p1_count > waiver_count && summary.heuristic_severity
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn proof(coverage: MissingCodeCoverage) -> MissingCodeProof {
+        MissingCodeProof {
+            coverage_set_id: "coverage.fixture".to_string(),
+            query_spec_hash: "sha256:query".to_string(),
+            searched_roots: vec!["vac-rs/crates/control-plane".to_string()],
+            excluded_roots: vec!["target".to_string()],
+            required_record_types: vec![
+                "symbol".to_string(),
+                "route".to_string(),
+                "call".to_string(),
+            ],
+            coverage,
+        }
+    }
+
+    #[test]
+    fn missing_code_full_coverage_without_residue_claims_absent() {
+        let result = evaluate_missing_code_proof(&proof(MissingCodeCoverage {
+            required_coverage_bps: 10_000,
+            actual_coverage_bps: 10_000,
+            low_confidence_residues: Vec::new(),
+            residues_ruled_irrelevant: Vec::new(),
+        }));
+        assert_eq!(result, MissingCodeProofResult::Absent);
+    }
+
+    #[test]
+    fn missing_code_low_confidence_residue_downgrades_absence_claim() {
+        let result = evaluate_missing_code_proof(&proof(MissingCodeCoverage {
+            required_coverage_bps: 10_000,
+            actual_coverage_bps: 10_000,
+            low_confidence_residues: vec!["src/generated.rs:unknown macro expansion".to_string()],
+            residues_ruled_irrelevant: Vec::new(),
+        }));
+        assert_eq!(result, MissingCodeProofResult::NotFoundInIndex);
+    }
+
+    #[test]
+    fn missing_code_insufficient_coverage_makes_no_absence_claim() {
+        let result = evaluate_missing_code_proof(&proof(MissingCodeCoverage {
+            required_coverage_bps: 10_000,
+            actual_coverage_bps: 8_500,
+            low_confidence_residues: Vec::new(),
+            residues_ruled_irrelevant: Vec::new(),
+        }));
+        assert_eq!(result, MissingCodeProofResult::CoverageInsufficient);
+    }
 }

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import json
 import pathlib
 import sqlite3
 import sys
@@ -31,6 +32,11 @@ CRITICAL_ACCEPTANCE_IDS = [
     "Derived trust recomputed at read time",
     "Subprocess `.vac/db/**` mutation detection",
     "Release doctor does not overclaim L1 local records",
+    "Governance denominator/numerator reproducible",
+    "Missing-code absence proof complete",
+    "Bounded patch hard-deny `.vac/db/**` rejected",
+    "Span CRLF raw/normalized behavior deterministic",
+    "Doctor trust wording golden snapshots",
 ]
 
 TOKEN_CHECKS = {
@@ -113,13 +119,66 @@ TOKEN_CHECKS = {
             "parser_mode_truth",
         ],
     },
-    "governance-and-known-gaps-explicit": {
-        "docs/audit/VAC_V19_TRACEABILITY_MATRIX.md": [
-            "FG-governance",
-            "TV-Pending",
-            "Implement governance score reducer fixture",
-            "FG-missing-code",
-            "FG-span-index",
+    "governance-fixture": {
+        "vac-rs/crates/control-plane/vac-doctor/src/lib.rs": [
+            "GovernanceWindowInput",
+            "reduce_governance_window",
+            "governance_zero_denominator_uses_max_one_and_passes",
+            "governance_reducer_matches_spec_denominator_breakdown",
+        ],
+        "tests/fixtures/v19/governance/zero-denominator.json": [
+            "v19.governance.zero_denominator",
+            "score_basis_points",
+        ],
+        "tests/fixtures/v19/governance/spec-window-example.json": [
+            "weighted_event_points",
+            "risk_weighted_slice_points",
+            "advisory_block",
+        ],
+    },
+    "missing-code-fixture": {
+        "vac-rs/crates/control-plane/vac-assessment/src/lib.rs": [
+            "MissingCodeProofResult",
+            "evaluate_missing_code_proof",
+            "missing_code_low_confidence_residue_downgrades_absence_claim",
+        ],
+        "tests/fixtures/v19/missing-code/triad.json": [
+            "absent_full_coverage",
+            "not_found_in_index",
+            "coverage_insufficient",
+        ],
+    },
+    "patch-hard-deny-fixture": {
+        "vac-rs/crates/runtime/vac-agent-loop/src/bound_runtime.rs": [
+            "HARD_DENY_PATCH_PATHS",
+            "hard_deny_patch_path",
+            "hard_deny_patch_blocks_vac_db_even_if_plan_claims_it",
+        ],
+        "tests/fixtures/v19/patch/hard-deny-vac-db.json": [
+            ".vac/db/runtime.db",
+            "hard_deny_patch",
+        ],
+    },
+    "span-index-crlf-fixture": {
+        "vac-rs/crates/control-plane/vac-index/src/lib.rs": [
+            "raw_span_sha256",
+            "normalized_text_fingerprint",
+            "crlf_only_change_refreshes_raw_hash_but_keeps_normalized_fingerprint",
+        ],
+        "tests/fixtures/v19/index/crlf-normalization.json": [
+            "raw_span_sha256_equal",
+            "normalized_fingerprint_equal",
+        ],
+    },
+    "doctor-output-golden-fixture": {
+        "vac-rs/crates/control-plane/vac-doctor/src/lib.rs": [
+            "doctor_trust_wording_golden_snapshots_match",
+            "trust-wording-golden.json",
+        ],
+        "tests/fixtures/v19/doctor-output/trust-wording-golden.json": [
+            "honest_l1_local",
+            "l1_overclaim_blocks",
+            "unverified_attestation_blocks",
         ],
     },
 }
@@ -163,6 +222,29 @@ def check_tokens(errors: list[str]) -> None:
             for token in tokens:
                 if token not in text:
                     errors.append(f"{check_id}: {rel} missing token {token!r}")
+
+
+def check_json_fixtures(errors: list[str]) -> None:
+    required = [
+        "tests/fixtures/v19/governance/zero-denominator.json",
+        "tests/fixtures/v19/governance/spec-window-example.json",
+        "tests/fixtures/v19/missing-code/triad.json",
+        "tests/fixtures/v19/patch/hard-deny-vac-db.json",
+        "tests/fixtures/v19/index/crlf-normalization.json",
+        "tests/fixtures/v19/doctor-output/trust-wording-golden.json",
+    ]
+    for rel in required:
+        path = ROOT / rel
+        if not path.is_file():
+            errors.append(f"missing v1.9 fixture file: {rel}")
+            continue
+        try:
+            value = json.loads(path.read_text())
+        except json.JSONDecodeError as exc:
+            errors.append(f"invalid JSON fixture {rel}: {exc}")
+            continue
+        if not value.get("fixture_id"):
+            errors.append(f"fixture missing fixture_id: {rel}")
 
 
 def check_runtime_event_duplicate_rejected(errors: list[str]) -> None:
@@ -238,6 +320,7 @@ def main() -> int:
     errors: list[str] = []
     check_matrix(errors)
     check_tokens(errors)
+    check_json_fixtures(errors)
     check_runtime_event_duplicate_rejected(errors)
     if errors:
         print("VAC v1.9 fixture coverage: FAIL")
@@ -247,6 +330,7 @@ def main() -> int:
     print("VAC v1.9 fixture coverage: PASS")
     print(f"fixture_groups={len(REQUIRED_FIXTURE_GROUPS)}")
     print(f"critical_acceptance_checks={len(CRITICAL_ACCEPTANCE_IDS)}")
+    print("v19_fixture_files=6")
     print("sqlite_duplicate_session_seq_rejected=true")
     print("full_p0_acceptance_claimed=false")
     return 0

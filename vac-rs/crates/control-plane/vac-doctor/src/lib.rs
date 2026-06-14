@@ -206,6 +206,108 @@ pub fn release_blocks_on(result: &DoctorResult) -> bool {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct GovernanceWeightedEvent {
+    pub event_type: String,
+    pub count: u64,
+    pub weight: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct GovernanceSliceRiskInput {
+    pub risk_class: String,
+    pub count: u64,
+    pub points_each: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct GovernanceSliceRiskBreakdown {
+    pub risk_class: String,
+    pub count: u64,
+    pub points_each: u64,
+    pub points: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct GovernanceThresholds {
+    pub warn_at_bps: u64,
+    pub advisory_block_at_bps: u64,
+    pub release_block_at_bps: u64,
+}
+
+impl Default for GovernanceThresholds {
+    fn default() -> Self {
+        Self {
+            warn_at_bps: 2_500,
+            advisory_block_at_bps: 4_500,
+            release_block_at_bps: 7_000,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct GovernanceWindowInput {
+    pub weighted_events: Vec<GovernanceWeightedEvent>,
+    pub slice_risk_points: Vec<GovernanceSliceRiskInput>,
+    pub thresholds: GovernanceThresholds,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct GovernanceWindowReport {
+    pub weighted_event_points: u64,
+    pub risk_weighted_slice_points: u64,
+    pub denominator: u64,
+    pub score_basis_points: u64,
+    pub threshold_state: String,
+    pub denominator_breakdown: Vec<GovernanceSliceRiskBreakdown>,
+}
+
+#[must_use]
+pub fn reduce_governance_window(input: &GovernanceWindowInput) -> GovernanceWindowReport {
+    let weighted_event_points = input
+        .weighted_events
+        .iter()
+        .map(|event| event.count.saturating_mul(event.weight))
+        .sum::<u64>();
+    let denominator_breakdown = input
+        .slice_risk_points
+        .iter()
+        .map(|slice| GovernanceSliceRiskBreakdown {
+            risk_class: slice.risk_class.clone(),
+            count: slice.count,
+            points_each: slice.points_each,
+            points: slice.count.saturating_mul(slice.points_each),
+        })
+        .collect::<Vec<_>>();
+    let risk_weighted_slice_points = denominator_breakdown
+        .iter()
+        .map(|slice| slice.points)
+        .sum::<u64>();
+    let denominator = risk_weighted_slice_points.max(1);
+    let score_basis_points = weighted_event_points
+        .saturating_mul(10_000)
+        .saturating_div(denominator);
+    let threshold_state = if score_basis_points >= input.thresholds.release_block_at_bps {
+        "release_block"
+    } else if score_basis_points >= input.thresholds.advisory_block_at_bps {
+        "advisory_block"
+    } else if score_basis_points >= input.thresholds.warn_at_bps {
+        "warn"
+    } else {
+        "pass"
+    }
+    .to_string();
+
+    GovernanceWindowReport {
+        weighted_event_points,
+        risk_weighted_slice_points,
+        denominator,
+        score_basis_points,
+        threshold_state,
+        denominator_breakdown,
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ReleaseTrustClaimInput {
     pub execution: String,
     pub custody: String,
@@ -271,6 +373,86 @@ mod tests {
     use super::*;
 
     #[test]
+    fn governance_zero_denominator_uses_max_one_and_passes() {
+        let report = reduce_governance_window(&GovernanceWindowInput {
+            weighted_events: Vec::new(),
+            slice_risk_points: Vec::new(),
+            thresholds: GovernanceThresholds::default(),
+        });
+        assert_eq!(report.risk_weighted_slice_points, 0);
+        assert_eq!(report.denominator, 1);
+        assert_eq!(report.score_basis_points, 0);
+        assert_eq!(report.threshold_state, "pass");
+    }
+
+    #[test]
+    fn governance_reducer_matches_spec_denominator_breakdown() {
+        let report = reduce_governance_window(&GovernanceWindowInput {
+            weighted_events: vec![
+                GovernanceWeightedEvent {
+                    event_type: "needs_discussion".to_string(),
+                    count: 3,
+                    weight: 12,
+                },
+                GovernanceWeightedEvent {
+                    event_type: "needs_discussion_release_relevant".to_string(),
+                    count: 2,
+                    weight: 80,
+                },
+                GovernanceWeightedEvent {
+                    event_type: "scoped_grant".to_string(),
+                    count: 1,
+                    weight: 80,
+                },
+                GovernanceWeightedEvent {
+                    event_type: "policy_downgrade".to_string(),
+                    count: 1,
+                    weight: 300,
+                },
+            ],
+            slice_risk_points: vec![
+                GovernanceSliceRiskInput {
+                    risk_class: "micro".to_string(),
+                    count: 6,
+                    points_each: 5,
+                },
+                GovernanceSliceRiskInput {
+                    risk_class: "low".to_string(),
+                    count: 5,
+                    points_each: 10,
+                },
+                GovernanceSliceRiskInput {
+                    risk_class: "medium".to_string(),
+                    count: 4,
+                    points_each: 30,
+                },
+                GovernanceSliceRiskInput {
+                    risk_class: "high".to_string(),
+                    count: 3,
+                    points_each: 80,
+                },
+                GovernanceSliceRiskInput {
+                    risk_class: "critical".to_string(),
+                    count: 1,
+                    points_each: 200,
+                },
+                GovernanceSliceRiskInput {
+                    risk_class: "release".to_string(),
+                    count: 1,
+                    points_each: 300,
+                },
+            ],
+            thresholds: GovernanceThresholds::default(),
+        });
+        assert_eq!(report.weighted_event_points, 576);
+        assert_eq!(report.risk_weighted_slice_points, 940);
+        assert_eq!(report.denominator, 940);
+        assert_eq!(report.score_basis_points, 6127);
+        assert_eq!(report.threshold_state, "advisory_block");
+        assert_eq!(report.denominator_breakdown[0].points, 30);
+    }
+
+    #[test]
     fn release_doctor_blocks_l1_local_overclaim_language() {
         let result = doctor_release_trust_language(&ReleaseTrustClaimInput {
             execution: "observed_l1".to_string(),
@@ -304,6 +486,69 @@ mod tests {
         });
         assert_eq!(result.status, DoctorStatus::Fail);
         assert!(result.failures[0].contains("downgrade unverified attestation"));
+    }
+
+    #[test]
+    fn doctor_trust_wording_golden_snapshots_match() {
+        let fixture: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../../../tests/fixtures/v19/doctor-output/trust-wording-golden.json"
+        ))
+        .expect("trust wording fixture must parse");
+        let cases = fixture
+            .get("cases")
+            .and_then(serde_json::Value::as_array)
+            .expect("fixture cases array");
+        for case in cases {
+            let input = case.get("input").expect("case input");
+            let result = doctor_release_trust_language(&ReleaseTrustClaimInput {
+                execution: input
+                    .get("execution")
+                    .and_then(serde_json::Value::as_str)
+                    .expect("execution")
+                    .to_string(),
+                custody: input
+                    .get("custody")
+                    .and_then(serde_json::Value::as_str)
+                    .expect("custody")
+                    .to_string(),
+                proof_verified: input
+                    .get("proof_verified")
+                    .and_then(serde_json::Value::as_bool)
+                    .expect("proof_verified"),
+                aggregate_claim: input
+                    .get("aggregate_claim")
+                    .and_then(serde_json::Value::as_str)
+                    .expect("aggregate_claim")
+                    .to_string(),
+            });
+            let expected = case.get("expected").expect("case expected");
+            let expected_status = expected
+                .get("status")
+                .and_then(serde_json::Value::as_str)
+                .expect("expected status");
+            let actual_status = match result.status {
+                DoctorStatus::Pass => "pass",
+                DoctorStatus::Warn => "warn",
+                DoctorStatus::Fail => "fail",
+                DoctorStatus::Fatal => "fatal",
+            };
+            assert_eq!(actual_status, expected_status, "case={case}");
+            let message_contains = expected
+                .get("message_contains")
+                .and_then(serde_json::Value::as_str)
+                .expect("message_contains");
+            let combined = result
+                .warnings
+                .iter()
+                .chain(result.failures.iter())
+                .cloned()
+                .collect::<Vec<_>>()
+                .join("\n");
+            assert!(
+                combined.contains(message_contains),
+                "case={case} expected message containing {message_contains:?}, got {combined:?}"
+            );
+        }
     }
 
     #[test]

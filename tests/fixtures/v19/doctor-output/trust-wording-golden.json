@@ -1,0 +1,44 @@
+{
+  "fixture_id": "v19.doctor_output.trust_wording_golden",
+  "cases": [
+    {
+      "case_id": "honest_l1_local",
+      "input": {
+        "execution": "observed_l1",
+        "custody": "local_only",
+        "proof_verified": false,
+        "aggregate_claim": "local self-reported trace; integrity hint only"
+      },
+      "expected": {
+        "status": "warn",
+        "message_contains": "integrity hint only"
+      }
+    },
+    {
+      "case_id": "l1_overclaim_blocks",
+      "input": {
+        "execution": "observed_l1",
+        "custody": "local_only",
+        "proof_verified": false,
+        "aggregate_claim": "release is audit-grade and tamper-evident"
+      },
+      "expected": {
+        "status": "fail",
+        "message_contains": "must not overclaim L1"
+      }
+    },
+    {
+      "case_id": "unverified_attestation_blocks",
+      "input": {
+        "execution": "observed_l1",
+        "custody": "ci_attested",
+        "proof_verified": false,
+        "aggregate_claim": "CI-attested self-report"
+      },
+      "expected": {
+        "status": "fail",
+        "message_contains": "downgrade unverified attestation"
+      }
+    }
+  ]
+}

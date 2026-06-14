@@ -1,0 +1,23 @@
+{
+  "fixture_id": "v19.governance.spec_window_example",
+  "weighted_events": [
+    { "event_type": "needs_discussion", "count": 3, "weight": 12 },
+    { "event_type": "needs_discussion_release_relevant", "count": 2, "weight": 80 },
+    { "event_type": "scoped_grant", "count": 1, "weight": 80 },
+    { "event_type": "policy_downgrade", "count": 1, "weight": 300 }
+  ],
+  "slice_risk_points": [
+    { "risk_class": "micro", "count": 6, "points_each": 5, "points": 30 },
+    { "risk_class": "low", "count": 5, "points_each": 10, "points": 50 },
+    { "risk_class": "medium", "count": 4, "points_each": 30, "points": 120 },
+    { "risk_class": "high", "count": 3, "points_each": 80, "points": 240 },
+    { "risk_class": "critical", "count": 1, "points_each": 200, "points": 200 },
+    { "risk_class": "release", "count": 1, "points_each": 300, "points": 300 }
+  ],
+  "expected": {
+    "weighted_event_points": 576,
+    "risk_weighted_slice_points": 940,
+    "score_basis_points": 6127,
+    "threshold_state": "advisory_block"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "fixture_id": "v19.patch.hard_deny_vac_db",
+  "attempt": {
+    "path": ".vac/db/runtime.db",
+    "operation": "modify"
+  },
+  "expected": {
+    "decision": "blocked",
+    "blocker_contains": "hard_deny_patch"
+  }
+}

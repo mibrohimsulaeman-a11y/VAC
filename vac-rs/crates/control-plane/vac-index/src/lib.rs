@@ -6,6 +6,42 @@
 //! tree-sitter-rust or ra_ap_syntax is the authority.
 
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
+
+#[must_use]
+pub fn sha256_hex(bytes: &[u8]) -> String {
+    let digest = Sha256::digest(bytes);
+    let mut out = String::with_capacity(71);
+    out.push_str("sha256:");
+    for byte in digest {
+        out.push_str(&format!("{byte:02x}"));
+    }
+    out
+}
+
+#[must_use]
+pub fn raw_span_sha256(bytes: &[u8]) -> String {
+    sha256_hex(bytes)
+}
+
+#[must_use]
+pub fn normalize_text_for_fingerprint(text: &str) -> String {
+    let normalized_eol = text.replace("\r\n", "\n").replace('\r', "\n");
+    let mut lines = normalized_eol
+        .split('\n')
+        .map(|line| line.trim_end_matches([' ', '\t']))
+        .collect::<Vec<_>>();
+    if matches!(lines.last(), Some(last) if last.is_empty()) {
+        lines.pop();
+    }
+    lines.join("\n")
+}
+
+#[must_use]
+pub fn normalized_text_fingerprint(bytes: &[u8]) -> String {
+    let text = String::from_utf8_lossy(bytes);
+    sha256_hex(normalize_text_for_fingerprint(&text).as_bytes())
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct FileRecord {
@@ -209,4 +245,33 @@ pub fn read_plan_ticket_count(value: &serde_json::Value) -> u64 {
         .or_else(|| value.pointer("/summary/read_plans"))
         .and_then(serde_json::Value::as_u64)
         .unwrap_or(0)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn crlf_only_change_refreshes_raw_hash_but_keeps_normalized_fingerprint() {
+        let lf = b"fn demo() {\n    println!(\"ok\");\n}\n";
+        let crlf = b"fn demo() {\r\n    println!(\"ok\");\r\n}\r\n";
+
+        assert_ne!(raw_span_sha256(lf), raw_span_sha256(crlf));
+        assert_eq!(
+            normalized_text_fingerprint(lf),
+            normalized_text_fingerprint(crlf)
+        );
+    }
+
+    #[test]
+    fn trailing_whitespace_and_final_newline_do_not_change_text_fingerprint() {
+        let clean = b"let value = 1;\nlet next = 2";
+        let formatted = b"let value = 1;   \r\nlet next = 2\t\r\n";
+
+        assert_ne!(raw_span_sha256(clean), raw_span_sha256(formatted));
+        assert_eq!(
+            normalized_text_fingerprint(clean),
+            normalized_text_fingerprint(formatted)
+        );
+    }
 }

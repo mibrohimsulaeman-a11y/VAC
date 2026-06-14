@@ -1,0 +1,10 @@
+{
+  "fixture_id": "v19.governance.zero_denominator",
+  "weighted_events": [],
+  "slice_risk_points": [],
+  "expected": {
+    "denominator": 1,
+    "score_basis_points": 0,
+    "threshold_state": "pass"
+  }
+}

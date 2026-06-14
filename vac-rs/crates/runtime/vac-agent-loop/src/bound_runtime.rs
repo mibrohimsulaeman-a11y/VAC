@@ -505,6 +505,15 @@ impl SemanticPlan {
     }
 }
 
+const HARD_DENY_PATCH_PATHS: &[&str] = &[".vac/db/**", ".vac/cache/**"];
+
+#[must_use]
+fn hard_deny_patch_path(path: &str) -> bool {
+    HARD_DENY_PATCH_PATHS
+        .iter()
+        .any(|pattern| vac_paths::path_matches(pattern, path))
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PlanApproval {
     pub required: bool,
@@ -1221,6 +1230,12 @@ impl BoundRuntimeController {
         }
 
         for file in &plan.allowed_files {
+            if hard_deny_patch_path(&file.path) {
+                outcome.push_blocker(format!(
+                    "hard_deny_patch path cannot be listed in a Semantic Plan: {}",
+                    file.path
+                ));
+            }
             if file.ownership != capability.id {
                 outcome.push_blocker(format!(
                     "plan file {} has ownership {} but active capability is {}",
@@ -1328,6 +1343,15 @@ impl BoundRuntimeController {
             return GateOutcome::block(
                 RuntimeGate::PrePatch,
                 "Semantic Plan is not approved/executable",
+            );
+        }
+        if hard_deny_patch_path(&attempt.path) {
+            return GateOutcome::block(
+                RuntimeGate::PrePatch,
+                format!(
+                    "hard_deny_patch path is runtime-owned or generated: {}",
+                    attempt.path
+                ),
             );
         }
         if plan.forbidden_matches(&attempt.path) {
@@ -2085,6 +2109,50 @@ mod tests {
         assert_eq!(
             runtime.pre_patch_gate(&attempt).decision,
             GateDecision::Pass
+        );
+    }
+
+    #[test]
+    fn hard_deny_patch_blocks_vac_db_even_if_plan_claims_it() {
+        let mut runtime =
+            BoundRuntimeController::new("s1", registry(), BoundRuntimeConfig::default());
+        let mut p = plan(PlanStatus::Approved);
+        p.allowed_files = vec![PlanFileScope {
+            path: ".vac/db/runtime.db".to_string(),
+            operation: FileOperation::Modify,
+            line_range: LineRange { start: 1, end: 1 },
+            semantic_anchor: SemanticAnchor {
+                symbol: "runtime_db".to_string(),
+                kind: "sqlite".to_string(),
+                ast_path: None,
+                normalized_fingerprint: None,
+            },
+            ownership: "vac.runtime.agent_loop".to_string(),
+        }];
+        runtime.active_plan = Some(p);
+
+        let attempt = PatchAttempt {
+            path: ".vac/db/runtime.db".to_string(),
+            operation: FileOperation::Modify,
+            touched_range: LineRange { start: 1, end: 1 },
+            semantic_anchor: SemanticAnchor {
+                symbol: "runtime_db".to_string(),
+                kind: "sqlite".to_string(),
+                ast_path: None,
+                normalized_fingerprint: None,
+            },
+            lines_added: 1,
+            lines_removed: 0,
+            creates_new_file: false,
+            patch_index: 0,
+        };
+        let outcome = runtime.pre_patch_gate(&attempt);
+        assert!(outcome.is_blocked());
+        assert!(
+            outcome
+                .blockers
+                .iter()
+                .any(|blocker| blocker.contains("hard_deny_patch"))
         );
     }
 
