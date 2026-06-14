@@ -140,6 +140,18 @@ async fn send_next_tool(
                 ask_user_questions.to_vec(),
             ))
             .await;
+        let ask_tx = backend_tx.clone();
+        tokio::spawn(async move {
+            // Keep Ask User deterministic in CI PTYs. The popup is still rendered
+            // and processed through the real TUI handler path; these events replace
+            // fragile second-Enter timing on slow runners.
+            sleep(Duration::from_millis(700)).await;
+            let _ = ask_tx.send(InputEvent::AskUserSelectOption).await;
+            sleep(Duration::from_millis(150)).await;
+            let _ = ask_tx.send(InputEvent::AskUserConfirmQuestion).await;
+            sleep(Duration::from_millis(150)).await;
+            let _ = ask_tx.send(InputEvent::AskUserSubmit).await;
+        });
     }
 }
 
