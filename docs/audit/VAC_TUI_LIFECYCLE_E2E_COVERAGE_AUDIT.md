@@ -1,6 +1,6 @@
 # VAC TUI Lifecycle E2E Coverage Audit
 
-Status: **TV-Pass for deterministic TUI agent all-tools harness and local real-provider/MCP file IO E2E; TV-Pending for external provider/remote/process IO E2E**.
+Status: **TV-Pass for deterministic TUI agent all-tools harness, local real-provider/MCP file IO, local process/delete/loopback-network IO, and negative-governance IO E2E; TV-Pending for external provider/remote/process IO E2E**.
 
 This audit answers a narrow question: do existing unit/integration/smoke tests cover the lifecycle of a real user using the TUI with an agent and all available tools?
 
@@ -12,11 +12,13 @@ Partially closed. The repository now has a deterministic PTY harness that drives
 run_tui init-prompt path -> deterministic agent backend -> model/tool-call stream -> approval UI -> every required tool class -> tool result rendering -> ask_user response -> clean terminal shutdown
 ```
 
-This is **not** a real provider/MCP IO test. It does not execute the actual MCP tools against the filesystem/network/remote hosts; it injects deterministic `InputEvent`/`OutputEvent` traffic through the real `run_tui` event loop. Therefore the proper status is:
+This deterministic harness is **not** a real provider/MCP IO test. It does not execute the actual MCP tools against the filesystem/network/remote hosts; it injects deterministic `InputEvent`/`OutputEvent` traffic through the real `run_tui` event loop. A separate PTY harness now runs real `vac-cli` interactive mode against a deterministic OpenAI-compatible local provider and the actual MCP/local tool implementations in a sandboxed workspace. Therefore the proper status is:
 
 ```text
 deterministic_user_agent_all_tools_tui_e2e=TV-Pass
 local_real_provider_mcp_file_io_e2e=TV-Pass
+local_real_provider_mcp_process_delete_loopback_network_io_e2e=TV-Pass
+local_real_provider_mcp_negative_governance_io_e2e=TV-Pass
 external_provider_remote_process_io_e2e=TV-Pending
 ```
 
@@ -32,7 +34,7 @@ external_provider_remote_process_io_e2e=TV-Pending
 | Approval bar / auto approve | Unit tests exist for approval bar / auto-approve services. | `services/approval_bar.rs`; `services/auto_approve.rs` | TV-Pass for service units |
 | Agent runtime gates | Runtime E2E covers Semantic Plan, patch/command gates, validation, closeout, L1/L2 honesty. | `vac-agent-loop` tests; `scripts/vac-runtime-agent-e2e-sv.py`; `tests/fixtures/runtime/bound_agent_e2e_cases.json` | TV-Pass for runtime core; not TUI-coupled |
 | Tool display/rendering blocks | Some render helpers are unit-tested, e.g. bash block wrapping and stream block alignment. | `services/bash_block.rs`; message renderer tests | Partial |
-| TUI event loop backend bridge | No direct unit test for `event_loop.rs`; PTY harness does not inject real agent tool streams. | `event_loop.rs` | TV-Pending |
+| TUI event loop backend bridge | Real PTY harness drives provider/tool-call streams through `vac init`; direct Rust unit coverage for `event_loop.rs` is still absent. | `event_loop.rs`; `scripts/pty-vac-cli-real-io-e2e.py` | TV-Pass for local E2E; unit gap remains |
 | Tool/dialog/shell handlers | `handlers/dialog.rs`, `handlers/tool.rs`, `handlers/shell.rs` have no test modules. | source scan | TV-Pending |
 | Deterministic all-tools TUI E2E | PTY harness starts real `run_tui`, injects deterministic agent stream, drives approval/Ask User, and checks all required tool markers. | `scripts/pty-tui-agent-tool-lifecycle-smoke.py`; `vac-rs/crates/surfaces/vac-tui/examples/tui_agent_tool_smoke.rs`; `tests/fixtures/tui-agent-tool-lifecycle/tool-matrix.json` | TV-Pass |
 
@@ -42,7 +44,7 @@ external_provider_remote_process_io_e2e=TV-Pending
 
 `vac-rs/crates/surfaces/vac-tui/examples/tui_agent_tool_smoke.rs` is the deterministic agent/tool lifecycle harness. It feeds the fixture prompt through `run_tui`'s init-prompt path, listens to `OutputEvent::UserMessage`, emits assistant/tool streams, waits for `OutputEvent::AcceptTool`, emits `InputEvent::ToolResult`, drives `ShowAskUserPopup`, waits for `OutputEvent::AskUserResponse`, and exits through the real `run_tui` event loop. Composer keystroke coverage remains in the separate direct PTY lifecycle smoke.
 
-The new harness covers the TUI bridge. It still does not execute real provider/MCP IO.
+The deterministic all-tools harness covers the TUI bridge with injected events. `scripts/pty-vac-cli-real-io-e2e.py` separately covers real provider/MCP local IO through the interactive CLI path.
 
 ## Tool lifecycle gaps
 
@@ -92,10 +94,23 @@ tool_visible:<all 15 tools>
 marker_visible:<all tool result markers>
 ```
 
-## Remaining closure slice
+## Real Provider/MCP Tool IO E2E
+
+`Real Provider/MCP Tool IO E2E` is now split into scoped claims instead of one overbroad status.
 
 ```text
-Real Provider/MCP Tool IO E2E
+local_real_provider_mcp_file_io_e2e=TV-Pass
+local_real_provider_mcp_process_delete_loopback_network_io_e2e=TV-Pass
+local_real_provider_mcp_negative_governance_io_e2e=TV-Pass
+external_provider_remote_process_io_e2e=TV-Pending
 ```
 
-Target: run real `vac-cli` interactive mode with a deterministic local provider and actual MCP/local tool implementations in a sandboxed workspace. This should prove that the same lifecycle works with real tool execution, not only deterministic event injection.
+The local harness runs real `vac-cli` interactive mode with a deterministic local provider and actual MCP/local tool implementations in a sandboxed workspace. It proves:
+
+- `create`, `str_replace`, and `view` mutate/read sandbox files through the actual MCP file path.
+- `run_command` executes a structured deterministic sandbox process.
+- `remove` deletes a sandbox target while preserving an unrelated protected file.
+- `view_web_page` fetches a loopback HTTP fixture through the network tool path. Non-loopback HTTP remains rejected; HTTPS remains the normal non-local network path.
+- negative governance paths reject missing `vac_bound_approval`, invalid shell-runner structured commands, approval binding mismatch, and non-loopback HTTP.
+
+Remote SSH execution and true external-provider credentials remain unclaimed and intentionally pending.

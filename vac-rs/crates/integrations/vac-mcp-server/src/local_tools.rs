@@ -335,6 +335,22 @@ fn vac_bound_binding_error(action: &str, target: &str, detail: &str) -> CallTool
     ])
 }
 
+fn is_loopback_http_url(parsed_url: &url::Url) -> bool {
+    if parsed_url.scheme() != "http" {
+        return false;
+    }
+    let Some(host) = parsed_url.host_str() else {
+        return false;
+    };
+    if host.eq_ignore_ascii_case("localhost") {
+        return true;
+    }
+    let normalized_host = host.trim_matches(|ch| ch == '[' || ch == ']');
+    normalized_host
+        .parse::<std::net::IpAddr>()
+        .is_ok_and(|addr| addr.is_loopback())
+}
+
 fn verify_vac_read_plan_ticket(
     ticket: &VacReadPlanTicket,
     path: &str,
@@ -1709,10 +1725,12 @@ The response will be truncated if it exceeds 300 lines, with the full content sa
             }
         };
 
-        if parsed_url.scheme() != "https" {
+        if parsed_url.scheme() != "https" && !is_loopback_http_url(&parsed_url) {
             return Ok(CallToolResult::error(vec![
                 Content::text("INSECURE_URL"),
-                Content::text("Only HTTPS URLs are allowed for security reasons"),
+                Content::text(
+                    "Only HTTPS URLs are allowed, except loopback HTTP URLs used for local VAC-governed tooling.",
+                ),
             ]));
         }
 
@@ -4117,6 +4135,21 @@ mod tests {
             result.is_err(),
             "RunCommandRequest must reject unknown 'password' field"
         );
+    }
+
+    #[test]
+    fn view_web_page_allows_only_loopback_http_exception() {
+        let loopback_v4 = url::Url::parse("http://127.0.0.1:41731/fixture.html").unwrap();
+        let loopback_v6 = url::Url::parse("http://[::1]:41731/fixture.html").unwrap();
+        let localhost = url::Url::parse("http://localhost:41731/fixture.html").unwrap();
+        let external_http = url::Url::parse("http://example.com/fixture.html").unwrap();
+        let external_https = url::Url::parse("https://example.com/fixture.html").unwrap();
+
+        assert!(is_loopback_http_url(&loopback_v4));
+        assert!(is_loopback_http_url(&loopback_v6));
+        assert!(is_loopback_http_url(&localhost));
+        assert!(!is_loopback_http_url(&external_http));
+        assert!(!is_loopback_http_url(&external_https));
     }
 
     fn local_container_with_profile(profile_name: Option<&str>) -> ToolContainer {

@@ -132,51 +132,158 @@ def with_approval(tool_call_id: str, tool_name: str, args: dict[str, Any]) -> di
     return out
 
 
-def build_tool_plan() -> list[dict[str, Any]]:
+def structured_command(
+    command_id: str,
+    runner: str,
+    args: list[str],
+    *,
+    risk: str = "execute_process",
+    approval: str = "policy",
+) -> dict[str, Any]:
+    return {"id": command_id, "runner": runner, "args": args, "risk": risk, "approval": approval}
+
+
+def tool_spec(tool_call_id: str, tool_name: str, args: dict[str, Any]) -> dict[str, Any]:
+    return {"id": tool_call_id, "name": tool_name, "args": args}
+
+
+def build_positive_tool_plan(web_url: str) -> list[dict[str, Any]]:
+    command_args = {
+        "command": "printf VAC_RUN_COMMAND_OK",
+        "structured_command": structured_command(
+            "real_io.printf", "printf", ["VAC_RUN_COMMAND_OK"]
+        ),
+        "description": "deterministic sandbox command",
+        "timeout": 5,
+    }
     return [
-        {
-            "id": "call_real_create",
-            "name": "vac__create",
-            "args": with_approval(
+        tool_spec(
+            "call_real_create",
+            "vac__create",
+            with_approval(
                 "call_real_create",
                 "vac__create",
                 {"path": "work.txt", "file_text": "alpha\n"},
             ),
-        },
-        {
-            "id": "call_real_replace",
-            "name": "vac__str_replace",
-            "args": with_approval(
+        ),
+        tool_spec(
+            "call_real_replace",
+            "vac__str_replace",
+            with_approval(
                 "call_real_replace",
                 "vac__str_replace",
                 {"path": "work.txt", "old_str": "alpha", "new_str": "beta"},
             ),
-        },
-        {
-            "id": "call_real_view",
-            "name": "vac__view",
-            "args": with_approval(
+        ),
+        tool_spec(
+            "call_real_view",
+            "vac__view",
+            with_approval(
                 "call_real_view",
                 "vac__view",
                 {"path": "work.txt", "view_range": [1, -1]},
             ),
-        },
+        ),
+        tool_spec(
+            "call_real_create_delete_target",
+            "vac__create",
+            with_approval(
+                "call_real_create_delete_target",
+                "vac__create",
+                {"path": "delete-me.txt", "file_text": "delete me\n"},
+            ),
+        ),
+        tool_spec(
+            "call_real_run_command",
+            "vac__run_command",
+            with_approval("call_real_run_command", "vac__run_command", command_args),
+        ),
+        tool_spec(
+            "call_real_remove",
+            "vac__remove",
+            with_approval(
+                "call_real_remove",
+                "vac__remove",
+                {"path": "delete-me.txt", "recursive": False},
+            ),
+        ),
+        tool_spec(
+            "call_real_view_web_page",
+            "vac__view_web_page",
+            with_approval("call_real_view_web_page", "vac__view_web_page", {"url": web_url}),
+        ),
+        tool_spec("call_real_password", "vac__generate_password", {"length": 12}),
     ]
 
 
-def full_tool_plan() -> list[dict[str, Any]]:
-    plan = build_tool_plan()
-    plan.append({"id": "call_real_password", "name": "vac__generate_password", "args": {"length": 12}})
-    return plan
+def build_negative_tool_plan() -> list[dict[str, Any]]:
+    missing_approval_command = {
+        "command": "printf SHOULD_NOT_RUN",
+        "structured_command": structured_command(
+            "negative.missing_approval", "printf", ["SHOULD_NOT_RUN"]
+        ),
+        "description": "must be blocked before execution",
+        "timeout": 5,
+    }
+    denied_shell_args = {
+        "command": "sh -c touch should-not-exist.txt",
+        "structured_command": structured_command(
+            "negative.shell_runner",
+            "sh",
+            ["-c", "touch", "should-not-exist.txt"],
+        ),
+        "description": "must reject shell runner",
+        "timeout": 5,
+    }
+    remove_mismatch_args = {"path": "protected.txt", "recursive": False}
+    remove_mismatch_args["vac_bound_approval"] = approval_for(
+        "call_negative_remove_binding_mismatch",
+        "vac__remove",
+        {"path": "delete-me.txt", "recursive": False},
+    )
+    return [
+        tool_spec(
+            "call_negative_run_command_missing_approval",
+            "vac__run_command",
+            missing_approval_command,
+        ),
+        tool_spec(
+            "call_negative_run_command_shell_runner",
+            "vac__run_command",
+            with_approval(
+                "call_negative_run_command_shell_runner",
+                "vac__run_command",
+                denied_shell_args,
+            ),
+        ),
+        tool_spec(
+            "call_negative_remove_binding_mismatch",
+            "vac__remove",
+            remove_mismatch_args,
+        ),
+        tool_spec(
+            "call_negative_view_web_page_non_loopback_http",
+            "vac__view_web_page",
+            with_approval(
+                "call_negative_view_web_page_non_loopback_http",
+                "vac__view_web_page",
+                {"url": "http://example.com/"},
+            ),
+        ),
+    ]
+
+
+def full_tool_plan(web_url: str) -> list[dict[str, Any]]:
+    return build_positive_tool_plan(web_url) + build_negative_tool_plan()
 
 
 class ProviderState:
-    def __init__(self) -> None:
+    def __init__(self, web_url: str) -> None:
         self.lock = threading.Lock()
         self.step = 0
         self.requests: list[dict[str, Any]] = []
         self.paths: list[str] = []
-        self.tool_plan = full_tool_plan()
+        self.tool_plan = full_tool_plan(web_url)
         self.seen_tool_results: list[str] = []
 
     def next_response(self, request: dict[str, Any]) -> dict[str, Any]:
@@ -331,8 +438,8 @@ def free_port() -> int:
         return int(sock.getsockname()[1])
 
 
-def start_provider(port: int) -> tuple[socketserver.ThreadingTCPServer, ProviderState]:
-    state = ProviderState()
+def start_provider(port: int, web_url: str) -> tuple[socketserver.ThreadingTCPServer, ProviderState]:
+    state = ProviderState(web_url)
 
     class Handler(ProviderHandler):
         pass
@@ -342,6 +449,30 @@ def start_provider(port: int) -> tuple[socketserver.ThreadingTCPServer, Provider
     server.daemon_threads = True
     threading.Thread(target=server.serve_forever, daemon=True).start()
     return server, state
+
+
+class LoopbackContentHandler(http.server.BaseHTTPRequestHandler):
+    def log_message(self, _fmt: str, *_args: Any) -> None:
+        return
+
+    def do_GET(self) -> None:  # noqa: N802
+        body = (
+            "<html><head><title>VAC Loopback Fixture</title></head>"
+            "<body><h1>VAC_LOOPBACK_WEB_OK</h1>"
+            "<p>local governed network fixture</p></body></html>"
+        ).encode("utf-8")
+        self.send_response(200)
+        self.send_header("content-type", "text/html; charset=utf-8")
+        self.send_header("content-length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+
+def start_loopback_content_server(port: int) -> socketserver.ThreadingTCPServer:
+    server = socketserver.ThreadingTCPServer(("127.0.0.1", port), LoopbackContentHandler)
+    server.daemon_threads = True
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    return server
 
 
 def set_pty_size(fd: int, rows: int = 48, cols: int = 140) -> None:
@@ -390,6 +521,7 @@ def find_vac_binary(root: Path) -> list[str]:
 
 def write_sandbox(sandbox: Path, provider_port: int) -> Path:
     (sandbox / ".vac").mkdir(parents=True, exist_ok=True)
+    (sandbox / "protected.txt").write_text("protected\n", encoding="utf-8")
     config_path = sandbox / ".vac" / "config.toml"
     config_path.write_text(
         f'''
@@ -404,8 +536,8 @@ editor = "true"
 provider = "local"
 model = "offline/vac-real-io-e2e"
 api_endpoint = "http://127.0.0.1:{provider_port}"
-allowed_tools = ["vac__create", "vac__str_replace", "vac__view", "vac__generate_password"]
-auto_approve = ["vac__create", "vac__str_replace", "vac__view", "vac__generate_password"]
+allowed_tools = ["vac__create", "vac__str_replace", "vac__view", "vac__run_command", "vac__remove", "vac__view_web_page", "vac__generate_password"]
+auto_approve = ["vac__create", "vac__str_replace", "vac__view", "vac__run_command", "vac__remove", "vac__view_web_page", "vac__generate_password"]
 
 [profiles.default.providers.offline]
 type = "custom"
@@ -527,8 +659,15 @@ def run_vac(root: Path, sandbox: Path, config_path: Path, timeout: float) -> tup
 def assert_sandbox_effects(sandbox: Path) -> list[str]:
     errors: list[str] = []
     work = sandbox / "work.txt"
-    if not work.exists() or work.read_text() != "beta\n":
+    if not work.exists() or work.read_text(encoding="utf-8") != "beta\n":
         errors.append("work.txt was not created and rewritten to beta by actual MCP file tools")
+    if (sandbox / "delete-me.txt").exists():
+        errors.append("delete-me.txt still exists after actual MCP remove tool")
+    protected = sandbox / "protected.txt"
+    if not protected.exists() or protected.read_text(encoding="utf-8") != "protected\n":
+        errors.append("protected.txt was changed despite remove binding-mismatch negative path")
+    if (sandbox / "should-not-exist.txt").exists():
+        errors.append("should-not-exist.txt was created despite denied structured-command negative path")
     return errors
 
 
@@ -542,7 +681,10 @@ def main() -> int:
 
     root = Path(args.root).resolve()
     provider_port = free_port()
-    server, state = start_provider(provider_port)
+    content_port = free_port()
+    web_url = f"http://127.0.0.1:{content_port}/fixture.html"
+    server, state = start_provider(provider_port, web_url)
+    content_server = start_loopback_content_server(content_port)
     tmp = tempfile.TemporaryDirectory(prefix="vac-real-io-e2e-")
     sandbox = Path(tmp.name)
     keep = args.keep_sandbox
@@ -550,7 +692,11 @@ def main() -> int:
         config_path = write_sandbox(sandbox, provider_port)
         code, output = run_vac(root, sandbox, config_path, args.timeout)
         text = decode(output)
-        visible = strip_ansi(text).lower()
+        clean_text = strip_ansi(text)
+        visible = clean_text.lower()
+        tool_results_text = "\n".join(state.seen_tool_results)
+        evidence_text = (clean_text + "\n" + tool_results_text).replace("\\_", "_")
+        evidence_lower = evidence_text.lower()
         if args.dump:
             sys.stdout.write(text)
         checks = {
@@ -562,7 +708,16 @@ def main() -> int:
             "visible_create": "create" in visible and "work.txt" in visible,
             "visible_replace": "str_replace" in visible or "str replace" in visible,
             "visible_view": "view" in visible,
+            "visible_run_command": "run_command" in visible or "run command" in visible,
+            "visible_remove": "remove" in visible or "delete-me.txt" in visible,
+            "visible_view_web_page": "view_web_page" in visible or "view web page" in visible,
             "visible_generate_password": "generate_password" in visible or "generate password" in visible,
+            "tool_result_run_command": "VAC_RUN_COMMAND_OK" in evidence_text,
+            "tool_result_loopback_web": "VAC_LOOPBACK_WEB_OK" in evidence_text,
+            "negative_missing_bound_approval": "vac_bound_approval_required" in evidence_lower,
+            "negative_structured_command_rejected": "vac_structured_command_required" in evidence_lower,
+            "negative_binding_mismatch_rejected": "vac_bound_approval_binding_mismatch" in evidence_lower,
+            "negative_non_loopback_http_rejected": "insecure_url" in evidence_lower,
         }
         failed = [name for name, ok in checks.items() if not ok]
         failed.extend(assert_sandbox_effects(sandbox))
@@ -583,13 +738,16 @@ def main() -> int:
         print(f"sandbox={sandbox}")
         print(f"chat_requests={len(state.requests)}")
         print(f"tool_results_seen={len(state.seen_tool_results)}")
-        print("actual_io=create,str_replace,view,generate_password")
+        print("actual_io=create,str_replace,view,generate_password,run_command,remove,view_web_page")
+        print("negative_io=missing_bound_approval,structured_command_reject,binding_mismatch,non_loopback_http_reject")
         for name in checks:
             print(f"- {name}")
         return 0
     finally:
         server.shutdown()
         server.server_close()
+        content_server.shutdown()
+        content_server.server_close()
         if keep:
             print(f"kept_sandbox={sandbox}")
         else:

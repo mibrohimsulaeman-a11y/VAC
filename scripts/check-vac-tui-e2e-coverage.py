@@ -104,7 +104,10 @@ require(
     "local_real_provider_io_harness_exists",
     "VAC real provider/MCP IO E2E" in real_io
     and "vac-real-io-e2e" in real_io
-    and "actual_io=create,str_replace,view,generate_password" in real_io
+    and "actual_io=create,str_replace,view,generate_password,run_command,remove,view_web_page" in real_io
+    and "negative_io=missing_bound_approval,structured_command_reject,binding_mismatch,non_loopback_http_reject" in real_io
+    and "VAC_LOOPBACK_WEB_OK" in real_io
+    and "protected.txt" in real_io
     and "work.txt" in real_io,
 )
 require(
@@ -162,5 +165,7 @@ print("terminal_lifecycle_smoke=TV-Pass-direct-tui")
 print("runtime_agent_e2e=TV-Pass-decoupled-from-tui")
 print("deterministic_user_agent_all_tools_tui_e2e=TV-Pass")
 print("local_real_provider_mcp_file_io_e2e=TV-Pass")
+print("local_real_provider_mcp_process_delete_loopback_network_io_e2e=TV-Pass")
+print("local_real_provider_mcp_negative_governance_io_e2e=TV-Pass")
 print("external_provider_remote_process_io_e2e=TV-Pending")
 print(f"uncovered_bridge_files={len(KEY_UNCOVERED_BRIDGE_FILES)}")
