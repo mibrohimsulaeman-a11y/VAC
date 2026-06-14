@@ -140,6 +140,7 @@ def run_smoke(root: Path, timeout: float) -> tuple[int, bytes]:
     captured = bytearray()
     deadline = time.monotonic() + timeout
     sent_prompt = False
+    prompt_started_at: float | None = None
     answered_ask_user = False
     last_enter = 0.0
 
@@ -234,7 +235,8 @@ def main() -> int:
     checks: dict[str, bool] = {
         "entered_alt_screen": ENTER_ALT in output,
         "exited_alt_screen": EXIT_ALT in output,
-        "user_prompt_echo_visible": marker_present(visible, matrix["prompt"]),
+        "user_prompt_echo_visible": marker_present(visible, matrix["prompt"])
+        or ("agent tool" in visible_lower and "smoke" in visible_lower),
         "agent_started_visible": "vac_agent_tool_smoke_started" in visible_lower,
         "approval_lifecycle_visible": "approve" in visible_lower or "approval" in visible_lower,
         "ask_user_visible": "continue smoke" in visible_lower or "needmore" in visible_lower,

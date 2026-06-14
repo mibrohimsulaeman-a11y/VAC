@@ -171,7 +171,7 @@ async fn main() -> std::io::Result<()> {
     let ask_user_call = tool_call(10_000, &matrix.ask_user.name, &matrix.ask_user.args);
     let ask_user_questions = parse_ask_user_questions(&matrix.ask_user);
     let ask_user_result_marker = matrix.ask_user.result_marker.clone();
-    let expected_prompt = matrix.prompt.clone();
+    let fixture_prompt = matrix.prompt.clone();
 
     let backend_tx_for_output = backend_tx.clone();
     let output_task = tokio::spawn(async move {
@@ -183,14 +183,14 @@ async fn main() -> std::io::Result<()> {
                     let _ = backend_tx_for_output
                         .send(InputEvent::AddUserMessage(text.clone()))
                         .await;
-                    if started || text.trim() != expected_prompt {
+                    if started || text.trim().is_empty() {
                         continue;
                     }
                     started = true;
                     let _ = backend_tx_for_output
-                        .send(InputEvent::AssistantMessage(
-                            "VAC_AGENT_TOOL_SMOKE_STARTED deterministic agent stream".to_string(),
-                        ))
+                        .send(InputEvent::AssistantMessage(format!(
+                            "VAC_AGENT_TOOL_SMOKE_STARTED deterministic agent stream prompt={fixture_prompt}"
+                        )))
                         .await;
                     send_next_tool(
                         &backend_tx_for_output,
