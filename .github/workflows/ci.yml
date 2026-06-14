@@ -43,6 +43,10 @@ jobs:
       - name: TUI Agent Tool Lifecycle Smoke
         run: ./scripts/pty-tui-agent-tool-lifecycle-smoke.py .
 
+
+      - name: Local Provider IO Smoke
+        run: ./scripts/pty-vac-cli-real-io-e2e.py .
+
       - name: Test
         run: cargo test --manifest-path vac-rs/Cargo.toml --workspace --verbose
 

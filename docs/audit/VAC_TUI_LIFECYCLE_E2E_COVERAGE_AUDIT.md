@@ -1,6 +1,6 @@
 # VAC TUI Lifecycle E2E Coverage Audit
 
-Status: **TV-Pass for deterministic TUI agent all-tools harness; TV-Pending for real provider/MCP IO E2E**.
+Status: **TV-Pass for deterministic TUI agent all-tools harness and local real-provider/MCP file IO E2E; TV-Pending for external provider/remote/process IO E2E**.
 
 This audit answers a narrow question: do existing unit/integration/smoke tests cover the lifecycle of a real user using the TUI with an agent and all available tools?
 
@@ -16,7 +16,8 @@ This is **not** a real provider/MCP IO test. It does not execute the actual MCP 
 
 ```text
 deterministic_user_agent_all_tools_tui_e2e=TV-Pass
-real_provider_mcp_all_tools_tui_e2e=TV-Pending
+local_real_provider_mcp_file_io_e2e=TV-Pass
+external_provider_remote_process_io_e2e=TV-Pending
 ```
 
 ## Current coverage map

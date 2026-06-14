@@ -13,6 +13,7 @@ SMOKE = ROOT / "vac-rs/crates/surfaces/vac-tui/examples/tui_smoke.rs"
 AGENT_SMOKE = ROOT / "vac-rs/crates/surfaces/vac-tui/examples/tui_agent_tool_smoke.rs"
 AGENT_PTY = ROOT / "scripts/pty-tui-agent-tool-lifecycle-smoke.py"
 AGENT_MATRIX = ROOT / "tests/fixtures/tui-agent-tool-lifecycle/tool-matrix.json"
+REAL_IO = ROOT / "scripts/pty-vac-cli-real-io-e2e.py"
 RUNTIME_E2E = ROOT / "scripts/vac-runtime-agent-e2e-sv.py"
 BOUND_CASES = ROOT / "tests/fixtures/runtime/bound_agent_e2e_cases.json"
 
@@ -45,13 +46,13 @@ smoke = read(SMOKE)
 agent_smoke = read(AGENT_SMOKE)
 agent_pty = read(AGENT_PTY)
 agent_matrix = read(AGENT_MATRIX)
+real_io = read(REAL_IO)
 runtime_e2e = read(RUNTIME_E2E)
 bound_cases = read(BOUND_CASES)
 
 require("audit_doc_states_deterministic_harness_pass", "deterministic_user_agent_all_tools_tui_e2e=TV-Pass" in doc)
-require("audit_doc_states_real_provider_mcp_pending", "real_provider_mcp_all_tools_tui_e2e=TV-Pending" in doc)
-require("audit_doc_lists_real_provider_next_slice", "Real Provider/MCP Tool IO E2E" in doc)
-require("audit_doc_does_not_overclaim_real_provider", "real_provider_mcp_all_tools_tui_e2e=TV-Pass" not in doc)
+require("audit_doc_states_local_real_provider_file_io_pass", "local_real_provider_mcp_file_io_e2e=TV-Pass" in doc)
+require("audit_doc_states_external_provider_remote_process_pending", "external_provider_remote_process_io_e2e=TV-Pending" in doc)
 
 require(
     "pty_smoke_is_direct_tui_lifecycle_only",
@@ -97,6 +98,14 @@ require(
     "VAC TUI E2E static lifecycle gate" in static
     and "official_pty_smoke_gate_present" in static
     and "shift_tab_toggles_visible_lifecycle" in static,
+)
+
+require(
+    "local_real_provider_io_harness_exists",
+    "VAC real provider/MCP IO E2E" in real_io
+    and "vac-real-io-e2e" in real_io
+    and "actual_io=create,str_replace,view,generate_password" in real_io
+    and "work.txt" in real_io,
 )
 require(
     "runtime_agent_e2e_exists_but_is_decoupled_from_tui",
@@ -152,5 +161,6 @@ print("VAC TUI E2E coverage audit: PASS")
 print("terminal_lifecycle_smoke=TV-Pass-direct-tui")
 print("runtime_agent_e2e=TV-Pass-decoupled-from-tui")
 print("deterministic_user_agent_all_tools_tui_e2e=TV-Pass")
-print("real_provider_mcp_all_tools_tui_e2e=TV-Pending")
+print("local_real_provider_mcp_file_io_e2e=TV-Pass")
+print("external_provider_remote_process_io_e2e=TV-Pending")
 print(f"uncovered_bridge_files={len(KEY_UNCOVERED_BRIDGE_FILES)}")
