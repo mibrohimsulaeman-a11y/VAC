@@ -113,6 +113,7 @@ def run_smoke(root: Path, timeout: float) -> tuple[int, bytes]:
 
     matrix = load_matrix(root)
     prompt = matrix["prompt"].encode()
+    type_prompt = os.environ.get("VAC_TUI_AGENT_TOOL_TYPE_PROMPT") == "1"
 
     env = os.environ.copy()
     env.setdefault("TERM", "xterm-256color")

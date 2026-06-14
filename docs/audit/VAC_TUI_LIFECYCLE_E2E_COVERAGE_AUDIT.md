@@ -9,7 +9,7 @@ This audit answers a narrow question: do existing unit/integration/smoke tests c
 Partially closed. The repository now has a deterministic PTY harness that drives:
 
 ```text
-terminal user input -> TUI composer -> deterministic agent backend -> model/tool-call stream -> approval UI -> every required tool class -> tool result rendering -> ask_user response -> clean terminal shutdown
+run_tui init-prompt path -> deterministic agent backend -> model/tool-call stream -> approval UI -> every required tool class -> tool result rendering -> ask_user response -> clean terminal shutdown
 ```
 
 This is **not** a real provider/MCP IO test. It does not execute the actual MCP tools against the filesystem/network/remote hosts; it injects deterministic `InputEvent`/`OutputEvent` traffic through the real `run_tui` event loop. Therefore the proper status is:
@@ -39,7 +39,7 @@ real_provider_mcp_all_tools_tui_e2e=TV-Pending
 
 `vac-rs/crates/surfaces/vac-tui/examples/tui_smoke.rs` remains a direct terminal lifecycle harness. It proves alt-screen/raw-mode cleanup and selected UI routes.
 
-`vac-rs/crates/surfaces/vac-tui/examples/tui_agent_tool_smoke.rs` is the deterministic agent/tool lifecycle harness. It listens to `OutputEvent::UserMessage`, emits assistant/tool streams, waits for `OutputEvent::AcceptTool`, emits `InputEvent::ToolResult`, drives `ShowAskUserPopup`, waits for `OutputEvent::AskUserResponse`, and exits through the real `run_tui` event loop.
+`vac-rs/crates/surfaces/vac-tui/examples/tui_agent_tool_smoke.rs` is the deterministic agent/tool lifecycle harness. It feeds the fixture prompt through `run_tui`'s init-prompt path, listens to `OutputEvent::UserMessage`, emits assistant/tool streams, waits for `OutputEvent::AcceptTool`, emits `InputEvent::ToolResult`, drives `ShowAskUserPopup`, waits for `OutputEvent::AskUserResponse`, and exits through the real `run_tui` event loop. Composer keystroke coverage remains in the separate direct PTY lifecycle smoke.
 
 The new harness covers the TUI bridge. It still does not execute real provider/MCP IO.
 
