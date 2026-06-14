@@ -13,7 +13,7 @@ jobs:
   rust-ci:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@master
@@ -30,6 +30,9 @@ jobs:
 
       - name: Format Check
         run: cargo fmt --manifest-path vac-rs/Cargo.toml --all -- --check
+
+      - name: VAC v1.9 SV Gate
+        run: ./scripts/vac-v19-final-sv-gate.sh
 
       - name: Lint
         run: cargo clippy --manifest-path vac-rs/Cargo.toml --workspace --all-targets -- -D warnings

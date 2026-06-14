@@ -204,3 +204,117 @@ pub fn product_path_gate(gate: &str, ok: bool, warnings: Vec<String>) -> DoctorR
 pub fn release_blocks_on(result: &DoctorResult) -> bool {
     matches!(result.status, DoctorStatus::Fail | DoctorStatus::Fatal)
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ReleaseTrustClaimInput {
+    pub execution: String,
+    pub custody: String,
+    pub proof_verified: bool,
+    pub aggregate_claim: String,
+}
+
+fn claim_contains_stronger_than_l1_local_language(claim: &str) -> bool {
+    let lower = claim.to_ascii_lowercase();
+    [
+        "audit-grade",
+        "tamper-evident",
+        "tamper evident",
+        "broker-mediated",
+        "broker mediated",
+        "ci-attested",
+        "ci attested",
+        "external-attested",
+        "external attested",
+        "enforced l2",
+        "untrusted-agent safe",
+    ]
+    .iter()
+    .any(|needle| lower.contains(needle))
+}
+
+#[must_use]
+pub fn doctor_release_trust_language(input: &ReleaseTrustClaimInput) -> DoctorResult {
+    let l1_local = input.execution == "observed_l1"
+        && matches!(input.custody.as_str(), "local_only" | "self_promoted");
+    let unverified_attestation = matches!(
+        input.custody.as_str(),
+        "ci_attested" | "broker_attested" | "external_attested"
+    ) && !input.proof_verified;
+
+    if l1_local && claim_contains_stronger_than_l1_local_language(&input.aggregate_claim) {
+        return DoctorResult::fail(
+            "release",
+            "release doctor must not overclaim L1 local/self-promoted records as audit-grade, tamper-evident, CI-attested, broker-mediated, or externally attested",
+        );
+    }
+
+    if unverified_attestation {
+        return DoctorResult::fail(
+            "release",
+            "release doctor must downgrade unverified attestation claims at read time",
+        );
+    }
+
+    let mut result = DoctorResult::pass("release");
+    if l1_local {
+        result.status = DoctorStatus::Warn;
+        result.warnings.push(
+            "release claim is L1 local/self-promoted; local evidence is an integrity hint only"
+                .to_string(),
+        );
+    }
+    result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn release_doctor_blocks_l1_local_overclaim_language() {
+        let result = doctor_release_trust_language(&ReleaseTrustClaimInput {
+            execution: "observed_l1".to_string(),
+            custody: "local_only".to_string(),
+            proof_verified: false,
+            aggregate_claim: "release is audit-grade and tamper-evident".to_string(),
+        });
+        assert_eq!(result.status, DoctorStatus::Fail);
+        assert!(result.failures[0].contains("must not overclaim L1"));
+    }
+
+    #[test]
+    fn release_doctor_warns_for_honest_l1_local_claim() {
+        let result = doctor_release_trust_language(&ReleaseTrustClaimInput {
+            execution: "observed_l1".to_string(),
+            custody: "local_only".to_string(),
+            proof_verified: false,
+            aggregate_claim: "local self-reported trace; integrity hint only".to_string(),
+        });
+        assert_eq!(result.status, DoctorStatus::Warn);
+        assert!(result.warnings[0].contains("integrity hint only"));
+    }
+
+    #[test]
+    fn release_doctor_blocks_unverified_attestation_claim() {
+        let result = doctor_release_trust_language(&ReleaseTrustClaimInput {
+            execution: "observed_l1".to_string(),
+            custody: "ci_attested".to_string(),
+            proof_verified: false,
+            aggregate_claim: "CI-attested self-report".to_string(),
+        });
+        assert_eq!(result.status, DoctorStatus::Fail);
+        assert!(result.failures[0].contains("downgrade unverified attestation"));
+    }
+
+    #[test]
+    fn release_aggregation_fails_when_required_gate_missing() {
+        let report = doctor_release_with_v1_5_gates(vec![DoctorResult::pass("spec_sync")]);
+        assert_eq!(report.status(), DoctorStatus::Fail);
+        assert!(
+            report
+                .checks
+                .iter()
+                .any(|check| check.gate == "assessment_freshness" && check.blocks_release())
+        );
+    }
+}

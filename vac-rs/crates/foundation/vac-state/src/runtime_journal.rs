@@ -162,6 +162,178 @@ fn blocked(reason: &str) -> RuntimeJournalAppendDecision {
     }
 }
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum ManifestSyncClassification {
+    Current,
+    BranchDrift,
+    StaleManifest,
+    GhostState,
+    OrphanState,
+}
+
+impl ManifestSyncClassification {
+    #[must_use]
+    pub fn action_label(self) -> &'static str {
+        match self {
+            Self::Current => "usable",
+            Self::BranchDrift => "warn_keep_usable",
+            Self::StaleManifest => "mark_stale_block_authorization",
+            Self::GhostState => "quarantine_require_plan_or_decision_refresh",
+            Self::OrphanState => "quarantine_require_operator_review",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ManifestSyncRecordProbe {
+    pub record_manifest_set_hash: String,
+    pub current_manifest_set_hash: String,
+    pub known_snapshot_hashes: Vec<String>,
+    pub git_head_changed: bool,
+    pub would_authorize_current_action: bool,
+}
+
+#[must_use]
+pub fn classify_manifest_sync_record(
+    probe: &ManifestSyncRecordProbe,
+) -> ManifestSyncClassification {
+    if probe.record_manifest_set_hash.trim().is_empty()
+        || !probe
+            .known_snapshot_hashes
+            .iter()
+            .any(|hash| hash == &probe.record_manifest_set_hash)
+    {
+        return ManifestSyncClassification::OrphanState;
+    }
+
+    if probe.record_manifest_set_hash != probe.current_manifest_set_hash {
+        return if probe.would_authorize_current_action {
+            ManifestSyncClassification::GhostState
+        } else {
+            ManifestSyncClassification::StaleManifest
+        };
+    }
+
+    if probe.git_head_changed {
+        ManifestSyncClassification::BranchDrift
+    } else {
+        ManifestSyncClassification::Current
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RuntimeDecisionAuthorizationRequest {
+    pub decision_id: String,
+    pub decision_manifest_set_hash: String,
+    pub current_manifest_set_hash: String,
+    pub locked: bool,
+    pub superseded_by: Option<String>,
+    pub would_authorize_current_action: bool,
+}
+
+#[must_use]
+pub fn evaluate_runtime_decision_authorization(
+    request: &RuntimeDecisionAuthorizationRequest,
+) -> RuntimeJournalAppendDecision {
+    if request.decision_id.trim().is_empty() {
+        return blocked("decision_id missing");
+    }
+    if !request.locked {
+        return blocked("decision is not locked");
+    }
+    if request.superseded_by.is_some() {
+        return blocked("decision has been superseded");
+    }
+    if request.decision_manifest_set_hash != request.current_manifest_set_hash {
+        return if request.would_authorize_current_action {
+            blocked("ghost_state: stale decision cannot authorize current action")
+        } else {
+            blocked("stale_manifest: refresh decision under current manifest_set_hash")
+        };
+    }
+
+    RuntimeJournalAppendDecision {
+        allow: true,
+        reason: "locked current-manifest decision may authorize scoped work".to_string(),
+        required_transaction: "BEGIN IMMEDIATE".to_string(),
+        writes_manifest_bound_record: true,
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RuntimeDerivedTrust {
+    pub execution: String,
+    pub custody: String,
+    pub derivation: String,
+    pub downgrade_reason: Option<String>,
+    pub wording: String,
+}
+
+fn custody_requires_proof(custody: &str) -> bool {
+    matches!(
+        custody,
+        "ci_attested" | "broker_attested" | "external_attested"
+    )
+}
+
+#[must_use]
+pub fn derive_runtime_trust_at_read(
+    claim: &RuntimeTrustClaim,
+    proof_material_verified: bool,
+) -> RuntimeDerivedTrust {
+    if custody_requires_proof(&claim.custody) && !proof_material_verified {
+        return RuntimeDerivedTrust {
+            execution: claim.execution.clone(),
+            custody: "self_promoted".to_string(),
+            derivation: "verified_downgrade".to_string(),
+            downgrade_reason: Some("missing_or_invalid_proof".to_string()),
+            wording: "shared cooperative record; not tamper-evident".to_string(),
+        };
+    }
+
+    let wording = match (claim.execution.as_str(), claim.custody.as_str()) {
+        ("observed_l1", "local_only") => "local self-reported trace; integrity hint only",
+        ("observed_l1", "self_promoted") => "shared cooperative record; not tamper-evident",
+        ("observed_l1", "ci_attested") => "CI-attested self-report; execution not mediated",
+        ("mediated_l2", "broker_attested") => "broker-attested mediated execution",
+        _ => "derived trust claim requires explicit surface wording",
+    };
+
+    RuntimeDerivedTrust {
+        execution: claim.execution.clone(),
+        custody: claim.custody.clone(),
+        derivation: "verified".to_string(),
+        downgrade_reason: None,
+        wording: wording.to_string(),
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RuntimeDbMutationProbe {
+    pub command_id: String,
+    pub before_hashes: Vec<String>,
+    pub after_hashes: Vec<String>,
+}
+
+#[must_use]
+pub fn evaluate_subprocess_runtime_db_mutation(
+    probe: &RuntimeDbMutationProbe,
+) -> RuntimeJournalAppendDecision {
+    if probe.before_hashes != probe.after_hashes {
+        return blocked("runtime_db_touched_by_subprocess");
+    }
+    RuntimeJournalAppendDecision {
+        allow: true,
+        reason: format!(
+            "structured command {} did not mutate .vac/db/**",
+            probe.command_id
+        ),
+        required_transaction: "BEGIN IMMEDIATE".to_string(),
+        writes_manifest_bound_record: true,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -265,5 +437,84 @@ mod tests {
         assert!(current.allow);
         assert_eq!(current.required_transaction, "BEGIN IMMEDIATE");
         assert!(current.writes_manifest_bound_record);
+    }
+
+    #[test]
+    fn manifest_sync_classifies_ghost_and_orphan_state() {
+        let known_snapshot_hashes = vec!["sha256:old".to_string(), "sha256:current".to_string()];
+
+        let ghost = classify_manifest_sync_record(&ManifestSyncRecordProbe {
+            record_manifest_set_hash: "sha256:old".to_string(),
+            current_manifest_set_hash: "sha256:current".to_string(),
+            known_snapshot_hashes: known_snapshot_hashes.clone(),
+            git_head_changed: false,
+            would_authorize_current_action: true,
+        });
+        assert_eq!(ghost, ManifestSyncClassification::GhostState);
+        assert_eq!(
+            ghost.action_label(),
+            "quarantine_require_plan_or_decision_refresh"
+        );
+
+        let orphan = classify_manifest_sync_record(&ManifestSyncRecordProbe {
+            record_manifest_set_hash: "sha256:unknown".to_string(),
+            current_manifest_set_hash: "sha256:current".to_string(),
+            known_snapshot_hashes,
+            git_head_changed: false,
+            would_authorize_current_action: false,
+        });
+        assert_eq!(orphan, ManifestSyncClassification::OrphanState);
+        assert_eq!(orphan.action_label(), "quarantine_require_operator_review");
+    }
+
+    #[test]
+    fn stale_decision_cannot_authorize_current_action() {
+        let decision =
+            evaluate_runtime_decision_authorization(&RuntimeDecisionAuthorizationRequest {
+                decision_id: "decision.test".to_string(),
+                decision_manifest_set_hash: "sha256:old".to_string(),
+                current_manifest_set_hash: "sha256:current".to_string(),
+                locked: true,
+                superseded_by: None,
+                would_authorize_current_action: true,
+            });
+        assert!(!decision.allow);
+        assert!(decision.reason.contains("ghost_state"));
+        assert!(decision.reason.contains("stale decision cannot authorize"));
+    }
+
+    #[test]
+    fn derived_trust_downgrades_unverified_attestation_at_read_time() {
+        let claim = RuntimeTrustClaim {
+            execution: "observed_l1".to_string(),
+            custody: "ci_attested".to_string(),
+            proof_ref: Some("proof.missing".to_string()),
+        };
+        let derived = derive_runtime_trust_at_read(&claim, false);
+        assert_eq!(derived.custody, "self_promoted");
+        assert_eq!(derived.derivation, "verified_downgrade");
+        assert_eq!(
+            derived.downgrade_reason.as_deref(),
+            Some("missing_or_invalid_proof")
+        );
+        assert!(derived.wording.contains("not tamper-evident"));
+    }
+
+    #[test]
+    fn subprocess_runtime_db_mutation_blocks_completion() {
+        let touched = evaluate_subprocess_runtime_db_mutation(&RuntimeDbMutationProbe {
+            command_id: "cargo.test.core".to_string(),
+            before_hashes: vec!["runtime.db=sha256:before".to_string()],
+            after_hashes: vec!["runtime.db=sha256:after".to_string()],
+        });
+        assert!(!touched.allow);
+        assert_eq!(touched.reason, "runtime_db_touched_by_subprocess");
+
+        let clean = evaluate_subprocess_runtime_db_mutation(&RuntimeDbMutationProbe {
+            command_id: "cargo.test.core".to_string(),
+            before_hashes: vec!["runtime.db=sha256:same".to_string()],
+            after_hashes: vec!["runtime.db=sha256:same".to_string()],
+        });
+        assert!(clean.allow);
     }
 }
