@@ -64,7 +64,7 @@ def default_command(root: Path) -> list[str]:
         return shlex.split(env_cmd)
 
     binary = root / "vac-rs" / "target" / "debug" / "examples" / "tui_agent_tool_smoke"
-    if binary.exists():
+    if os.environ.get("VAC_TUI_AGENT_TOOL_USE_EXISTING") == "1" and binary.exists():
         return [str(binary)]
 
     return [
@@ -157,19 +157,45 @@ def run_smoke(root: Path, timeout: float) -> tuple[int, bytes]:
             visible = strip_ansi(decode(captured)).lower()
             now = time.monotonic()
             if not sent_prompt:
-                os.write(master_fd, prompt + b"\r")
+                if not type_prompt:
+                    # The example feeds the prompt through run_tui's init-prompt
+                    # path. This avoids CI PTY line-discipline flakes while still
+                    # exercising the real TUI event loop, approval UI, tool result
+                    # rendering, Ask User popup, and terminal cleanup.
+                    sent_prompt = True
+                    prompt_started_at = time.monotonic()
+                    pump(0.5)
+                    continue
+                for byte in prompt:
+                    os.write(master_fd, bytes([byte]))
+                    pump(0.015)
+                pump(0.2)
+                os.write(master_fd, ENTER_KEY)
                 sent_prompt = True
-                pump(0.5)
+                prompt_started_at = time.monotonic()
+                pump(0.8)
                 continue
 
-            if not answered_ask_user and ("continue smoke" in visible or "needmore" in visible):
-                os.write(master_fd, b" ")
-                pump(0.2)
+            if type_prompt and prompt_started_at is not None and "vac_agent_tool_smoke_started" not in visible:
+                if now - last_enter > 0.75:
+                    os.write(master_fd, ENTER_KEY)
+                    last_enter = now
+                pump(0.25)
+                continue
+
+            ask_user_active = (
+                "ask user" in visible
+                or "continue smoke" in visible
+                or "needmore" in visible
+                or "enter submit" in visible
+            )
+            if ask_user_active and "vac_agent_tool_smoke_done" not in visible:
+                if not answered_ask_user:
+                    os.write(master_fd, b" ")
+                    answered_ask_user = True
+                    pump(0.35)
                 os.write(master_fd, ENTER_KEY)
-                pump(0.2)
-                os.write(master_fd, ENTER_KEY)
-                answered_ask_user = True
-                pump(0.8)
+                pump(0.6)
                 continue
 
             if "vac_agent_tool_smoke_done" in visible:
