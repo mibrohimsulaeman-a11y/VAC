@@ -1,0 +1,29 @@
+schema_version: 1
+kind: intent_spec
+id: intent.vac.runtime.autopilot
+status: confirmed
+source: p1_confirmed_intent_traceability_closure
+business_processes:
+  - id: vac.autopilot.runtime_orchestration
+    description: "Autopilot orchestrates scheduled and continuous workflows without bypassing VAC gates, weakening sandbox/process/network policy, or hiding config reload authority changes."
+    required_capability: vac.runtime.agent_loop
+    invariants:
+      - autopilot_does_not_bypass_policy_gate
+      - autopilot_schedule_config_reload_is_explicit
+      - autopilot_runtime_server_loopback_refresh_is_safe
+      - autopilot_process_expansion_requires_policy
+  - id: vac.autopilot.cli_surface
+    description: "The CLI autopilot surface exposes orchestration state without becoming an alternate authority plane outside compiled VAC manifests and runtime journal state."
+    required_capability: vac.surfaces.cli
+    invariants:
+      - autopilot_cli_surface_uses_runtime_authority
+      - autopilot_cli_output_does_not_overclaim_release_readiness
+expected_code:
+  modules:
+    - vac-rs/crates/runtime/vac-autopilot
+    - vac-rs/crates/surfaces/vac-cli/src/commands/autopilot
+    - vac-rs/crates/surfaces/vac-cli/src/commands/autopilot/mod.rs
+out_of_scope:
+  - continuous_workflow_release_claims_without_gates
+  - sandbox_or_network_policy_downgrade_by_autopilot
+  - unbounded_background_execution_authority

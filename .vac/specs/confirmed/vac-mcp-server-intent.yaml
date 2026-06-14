@@ -1,0 +1,24 @@
+schema_version: 1
+kind: intent_spec
+id: intent.vac.integrations.mcp_server
+status: confirmed
+source: p1_confirmed_intent_traceability_closure
+business_processes:
+  - id: vac.mcp_server.local_tool_boundary
+    description: "MCP local tools are execution boundaries: mutation, process, and network operations require bound approval, structured commands reject shell/path runners, and approval binding is recomputed against the actual MCP payload."
+    required_capability: vac.integrations.mcp
+    invariants:
+      - mcp_mutation_requires_bound_approval
+      - mcp_process_requires_structured_command
+      - mcp_recomputes_binding_hash
+      - mcp_rejects_binding_target_mismatch
+      - mcp_non_loopback_http_requires_https
+      - mcp_loopback_http_fixture_allowed
+expected_code:
+  modules:
+    - vac-rs/crates/integrations/vac-mcp-server
+    - scripts/pty-vac-cli-real-io-e2e.py
+out_of_scope:
+  - non_loopback_plain_http_allowance
+  - unbound_mutating_mcp_tool_execution
+  - remote_process_io_tv_pass_without_remote_fixture

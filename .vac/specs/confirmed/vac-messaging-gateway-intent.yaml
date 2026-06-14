@@ -1,0 +1,22 @@
+schema_version: 1
+kind: intent_spec
+id: intent.vac.integrations.messaging_gateway
+status: confirmed
+source: p1_confirmed_intent_traceability_closure
+business_processes:
+  - id: vac.messaging_gateway.notification_boundary
+    description: "Messaging gateway dispatches notifications and delivery state but never becomes runtime authority, never authorizes VAC-managed actions, and never upgrades evidence custody claims."
+    required_capability: vac.integrations.messaging_gateway
+    invariants:
+      - messaging_gateway_is_notification_only
+      - messaging_gateway_never_authorizes_runtime_action
+      - messaging_tokens_redacted
+      - delivery_failure_is_explicit
+      - gateway_evidence_custody_not_upgraded
+expected_code:
+  modules:
+    - vac-rs/crates/integrations/vac-messaging-gateway
+out_of_scope:
+  - messaging_delivery_as_policy_authority
+  - raw_secret_or_token_evidence_persistence
+  - delivery_success_as_trust_upgrade

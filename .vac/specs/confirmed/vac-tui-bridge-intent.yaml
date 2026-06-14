@@ -1,0 +1,27 @@
+schema_version: 1
+kind: intent_spec
+id: intent.vac.surfaces.tui_bridge
+status: confirmed
+source: p1_confirmed_intent_traceability_closure
+business_processes:
+  - id: vac.tui_bridge.tool_lifecycle_truth
+    description: "TUI bridge displays agent, approval, tool, Ask User, result, error, and completion lifecycle state truthfully without replacing backend completion with mock runtime truth."
+    required_capability: vac.surfaces.tui
+    invariants:
+      - tui_tool_pending_visible
+      - tui_tool_result_visible
+      - tui_ask_user_response_visible
+      - tui_done_marker_requires_backend_completion
+      - tui_no_mock_runtime_tabs
+      - tui_ci_smoke_no_timing_race
+expected_code:
+  modules:
+    - vac-rs/crates/surfaces/vac-tui/src/event_loop.rs
+    - vac-rs/crates/surfaces/vac-tui/src/services/handlers/dialog.rs
+    - vac-rs/crates/surfaces/vac-tui/src/services/handlers/tool.rs
+    - vac-rs/crates/surfaces/vac-tui/src/services/handlers/shell.rs
+    - scripts/pty-tui-agent-tool-lifecycle-smoke.py
+out_of_scope:
+  - external_provider_remote_process_io_e2e_tv_pass_claim
+  - production_maturity_claim_for_uncovered_bridge_unit_tests
+  - mock_provider_truth_as_runtime_truth

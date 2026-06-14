@@ -1,16 +1,36 @@
 {
-  "compiled_snapshot_hash": "sha256:462a44c92196391437e40445f9180ee4a19db8532ceb01a5a93d8e6457895a84",
+  "compiled_snapshot_hash": "sha256:4235937ee0560b19b9797c29f85377b57a52923a668237374d0186ec7c7bd164",
   "control_plane": {
     "audit": "jcs_json",
     "authoring": "yaml",
     "capabilities_snapshot_hash": "sha256:d2b8bf2cdae622bbf711bb32e89c35a5863bb206ac048dbdfc681e693aaafd33",
-    "compiled_snapshot_hash": "sha256:462a44c92196391437e40445f9180ee4a19db8532ceb01a5a93d8e6457895a84",
+    "compiled_snapshot_hash": "sha256:4235937ee0560b19b9797c29f85377b57a52923a668237374d0186ec7c7bd164",
     "compiled_snapshot_location": ".vac/cache/compiled",
     "compiled_snapshots_current": true,
     "generated_mirror_location": ".vac/registry/compiled",
     "runtime": "compiled_json"
   },
   "control_plane_version": "1.9",
+  "confirmed_intent": {
+    "confirmed_intent_domain_coverage": "SV-Pass",
+    "confirmed_intent_traceability_gate": "SV-Pass",
+    "confirmed_intent_traceability": "SV-Pass",
+    "crate_without_intent_or_rationale": 0,
+    "external_provider_remote_process_io_e2e": "TV-Pending",
+    "domain_count": 7,
+    "domain_map": "tests/fixtures/confirmed-intent/domain-map.json",
+    "coverage_audit": "docs/audit/VAC_CONFIRMED_INTENT_COVERAGE_AUDIT.md",
+    "traceability_audit": "docs/audit/VAC_CONFIRMED_INTENT_TRACEABILITY.md",
+    "domains": [
+      "vac-broker",
+      "vac-provider-core",
+      "vac-mcp-server",
+      "vac-messaging-gateway",
+      "vac-remote-service",
+      "vac-autopilot",
+      "vac-tui-bridge"
+    ]
+  },
   "enforcement_level": "L1",
   "generated_at": "1970-01-01T00:00:00Z",
   "id": "status.workspace.current",
@@ -71,7 +91,7 @@
   "workspace": {
     "conformance_level": "L1",
     "enforcement_level": "L1",
-    "file_count": 714,
+    "file_count": 726,
     "rust_crate_count": 38
   }
 }

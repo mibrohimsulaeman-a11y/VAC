@@ -1,0 +1,23 @@
+schema_version: 1
+kind: intent_spec
+id: intent.vac.providers.model_core
+status: confirmed
+source: p1_confirmed_intent_traceability_closure
+business_processes:
+  - id: vac.provider_core.stream_normalization
+    description: "Provider core normalizes external model and provider streams into VAC internal events without hardcoding active model identity or silently converting provider failures into success."
+    required_capability: vac.providers.model_core
+    invariants:
+      - provider_stream_preserves_tool_call_id
+      - provider_stream_preserves_arguments
+      - provider_error_not_silent_success
+      - active_model_comes_from_runtime_state
+      - provider_adapter_does_not_authorize_tools
+expected_code:
+  modules:
+    - vac-rs/crates/providers/vac-provider-core
+    - vac-rs/crates/foundation/vac-foundation/src/models/provider_core_adapter.rs
+out_of_scope:
+  - external_provider_api_compatibility_tv_pass_without_live_provider_fixture
+  - tool_authorization_inside_provider_adapter
+  - active_model_hardcoded_into_runtime_truth

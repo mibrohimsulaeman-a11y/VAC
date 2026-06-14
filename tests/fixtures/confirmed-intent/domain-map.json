@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "fixture_id": "confirmed_intent.domain_coverage.v1",
+  "status_expectations": {
+    "confirmed_intent_domain_coverage": "SV-Pass",
+    "confirmed_intent_traceability_gate": "SV-Pass",
+    "crate_without_intent_or_rationale": 0,
+    "external_provider_remote_process_io_e2e": "TV-Pending"
+  },
+  "domains": [
+    {
+      "id": "vac-broker",
+      "required_intent": ".vac/specs/confirmed/vac-broker-intent.yaml",
+      "paths": ["vac-rs/crates/runtime/vac-broker"],
+      "capabilities": [
+        {"id": "vac.runtime.broker", "manifest": ".vac/capabilities/vac-runtime-broker.yaml"}
+      ],
+      "required_markers": [
+        "broker_action_requires_policy_decision",
+        "broker_rejects_unknown_action",
+        "broker_does_not_upgrade_l1_to_l2_claim",
+        "broker_request_boundary_no_runtime_panic",
+        "broker_evidence_claim_has_truthful_execution_axis"
+      ],
+      "doctor_gates": ["policy", "evidence", "release"],
+      "fixtures": ["FG-command-seam", "FG-policy-patch", "FG-trust-vector"],
+      "implementation_modules": ["vac-rs/crates/runtime/vac-broker"],
+      "expected_status": "SV-Pass",
+      "rationale": "Broker is a large enforcement-boundary crate; confirmed intent prevents L1/L2 semantic overclaim."
+    },
+    {
+      "id": "vac-provider-core",
+      "required_intent": ".vac/specs/confirmed/vac-provider-core-intent.yaml",
+      "paths": ["vac-rs/crates/providers/vac-provider-core", "vac-rs/crates/foundation/vac-foundation/src/models/provider_core_adapter.rs"],
+      "capabilities": [
+        {"id": "vac.providers.model_core", "manifest": ".vac/capabilities/vac-providers-model_core.yaml"}
+      ],
+      "required_markers": [
+        "provider_stream_preserves_tool_call_id",
+        "provider_stream_preserves_arguments",
+        "provider_error_not_silent_success",
+        "active_model_comes_from_runtime_state",
+        "provider_adapter_does_not_authorize_tools"
+      ],
+      "doctor_gates": ["evidence", "readiness", "release"],
+      "fixtures": ["deterministic_user_agent_all_tools_tui_e2e", "local_real_provider_mcp_file_io_e2e", "external_provider_remote_process_io_e2e"],
+      "implementation_modules": ["vac-rs/crates/providers/vac-provider-core", "vac-rs/crates/foundation/vac-foundation/src/models/provider_core_adapter.rs"],
+      "expected_status": "SV-Pass",
+      "rationale": "Provider stream normalization is semantic authority for model/tool events but must not authorize tools or hardcode runtime truth."
+    },
+    {
+      "id": "vac-mcp-server",
+      "required_intent": ".vac/specs/confirmed/vac-mcp-server-intent.yaml",
+      "paths": ["vac-rs/crates/integrations/vac-mcp-server", "scripts/pty-vac-cli-real-io-e2e.py"],
+      "capabilities": [
+        {"id": "vac.integrations.mcp", "manifest": ".vac/capabilities/vac-integrations-mcp.yaml"}
+      ],
+      "required_markers": [
+        "mcp_mutation_requires_bound_approval",
+        "mcp_process_requires_structured_command",
+        "mcp_recomputes_binding_hash",
+        "mcp_rejects_binding_target_mismatch",
+        "mcp_non_loopback_http_requires_https",
+        "mcp_loopback_http_fixture_allowed"
+      ],
+      "doctor_gates": ["command", "policy", "evidence"],
+      "fixtures": ["local_real_provider_mcp_file_io_e2e", "local_real_provider_mcp_process_delete_loopback_network_io_e2e", "local_real_provider_mcp_negative_governance_io_e2e"],
+      "implementation_modules": ["vac-rs/crates/integrations/vac-mcp-server", "scripts/pty-vac-cli-real-io-e2e.py"],
+      "expected_status": "SV-Pass",
+      "rationale": "MCP server is a local tool execution boundary; confirmed intent pins approval binding and network/process semantics."
+    },
+    {
+      "id": "vac-messaging-gateway",
+      "required_intent": ".vac/specs/confirmed/vac-messaging-gateway-intent.yaml",
+      "paths": ["vac-rs/crates/integrations/vac-messaging-gateway"],
+      "capabilities": [
+        {"id": "vac.integrations.messaging_gateway", "manifest": ".vac/capabilities/vac-integrations-messaging_gateway.yaml"}
+      ],
+      "required_markers": [
+        "messaging_gateway_is_notification_only",
+        "messaging_gateway_never_authorizes_runtime_action",
+        "messaging_tokens_redacted",
+        "delivery_failure_is_explicit",
+        "gateway_evidence_custody_not_upgraded"
+      ],
+      "doctor_gates": ["evidence", "policy"],
+      "fixtures": ["manual-review:messaging_token_redaction", "manual-review:delivery_failure_handling"],
+      "implementation_modules": ["vac-rs/crates/integrations/vac-messaging-gateway"],
+      "expected_status": "SV-Pass",
+      "rationale": "Messaging gateway is notification-only; intent prevents notification delivery from becoming authority or evidence custody upgrade."
+    },
+    {
+      "id": "vac-remote-service",
+      "required_intent": ".vac/specs/confirmed/vac-remote-service-intent.yaml",
+      "paths": ["vac-rs/crates/integrations/vac-remote-service"],
+      "capabilities": [
+        {"id": "vac.integrations.remote_service", "manifest": ".vac/capabilities/vac-integrations-remote_service.yaml"}
+      ],
+      "required_markers": [
+        "remote_unavailable_not_success",
+        "remote_execution_requires_remote_binding",
+        "remote_credential_material_redacted",
+        "remote_process_io_e2e_not_claimed_without_fixture"
+      ],
+      "doctor_gates": ["evidence", "command", "policy"],
+      "fixtures": ["future:remote_process_io_e2e", "external_provider_remote_process_io_e2e"],
+      "implementation_modules": ["vac-rs/crates/integrations/vac-remote-service"],
+      "expected_status": "SV-Pass",
+      "rationale": "Remote service must distinguish configured remote execution from local success and keep remote process E2E pending without proof."
+    },
+    {
+      "id": "vac-autopilot",
+      "required_intent": ".vac/specs/confirmed/vac-autopilot-intent.yaml",
+      "paths": ["vac-rs/crates/runtime/vac-autopilot", "vac-rs/crates/surfaces/vac-cli/src/commands/autopilot"],
+      "capabilities": [
+        {"id": "vac.runtime.agent_loop", "manifest": ".vac/capabilities/vac-runtime-agent_loop.yaml"},
+        {"id": "vac.surfaces.cli", "manifest": ".vac/capabilities/vac-surfaces-cli.yaml"}
+      ],
+      "required_markers": [
+        "autopilot_does_not_bypass_policy_gate",
+        "autopilot_schedule_config_reload_is_explicit",
+        "autopilot_runtime_server_loopback_refresh_is_safe",
+        "autopilot_process_expansion_requires_policy",
+        "autopilot_cli_surface_uses_runtime_authority",
+        "autopilot_cli_output_does_not_overclaim_release_readiness"
+      ],
+      "doctor_gates": ["policy", "command", "governance"],
+      "fixtures": ["manual-review:autopilot_config_reload", "manual-review:large_file_decomposition_debt"],
+      "implementation_modules": ["vac-rs/crates/runtime/vac-autopilot", "vac-rs/crates/surfaces/vac-cli/src/commands/autopilot"],
+      "expected_status": "SV-Pass",
+      "rationale": "Autopilot is a scheduled/continuous orchestration domain; confirmed intent prevents it from becoming a bypass path around VAC gates."
+    },
+    {
+      "id": "vac-tui-bridge",
+      "required_intent": ".vac/specs/confirmed/vac-tui-bridge-intent.yaml",
+      "paths": [
+        "vac-rs/crates/surfaces/vac-tui/src/event_loop.rs",
+        "vac-rs/crates/surfaces/vac-tui/src/services/handlers/dialog.rs",
+        "vac-rs/crates/surfaces/vac-tui/src/services/handlers/tool.rs",
+        "vac-rs/crates/surfaces/vac-tui/src/services/handlers/shell.rs",
+        "scripts/pty-tui-agent-tool-lifecycle-smoke.py"
+      ],
+      "capabilities": [
+        {"id": "vac.surfaces.tui", "manifest": ".vac/capabilities/vac-surfaces-tui.yaml"}
+      ],
+      "required_markers": [
+        "tui_tool_pending_visible",
+        "tui_tool_result_visible",
+        "tui_ask_user_response_visible",
+        "tui_done_marker_requires_backend_completion",
+        "tui_no_mock_runtime_tabs",
+        "tui_ci_smoke_no_timing_race"
+      ],
+      "doctor_gates": ["readiness", "evidence", "release"],
+      "fixtures": ["deterministic_user_agent_all_tools_tui_e2e", "local_real_provider_mcp_file_io_e2e", "local_real_provider_mcp_negative_governance_io_e2e"],
+      "implementation_modules": [
+        "vac-rs/crates/surfaces/vac-tui/src/event_loop.rs",
+        "vac-rs/crates/surfaces/vac-tui/src/services/handlers/dialog.rs",
+        "vac-rs/crates/surfaces/vac-tui/src/services/handlers/tool.rs",
+        "vac-rs/crates/surfaces/vac-tui/src/services/handlers/shell.rs",
+        "scripts/pty-tui-agent-tool-lifecycle-smoke.py"
+      ],
+      "expected_status": "SV-Pass",
+      "rationale": "TUI bridge is the user-visible agent/tool lifecycle surface; confirmed intent prevents mock runtime truth and hidden lifecycle states."
+    }
+  ]
+}

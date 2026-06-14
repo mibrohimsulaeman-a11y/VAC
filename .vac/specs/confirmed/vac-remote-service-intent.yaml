@@ -1,0 +1,21 @@
+schema_version: 1
+kind: intent_spec
+id: intent.vac.integrations.remote_service
+status: confirmed
+source: p1_confirmed_intent_traceability_closure
+business_processes:
+  - id: vac.remote_service.remote_state_boundary
+    description: "Remote service mediates remote state and operations only when configured; remote unavailability is explicit pending/fail state, not local success, and remote execution is never claimed without remote proof."
+    required_capability: vac.integrations.remote_service
+    invariants:
+      - remote_unavailable_not_success
+      - remote_execution_requires_remote_binding
+      - remote_credential_material_redacted
+      - remote_process_io_e2e_not_claimed_without_fixture
+expected_code:
+  modules:
+    - vac-rs/crates/integrations/vac-remote-service
+out_of_scope:
+  - remote_process_io_tv_pass_without_remote_fixture
+  - remote_credential_material_in_evidence
+  - local_success_substituted_for_remote_execution

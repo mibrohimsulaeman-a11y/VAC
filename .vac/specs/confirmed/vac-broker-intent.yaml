@@ -1,0 +1,22 @@
+schema_version: 1
+kind: intent_spec
+id: intent.vac.runtime.broker
+status: confirmed
+source: p1_confirmed_intent_traceability_closure
+business_processes:
+  - id: vac.broker.action_boundary
+    description: "Broker mediates filesystem, process, and network action boundaries according to compiled policy and must not claim L2 enforcement unless the action is actually broker-mediated."
+    required_capability: vac.runtime.broker
+    invariants:
+      - broker_action_requires_policy_decision
+      - broker_rejects_unknown_action
+      - broker_does_not_upgrade_l1_to_l2_claim
+      - broker_request_boundary_no_runtime_panic
+      - broker_evidence_claim_has_truthful_execution_axis
+expected_code:
+  modules:
+    - vac-rs/crates/runtime/vac-broker
+out_of_scope:
+  - os_level_isolation_claims_without_broker_mediation
+  - broker_attested_release_claim_without_proof_material
+  - external_provider_remote_process_io_e2e_tv_pass_claim
