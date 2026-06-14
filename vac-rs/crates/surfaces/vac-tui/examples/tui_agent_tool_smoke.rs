@@ -147,10 +147,12 @@ async fn send_next_tool(
             // fragile second-Enter timing on slow runners.
             sleep(Duration::from_millis(700)).await;
             let _ = ask_tx.send(InputEvent::AskUserSelectOption).await;
-            sleep(Duration::from_millis(150)).await;
+            sleep(Duration::from_millis(300)).await;
             let _ = ask_tx.send(InputEvent::AskUserConfirmQuestion).await;
-            sleep(Duration::from_millis(150)).await;
-            let _ = ask_tx.send(InputEvent::AskUserSubmit).await;
+            for _ in 0..4 {
+                sleep(Duration::from_millis(300)).await;
+                let _ = ask_tx.send(InputEvent::AskUserSubmit).await;
+            }
         });
     }
 }
