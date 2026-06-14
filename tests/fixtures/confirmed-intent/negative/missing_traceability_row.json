@@ -1,0 +1,16 @@
+{
+  "case_id": "missing_traceability_row",
+  "mutations": [
+    {
+      "op": "replace",
+      "path": "docs/audit/VAC_CONFIRMED_INTENT_TRACEABILITY.md",
+      "old": "vac-mcp-server",
+      "new": "vac_mcp_server_trace_row_absent"
+    }
+  ],
+  "expected_exit": 1,
+  "expected_substrings": [
+    "VAC confirmed intent coverage: FAIL",
+    "vac-mcp-server:trace_doc_mentions_domain"
+  ]
+}

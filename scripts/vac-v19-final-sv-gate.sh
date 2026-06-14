@@ -15,6 +15,7 @@ run fixture-coverage python3 scripts/check-vac-v19-fixture-coverage.py .
 run tui-lifecycle-static python3 scripts/check-tui-lifecycle-e2e-static.py .
 run tui-e2e-coverage python3 scripts/check-vac-tui-e2e-coverage.py .
 run confirmed-intent-coverage python3 scripts/check-confirmed-intent-coverage.py .
+run confirmed-intent-negative-fixtures python3 scripts/check-confirmed-intent-negative-fixtures.py .
 run confirmed-intent-status python3 scripts/refresh-confirmed-intent-status.py .
 run storage-classes python3 scripts/check-v19-storage-classes.py .
 run ci-workdir python3 scripts/check-ci-workdir-v19.py .

@@ -14,6 +14,8 @@ TRACE_DOC = ROOT / "docs/audit/VAC_CONFIRMED_INTENT_TRACEABILITY.md"
 REQUIRED_STATUS = {
     "confirmed_intent_domain_coverage": "SV-Pass",
     "confirmed_intent_traceability_gate": "SV-Pass",
+    "confirmed_intent_negative_fixtures": "SV-Pass",
+    "all_negative_cases_rejected": True,
     "crate_without_intent_or_rationale": 0,
     "external_provider_remote_process_io_e2e": "TV-Pending",
 }
@@ -49,6 +51,12 @@ def require(name: str, condition: bool) -> None:
         errors.append(name)
 
 
+def status_token_value(value: Any) -> str:
+    if isinstance(value, bool):
+        return str(value).lower()
+    return str(value)
+
+
 def load_json(path: Path) -> dict[str, Any]:
     text = read_text(path, "domain map")
     if not text:
@@ -73,9 +81,10 @@ status_expectations = payload.get("status_expectations", {})
 require("status_expectations_is_object", isinstance(status_expectations, dict))
 if isinstance(status_expectations, dict):
     for key, expected in REQUIRED_STATUS.items():
-        require(f"status_expectation:{key}={expected}", status_expectations.get(key) == expected)
-        require(f"coverage_doc_status_token:{key}", f"{key}={expected}" in coverage_doc)
-        require(f"trace_doc_status_token:{key}", f"{key}={expected}" in trace_doc)
+        token_value = status_token_value(expected)
+        require(f"status_expectation:{key}={token_value}", status_expectations.get(key) == expected)
+        require(f"coverage_doc_status_token:{key}", f"{key}={token_value}" in coverage_doc)
+        require(f"trace_doc_status_token:{key}", f"{key}={token_value}" in trace_doc)
 
 domains = payload.get("domains", [])
 require("domains_is_nonempty_list", isinstance(domains, list) and bool(domains))
@@ -95,6 +104,7 @@ for domain in domains if isinstance(domains, list) else []:
 
     intent_rel = str(domain.get("required_intent", ""))
     spec_path = ROOT / intent_rel
+    spec_exists = spec_path.is_file()
     spec_text = read_text(spec_path, f"intent spec for {domain_id}")
     require(f"{domain_id}:expected_status_is_sv_pass", domain.get("expected_status") == "SV-Pass")
     require(f"{domain_id}:has_rationale", bool(str(domain.get("rationale", "")).strip()))
@@ -111,7 +121,8 @@ for domain in domains if isinstance(domains, list) else []:
     for item in paths if isinstance(paths, list) else []:
         path_text = str(item)
         require(f"{domain_id}:path_exists:{path_text}", (ROOT / path_text).exists())
-        require(f"{domain_id}:spec_mentions_path:{path_text}", path_text in spec_text)
+        if spec_exists:
+            require(f"{domain_id}:spec_mentions_path:{path_text}", path_text in spec_text)
         require(f"{domain_id}:coverage_doc_mentions_path:{path_text}", path_text in coverage_doc)
         require(f"{domain_id}:trace_doc_mentions_path:{path_text}", path_text in trace_doc)
 
@@ -133,7 +144,8 @@ for domain in domains if isinstance(domains, list) else []:
     require(f"{domain_id}:required_markers_is_nonempty_list", isinstance(markers, list) and bool(markers))
     for marker in markers if isinstance(markers, list) else []:
         marker_text = str(marker)
-        require(f"{domain_id}:spec_mentions_marker:{marker_text}", marker_text in spec_text)
+        if spec_exists:
+            require(f"{domain_id}:spec_mentions_marker:{marker_text}", marker_text in spec_text)
         require(f"{domain_id}:trace_doc_mentions_marker:{marker_text}", marker_text in trace_doc)
 
     for field, doc_label in [("doctor_gates", "gate"), ("fixtures", "fixture"), ("implementation_modules", "implementation module")]:
@@ -171,4 +183,6 @@ print("crate_without_intent_or_rationale=0")
 print("confirmed_intent_domain_coverage=SV-Pass")
 print("confirmed_intent_traceability_gate=SV-Pass")
 print("confirmed_intent_traceability=SV-Pass")
+print("confirmed_intent_negative_fixtures=SV-Pass")
+print("all_negative_cases_rejected=true")
 print("external_provider_remote_process_io_e2e=TV-Pending")

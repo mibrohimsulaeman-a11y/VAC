@@ -48,6 +48,8 @@ Status: **confirmed_intent_traceability_gate=SV-Pass**. This document maps P1 co
 confirmed_intent_domain_coverage=SV-Pass
 confirmed_intent_traceability_gate=SV-Pass
 crate_without_intent_or_rationale=0
+confirmed_intent_negative_fixtures=SV-Pass
+all_negative_cases_rejected=true
 external_provider_remote_process_io_e2e=TV-Pending
 remote_process_io_e2e=TV-Pending
 ```
@@ -58,3 +60,12 @@ remote_process_io_e2e=TV-Pending
 - Autopilot config reload, process expansion, and large-file decomposition remain manual-review criteria until direct tests are added.
 - Remote process IO remains TV-Pending until a real remote fixture or equivalent proof material exists.
 - TUI bridge has deterministic and local real-provider E2E coverage, but direct unit coverage for `event_loop.rs`, `dialog.rs`, `tool.rs`, and `shell.rs` remains a known production-maturity gap.
+
+## Negative fixture hardening
+
+`scripts/check-confirmed-intent-negative-fixtures.py` verifies that bad confirmed-intent states fail closed. Covered negative cases: `missing_spec`, `missing_traceability_row`, `missing_required_invariant`, `tv_pass_without_fixture`, `remote_io_overclaim`, and `crate_without_intent_or_rationale`. Golden snapshots preserve honest wording around `SV-Pass`, `TV-Pending`, `NotEvaluated`, `NotImplemented`, and `Not claimed`.
+
+```text
+confirmed_intent_negative_fixtures=SV-Pass
+all_negative_cases_rejected=true
+```

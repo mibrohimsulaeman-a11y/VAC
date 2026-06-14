@@ -35,6 +35,8 @@ summary: dict[str, Any] = {
     "confirmed_intent_domain_coverage": expectations.get("confirmed_intent_domain_coverage"),
     "confirmed_intent_traceability_gate": expectations.get("confirmed_intent_traceability_gate"),
     "confirmed_intent_traceability": "SV-Pass",
+    "confirmed_intent_negative_fixtures": expectations.get("confirmed_intent_negative_fixtures"),
+    "all_negative_cases_rejected": expectations.get("all_negative_cases_rejected"),
     "crate_without_intent_or_rationale": expectations.get("crate_without_intent_or_rationale"),
     "external_provider_remote_process_io_e2e": expectations.get("external_provider_remote_process_io_e2e"),
     "domain_count": len(domains),
@@ -47,6 +49,8 @@ summary: dict[str, Any] = {
 required = {
     "confirmed_intent_domain_coverage": "SV-Pass",
     "confirmed_intent_traceability_gate": "SV-Pass",
+    "confirmed_intent_negative_fixtures": "SV-Pass",
+    "all_negative_cases_rejected": True,
     "crate_without_intent_or_rationale": 0,
     "external_provider_remote_process_io_e2e": "TV-Pending",
 }
@@ -74,5 +78,7 @@ print("VAC confirmed intent status refreshed")
 print("confirmed_intent_domain_coverage=SV-Pass")
 print("confirmed_intent_traceability_gate=SV-Pass")
 print("confirmed_intent_traceability=SV-Pass")
+print("confirmed_intent_negative_fixtures=SV-Pass")
+print("all_negative_cases_rejected=true")
 print("crate_without_intent_or_rationale=0")
 print("external_provider_remote_process_io_e2e=TV-Pending")

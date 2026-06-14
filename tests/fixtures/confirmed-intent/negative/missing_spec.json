@@ -1,0 +1,16 @@
+{
+  "case_id": "missing_spec",
+  "description": "Required confirmed intent spec is missing from the authority plane.",
+  "mutations": [
+    {
+      "op": "remove_path",
+      "path": ".vac/specs/confirmed/vac-broker-intent.yaml"
+    }
+  ],
+  "expected_exit": 1,
+  "expected_substrings": [
+    "VAC confirmed intent coverage: FAIL",
+    "missing intent spec for vac-broker: .vac/specs/confirmed/vac-broker-intent.yaml"
+  ],
+  "golden": "tests/fixtures/confirmed-intent/golden/fail_missing_spec.out"
+}

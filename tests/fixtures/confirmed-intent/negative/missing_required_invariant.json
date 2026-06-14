@@ -1,0 +1,16 @@
+{
+  "case_id": "missing_required_invariant",
+  "mutations": [
+    {
+      "op": "replace",
+      "path": ".vac/specs/confirmed/vac-provider-core-intent.yaml",
+      "old": "provider_stream_preserves_arguments",
+      "new": "provider_stream_arguments_marker_absent"
+    }
+  ],
+  "expected_exit": 1,
+  "expected_substrings": [
+    "VAC confirmed intent coverage: FAIL",
+    "vac-provider-core:spec_mentions_marker:provider_stream_preserves_arguments"
+  ]
+}

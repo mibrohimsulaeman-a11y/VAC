@@ -1,6 +1,6 @@
 # VAC Confirmed Intent Coverage Audit
 
-Status: **confirmed_intent_domain_coverage=SV-Pass**, **confirmed_intent_traceability_gate=SV-Pass**, **crate_without_intent_or_rationale=0**, **external_provider_remote_process_io_e2e=TV-Pending**.
+Status: **confirmed_intent_domain_coverage=SV-Pass**, **confirmed_intent_traceability_gate=SV-Pass**, **confirmed_intent_negative_fixtures=SV-Pass**, **all_negative_cases_rejected=true**, **crate_without_intent_or_rationale=0**, **external_provider_remote_process_io_e2e=TV-Pending**.
 
 This audit closes the P1 confirmed-intent semantic authority gap for the large runtime/provider/integration/surface domains that previously had capability manifests but no domain-specific confirmed intent baseline. It does not claim full P1 or release acceptance. It only proves that each named domain has explicit should-be semantics, capability/rationale binding, acceptance invariants, and traceability coverage that can be consumed by static assessment.
 
@@ -39,3 +39,12 @@ This audit closes the P1 confirmed-intent semantic authority gap for the large r
 ## Gate contract
 
 `scripts/check-confirmed-intent-coverage.py` reads `tests/fixtures/confirmed-intent/domain-map.json` and fails if a required intent spec, domain row, capability/rationale, acceptance invariant, fixture/gate mapping, or pending remote/external status is missing. The gate is intentionally token-based rather than prose-exact so wording can evolve while authority coverage remains stable.
+
+## Negative fixture hardening
+
+`scripts/check-confirmed-intent-negative-fixtures.py` verifies that bad confirmed-intent states fail closed. Covered negative cases: `missing_spec`, `missing_traceability_row`, `missing_required_invariant`, `tv_pass_without_fixture`, `remote_io_overclaim`, and `crate_without_intent_or_rationale`. Golden snapshots preserve honest wording around `SV-Pass`, `TV-Pending`, `NotEvaluated`, `NotImplemented`, and `Not claimed`.
+
+```text
+confirmed_intent_negative_fixtures=SV-Pass
+all_negative_cases_rejected=true
+```

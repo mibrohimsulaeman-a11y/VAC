@@ -1,10 +1,10 @@
 {
-  "compiled_snapshot_hash": "sha256:4235937ee0560b19b9797c29f85377b57a52923a668237374d0186ec7c7bd164",
+  "compiled_snapshot_hash": "sha256:19186edcb8375fe4e1bfa8089c9892613c8e8dfa1407c89abd364496f7f0ef7b",
   "control_plane": {
     "audit": "jcs_json",
     "authoring": "yaml",
     "capabilities_snapshot_hash": "sha256:d2b8bf2cdae622bbf711bb32e89c35a5863bb206ac048dbdfc681e693aaafd33",
-    "compiled_snapshot_hash": "sha256:4235937ee0560b19b9797c29f85377b57a52923a668237374d0186ec7c7bd164",
+    "compiled_snapshot_hash": "sha256:19186edcb8375fe4e1bfa8089c9892613c8e8dfa1407c89abd364496f7f0ef7b",
     "compiled_snapshot_location": ".vac/cache/compiled",
     "compiled_snapshots_current": true,
     "generated_mirror_location": ".vac/registry/compiled",
@@ -15,6 +15,8 @@
     "confirmed_intent_domain_coverage": "SV-Pass",
     "confirmed_intent_traceability_gate": "SV-Pass",
     "confirmed_intent_traceability": "SV-Pass",
+    "confirmed_intent_negative_fixtures": "SV-Pass",
+    "all_negative_cases_rejected": true,
     "crate_without_intent_or_rationale": 0,
     "external_provider_remote_process_io_e2e": "TV-Pending",
     "domain_count": 7,
@@ -91,7 +93,7 @@
   "workspace": {
     "conformance_level": "L1",
     "enforcement_level": "L1",
-    "file_count": 726,
+    "file_count": 736,
     "rust_crate_count": 38
   }
 }

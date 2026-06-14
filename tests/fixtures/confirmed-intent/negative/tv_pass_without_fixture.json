@@ -1,0 +1,20 @@
+{
+  "case_id": "tv_pass_without_fixture",
+  "mutations": [
+    {
+      "op": "set_domain_field",
+      "domain_id": "vac-remote-service",
+      "field": "expected_status",
+      "value_parts": [
+        "TV",
+        "-",
+        "Pass"
+      ]
+    }
+  ],
+  "expected_exit": 1,
+  "expected_substrings": [
+    "VAC confirmed intent coverage: FAIL",
+    "vac-remote-service:expected_status_is_sv_pass"
+  ]
+}

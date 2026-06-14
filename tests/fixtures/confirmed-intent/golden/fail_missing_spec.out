@@ -1,0 +1,2 @@
+VAC confirmed intent coverage: FAIL
+- missing intent spec for vac-broker: .vac/specs/confirmed/vac-broker-intent.yaml

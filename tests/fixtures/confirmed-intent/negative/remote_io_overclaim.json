@@ -1,0 +1,17 @@
+{
+  "case_id": "remote_io_overclaim",
+  "mutations": [
+    {
+      "op": "replace",
+      "path": "docs/audit/VAC_CONFIRMED_INTENT_TRACEABILITY.md",
+      "old": "external_provider_remote_process_io_e2e=TV-Pending",
+      "new_parts": ["external_provider_remote_process_io_e2e=TV", "-", "Pass"]
+    }
+  ],
+  "expected_exit": 1,
+  "expected_substrings": [
+    "VAC confirmed intent coverage: FAIL",
+    "no_forbidden_overclaim:external_provider_remote_process_io_e2e"
+  ],
+  "golden": "tests/fixtures/confirmed-intent/golden/fail_overclaim.out"
+}

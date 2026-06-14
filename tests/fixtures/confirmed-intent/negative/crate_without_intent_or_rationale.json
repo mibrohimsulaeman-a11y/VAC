@@ -1,0 +1,16 @@
+{
+  "case_id": "crate_without_intent_or_rationale",
+  "mutations": [
+    {
+      "op": "set_domain_field",
+      "domain_id": "vac-autopilot",
+      "field": "rationale",
+      "value": ""
+    }
+  ],
+  "expected_exit": 1,
+  "expected_substrings": [
+    "VAC confirmed intent coverage: FAIL",
+    "vac-autopilot:has_rationale"
+  ]
+}
