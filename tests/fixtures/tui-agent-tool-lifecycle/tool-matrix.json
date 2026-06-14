@@ -1,0 +1,43 @@
+{
+  "fixture_id": "tui.agent_tool_lifecycle.v1",
+  "prompt": "run agent tool lifecycle smoke",
+  "tools": [
+    {"name": "run_command", "args": {"command": "printf VAC_AGENT_TOOL run_command"}, "result": "VAC_AGENT_TOOL_RESULT run_command foreground command completed"},
+    {"name": "run_command_task", "args": {"command": "printf VAC_AGENT_TOOL run_command_task", "timeout_ms": 1000}, "result": "VAC_AGENT_TOOL_RESULT run_command_task background task started task-1"},
+    {"name": "run_remote_command", "args": {"connection": "user@example.invalid", "command": "printf VAC_AGENT_TOOL run_remote_command"}, "result": "VAC_AGENT_TOOL_RESULT run_remote_command remote command simulated"},
+    {"name": "run_remote_command_task", "args": {"connection": "user@example.invalid", "command": "printf VAC_AGENT_TOOL run_remote_command_task", "timeout_ms": 1000}, "result": "VAC_AGENT_TOOL_RESULT run_remote_command_task remote background task simulated"},
+    {"name": "get_all_tasks", "args": {"view": "summary"}, "result": "VAC_AGENT_TOOL_RESULT get_all_tasks task-1 running"},
+    {"name": "wait_for_tasks", "args": {"task_ids": ["task-1"], "timeout_ms": 100}, "result": "VAC_AGENT_TOOL_RESULT wait_for_tasks task-1 completed"},
+    {"name": "get_task_details", "args": {"task_id": "task-1"}, "result": "VAC_AGENT_TOOL_RESULT get_task_details task-1 exit=0"},
+    {"name": "cancel_task", "args": {"task_id": "task-1"}, "result": "VAC_AGENT_TOOL_RESULT cancel_task task-1 cancelled no-op"},
+    {"name": "view", "args": {"path": "README.md", "view_range": [1, 4]}, "result": "VAC_AGENT_TOOL_RESULT view README.md lines 1-4\n# VAC"},
+    {"name": "str_replace", "args": {"path": "README.md", "old_str": "old", "new_str": "new"}, "result": "VAC_AGENT_TOOL_RESULT str_replace simulated unified diff"},
+    {"name": "create", "args": {"path": "tmp/vac-agent-tool-smoke.txt", "file_text": "hello"}, "result": "VAC_AGENT_TOOL_RESULT create simulated file creation"},
+    {"name": "remove", "args": {"path": "tmp/vac-agent-tool-smoke.txt", "recursive": false}, "result": "VAC_AGENT_TOOL_RESULT remove simulated removal"},
+    {"name": "view_web_page", "args": {"url": "https://example.com"}, "result": "VAC_AGENT_TOOL_RESULT view_web_page simulated markdown"},
+    {"name": "generate_password", "args": {"length": 24}, "result": "VAC_AGENT_TOOL_RESULT generate_password ********"}
+  ],
+  "ask_user": {
+    "name": "ask_user",
+    "args": {"questions": [{"label": "NeedMore", "question": "Continue smoke?", "options": [{"value": "yes", "label": "Yes"}, {"value": "no", "label": "No"}], "allow_custom": false, "multi_select": false}]},
+    "result_marker": "VAC_AGENT_ASK_USER_RESPONSE"
+  },
+  "required_visible_markers": [
+    "VAC_AGENT_TOOL_RESULT run_command",
+    "VAC_AGENT_TOOL_RESULT run_command_task",
+    "VAC_AGENT_TOOL_RESULT run_remote_command",
+    "VAC_AGENT_TOOL_RESULT run_remote_command_task",
+    "VAC_AGENT_TOOL_RESULT get_all_tasks",
+    "VAC_AGENT_TOOL_RESULT wait_for_tasks",
+    "VAC_AGENT_TOOL_RESULT get_task_details",
+    "VAC_AGENT_TOOL_RESULT cancel_task",
+    "VAC_AGENT_TOOL_RESULT view",
+    "VAC_AGENT_TOOL_RESULT str_replace",
+    "VAC_AGENT_TOOL_RESULT create",
+    "VAC_AGENT_TOOL_RESULT remove",
+    "VAC_AGENT_TOOL_RESULT view_web_page",
+    "VAC_AGENT_TOOL_RESULT generate_password",
+    "VAC_AGENT_ASK_USER_RESPONSE",
+    "VAC_AGENT_TOOL_SMOKE_DONE"
+  ]
+}

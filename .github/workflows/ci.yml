@@ -40,6 +40,9 @@ jobs:
       - name: Build
         run: cargo build --manifest-path vac-rs/Cargo.toml --verbose
 
+      - name: TUI Agent Tool Lifecycle Smoke
+        run: ./scripts/pty-tui-agent-tool-lifecycle-smoke.py .
+
       - name: Test
         run: cargo test --manifest-path vac-rs/Cargo.toml --workspace --verbose
 

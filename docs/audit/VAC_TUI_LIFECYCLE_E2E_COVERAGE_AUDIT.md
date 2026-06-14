@@ -1,18 +1,23 @@
 # VAC TUI Lifecycle E2E Coverage Audit
 
-Status: **TV-Pending for full user-agent-all-tools TUI E2E**.
+Status: **TV-Pass for deterministic TUI agent all-tools harness; TV-Pending for real provider/MCP IO E2E**.
 
 This audit answers a narrow question: do existing unit/integration/smoke tests cover the lifecycle of a real user using the TUI with an agent and all available tools?
 
 ## Verdict
 
-No. Current tests cover important slices, but they do not yet cover the full real lifecycle:
+Partially closed. The repository now has a deterministic PTY harness that drives:
 
 ```text
-terminal user input -> TUI composer -> vac-cli interactive agent loop -> model/tool-call stream -> tool approval UI -> every tool class -> tool result rendering -> completion/closeout -> terminal shutdown
+terminal user input -> TUI composer -> deterministic agent backend -> model/tool-call stream -> approval UI -> every required tool class -> tool result rendering -> ask_user response -> clean terminal shutdown
 ```
 
-The repository has enough tests to say **TUI terminal lifecycle smoke is covered** and **bounded agent runtime gates are covered separately**. It does **not** have a single E2E test that drives a real TUI session with the agent runtime and every tool path.
+This is **not** a real provider/MCP IO test. It does not execute the actual MCP tools against the filesystem/network/remote hosts; it injects deterministic `InputEvent`/`OutputEvent` traffic through the real `run_tui` event loop. Therefore the proper status is:
+
+```text
+deterministic_user_agent_all_tools_tui_e2e=TV-Pass
+real_provider_mcp_all_tools_tui_e2e=TV-Pending
+```
 
 ## Current coverage map
 
@@ -28,18 +33,15 @@ The repository has enough tests to say **TUI terminal lifecycle smoke is covered
 | Tool display/rendering blocks | Some render helpers are unit-tested, e.g. bash block wrapping and stream block alignment. | `services/bash_block.rs`; message renderer tests | Partial |
 | TUI event loop backend bridge | No direct unit test for `event_loop.rs`; PTY harness does not inject real agent tool streams. | `event_loop.rs` | TV-Pending |
 | Tool/dialog/shell handlers | `handlers/dialog.rs`, `handlers/tool.rs`, `handlers/shell.rs` have no test modules. | source scan | TV-Pending |
-| Full all-tools E2E | No test starts real `vac-cli` interactive session with deterministic fake model/agent and exhaustively exercises every tool. | absence of fixture/harness | NotCovered |
+| Deterministic all-tools TUI E2E | PTY harness starts real `run_tui`, injects deterministic agent stream, drives approval/Ask User, and checks all required tool markers. | `scripts/pty-tui-agent-tool-lifecycle-smoke.py`; `vac-rs/crates/surfaces/vac-tui/examples/tui_agent_tool_smoke.rs`; `tests/fixtures/tui-agent-tool-lifecycle/tool-matrix.json` | TV-Pass |
 
-## Why current PTY smoke is not full TUI+agent E2E
+## Harness distinction
 
-`vac-rs/crates/surfaces/vac-tui/examples/tui_smoke.rs` calls `vac_tui::run_tui` directly. Its backend shim only loops back:
+`vac-rs/crates/surfaces/vac-tui/examples/tui_smoke.rs` remains a direct terminal lifecycle harness. It proves alt-screen/raw-mode cleanup and selected UI routes.
 
-```text
-OutputEvent::PlanModeActivated -> InputEvent::PlanModeChanged
-OutputEvent::UserMessage -> InputEvent::AddUserMessage
-```
+`vac-rs/crates/surfaces/vac-tui/examples/tui_agent_tool_smoke.rs` is the deterministic agent/tool lifecycle harness. It listens to `OutputEvent::UserMessage`, emits assistant/tool streams, waits for `OutputEvent::AcceptTool`, emits `InputEvent::ToolResult`, drives `ShowAskUserPopup`, waits for `OutputEvent::AskUserResponse`, and exits through the real `run_tui` event loop.
 
-All other output events are ignored in that harness. Therefore it proves terminal lifecycle and selected UI routes, but not agent orchestration or tool execution.
+The new harness covers the TUI bridge. It still does not execute real provider/MCP IO.
 
 ## Tool lifecycle gaps
 
@@ -54,57 +56,45 @@ vac-rs/crates/surfaces/vac-tui/src/services/handlers/shell.rs
 
 These paths should be covered before claiming mature production E2E for “user uses TUI with agent and all tools”.
 
-## Required next test design
+## Deterministic tool matrix covered by the new harness
 
-A proper full E2E needs a deterministic test harness with:
+The harness covers:
 
-1. A fake provider/model stream that emits assistant deltas, tool-call starts, streaming tool progress, tool results, errors, cancellations, and retries.
-2. A tool matrix covering at least:
-   - `run_command`
-   - `run_command_task`
-   - `run_remote_command`
-   - `run_remote_command_task`
-   - `get_all_tasks`
-   - `wait_for_tasks`
-   - `get_task_details`
-   - `cancel_task`
-   - `view`
-   - `str_replace`
-   - `create`
-   - `remove`
-   - `view_web_page`
-   - `generate_password`
-   - `ask_user`
-3. Real TUI event loop, not only isolated handler functions.
-4. PTY or terminal backend capture proving visible states:
-   - pending tool block
-   - approval bar/modal
-   - accept/reject path
-   - stream progress
-   - success result rendering
-   - error/cancel rendering
-   - retry path
-   - shell focus/background lifecycle
-   - Ask User response returns an `OutputEvent::AskUserResponse`
-5. Closeout/quit proving raw-mode/alt-screen cleanup after tool lifecycle activity.
+- `run_command`
+- `run_command_task`
+- `run_remote_command`
+- `run_remote_command_task`
+- `get_all_tasks`
+- `wait_for_tasks`
+- `get_task_details`
+- `cancel_task`
+- `view`
+- `str_replace`
+- `create`
+- `remove`
+- `view_web_page`
+- `generate_password`
+- `ask_user`
 
-## Recommended next closure slice
+Acceptance now enforced by `scripts/pty-tui-agent-tool-lifecycle-smoke.py`:
 
 ```text
-TUI Agent Tool Lifecycle Harness
+entered_alt_screen
+exited_alt_screen
+user_prompt_echo_visible
+agent_started_visible
+approval_lifecycle_visible
+ask_user_visible
+done_marker_visible
+mock_tabs_absent
+tool_visible:<all 15 tools>
+marker_visible:<all tool result markers>
 ```
 
-Target artifacts:
+## Remaining closure slice
 
 ```text
-vac-rs/crates/surfaces/vac-tui/examples/tui_agent_tool_smoke.rs
-scripts/pty-tui-agent-tool-lifecycle-smoke.py
-tests/fixtures/tui-agent-tool-lifecycle/tool-matrix.json
+Real Provider/MCP Tool IO E2E
 ```
 
-Acceptance:
-
-```text
-full_user_agent_all_tools_e2e remains TV-Pending until the harness drives real TUI event loop plus deterministic agent/tool stream.
-No release or audit output may claim full TUI+agent+all-tools coverage before that harness passes in CI.
-```
+Target: run real `vac-cli` interactive mode with a deterministic local provider and actual MCP/local tool implementations in a sandboxed workspace. This should prove that the same lifecycle works with real tool execution, not only deterministic event injection.

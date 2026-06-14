@@ -10,6 +10,9 @@ DOC = ROOT / "docs/audit/VAC_TUI_LIFECYCLE_E2E_COVERAGE_AUDIT.md"
 PTY = ROOT / "scripts/pty-tui-lifecycle-smoke.py"
 STATIC = ROOT / "scripts/check-tui-lifecycle-e2e-static.py"
 SMOKE = ROOT / "vac-rs/crates/surfaces/vac-tui/examples/tui_smoke.rs"
+AGENT_SMOKE = ROOT / "vac-rs/crates/surfaces/vac-tui/examples/tui_agent_tool_smoke.rs"
+AGENT_PTY = ROOT / "scripts/pty-tui-agent-tool-lifecycle-smoke.py"
+AGENT_MATRIX = ROOT / "tests/fixtures/tui-agent-tool-lifecycle/tool-matrix.json"
 RUNTIME_E2E = ROOT / "scripts/vac-runtime-agent-e2e-sv.py"
 BOUND_CASES = ROOT / "tests/fixtures/runtime/bound_agent_e2e_cases.json"
 
@@ -39,13 +42,16 @@ doc = read(DOC)
 pty = read(PTY)
 static = read(STATIC)
 smoke = read(SMOKE)
+agent_smoke = read(AGENT_SMOKE)
+agent_pty = read(AGENT_PTY)
+agent_matrix = read(AGENT_MATRIX)
 runtime_e2e = read(RUNTIME_E2E)
 bound_cases = read(BOUND_CASES)
 
-require("audit_doc_states_full_e2e_tv_pending", "TV-Pending for full user-agent-all-tools TUI E2E" in doc)
-require("audit_doc_explicitly_says_no_full_coverage", "No. Current tests cover important slices" in doc)
-require("audit_doc_lists_required_next_harness", "TUI Agent Tool Lifecycle Harness" in doc)
-require("audit_doc_does_not_claim_full_pass", "full_user_agent_all_tools_e2e: TV-Pass" not in doc)
+require("audit_doc_states_deterministic_harness_pass", "deterministic_user_agent_all_tools_tui_e2e=TV-Pass" in doc)
+require("audit_doc_states_real_provider_mcp_pending", "real_provider_mcp_all_tools_tui_e2e=TV-Pending" in doc)
+require("audit_doc_lists_real_provider_next_slice", "Real Provider/MCP Tool IO E2E" in doc)
+require("audit_doc_does_not_overclaim_real_provider", "real_provider_mcp_all_tools_tui_e2e=TV-Pass" not in doc)
 
 require(
     "pty_smoke_is_direct_tui_lifecycle_only",
@@ -62,6 +68,29 @@ require(
     and "_ => {}" in smoke
     and "run_interactive" not in smoke
     and "vac_agent_loop" not in smoke,
+)
+
+require(
+    "deterministic_agent_tool_harness_exists",
+    "tui_agent_tool_smoke" in str(AGENT_SMOKE)
+    and "VAC_AGENT_TOOL_SMOKE_STARTED" in agent_smoke
+    and "OutputEvent::AcceptTool" in agent_smoke
+    and "OutputEvent::AskUserResponse" in agent_smoke
+    and "InputEvent::ToolResult" in agent_smoke
+    and "ShowAskUserPopup" in agent_smoke,
+)
+require(
+    "agent_tool_pty_smoke_gate_exists",
+    "VAC TUI agent tool lifecycle smoke" in agent_pty
+    and "tool_count=" in agent_pty
+    and "marker_visible" in agent_pty
+    and "approval_lifecycle_visible" in agent_pty,
+)
+require(
+    "agent_tool_matrix_fixture_exists",
+    "tui.agent_tool_lifecycle.v1" in agent_matrix
+    and "required_visible_markers" in agent_matrix
+    and "VAC_AGENT_TOOL_SMOKE_DONE" in agent_matrix,
 )
 require(
     "static_lifecycle_gate_exists",
@@ -122,5 +151,6 @@ if errors:
 print("VAC TUI E2E coverage audit: PASS")
 print("terminal_lifecycle_smoke=TV-Pass-direct-tui")
 print("runtime_agent_e2e=TV-Pass-decoupled-from-tui")
-print("full_user_agent_all_tools_e2e=TV-Pending")
+print("deterministic_user_agent_all_tools_tui_e2e=TV-Pass")
+print("real_provider_mcp_all_tools_tui_e2e=TV-Pending")
 print(f"uncovered_bridge_files={len(KEY_UNCOVERED_BRIDGE_FILES)}")

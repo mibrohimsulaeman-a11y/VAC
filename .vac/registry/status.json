@@ -1,10 +1,10 @@
 {
-  "compiled_snapshot_hash": "sha256:ac0eda1d5e22f8ff75cab6671b56588d71070869da10c9a1c40ea13fa0c82e86",
+  "compiled_snapshot_hash": "sha256:cc7f814ad1dab32064d9e236611a2fd18dc11c9f60f2856665c7c59980228879",
   "control_plane": {
     "audit": "jcs_json",
     "authoring": "yaml",
     "capabilities_snapshot_hash": "sha256:d2b8bf2cdae622bbf711bb32e89c35a5863bb206ac048dbdfc681e693aaafd33",
-    "compiled_snapshot_hash": "sha256:ac0eda1d5e22f8ff75cab6671b56588d71070869da10c9a1c40ea13fa0c82e86",
+    "compiled_snapshot_hash": "sha256:cc7f814ad1dab32064d9e236611a2fd18dc11c9f60f2856665c7c59980228879",
     "compiled_snapshot_location": ".vac/cache/compiled",
     "compiled_snapshots_current": true,
     "generated_mirror_location": ".vac/registry/compiled",
@@ -71,7 +71,7 @@
   "workspace": {
     "conformance_level": "L1",
     "enforcement_level": "L1",
-    "file_count": 710,
+    "file_count": 713,
     "rust_crate_count": 38
   }
 }
