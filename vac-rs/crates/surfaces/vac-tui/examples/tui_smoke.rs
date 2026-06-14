@@ -60,5 +60,9 @@ async fn main() -> std::io::Result<()> {
 
     output_task.abort();
     task_manager_task.abort();
-    result
+    if let Err(error) = result {
+        eprintln!("VAC TUI smoke harness failed: {error}");
+        std::process::exit(1);
+    }
+    std::process::exit(0);
 }

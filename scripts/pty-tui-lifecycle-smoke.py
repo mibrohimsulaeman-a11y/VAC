@@ -100,6 +100,11 @@ def run_smoke(root: Path, timeout: float) -> tuple[int, bytes]:
     env.setdefault("VAC_TUI_SMOKE", "1")
     env.setdefault("VAC_SKIP_DISCOVERY", "1")
     env.setdefault("RUST_BACKTRACE", "0")
+    # Do not inherit system-wide Rust home overrides from local shells. When the
+    # smoke has to build the example harness, cargo/rustup should resolve from
+    # HOME (CI/user default), not from non-writable paths such as /usr/local/rustup.
+    env.pop("RUSTUP_HOME", None)
+    env.pop("CARGO_HOME", None)
 
     proc = subprocess.Popen(
         default_command(root),
@@ -122,7 +127,8 @@ def run_smoke(root: Path, timeout: float) -> tuple[int, bytes]:
         captured.extend(read_available(master_fd, selector, min(deadline, time.monotonic() + seconds)))
 
     try:
-        pump(4.0)
+        while ENTER_ALT not in captured and proc.poll() is None and time.monotonic() < deadline:
+            pump(0.25)
         # Activate plan mode from the normal composer first. Shift+Tab moves the
         # operator to the review route, so sending /plan after Shift+Tab can be
         # consumed by review-mode key handling instead of the composer.
@@ -167,7 +173,7 @@ def run_smoke(root: Path, timeout: float) -> tuple[int, bytes]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="VAC TUI PTY lifecycle smoke gate")
     parser.add_argument("root", nargs="?", default=".")
-    parser.add_argument("--timeout", type=float, default=25.0)
+    parser.add_argument("--timeout", type=float, default=60.0)
     parser.add_argument("--dump", action="store_true")
     args = parser.parse_args()
 
