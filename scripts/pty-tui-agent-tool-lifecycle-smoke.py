@@ -190,11 +190,12 @@ def run_smoke(root: Path, timeout: float) -> tuple[int, bytes]:
                 or "enter submit" in visible
             )
             if ask_user_active and "vac_agent_tool_smoke_done" not in visible:
-                if not answered_ask_user:
-                    os.write(master_fd, b" ")
-                    answered_ask_user = True
-                    pump(0.35)
-                os.write(master_fd, ENTER_KEY)
+                # The Rust smoke example injects Ask User select/confirm/submit
+                # events internally after rendering the popup. Keep the PTY side
+                # passive here; extra Space/Enter writes can race with the
+                # deterministic handler on slow CI runners and leave the modal
+                # open until timeout.
+                answered_ask_user = True
                 pump(0.6)
                 continue
 
