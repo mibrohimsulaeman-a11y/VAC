@@ -20,6 +20,7 @@ from pathlib import Path
 ENTER_ALT = b"\x1b[?1049h"
 EXIT_ALT = b"\x1b[?1049l"
 CTRL_C = b"\x03"
+ENTER_KEY = b"\r\n"
 
 
 def strip_ansi(text: str) -> str:
@@ -163,9 +164,9 @@ def run_smoke(root: Path, timeout: float) -> tuple[int, bytes]:
             if not answered_ask_user and ("continue smoke" in visible or "needmore" in visible):
                 os.write(master_fd, b" ")
                 pump(0.2)
-                os.write(master_fd, b"\r")
+                os.write(master_fd, ENTER_KEY)
                 pump(0.2)
-                os.write(master_fd, b"\r")
+                os.write(master_fd, ENTER_KEY)
                 answered_ask_user = True
                 pump(0.8)
                 continue
@@ -179,7 +180,7 @@ def run_smoke(root: Path, timeout: float) -> tuple[int, bytes]:
             # states are harmless because the deterministic backend ignores all
             # messages after the first exact prompt.
             if now - last_enter > 0.45:
-                os.write(master_fd, b"\r")
+                os.write(master_fd, ENTER_KEY)
                 last_enter = now
             pump(0.25)
 
