@@ -7,7 +7,8 @@
     "crate_without_intent_or_rationale": 0,
     "external_provider_remote_process_io_e2e": "TV-Pending",
     "confirmed_intent_negative_fixtures": "SV-Pass",
-    "all_negative_cases_rejected": true
+    "all_negative_cases_rejected": true,
+    "confirmed_intent_executable_fixtures": "SV-Pass"
   },
   "domains": [
     {
@@ -37,7 +38,8 @@
       "fixtures": [
         "FG-command-seam",
         "FG-policy-patch",
-        "FG-trust-vector"
+        "FG-trust-vector",
+        "executable:broker_no_l2_overclaim"
       ],
       "implementation_modules": [
         "vac-rs/crates/runtime/vac-broker"
@@ -145,7 +147,8 @@
       ],
       "fixtures": [
         "manual-review:messaging_token_redaction",
-        "manual-review:delivery_failure_handling"
+        "manual-review:delivery_failure_handling",
+        "executable:messaging_delivery_failure_explicit"
       ],
       "implementation_modules": [
         "vac-rs/crates/integrations/vac-messaging-gateway"
@@ -218,7 +221,8 @@
       ],
       "fixtures": [
         "manual-review:autopilot_config_reload",
-        "manual-review:large_file_decomposition_debt"
+        "manual-review:large_file_decomposition_debt",
+        "executable:autopilot_cli_no_release_overclaim"
       ],
       "implementation_modules": [
         "vac-rs/crates/runtime/vac-autopilot",

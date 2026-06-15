@@ -1,6 +1,8 @@
 VAC Rust AST index coverage: PASS
 rust_ast_index=SV-Pass
 parser_mode=rust_ast
+rust_ast_default_index=SV-Pass
+fail_closed_fallback=true
 ast_symbols_detected=true
 heuristic_ast_delta_reported=true
 ast_index_does_not_overclaim_calls=true

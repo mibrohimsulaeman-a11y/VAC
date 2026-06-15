@@ -238,8 +238,15 @@ impl AgentProvider for AgentClient {
             meta.insert("state_metadata".to_string(), state_metadata.clone());
         }
 
+        let response_message = ctx
+            .state
+            .messages
+            .last()
+            .cloned()
+            .ok_or_else(|| "agent completion produced no response message".to_string())?;
+
         Ok(ChatCompletionResponse {
-            id: ctx.new_checkpoint_id.unwrap().to_string(),
+            id: result.checkpoint_id.to_string(),
             object: "chat.completion".to_string(),
             created: checkpoint_created_at,
             model: ctx
@@ -250,7 +257,7 @@ impl AgentProvider for AgentClient {
                 .unwrap_or_default(),
             choices: vec![ChatCompletionChoice {
                 index: 0,
-                message: ctx.state.messages.last().cloned().unwrap(),
+                message: response_message,
                 logprobs: None,
                 finish_reason: FinishReason::Stop,
             }],

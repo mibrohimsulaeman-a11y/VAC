@@ -1,10 +1,10 @@
 {
-  "compiled_snapshot_hash": "sha256:81d071b6daec308407999e00fbd9234adf1ab3a56a75c86119794e01e805c897",
+  "compiled_snapshot_hash": "sha256:1061420cd3be7aed97e61556124e01cc043a3978632b1b9ecad3cab0aa083c28",
   "control_plane": {
     "audit": "jcs_json",
     "authoring": "yaml",
     "capabilities_snapshot_hash": "sha256:d2b8bf2cdae622bbf711bb32e89c35a5863bb206ac048dbdfc681e693aaafd33",
-    "compiled_snapshot_hash": "sha256:81d071b6daec308407999e00fbd9234adf1ab3a56a75c86119794e01e805c897",
+    "compiled_snapshot_hash": "sha256:1061420cd3be7aed97e61556124e01cc043a3978632b1b9ecad3cab0aa083c28",
     "compiled_snapshot_location": ".vac/cache/compiled",
     "compiled_snapshots_current": true,
     "generated_mirror_location": ".vac/registry/compiled",
@@ -16,6 +16,7 @@
     "confirmed_intent_traceability_gate": "SV-Pass",
     "confirmed_intent_traceability": "SV-Pass",
     "confirmed_intent_negative_fixtures": "SV-Pass",
+    "confirmed_intent_executable_fixtures": "SV-Pass",
     "all_negative_cases_rejected": true,
     "crate_without_intent_or_rationale": 0,
     "external_provider_remote_process_io_e2e": "TV-Pending",
@@ -93,19 +94,22 @@
   "workspace": {
     "conformance_level": "L1",
     "enforcement_level": "L1",
-    "file_count": 747,
+    "file_count": 752,
     "rust_crate_count": 38
   },
   "rust_ast_index": {
     "rust_ast_index": "SV-Pass",
     "parser_mode": "rust_ast",
     "ast_symbols_detected": true,
+    "rust_ast_default_index": "SV-Pass",
+    "fail_closed_fallback": true,
     "heuristic_ast_delta_reported": true,
     "ast_index_does_not_overclaim_calls": true,
     "calls_lightweight": "SV-Partial",
     "complete_call_graph": "Not claimed",
-    "default_index_parser": "static_heuristic_fail_closed",
-    "ast_lane": "parallel_syn_prototype",
+    "default_index_parser": "rust_ast_default",
+    "fallback_mode": "fail_closed_static_heuristic",
+    "ast_lane": "default_syn",
     "fixture_dir": "tests/fixtures/index/rust-ast",
     "delta_audit": "docs/audit/VAC_RUST_AST_INDEX_DELTA.md"
   }

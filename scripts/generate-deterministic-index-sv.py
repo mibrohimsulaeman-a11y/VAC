@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 """Generate a deterministic VAC codebase index without requiring Cargo.
 
-State-3 hardening: this is still an SV/bootstrap indexer, but it now emits
-Rust function/impl/module/type spans using static heuristic extraction, simple call/import/read/write relations,
-scanner-confidence metadata, and file-level fallback spans. It is explicitly not AST-grounded until tree-sitter/ra_ap_syntax is wired. It no longer indexes
-assessment/compiled/index outputs to avoid generated-artifact freshness cycles.
+P1 default-index hardening: Rust files are parsed through the real vac-index syn-based rust_ast extractor when available. Non-Rust files and Rust parse/helper failures remain fail-closed static fallback records, with fallback counts surfaced in the manifest. It still does not claim a complete call graph.
 """
 from __future__ import annotations
 
@@ -13,6 +10,7 @@ import hashlib
 import os
 import json
 import re
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -227,6 +225,164 @@ def fallback_spans(rel: str, digest: str, total_lines: int, lang: str) -> list[d
     }]
 
 
+def run_rust_ast_helper(root: Path, rust_files: list[str], required: bool) -> tuple[dict[str, dict[str, Any]], str | None]:
+    if not rust_files:
+        return {}, None
+
+    command = os.environ.get("VAC_INDEX_RUST_AST_HELPER")
+    if command:
+        cmd = command.split()
+    else:
+        cmd = [
+            "cargo",
+            "run",
+            "--quiet",
+            "--manifest-path",
+            str(root / "vac-rs" / "Cargo.toml"),
+            "-p",
+            "vac-index",
+            "--bin",
+            "vac-index-rust-ast",
+            "--",
+            "--root",
+            str(root),
+        ]
+
+    try:
+        result = subprocess.run(
+            cmd,
+            input="\n".join(rust_files) + "\n",
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=int(os.environ.get("VAC_INDEX_RUST_AST_TIMEOUT", "240")),
+        )
+    except Exception as exc:
+        if required:
+            raise RuntimeError(f"rust_ast helper unavailable: {exc}") from exc
+        return {}, f"rust_ast helper unavailable: {exc}"
+
+    if result.returncode != 0:
+        reason = f"rust_ast helper failed rc={result.returncode}: {result.stderr.strip() or result.stdout.strip()}"
+        if required:
+            raise RuntimeError(reason)
+        return {}, reason
+
+    by_path: dict[str, dict[str, Any]] = {}
+    for line in result.stdout.splitlines():
+        if not line.strip():
+            continue
+        try:
+            payload = json.loads(line)
+        except json.JSONDecodeError as exc:
+            reason = f"rust_ast helper emitted invalid JSON: {exc}"
+            if required:
+                raise RuntimeError(reason) from exc
+            return {}, reason
+        rel = str(payload.get("path", ""))
+        if rel:
+            by_path[rel] = payload
+    missing = sorted(set(rust_files) - set(by_path))
+    if missing:
+        reason = f"rust_ast helper omitted {len(missing)} Rust files; first={missing[0]}"
+        if required:
+            raise RuntimeError(reason)
+        return {}, reason
+    return by_path, None
+
+
+def ast_spans(rel: str, digest: str, total_lines: int, ast_index: dict[str, Any]) -> list[dict[str, Any]]:
+    spans: list[dict[str, Any]] = [{
+        "span_id": f"span:{rel}:1-{total_lines}",
+        "path": rel,
+        "start_line": 1,
+        "end_line": total_lines,
+        "ast_path": "file",
+        "symbol": rel,
+        "kind": "file",
+        "normalized_fingerprint": digest,
+        "span_sha256": digest,
+        "confidence": "high",
+        "parser_mode": "rust_ast",
+    }]
+    for symbol in ast_index.get("symbols", []):
+        ast_path = str(symbol.get("ast_path", ""))
+        name = str(symbol.get("name", ""))
+        kind = str(symbol.get("kind", ""))
+        start = int(symbol.get("line_start", 1))
+        end = int(symbol.get("line_end", start))
+        spans.append({
+            "span_id": f"span:{rel}:{start}-{end}:{kind}:{name}",
+            "path": rel,
+            "start_line": start,
+            "end_line": end,
+            "ast_path": ast_path,
+            "symbol": name,
+            "kind": kind,
+            "normalized_fingerprint": str(symbol.get("normalized_fingerprint", digest)),
+            "span_sha256": str(symbol.get("raw_span_sha256", digest)),
+            "confidence": "high",
+            "parser_mode": "rust_ast",
+        })
+    return spans
+
+
+def add_ast_symbols_relations(
+    rel: str,
+    ast_index: dict[str, Any],
+    spans_for_file: list[dict[str, Any]],
+    symbols: list[dict[str, Any]],
+    relations: list[dict[str, Any]],
+) -> None:
+    by_ast_path = {span.get("ast_path"): span for span in spans_for_file if span.get("kind") != "file"}
+    for span in spans_for_file:
+        if span.get("kind") == "file":
+            continue
+        symbols.append({
+            "symbol_id": f"{rel}:{span['start_line']}:{span['symbol']}",
+            "path": rel,
+            "line": span["start_line"],
+            "kind": f"rust_{span['kind']}",
+            "name": span["symbol"],
+            "span_id": span["span_id"],
+            "ast_path": span["ast_path"],
+            "confidence": span["confidence"],
+            "parser_mode": "rust_ast",
+        })
+    for relation in ast_index.get("relations", []):
+        source = str(relation.get("source", ""))
+        target = str(relation.get("target", ""))
+        kind = str(relation.get("relation_kind", ""))
+        source_span = by_ast_path.get(source, {}).get("span_id", f"span:{rel}:1-1")
+        relations.append({
+            "relation_id": f"rel:{rel}:ast:{hashlib.sha256((source + kind + target).encode()).hexdigest()[:16]}",
+            "path": rel,
+            "line": int(by_ast_path.get(source, {}).get("start_line", 1)),
+            "source_span": source_span,
+            "relation": kind,
+            "relation_kind": kind,
+            "target": target,
+            "confidence": str(relation.get("confidence", "high")),
+            "parser_mode": "rust_ast",
+            "status": str(relation.get("status", "SV-Pass")),
+        })
+
+
+def add_rust_risks(rel: str, text: str, spans_for_file: list[dict[str, Any]], risks: list[dict[str, Any]]) -> None:
+    for lineno, line in enumerate(text.splitlines(), 1):
+        source_span = current_span_id_for_line(spans_for_file, rel, lineno)
+        low = line.lower()
+        if any(tok in low for tok in ["command::new", "std::process", "tokio::process"]):
+            risks.append({"finding_id": f"risk:{rel}:{lineno}:process", "path": rel, "line": lineno, "span_id": source_span, "pattern": "process_execution", "inferred_risk": "execute_process", "confidence": 0.9, "method": "static_heuristic_lightweight"})
+        if any(tok in low for tok in ["tokio::net", "reqwest::", "hyper::", "socket", ".get(&url)", "networkaccess"]):
+            risks.append({"finding_id": f"risk:{rel}:{lineno}:network", "path": rel, "line": lineno, "span_id": source_span, "pattern": "network_access", "inferred_risk": "network_access", "confidence": 0.82, "method": "static_heuristic_lightweight"})
+        if any(tok in low for tok in ["remove_file", "remove_dir", "write(", "create(", "truncate", "rename("]):
+            risks.append({"finding_id": f"risk:{rel}:{lineno}:filesystem", "path": rel, "line": lineno, "span_id": source_span, "pattern": "filesystem_mutation", "inferred_risk": "filesystem_write", "confidence": 0.78, "method": "static_heuristic_lightweight"})
+        if "unsafe" in low:
+            risks.append({"finding_id": f"risk:{rel}:{lineno}:unsafe", "path": rel, "line": lineno, "span_id": source_span, "pattern": "unsafe_rust", "inferred_risk": "unsafe_code", "confidence": 0.7, "method": "static_heuristic_lightweight"})
+
+
 def current_span_id_for_line(spans: list[dict[str, Any]], rel: str, line: int) -> str:
     candidates = [s for s in spans if s["path"] == rel and int(s.get("start_line", 1)) <= line <= int(s.get("end_line", 1)) and s.get("kind") != "file"]
     if candidates:
@@ -306,8 +462,6 @@ def main() -> int:
     parser.add_argument("--parser", choices=["auto", "static-heuristic", "rust-ast"], default=os.environ.get("VAC_INDEX_PARSER", "auto"))
     args = parser.parse_args()
     selected_parser = args.parser
-    active_generator_parser = "static_heuristic_fail_closed"
-    rust_ast_lane = "available_parallel_not_used_by_python_generator" if selected_parser == "rust-ast" else "available_parallel"
     OUT.mkdir(parents=True, exist_ok=True)
     files: list[dict[str, Any]] = []
     spans: list[dict[str, Any]] = []
@@ -317,6 +471,20 @@ def main() -> int:
     read_plans: list[dict[str, Any]] = []
 
     paths = sorted(x for x in ROOT.rglob("*") if x.is_file() and include(x))
+    rust_file_rels = [p.relative_to(ROOT).as_posix() for p in paths if LANG.get(p.suffix.lower(), "unknown") == "rust"]
+    rust_ast_results: dict[str, dict[str, Any]] = {}
+    rust_ast_unavailable_reason: str | None = None
+    if selected_parser in {"auto", "rust-ast"}:
+        rust_ast_results, rust_ast_unavailable_reason = run_rust_ast_helper(
+            ROOT, rust_file_rels, required=selected_parser == "rust-ast"
+        )
+    rust_ast_active = bool(rust_ast_results) and selected_parser in {"auto", "rust-ast"}
+    active_generator_parser = "rust_ast_default" if rust_ast_active else "static_heuristic_fail_closed"
+    rust_ast_lane = "default_active" if rust_ast_active else "fallback_unavailable_fail_closed"
+    rust_ast_files = 0
+    rust_ast_parse_errors = 0
+    rust_fallback_files = 0
+
     for p in paths:
         rel = p.relative_to(ROOT).as_posix()
         data = p.read_bytes()
@@ -324,6 +492,21 @@ def main() -> int:
         lang = LANG.get(p.suffix.lower(), "unknown")
         text = read_text(p)
         line_count = count_lines(text)
+        parser_mode = "static_heuristic_fail_closed"
+        ast_payload = rust_ast_results.get(rel) if lang == "rust" and rust_ast_active else None
+        if lang == "rust" and ast_payload and ast_payload.get("ok") and isinstance(ast_payload.get("index"), dict):
+            parser_mode = "rust_ast"
+            file_spans = ast_spans(rel, digest, line_count, ast_payload["index"])
+            rust_ast_files += 1
+        elif lang == "rust":
+            parser_mode = "not_parsed_fail_closed" if rust_ast_active else "rust_static_heuristic_fail_closed"
+            file_spans = rust_spans(rel, text, digest, line_count)
+            rust_fallback_files += 1
+            if ast_payload and not ast_payload.get("ok"):
+                rust_ast_parse_errors += 1
+        else:
+            file_spans = fallback_spans(rel, digest, line_count, lang)
+
         file_record = {
             "path": rel,
             "sha256": digest,
@@ -333,10 +516,9 @@ def main() -> int:
             "vendor": False,
             "test": ("/tests/" in rel or rel.startswith("tests/")),
             "bytes": len(data),
-            "parser_mode": "rust_static_heuristic_fail_closed" if lang == "rust" else "static_heuristic_fail_closed",
+            "parser_mode": parser_mode,
         }
         files.append(file_record)
-        file_spans = rust_spans(rel, text, digest, line_count) if lang == "rust" else fallback_spans(rel, digest, line_count, lang)
         spans.extend(file_spans)
         for span in file_spans:
             read_plans.append({
@@ -348,7 +530,10 @@ def main() -> int:
                 "line_range": {"start": span["start_line"], "end": min(int(span["end_line"]), int(span["start_line"]) + 240)},
                 "confidence": span["confidence"],
             })
-        if lang == "rust":
+        if lang == "rust" and ast_payload and ast_payload.get("ok") and isinstance(ast_payload.get("index"), dict):
+            add_ast_symbols_relations(rel, ast_payload["index"], file_spans, symbols, relations)
+            add_rust_risks(rel, text, file_spans, risks)
+        elif lang == "rust":
             add_rust_symbols_relations_risks(rel, text, file_spans, symbols, relations, risks)
 
     jsonl_write("files.jsonl", files)
@@ -367,10 +552,14 @@ def main() -> int:
         "workspace_root": "/vac",
         "file_count": len(files),
         "rust_files": sum(1 for f in files if f["language"] == "rust"),
-        "parser_contract": "rust_static_heuristic_fail_closed_with_parallel_rust_ast_lane",
+        "parser_contract": "rust_ast_default_with_fail_closed_fallback" if rust_ast_active else "rust_static_heuristic_fail_closed",
         "selected_parser": selected_parser,
         "active_generator_parser": active_generator_parser,
         "rust_ast_lane": rust_ast_lane,
+        "rust_ast_files": rust_ast_files,
+        "rust_fallback_files": rust_fallback_files,
+        "rust_ast_parse_errors": rust_ast_parse_errors,
+        "rust_ast_unavailable_reason": rust_ast_unavailable_reason,
     }
     jsonl_write("repo_manifest.jsonl", [repo])
     counts = {
@@ -403,13 +592,19 @@ def main() -> int:
             "selected_parser": selected_parser,
             "active_generator_parser": active_generator_parser,
             "rust_ast_lane": rust_ast_lane,
-            "rust_ast_mode": "static_heuristic_fail_closed",
+            "rust_ast_mode": "rust_ast_default_with_fail_closed_fallback" if rust_ast_active else "static_heuristic_fail_closed",
+            "rust_ast_files": rust_ast_files,
+            "rust_ast_parse_errors": rust_ast_parse_errors,
+            "rust_fallback_files": rust_fallback_files,
+            "rust_ast_unavailable_reason": rust_ast_unavailable_reason,
             "polyglot_mode": "static_heuristic_fail_closed",
             "span_granularity": "file,function,impl,module,type",
-            "ast_grounded": False,
-            "ast_grounded_default_index": False,
-            "upgrade_required": "tree-sitter-rust or ra_ap_syntax, or a wired vac-index rust_ast lane, before product AST claim",
-            "relation_granularity": "imports,calls,implements,read_write_risk",
+            "ast_grounded": rust_ast_active,
+            "ast_grounded_default_index": rust_ast_active,
+            "fallback_mode": "fail_closed_static_heuristic",
+            "relation_granularity": "imports,impls_trait,impls_type,calls_lightweight,read_write_risk",
+            "calls_lightweight": "SV-Partial",
+            "complete_call_graph": "Not claimed",
         },
         "counts": counts,
     }

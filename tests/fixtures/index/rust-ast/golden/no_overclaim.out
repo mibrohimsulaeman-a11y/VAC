@@ -1,4 +1,6 @@
 parser_mode=rust_ast
+rust_ast_default_index=SV-Pass
+fallback_mode=fail_closed_static_heuristic
 calls_lightweight=SV-Partial
 complete_call_graph=Not claimed
 cargo_tv=NotEvaluated

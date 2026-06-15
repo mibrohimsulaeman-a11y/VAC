@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "fixture_id": "confirmed_intent.executable_invariants.v1",
+  "status": "SV-Pass",
+  "cases": [
+    {
+      "case_id": "broker_no_l2_overclaim",
+      "domain": "vac-broker",
+      "invariant": "broker_does_not_upgrade_l1_to_l2_claim",
+      "fixture_id": "executable:broker_no_l2_overclaim",
+      "trace_status": "SV-Pass",
+      "files": [
+        ".vac/specs/confirmed/vac-broker-intent.yaml",
+        "docs/audit/VAC_CONFIRMED_INTENT_TRACEABILITY.md",
+        "docs/audit/VAC_CONFIRMED_INTENT_COVERAGE_AUDIT.md"
+      ],
+      "required_tokens": [
+        "broker_does_not_upgrade_l1_to_l2_claim",
+        "broker_attested_l2_enforcement=TV-Pending"
+      ],
+      "forbidden_tokens": [
+        "broker_attested_l2_enforcement=TV-Pass",
+        "broker_attested_l2_enforcement=Pass"
+      ]
+    },
+    {
+      "case_id": "autopilot_cli_no_release_overclaim",
+      "domain": "vac-autopilot",
+      "invariant": "autopilot_cli_output_does_not_overclaim_release_readiness",
+      "fixture_id": "executable:autopilot_cli_no_release_overclaim",
+      "trace_status": "SV-Pass",
+      "files": [
+        ".vac/specs/confirmed/vac-autopilot-intent.yaml",
+        "vac-rs/crates/surfaces/vac-cli/src/commands/autopilot/mod.rs",
+        "docs/audit/VAC_CONFIRMED_INTENT_TRACEABILITY.md"
+      ],
+      "required_tokens": [
+        "autopilot_cli_output_does_not_overclaim_release_readiness",
+        "manual-review:large_file_decomposition_debt"
+      ],
+      "forbidden_tokens": [
+        "release_ready=Pass",
+        "P1 acceptance=Pass",
+        "P0 acceptance=Pass"
+      ]
+    },
+    {
+      "case_id": "messaging_delivery_failure_explicit",
+      "domain": "vac-messaging-gateway",
+      "invariant": "delivery_failure_is_explicit",
+      "fixture_id": "executable:messaging_delivery_failure_explicit",
+      "trace_status": "SV-Pass",
+      "files": [
+        ".vac/specs/confirmed/vac-messaging-gateway-intent.yaml",
+        "vac-rs/crates/integrations/vac-messaging-gateway/src/api.rs",
+        "docs/audit/VAC_CONFIRMED_INTENT_TRACEABILITY.md"
+      ],
+      "required_tokens": [
+        "delivery_failure_is_explicit",
+        "send_interactive_failure_notice",
+        "failed to deliver interactive failure notice"
+      ],
+      "forbidden_tokens": [
+        "delivery_failure_is_explicit=TV-Pass",
+        "delivery_success_as_trust_upgrade=Pass"
+      ]
+    }
+  ]
+}

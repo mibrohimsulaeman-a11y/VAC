@@ -1,12 +1,12 @@
 # VAC Confirmed Intent Traceability
 
-Status: **confirmed_intent_traceability_gate=SV-Pass**. This document maps P1 confirmed intent domains to implementation modules, doctor gates, fixture/manual-review evidence, and SV/TV status without upgrading remote/external provider claims.
+Status: **confirmed_intent_traceability_gate=SV-Pass**, **confirmed_intent_executable_fixtures=SV-Pass**. This document maps P1 confirmed intent domains to implementation modules, doctor gates, fixture/manual-review evidence, and SV/TV status without upgrading remote/external provider claims.
 
 | Domain | Crate/path | Confirmed intent | Capability | Acceptance invariant | Implementation module | Gate | Fixture/test | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | vac-broker | `vac-rs/crates/runtime/vac-broker` | `.vac/specs/confirmed/vac-broker-intent.yaml` | `vac.runtime.broker (.vac/capabilities/vac-runtime-broker.yaml)` | `broker_action_requires_policy_decision` | `vac-rs/crates/runtime/vac-broker` | `policy` | `FG-command-seam` | SV-Pass |
 | vac-broker | `vac-rs/crates/runtime/vac-broker` | `.vac/specs/confirmed/vac-broker-intent.yaml` | `vac.runtime.broker (.vac/capabilities/vac-runtime-broker.yaml)` | `broker_rejects_unknown_action` | `vac-rs/crates/runtime/vac-broker` | `evidence` | `FG-policy-patch` | SV-Pass |
-| vac-broker | `vac-rs/crates/runtime/vac-broker` | `.vac/specs/confirmed/vac-broker-intent.yaml` | `vac.runtime.broker (.vac/capabilities/vac-runtime-broker.yaml)` | `broker_does_not_upgrade_l1_to_l2_claim` | `vac-rs/crates/runtime/vac-broker` | `release` | `FG-trust-vector` | SV-Pass |
+| vac-broker | `vac-rs/crates/runtime/vac-broker` | `.vac/specs/confirmed/vac-broker-intent.yaml` | `vac.runtime.broker (.vac/capabilities/vac-runtime-broker.yaml)` | `broker_does_not_upgrade_l1_to_l2_claim` | `vac-rs/crates/runtime/vac-broker` | `release` | `FG-trust-vector`; `executable:broker_no_l2_overclaim` | SV-Pass |
 | vac-broker | `vac-rs/crates/runtime/vac-broker` | `.vac/specs/confirmed/vac-broker-intent.yaml` | `vac.runtime.broker (.vac/capabilities/vac-runtime-broker.yaml)` | `broker_request_boundary_no_runtime_panic` | `vac-rs/crates/runtime/vac-broker` | `policy` | `FG-command-seam` | SV-Pass |
 | vac-broker | `vac-rs/crates/runtime/vac-broker` | `.vac/specs/confirmed/vac-broker-intent.yaml` | `vac.runtime.broker (.vac/capabilities/vac-runtime-broker.yaml)` | `broker_evidence_claim_has_truthful_execution_axis` | `vac-rs/crates/runtime/vac-broker` | `evidence` | `FG-policy-patch` | SV-Pass |
 | vac-provider-core | `vac-rs/crates/providers/vac-provider-core` | `.vac/specs/confirmed/vac-provider-core-intent.yaml` | `vac.providers.model_core (.vac/capabilities/vac-providers-model_core.yaml)` | `provider_stream_preserves_tool_call_id` | `vac-rs/crates/providers/vac-provider-core` | `evidence` | `deterministic_user_agent_all_tools_tui_e2e` | SV-Pass |
@@ -23,7 +23,7 @@ Status: **confirmed_intent_traceability_gate=SV-Pass**. This document maps P1 co
 | vac-messaging-gateway | `vac-rs/crates/integrations/vac-messaging-gateway` | `.vac/specs/confirmed/vac-messaging-gateway-intent.yaml` | `vac.integrations.messaging_gateway (.vac/capabilities/vac-integrations-messaging_gateway.yaml)` | `messaging_gateway_is_notification_only` | `vac-rs/crates/integrations/vac-messaging-gateway` | `evidence` | `manual-review:messaging_token_redaction` | Manual-Review |
 | vac-messaging-gateway | `vac-rs/crates/integrations/vac-messaging-gateway` | `.vac/specs/confirmed/vac-messaging-gateway-intent.yaml` | `vac.integrations.messaging_gateway (.vac/capabilities/vac-integrations-messaging_gateway.yaml)` | `messaging_gateway_never_authorizes_runtime_action` | `vac-rs/crates/integrations/vac-messaging-gateway` | `policy` | `manual-review:delivery_failure_handling` | Manual-Review |
 | vac-messaging-gateway | `vac-rs/crates/integrations/vac-messaging-gateway` | `.vac/specs/confirmed/vac-messaging-gateway-intent.yaml` | `vac.integrations.messaging_gateway (.vac/capabilities/vac-integrations-messaging_gateway.yaml)` | `messaging_tokens_redacted` | `vac-rs/crates/integrations/vac-messaging-gateway` | `evidence` | `manual-review:messaging_token_redaction` | Manual-Review |
-| vac-messaging-gateway | `vac-rs/crates/integrations/vac-messaging-gateway` | `.vac/specs/confirmed/vac-messaging-gateway-intent.yaml` | `vac.integrations.messaging_gateway (.vac/capabilities/vac-integrations-messaging_gateway.yaml)` | `delivery_failure_is_explicit` | `vac-rs/crates/integrations/vac-messaging-gateway` | `policy` | `manual-review:delivery_failure_handling` | Manual-Review |
+| vac-messaging-gateway | `vac-rs/crates/integrations/vac-messaging-gateway` | `.vac/specs/confirmed/vac-messaging-gateway-intent.yaml` | `vac.integrations.messaging_gateway (.vac/capabilities/vac-integrations-messaging_gateway.yaml)` | `delivery_failure_is_explicit` | `vac-rs/crates/integrations/vac-messaging-gateway` | `policy` | `executable:messaging_delivery_failure_explicit` | SV-Pass |
 | vac-messaging-gateway | `vac-rs/crates/integrations/vac-messaging-gateway` | `.vac/specs/confirmed/vac-messaging-gateway-intent.yaml` | `vac.integrations.messaging_gateway (.vac/capabilities/vac-integrations-messaging_gateway.yaml)` | `gateway_evidence_custody_not_upgraded` | `vac-rs/crates/integrations/vac-messaging-gateway` | `evidence` | `manual-review:messaging_token_redaction` | Manual-Review |
 | vac-remote-service | `vac-rs/crates/integrations/vac-remote-service` | `.vac/specs/confirmed/vac-remote-service-intent.yaml` | `vac.integrations.remote_service (.vac/capabilities/vac-integrations-remote_service.yaml)` | `remote_unavailable_not_success` | `vac-rs/crates/integrations/vac-remote-service` | `evidence` | `future:remote_process_io_e2e` | TV-Pending |
 | vac-remote-service | `vac-rs/crates/integrations/vac-remote-service` | `.vac/specs/confirmed/vac-remote-service-intent.yaml` | `vac.integrations.remote_service (.vac/capabilities/vac-integrations-remote_service.yaml)` | `remote_execution_requires_remote_binding` | `vac-rs/crates/integrations/vac-remote-service` | `command` | `external_provider_remote_process_io_e2e` | TV-Pending |
@@ -34,7 +34,7 @@ Status: **confirmed_intent_traceability_gate=SV-Pass**. This document maps P1 co
 | vac-autopilot | `vac-rs/crates/runtime/vac-autopilot` | `.vac/specs/confirmed/vac-autopilot-intent.yaml` | `vac.runtime.agent_loop (.vac/capabilities/vac-runtime-agent_loop.yaml)` | `autopilot_runtime_server_loopback_refresh_is_safe` | `vac-rs/crates/runtime/vac-autopilot` | `governance` | `manual-review:autopilot_config_reload` | Manual-Review |
 | vac-autopilot | `vac-rs/crates/surfaces/vac-cli/src/commands/autopilot` | `.vac/specs/confirmed/vac-autopilot-intent.yaml` | `vac.surfaces.cli (.vac/capabilities/vac-surfaces-cli.yaml)` | `autopilot_process_expansion_requires_policy` | `vac-rs/crates/surfaces/vac-cli/src/commands/autopilot` | `policy` | `manual-review:large_file_decomposition_debt` | Manual-Review |
 | vac-autopilot | `vac-rs/crates/runtime/vac-autopilot` | `.vac/specs/confirmed/vac-autopilot-intent.yaml` | `vac.runtime.agent_loop (.vac/capabilities/vac-runtime-agent_loop.yaml)` | `autopilot_cli_surface_uses_runtime_authority` | `vac-rs/crates/runtime/vac-autopilot` | `command` | `manual-review:autopilot_config_reload` | Manual-Review |
-| vac-autopilot | `vac-rs/crates/surfaces/vac-cli/src/commands/autopilot` | `.vac/specs/confirmed/vac-autopilot-intent.yaml` | `vac.surfaces.cli (.vac/capabilities/vac-surfaces-cli.yaml)` | `autopilot_cli_output_does_not_overclaim_release_readiness` | `vac-rs/crates/surfaces/vac-cli/src/commands/autopilot` | `governance` | `manual-review:large_file_decomposition_debt` | Manual-Review |
+| vac-autopilot | `vac-rs/crates/surfaces/vac-cli/src/commands/autopilot` | `.vac/specs/confirmed/vac-autopilot-intent.yaml` | `vac.surfaces.cli (.vac/capabilities/vac-surfaces-cli.yaml)` | `autopilot_cli_output_does_not_overclaim_release_readiness` | `vac-rs/crates/surfaces/vac-cli/src/commands/autopilot` | `governance` | `executable:autopilot_cli_no_release_overclaim` | SV-Pass |
 | vac-tui-bridge | `vac-rs/crates/surfaces/vac-tui/src/event_loop.rs` | `.vac/specs/confirmed/vac-tui-bridge-intent.yaml` | `vac.surfaces.tui (.vac/capabilities/vac-surfaces-tui.yaml)` | `tui_tool_pending_visible` | `vac-rs/crates/surfaces/vac-tui/src/event_loop.rs` | `readiness` | `deterministic_user_agent_all_tools_tui_e2e` | SV-Pass |
 | vac-tui-bridge | `vac-rs/crates/surfaces/vac-tui/src/services/handlers/dialog.rs` | `.vac/specs/confirmed/vac-tui-bridge-intent.yaml` | `vac.surfaces.tui (.vac/capabilities/vac-surfaces-tui.yaml)` | `tui_tool_result_visible` | `vac-rs/crates/surfaces/vac-tui/src/services/handlers/dialog.rs` | `evidence` | `local_real_provider_mcp_file_io_e2e` | SV-Pass |
 | vac-tui-bridge | `vac-rs/crates/surfaces/vac-tui/src/services/handlers/tool.rs` | `.vac/specs/confirmed/vac-tui-bridge-intent.yaml` | `vac.surfaces.tui (.vac/capabilities/vac-surfaces-tui.yaml)` | `tui_ask_user_response_visible` | `vac-rs/crates/surfaces/vac-tui/src/services/handlers/tool.rs` | `release` | `local_real_provider_mcp_negative_governance_io_e2e` | SV-Pass |
@@ -49,6 +49,7 @@ confirmed_intent_domain_coverage=SV-Pass
 confirmed_intent_traceability_gate=SV-Pass
 crate_without_intent_or_rationale=0
 confirmed_intent_negative_fixtures=SV-Pass
+confirmed_intent_executable_fixtures=SV-Pass
 all_negative_cases_rejected=true
 external_provider_remote_process_io_e2e=TV-Pending
 remote_process_io_e2e=TV-Pending
@@ -56,16 +57,17 @@ remote_process_io_e2e=TV-Pending
 
 ## Non-automated review criteria
 
-- Messaging gateway token redaction and delivery failure handling remain manual-review criteria until executable fixtures are added.
-- Autopilot config reload, process expansion, and large-file decomposition remain manual-review criteria until direct tests are added.
+- Messaging gateway token redaction remains manual-review; delivery failure handling now has executable SV coverage.
+- Autopilot config reload, process expansion, and large-file decomposition remain manual-review; CLI release-readiness non-overclaim now has executable SV coverage.
 - Remote process IO remains TV-Pending until a real remote fixture or equivalent proof material exists.
 - TUI bridge has deterministic and local real-provider E2E coverage, but direct unit coverage for `event_loop.rs`, `dialog.rs`, `tool.rs`, and `shell.rs` remains a known production-maturity gap.
 
 ## Negative fixture hardening
 
-`scripts/check-confirmed-intent-negative-fixtures.py` verifies that bad confirmed-intent states fail closed. Covered negative cases: `missing_spec`, `missing_traceability_row`, `missing_required_invariant`, `tv_pass_without_fixture`, `remote_io_overclaim`, and `crate_without_intent_or_rationale`. Golden snapshots preserve honest wording around `SV-Pass`, `TV-Pending`, `NotEvaluated`, `NotImplemented`, and `Not claimed`.
+`scripts/check-confirmed-intent-negative-fixtures.py` verifies that bad confirmed-intent states fail closed. `scripts/check-confirmed-intent-executable-fixtures.py` verifies selected invariants with executable SV token/negative checks. Covered negative cases: `missing_spec`, `missing_traceability_row`, `missing_required_invariant`, `tv_pass_without_fixture`, `remote_io_overclaim`, and `crate_without_intent_or_rationale`. Golden snapshots preserve honest wording around `SV-Pass`, `TV-Pending`, `NotEvaluated`, `NotImplemented`, and `Not claimed`.
 
 ```text
 confirmed_intent_negative_fixtures=SV-Pass
+confirmed_intent_executable_fixtures=SV-Pass
 all_negative_cases_rejected=true
 ```

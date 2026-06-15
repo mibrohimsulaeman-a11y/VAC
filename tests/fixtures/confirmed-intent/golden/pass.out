@@ -5,5 +5,6 @@ confirmed_intent_domain_coverage=SV-Pass
 confirmed_intent_traceability_gate=SV-Pass
 confirmed_intent_traceability=SV-Pass
 confirmed_intent_negative_fixtures=SV-Pass
+confirmed_intent_executable_fixtures=SV-Pass
 all_negative_cases_rejected=true
 external_provider_remote_process_io_e2e=TV-Pending

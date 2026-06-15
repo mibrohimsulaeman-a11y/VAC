@@ -120,13 +120,17 @@ control_plane = require_text("vac-rs/crates/surfaces/vac-cli/src/commands/contro
     "fixtures_and_sandbox_sv_helpers_only",
 ])
 
-# B2/B6/B7: index/assessment must be honest about heuristic mode and severity.
+# B2/B6/B7: index/assessment must be honest about Rust AST default and remaining partiality.
 index_script = require_text("scripts/generate-deterministic-index-sv.py", [
-    "static_heuristic_fail_closed",
-    "ast_grounded",
-    "tree-sitter-rust or ra_ap_syntax",
+    "rust_ast_default_with_fail_closed_fallback",
+    "fail_closed_static_heuristic",
+    "ast_grounded_default_index",
+    "calls_lightweight",
+    "complete_call_graph",
 ])
-require('"rust_ast_mode": "static_heuristic_fail_closed"' in index_script, "index manifest must not claim rust_ast_lightweight as AST-grounded")
+require("rust_ast_default" in index_script, "index generator must wire rust_ast as the Rust default lane")
+require("Not claimed" in index_script and "SV-Partial" in index_script, "index generator must keep call graph partial/non-claim wording")
+require("not_parsed_fail_closed" in index_script, "index generator must downgrade Rust parse failures instead of claiming clean absence")
 assessment_script = require_text("scripts/generate-assessment-report-sv.py", [
     "sv_static_heuristic_scaffold",
     "heuristic_index_with_deterministic_rubric",

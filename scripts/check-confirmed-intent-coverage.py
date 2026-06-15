@@ -15,6 +15,7 @@ REQUIRED_STATUS = {
     "confirmed_intent_domain_coverage": "SV-Pass",
     "confirmed_intent_traceability_gate": "SV-Pass",
     "confirmed_intent_negative_fixtures": "SV-Pass",
+    "confirmed_intent_executable_fixtures": "SV-Pass",
     "all_negative_cases_rejected": True,
     "crate_without_intent_or_rationale": 0,
     "external_provider_remote_process_io_e2e": "TV-Pending",
@@ -184,5 +185,6 @@ print("confirmed_intent_domain_coverage=SV-Pass")
 print("confirmed_intent_traceability_gate=SV-Pass")
 print("confirmed_intent_traceability=SV-Pass")
 print("confirmed_intent_negative_fixtures=SV-Pass")
+print("confirmed_intent_executable_fixtures=SV-Pass")
 print("all_negative_cases_rejected=true")
 print("external_provider_remote_process_io_e2e=TV-Pending")

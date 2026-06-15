@@ -13,6 +13,8 @@ OUTPUT = "\n".join([
     "VAC Rust AST index coverage: PASS",
     "rust_ast_index=" + SV_PASS,
     "parser_mode=rust_ast",
+    "rust_ast_default_index=" + SV_PASS,
+    "fail_closed_fallback=true",
     "ast_symbols_detected=true",
     "heuristic_ast_delta_reported=true",
     "ast_index_does_not_overclaim_calls=true",
@@ -51,7 +53,9 @@ no_overclaim_golden = read("tests/fixtures/index/rust-ast/golden/no_overclaim.ou
 require("lib_exports_rust_ast", "pub mod rust_ast;" in lib)
 require("cargo_has_syn_full", "syn =" in cargo and "full" in cargo)
 require("generator_parser_flag", "--parser" in generator and "rust-ast" in generator and "static-heuristic" in generator and "auto" in generator)
-require("generator_default_honest", "active_generator_parser" in generator and "static_heuristic_fail_closed" in generator and "ast_grounded_default_index" in generator)
+require("generator_rust_ast_default_wired", "active_generator_parser" in generator and "rust_ast_default" in generator and "ast_grounded_default_index" in generator)
+require("generator_fallback_fail_closed", "fallback_mode" in generator and "fail_closed_static_heuristic" in generator and "rust_ast_parse_errors" in generator)
+require("helper_binary_exists", (ROOT / "vac-rs/crates/control-plane/vac-index/src/bin/vac-index-rust-ast.rs").is_file())
 
 require_tokens("rust_ast", rust_ast, [
     "syn::parse_file", "ItemFn", "ItemStruct", "ItemEnum", "ItemTrait", "ItemImpl", "ItemMod",
@@ -65,15 +69,17 @@ fixtures = {
     "impl_trait.rs": ["pub trait Greeter", "impl Greeter for Person", "impl Person"],
     "nested_mod.rs": ["pub mod outer", "pub mod inner", "nested_function"],
     "tests.rs": ["#[test]", "#[tokio::test]", "helper_macro_like", "async_helper"],
+    "invalid.rs": ["pub fn broken_fixture", "let missing_header = true"],
 }
 for name, tokens in fixtures.items():
     require_tokens("fixture:" + name, read("tests/fixtures/index/rust-ast/" + name), tokens)
 
 require_tokens("delta_doc", doc, [
-    "rust_ast_index=" + SV_PASS, "parser_mode=rust_ast", "ast_symbols_detected=true",
+    "rust_ast_index=" + SV_PASS, "parser_mode=rust_ast", "rust_ast_default_index=" + SV_PASS,
+    "fail_closed_fallback=true", "ast_symbols_detected=true",
     "heuristic_ast_delta_reported=true", "ast_index_does_not_overclaim_calls=true",
     "calls_lightweight=" + SV_PARTIAL, "complete_call_graph=" + NOT_CLAIMED,
-    "static_heuristic_default_index=still_active",
+    "fallback_mode=fail_closed_static_heuristic",
 ])
 require_tokens("no_overclaim_golden", no_overclaim_golden, [
     "parser_mode=rust_ast", "calls_lightweight=" + SV_PARTIAL, "complete_call_graph=" + NOT_CLAIMED,
@@ -85,7 +91,7 @@ bad_tokens = [
     "complete_call_graph" + "=" + "true",
     "complete_call_graph=" + SV_PASS,
     "call_graph_complete: " + "true",
-    "repo_wide_ast_grounded" + "=" + "true",
+    "complete_call_graph_claimed",
 ]
 combined = "\n".join([rust_ast, doc, no_overclaim_golden, coverage_golden])
 for token in bad_tokens:
