@@ -178,8 +178,8 @@ async fn send_next_tool(
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     let matrix: ToolMatrix = serde_json::from_str(MATRIX_JSON).expect("tool matrix fixture parses");
-    let (backend_tx, backend_rx) = mpsc::channel::<InputEvent>(200);
-    let (output_tx, mut output_rx) = mpsc::channel::<OutputEvent>(200);
+    let (backend_tx, backend_rx) = mpsc::channel::<InputEvent>(4096);
+    let (output_tx, mut output_rx) = mpsc::channel::<OutputEvent>(4096);
     let (shutdown_tx, _shutdown_rx) = broadcast::channel::<()>(1);
 
     let task_manager = TaskManager::new();

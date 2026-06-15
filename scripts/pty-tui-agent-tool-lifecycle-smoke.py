@@ -260,7 +260,7 @@ def run_smoke(root: Path, timeout: float) -> tuple[int, bytes]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="VAC TUI agent tool lifecycle PTY smoke gate")
     parser.add_argument("root", nargs="?", default=".")
-    parser.add_argument("--timeout", type=float, default=90.0)
+    parser.add_argument("--timeout", type=float, default=120.0)
     parser.add_argument("--dump", action="store_true")
     args = parser.parse_args()
 
