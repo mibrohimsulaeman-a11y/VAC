@@ -376,6 +376,23 @@ fn cleanup_downloaded_binary_update(temp_exe: &Path, extracted_binary_path: &Pat
     fs::remove_file(extracted_binary_path).ok();
 }
 
+fn run_binary_verification_command(
+    path: &Path,
+    args: &[&str],
+) -> Result<std::process::Output, std::io::Error> {
+    let mut delay_ms = 25;
+    for attempt in 0..5 {
+        match Command::new(path).args(args).output() {
+            Err(error) if error.raw_os_error() == Some(26) && attempt < 4 => {
+                std::thread::sleep(std::time::Duration::from_millis(delay_ms));
+                delay_ms *= 2;
+            }
+            result => return result,
+        }
+    }
+    Command::new(path).args(args).output()
+}
+
 fn apply_downloaded_binary_update(
     current_exe: &Path,
     extracted_binary_path: &Path,
@@ -416,7 +433,7 @@ fn apply_downloaded_binary_update(
     }
 
     update_info!(silent, "Verifying new binary...");
-    let verification_result = Command::new(&temp_exe).arg("--help").output();
+    let verification_result = run_binary_verification_command(&temp_exe, &["--help"]);
 
     let verification_success = match verification_result {
         Ok(output) if output.status.success() => {
@@ -431,7 +448,7 @@ fn apply_downloaded_binary_update(
         }
         Ok(_) | Err(_) => {
             update_info!(silent, "--help failed, trying without arguments...");
-            match Command::new(&temp_exe).output() {
+            match run_binary_verification_command(&temp_exe, &[]) {
                 Ok(output) => {
                     let stdout = String::from_utf8_lossy(&output.stdout);
                     let stderr = String::from_utf8_lossy(&output.stderr);
