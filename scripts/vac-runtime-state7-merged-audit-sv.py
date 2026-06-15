@@ -46,6 +46,11 @@ require('"arguments": tool_arguments_without_bound_approval(tool_call)' in bound
 require('"schema_version": 2' in bound_tool, "agent stamp must emit vac_bound_approval schema_version=2")
 
 local_tools = require_text("vac-rs/crates/integrations/vac-mcp-server/src/local_tools.rs", [
+    "approval_boundary",
+    "require_vac_bound_approval",
+    "VacBoundApproval",
+])
+approval_boundary = require_text("vac-rs/crates/integrations/vac-mcp-server/src/approval_boundary.rs", [
     "pub struct VacBoundApproval",
     "schema_version: u32",
     "approval_request_id",
@@ -59,9 +64,9 @@ local_tools = require_text("vac-rs/crates/integrations/vac-mcp-server/src/local_
     "arguments_without_vac_bound_approval",
     "vac_jcs::canonical_json_sha256",
 ])
-require('approval.schema_version != 2' in local_tools, "MCP verifier must reject non-v2 approvals")
-require('actual_arguments' in local_tools and 'diff_hash mismatch against actual MCP tool arguments' in local_tools, "MCP verifier must recompute approval against actual payload")
-require('strip_nulls' in local_tools, "MCP verifier should tolerate null-vs-omitted canonical optional fields without allowing argument drift")
+require('approval.schema_version != 2' in approval_boundary, "MCP verifier must reject non-v2 approvals")
+require('actual_arguments' in approval_boundary and 'diff_hash mismatch against actual MCP tool arguments' in approval_boundary, "MCP verifier must recompute approval against actual payload")
+require('strip_nulls' in approval_boundary, "MCP verifier should tolerate null-vs-omitted canonical optional fields without allowing argument drift")
 
 # A3: needs_discussion must be operator pause, not technical run error.
 types = require_text("vac-rs/crates/runtime/vac-agent-loop/src/types.rs", [
@@ -95,7 +100,7 @@ runtime_e2e = require_text("vac-rs/crates/runtime/vac-agent-loop/src/runtime_e2e
 require((ROOT / "vac-rs/crates/foundation/vac-jcs/src/lib.rs").is_file(), "vac-jcs crate missing")
 for rel in [
     "vac-rs/crates/runtime/vac-agent-loop/src/bound_runtime.rs",
-    "vac-rs/crates/integrations/vac-mcp-server/src/local_tools.rs",
+    "vac-rs/crates/integrations/vac-mcp-server/src/approval_boundary.rs",
     "vac-rs/crates/control-plane/vac-evidence/src/lib.rs",
     "vac-rs/crates/control-plane/vac-registry-compiler/src/lib.rs",
 ]:
