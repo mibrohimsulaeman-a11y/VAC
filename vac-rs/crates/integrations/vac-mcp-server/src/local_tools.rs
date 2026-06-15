@@ -1,5 +1,7 @@
 use crate::approval_boundary::require_vac_bound_approval;
 pub use crate::approval_boundary::{VacBoundApproval, VacSignatureHint};
+pub use crate::read_authorization::VacReadPlanTicket;
+use crate::read_authorization::require_vac_view_governance;
 use crate::tool_container::ToolContainer;
 use rmcp::service::RequestContext;
 use rmcp::{ErrorData as McpError, handler::server::wrapper::Parameters, model::*, schemars, tool};
@@ -17,7 +19,7 @@ use grep_searcher::sinks::UTF8;
 use html2md;
 use ignore::WalkBuilder;
 use reqwest::header::{HeaderMap, HeaderValue, USER_AGENT};
-use serde_json::{Value, json};
+use serde_json::json;
 use similar::TextDiff;
 use std::fs::{self};
 use std::path::Path;
@@ -118,18 +120,6 @@ pub struct VacStructuredCommandRequest {
     pub approval: Option<String>,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, schemars::JsonSchema)]
-#[serde(deny_unknown_fields)]
-pub struct VacReadPlanTicket {
-    pub id: String,
-    #[serde(default)]
-    pub span_id: Option<String>,
-    #[serde(default)]
-    pub path_sha256: Option<String>,
-    #[serde(default)]
-    pub mode: Option<String>,
-}
-
 #[derive(Debug, Clone)]
 struct VacStructuredCommand {
     id: String,
@@ -151,51 +141,6 @@ fn is_loopback_http_url(parsed_url: &url::Url) -> bool {
     normalized_host
         .parse::<std::net::IpAddr>()
         .is_ok_and(|addr| addr.is_loopback())
-}
-
-fn verify_vac_read_plan_ticket(
-    ticket: &VacReadPlanTicket,
-    path: &str,
-) -> Result<(), CallToolResult> {
-    if ticket.id.trim().is_empty() {
-        return Err(CallToolResult::error(vec![
-            Content::text("VAC_READ_PLAN_TICKET_INVALID"),
-            Content::text(
-                "VAC read_plan_ticket.id must be non-empty and generated from .vac/index/read_plans.jsonl",
-            ),
-        ]));
-    }
-    let root = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("."));
-    let read_plans = root.join(".vac/index/read_plans.jsonl");
-    let Ok(contents) = fs::read_to_string(&read_plans) else {
-        return Err(CallToolResult::error(vec![
-            Content::text("VAC_READ_PLAN_TICKET_INDEX_MISSING"),
-            Content::text(
-                "VAC read_plan_ticket cannot be verified because .vac/index/read_plans.jsonl is unavailable",
-            ),
-        ]));
-    };
-    for line in contents.lines().filter(|line| !line.trim().is_empty()) {
-        let Ok(row) = serde_json::from_str::<serde_json::Value>(line) else {
-            continue;
-        };
-        let id_match = row
-            .get("ticket_id")
-            .or_else(|| row.get("id"))
-            .and_then(serde_json::Value::as_str)
-            == Some(ticket.id.as_str());
-        let path_match = row.get("path").and_then(serde_json::Value::as_str) == Some(path);
-        if id_match && path_match {
-            return Ok(());
-        }
-    }
-    Err(CallToolResult::error(vec![
-        Content::text("VAC_READ_PLAN_TICKET_BINDING_MISMATCH"),
-        Content::text(format!(
-            "VAC read_plan_ticket {} does not bind to requested path {} in .vac/index/read_plans.jsonl",
-            ticket.id, path
-        )),
-    ]))
 }
 
 fn parse_vac_structured_command(command: &str) -> Result<VacStructuredCommand, CallToolResult> {
@@ -274,56 +219,6 @@ fn parse_vac_structured_command_object(
         runner: request.runner.clone(),
         args: request.args.clone(),
     })
-}
-
-fn require_vac_view_governance(
-    approval: &Option<VacBoundApproval>,
-    ticket: &Option<VacReadPlanTicket>,
-    path: &str,
-    password: &Option<String>,
-    private_key_path: &Option<String>,
-    actual_arguments: &Value,
-) -> Result<(), CallToolResult> {
-    let credential_material_present = password.as_ref().is_some_and(|value| !value.is_empty())
-        || private_key_path
-            .as_ref()
-            .is_some_and(|value| !value.is_empty());
-    let remote = ToolContainer::is_remote_path(path);
-
-    if credential_material_present || remote {
-        require_vac_bound_approval(
-            approval,
-            if credential_material_present {
-                "credential_read"
-            } else {
-                "network_access"
-            },
-            path,
-            actual_arguments,
-        )?;
-        return Ok(());
-    }
-
-    if let Some(approval) = approval {
-        require_vac_bound_approval(
-            &Some(approval.clone()),
-            "filesystem_read",
-            path,
-            actual_arguments,
-        )?;
-        return Ok(());
-    }
-
-    let Some(ticket) = ticket else {
-        return Err(CallToolResult::error(vec![
-            Content::text("VAC_READ_GOVERNANCE_REQUIRED"),
-            Content::text(format!(
-                "VAC v1.5 blocked view on {path}: local file/grep/glob reads require a deterministic read_plan_ticket or vac_bound_approval stamped by the bound runtime."
-            )),
-        ]));
-    };
-    verify_vac_read_plan_ticket(ticket, path)?;
-    Ok(())
 }
 
 fn resolve_vac_structured_command_authority(

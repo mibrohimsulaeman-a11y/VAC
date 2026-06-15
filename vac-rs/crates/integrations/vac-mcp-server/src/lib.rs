@@ -20,6 +20,7 @@ use vac_remote_service::AgentProvider;
 pub mod approval_boundary;
 pub mod integrations;
 pub mod local_tools;
+pub mod read_authorization;
 pub mod remote_tools;
 pub mod subagent_tools;
 pub mod tool_container;
