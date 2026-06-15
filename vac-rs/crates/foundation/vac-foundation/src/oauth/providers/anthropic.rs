@@ -45,7 +45,12 @@ impl AnthropicProvider {
     async fn create_api_key(&self, access_token: &str) -> OAuthResult<String> {
         let client =
             crate::tls_client::create_tls_client(crate::tls_client::TlsClientConfig::default())
-                .expect("Failed to create TLS client for Anthropic API key creation");
+                .map_err(|e| {
+                    tracing::error!(
+                        "Failed to create TLS client for Anthropic API key creation: {e}"
+                    );
+                    OAuthError::ApiKeyCreationFailed
+                })?;
         let response = client
             .post("https://api.anthropic.com/api/oauth/claude_cli/create_api_key")
             .header("authorization", format!("Bearer {}", access_token))

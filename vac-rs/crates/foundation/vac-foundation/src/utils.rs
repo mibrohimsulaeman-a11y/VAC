@@ -154,32 +154,12 @@ pub fn generate_password(length: usize, no_symbols: bool) -> String {
     let mut password = String::new();
 
     // Ensure at least one character from each category
-    password.push(
-        lowercase
-            .chars()
-            .nth(rng.random_range(0..lowercase.len()))
-            .unwrap(),
-    );
-    password.push(
-        uppercase
-            .chars()
-            .nth(rng.random_range(0..uppercase.len()))
-            .unwrap(),
-    );
-    password.push(
-        digits
-            .chars()
-            .nth(rng.random_range(0..digits.len()))
-            .unwrap(),
-    );
+    password.push(random_ascii_char(&mut rng, lowercase));
+    password.push(random_ascii_char(&mut rng, uppercase));
+    password.push(random_ascii_char(&mut rng, digits));
 
     if !no_symbols {
-        password.push(
-            symbols
-                .chars()
-                .nth(rng.random_range(0..symbols.len()))
-                .unwrap(),
-        );
+        password.push(random_ascii_char(&mut rng, symbols));
     }
 
     // Fill the rest with random characters from the full charset
@@ -203,6 +183,10 @@ pub fn generate_password(length: usize, no_symbols: bool) -> String {
 
     // Take only the requested length
     password_chars.into_iter().take(length).collect()
+}
+
+fn random_ascii_char(rng: &mut impl Rng, charset: &str) -> char {
+    charset.as_bytes()[rng.random_range(0..charset.len())] as char
 }
 
 /// Normalize an optional string by trimming leading/trailing whitespace.

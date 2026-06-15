@@ -122,16 +122,20 @@ pub struct SearchClient {
 }
 
 impl SearchClient {
-    pub fn new(api_url: String) -> Self {
+    pub fn new(api_url: String) -> Result<Self, AgentError> {
         let retry_policy = ExponentialBackoff::builder().build_with_max_retries(MAX_RETRIES);
         let base_client =
             crate::tls_client::create_tls_client(crate::tls_client::TlsClientConfig::default())
-                .expect("Failed to create TLS client for search service");
+                .map_err(|e| {
+                    AgentError::BadRequest(BadRequestErrorMessage::ApiError(format!(
+                        "Failed to create TLS client for search service: {e}"
+                    )))
+                })?;
         let client = ClientBuilder::new(base_client)
             .with(RetryTransientMiddleware::new_with_policy(retry_policy))
             .build();
 
-        Self { client, api_url }
+        Ok(Self { client, api_url })
     }
 
     pub async fn search(&self, query: String) -> Result<Vec<SearchResult>, AgentError> {

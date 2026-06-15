@@ -474,7 +474,7 @@ impl AgentProvider for AgentClient {
                 .map_err(|e| e.to_string())?;
 
             let api_url = format!("http://localhost:{}", config.api_port);
-            let search_client = SearchClient::new(api_url);
+            let search_client = SearchClient::new(api_url).map_err(|e| e.to_string())?;
 
             let search_results = search_client
                 .search_and_scrape(input.keywords.clone(), None)

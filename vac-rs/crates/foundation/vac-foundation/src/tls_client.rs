@@ -41,7 +41,7 @@ pub fn create_tls_client(config: TlsClientConfig) -> Result<Client, String> {
     let arc_crypto_provider = std::sync::Arc::new(rustls::crypto::ring::default_provider());
     let tls_config = rustls::ClientConfig::builder_with_provider(arc_crypto_provider)
         .with_safe_default_protocol_versions()
-        .expect("Failed to build client TLS config")
+        .map_err(|e| format!("failed to build client TLS config: {e}"))?
         .with_platform_verifier()
         .with_no_client_auth();
 
@@ -51,7 +51,7 @@ pub fn create_tls_client(config: TlsClientConfig) -> Result<Client, String> {
         .timeout(config.timeout)
         .redirect(config.redirect_policy)
         .build()
-        .expect("Failed to create HTTP client");
+        .map_err(|e| format!("failed to create HTTP client: {e}"))?;
 
     Ok(client)
 }

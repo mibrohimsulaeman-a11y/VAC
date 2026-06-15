@@ -1,10 +1,10 @@
 {
-  "compiled_snapshot_hash": "sha256:b9e04e2d2672e95db5624859638d54d81bb4f1c0e8bfea271a1eeae9f9703ad4",
+  "compiled_snapshot_hash": "sha256:602b0961f27ea376999199464641ed2d54846d970b386b374eb244c9ff2a9452",
   "control_plane": {
     "audit": "jcs_json",
     "authoring": "yaml",
     "capabilities_snapshot_hash": "sha256:d2b8bf2cdae622bbf711bb32e89c35a5863bb206ac048dbdfc681e693aaafd33",
-    "compiled_snapshot_hash": "sha256:b9e04e2d2672e95db5624859638d54d81bb4f1c0e8bfea271a1eeae9f9703ad4",
+    "compiled_snapshot_hash": "sha256:602b0961f27ea376999199464641ed2d54846d970b386b374eb244c9ff2a9452",
     "compiled_snapshot_location": ".vac/cache/compiled",
     "compiled_snapshots_current": true,
     "generated_mirror_location": ".vac/registry/compiled",

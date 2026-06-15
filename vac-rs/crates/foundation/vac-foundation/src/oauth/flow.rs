@@ -166,7 +166,11 @@ impl OAuthFlow {
 
         let client =
             crate::tls_client::create_tls_client(crate::tls_client::TlsClientConfig::default())
-                .expect("Failed to create TLS client for OAuth token exchange");
+                .map_err(|e| {
+                    OAuthError::token_exchange_failed(format!(
+                        "Failed to create TLS client for OAuth token exchange: {e}"
+                    ))
+                })?;
         let response = match token_request {
             TokenRequest::Json(body) => client.post(&self.config.token_url).json(&body),
             TokenRequest::Form(body) => client.post(&self.config.token_url).form(&body),
@@ -193,7 +197,11 @@ impl OAuthFlow {
         let token_request = self.build_token_refresh_request(refresh_token.to_string());
         let client =
             crate::tls_client::create_tls_client(crate::tls_client::TlsClientConfig::default())
-                .expect("Failed to create TLS client for OAuth token refresh");
+                .map_err(|e| {
+                    OAuthError::token_refresh_failed(format!(
+                        "Failed to create TLS client for OAuth token refresh: {e}"
+                    ))
+                })?;
         let response = match token_request {
             TokenRequest::Json(body) => client.post(&self.config.token_url).json(&body),
             TokenRequest::Form(body) => client.post(&self.config.token_url).form(&body),

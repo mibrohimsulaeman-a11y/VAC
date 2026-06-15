@@ -376,7 +376,12 @@ pub fn get_container_host_port(container_id: &str, container_port: u16) -> Resul
     if output.status.success() {
         let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
         let port = stdout.split(':').next_back().unwrap_or("");
-        Ok(port.parse().unwrap())
+        port.parse::<u16>().map_err(|e| {
+            format!(
+                "Failed to parse host port from docker port output '{}': {}",
+                stdout, e
+            )
+        })
     } else {
         let stderr = String::from_utf8_lossy(&output.stderr).to_string();
         Err(format!("Failed to get container port: {}", stderr))
