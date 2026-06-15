@@ -6,6 +6,8 @@
 //! tree-sitter-rust or ra_ap_syntax is the authority.
 
 use serde::{Deserialize, Serialize};
+
+pub mod rust_ast;
 use sha2::{Digest, Sha256};
 
 #[must_use]
@@ -221,7 +223,11 @@ pub struct ParserModeTruth {
 #[must_use]
 pub fn parser_mode_truth(manifest_label: &str) -> ParserModeTruth {
     let lower = manifest_label.to_ascii_lowercase();
-    if lower.contains("tree_sitter") || lower.contains("ra_ap_syntax") || lower == "rust_ast" {
+    if lower.contains("tree_sitter")
+        || lower.contains("ra_ap_syntax")
+        || lower.contains("syn")
+        || lower == "rust_ast"
+    {
         ParserModeTruth {
             manifest_label: manifest_label.to_string(),
             product_claim_allowed: true,

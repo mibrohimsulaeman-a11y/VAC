@@ -4,6 +4,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 run() { local label="$1"; shift; printf '\n== %s ==\n' "$label"; timeout 120 "$@"; }
 run deterministic-index python3 scripts/generate-deterministic-index-sv.py .
+run rust-ast-index-coverage python3 scripts/check-rust-ast-index-coverage.py .
 run compile-registry python3 scripts/compile-vac-registry-sv.py .
 run assessment-report python3 scripts/generate-assessment-report-sv.py .
 run generate-spec-sync python3 scripts/generate-spec-sync-report-sv.py .
@@ -17,6 +18,7 @@ run tui-e2e-coverage python3 scripts/check-vac-tui-e2e-coverage.py .
 run confirmed-intent-coverage python3 scripts/check-confirmed-intent-coverage.py .
 run confirmed-intent-negative-fixtures python3 scripts/check-confirmed-intent-negative-fixtures.py .
 run confirmed-intent-status python3 scripts/refresh-confirmed-intent-status.py .
+run rust-ast-index-status python3 scripts/refresh-rust-ast-index-status.py .
 run storage-classes python3 scripts/check-v19-storage-classes.py .
 run ci-workdir python3 scripts/check-ci-workdir-v19.py .
 run clippy-debt-strategy python3 scripts/check-clippy-debt-strategy.py .

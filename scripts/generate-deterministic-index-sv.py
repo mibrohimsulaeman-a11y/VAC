@@ -8,6 +8,7 @@ assessment/compiled/index outputs to avoid generated-artifact freshness cycles.
 """
 from __future__ import annotations
 
+import argparse
 import hashlib
 import os
 import json
@@ -290,16 +291,23 @@ def add_rust_symbols_relations_risks(rel: str, text: str, spans_for_file: list[d
             })
         low = line.lower()
         if any(tok in low for tok in ["command::new", "std::process", "tokio::process"]):
-            risks.append({"finding_id": f"risk:{rel}:{lineno}:process", "path": rel, "line": lineno, "span_id": source_span, "pattern": "process_execution", "inferred_risk": "execute_process", "confidence": 0.9, "method": "rust_ast_lightweight"})
+            risks.append({"finding_id": f"risk:{rel}:{lineno}:process", "path": rel, "line": lineno, "span_id": source_span, "pattern": "process_execution", "inferred_risk": "execute_process", "confidence": 0.9, "method": "static_heuristic_lightweight"})
         if any(tok in low for tok in ["tokio::net", "reqwest::", "hyper::", "socket", ".get(&url)", "networkaccess"]):
-            risks.append({"finding_id": f"risk:{rel}:{lineno}:network", "path": rel, "line": lineno, "span_id": source_span, "pattern": "network_access", "inferred_risk": "network_access", "confidence": 0.82, "method": "rust_ast_lightweight"})
+            risks.append({"finding_id": f"risk:{rel}:{lineno}:network", "path": rel, "line": lineno, "span_id": source_span, "pattern": "network_access", "inferred_risk": "network_access", "confidence": 0.82, "method": "static_heuristic_lightweight"})
         if any(tok in low for tok in ["remove_file", "remove_dir", "write(", "create(", "truncate", "rename("]):
-            risks.append({"finding_id": f"risk:{rel}:{lineno}:filesystem", "path": rel, "line": lineno, "span_id": source_span, "pattern": "filesystem_mutation", "inferred_risk": "filesystem_write", "confidence": 0.78, "method": "rust_ast_lightweight"})
+            risks.append({"finding_id": f"risk:{rel}:{lineno}:filesystem", "path": rel, "line": lineno, "span_id": source_span, "pattern": "filesystem_mutation", "inferred_risk": "filesystem_write", "confidence": 0.78, "method": "static_heuristic_lightweight"})
         if "unsafe" in low:
-            risks.append({"finding_id": f"risk:{rel}:{lineno}:unsafe", "path": rel, "line": lineno, "span_id": source_span, "pattern": "unsafe_rust", "inferred_risk": "unsafe_code", "confidence": 0.7, "method": "rust_ast_lightweight"})
+            risks.append({"finding_id": f"risk:{rel}:{lineno}:unsafe", "path": rel, "line": lineno, "span_id": source_span, "pattern": "unsafe_rust", "inferred_risk": "unsafe_code", "confidence": 0.7, "method": "static_heuristic_lightweight"})
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("root", nargs="?", default=str(ROOT))
+    parser.add_argument("--parser", choices=["auto", "static-heuristic", "rust-ast"], default=os.environ.get("VAC_INDEX_PARSER", "auto"))
+    args = parser.parse_args()
+    selected_parser = args.parser
+    active_generator_parser = "static_heuristic_fail_closed"
+    rust_ast_lane = "available_parallel_not_used_by_python_generator" if selected_parser == "rust-ast" else "available_parallel"
     OUT.mkdir(parents=True, exist_ok=True)
     files: list[dict[str, Any]] = []
     spans: list[dict[str, Any]] = []
@@ -359,7 +367,10 @@ def main() -> int:
         "workspace_root": "/vac",
         "file_count": len(files),
         "rust_files": sum(1 for f in files if f["language"] == "rust"),
-        "parser_contract": "rust_static_heuristic_fail_closed_until_tree_sitter_or_ra_ap_syntax",
+        "parser_contract": "rust_static_heuristic_fail_closed_with_parallel_rust_ast_lane",
+        "selected_parser": selected_parser,
+        "active_generator_parser": active_generator_parser,
+        "rust_ast_lane": rust_ast_lane,
     }
     jsonl_write("repo_manifest.jsonl", [repo])
     counts = {
@@ -389,11 +400,15 @@ def main() -> int:
         "coverage": {
             "languages": sorted(set(f["language"] for f in files)),
             "low_confidence_files": [f["path"] for f in files if f["parser_mode"] == "static_heuristic_fail_closed" and f["language"] == "unknown"][:200],
+            "selected_parser": selected_parser,
+            "active_generator_parser": active_generator_parser,
+            "rust_ast_lane": rust_ast_lane,
             "rust_ast_mode": "static_heuristic_fail_closed",
             "polyglot_mode": "static_heuristic_fail_closed",
             "span_granularity": "file,function,impl,module,type",
             "ast_grounded": False,
-            "upgrade_required": "tree-sitter-rust or ra_ap_syntax before product AST claim",
+            "ast_grounded_default_index": False,
+            "upgrade_required": "tree-sitter-rust or ra_ap_syntax, or a wired vac-index rust_ast lane, before product AST claim",
             "relation_granularity": "imports,calls,implements,read_write_risk",
         },
         "counts": counts,
