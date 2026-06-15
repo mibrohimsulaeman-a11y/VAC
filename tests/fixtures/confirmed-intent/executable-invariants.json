@@ -64,6 +64,102 @@
         "delivery_failure_is_explicit=TV-Pass",
         "delivery_success_as_trust_upgrade=Pass"
       ]
+    },
+    {
+      "case_id": "messaging_tokens_redacted",
+      "domain": "vac-messaging-gateway",
+      "invariant": "messaging_tokens_redacted",
+      "fixture_id": "executable:messaging_tokens_redacted",
+      "trace_status": "SV-Pass",
+      "files": [
+        ".vac/specs/confirmed/vac-messaging-gateway-intent.yaml",
+        "vac-rs/crates/integrations/vac-messaging-gateway/src/config.rs",
+        "docs/audit/VAC_CONFIRMED_INTENT_TRACEABILITY.md"
+      ],
+      "required_tokens": [
+        "messaging_tokens_redacted",
+        "debug_redacts_all_messaging_token_fields",
+        "REDACTED_TOKEN_DEBUG",
+        "save_preserves_raw_messaging_tokens_for_config_roundtrip"
+      ],
+      "forbidden_tokens": [
+        "messaging_tokens_redacted=TV-Pass",
+        "messaging_delivery_success_as_trust_upgrade=Pass"
+      ],
+      "redaction_fixture": {
+        "raw_secrets": [
+          "gateway-debug-raw",
+          "telegram-debug-raw",
+          "discord-debug-raw",
+          "xoxb-debug-raw",
+          "xapp-debug-raw"
+        ],
+        "redacted_outputs": [
+          "GatewayCliFlags { token: Some(\"[REDACTED]\"), telegram_token: Some(\"[REDACTED]\"), discord_token: Some(\"[REDACTED]\"), slack_bot_token: Some(\"[REDACTED]\"), slack_app_token: Some(\"[REDACTED]\") }",
+          "SlackConfig { bot_token: \"[REDACTED]\", app_token: \"[REDACTED]\" }"
+        ],
+        "redacted_required": [
+          "[REDACTED]"
+        ],
+        "raw_forbidden": [
+          "gateway-debug-raw",
+          "telegram-debug-raw",
+          "discord-debug-raw",
+          "xoxb-debug-raw",
+          "xapp-debug-raw"
+        ]
+      }
+    },
+    {
+      "case_id": "remote_credential_material_redacted",
+      "domain": "vac-remote-service",
+      "invariant": "remote_credential_material_redacted",
+      "fixture_id": "executable:remote_credential_material_redacted",
+      "trace_status": "SV-Pass",
+      "files": [
+        ".vac/specs/confirmed/vac-remote-service-intent.yaml",
+        "vac-rs/crates/integrations/vac-remote-service/src/redaction.rs",
+        "vac-rs/crates/integrations/vac-remote-service/src/client/mod.rs",
+        "vac-rs/crates/integrations/vac-remote-service/src/vac/mod.rs",
+        "vac-rs/crates/integrations/vac-remote-service/src/storage.rs",
+        "docs/audit/VAC_CONFIRMED_INTENT_TRACEABILITY.md"
+      ],
+      "required_tokens": [
+        "remote_credential_material_redacted",
+        "redact_json_secret_values",
+        "redacts_sensitive_key_values_recursively",
+        "vac_api_config_debug_redacts_api_key",
+        "agent_client_config_debug_does_not_render_provider_credentials",
+        "checkpoint_request_metadata_redacts_credential_material"
+      ],
+      "forbidden_tokens": [
+        "remote_process_io_e2e=TV-Pass",
+        "external_provider_remote_process_io_e2e=TV-Pass"
+      ],
+      "redaction_fixture": {
+        "raw_secrets": [
+          "vac-api-debug-raw",
+          "vac-cloud-debug-raw",
+          "provider-debug-raw",
+          "checkpoint-api-key-raw",
+          "remote-redaction-fixture-raw"
+        ],
+        "redacted_outputs": [
+          "VACApiConfig { api_key: \"[REDACTED]\", api_endpoint: \"https://example.invalid/vac\" }",
+          "AgentClientConfig { vac: Some(VacCloudConfig { api_key: \"[REDACTED]\" }), provider_count: 1 }",
+          "{\"api_key\":\"[REDACTED]\",\"nested\":{\"access_token\":\"[REDACTED]\"},\"safe\":\"keep-me\"}"
+        ],
+        "redacted_required": [
+          "[REDACTED]"
+        ],
+        "raw_forbidden": [
+          "vac-api-debug-raw",
+          "vac-cloud-debug-raw",
+          "provider-debug-raw",
+          "checkpoint-api-key-raw",
+          "remote-redaction-fixture-raw"
+        ]
+      }
     }
   ]
 }

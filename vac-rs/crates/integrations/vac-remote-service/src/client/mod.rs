@@ -28,12 +28,21 @@ use vac_foundation::models::provider_core_adapter::VacProviderClient;
 pub const DEFAULT_VAC_ENDPOINT: &str = "https://api.vastar.ai/vac";
 
 /// VAC connection configuration
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct VacCloudConfig {
     /// VAC API key
     pub api_key: String,
     /// VAC API endpoint (default: https://api.vastar.ai/vac)
     pub api_endpoint: String,
+}
+
+impl std::fmt::Debug for VacCloudConfig {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("VacCloudConfig")
+            .field("api_key", &"[REDACTED]")
+            .field("api_endpoint", &self.api_endpoint)
+            .finish()
+    }
 }
 
 impl VacCloudConfig {
@@ -51,7 +60,7 @@ impl VacCloudConfig {
 }
 
 /// Configuration for creating an AgentClient
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct AgentClientConfig {
     /// VAC configuration (optional - enables remote features when present)
     pub vac: Option<VacCloudConfig>,
@@ -61,6 +70,20 @@ pub struct AgentClientConfig {
     pub store_path: Option<String>,
     /// Hook registry for lifecycle events
     pub hook_registry: Option<HookRegistry<AgentState>>,
+}
+
+impl std::fmt::Debug for AgentClientConfig {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("AgentClientConfig")
+            .field("vac", &self.vac)
+            .field("provider_count", &self.providers.providers.len())
+            .field("store_path", &self.store_path)
+            .field(
+                "hook_registry",
+                &self.hook_registry.as_ref().map(|_| "configured"),
+            )
+            .finish()
+    }
 }
 
 impl AgentClientConfig {
@@ -275,5 +298,47 @@ impl std::fmt::Debug for AgentClient {
         f.debug_struct("AgentClient")
             .field("has_vac", &self.has_vac())
             .finish_non_exhaustive()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use vac_foundation::models::llm::ProviderConfig;
+
+    #[test]
+    fn vac_cloud_config_debug_redacts_api_key() {
+        let raw = "vac-cloud-debug-raw";
+        let config = VacCloudConfig::new(raw).with_endpoint("https://example.invalid/vac");
+        let rendered = format!("{config:?}");
+
+        assert!(rendered.contains("[REDACTED]"));
+        assert!(rendered.contains("https://example.invalid/vac"));
+        assert!(!rendered.contains(raw));
+    }
+
+    #[test]
+    fn agent_client_config_debug_does_not_render_provider_credentials() {
+        let raw_vac = "vac-client-debug-raw";
+        let raw_provider = "provider-debug-raw";
+        let mut providers = LLMProviderConfig::new();
+        providers.add_provider(
+            "openai",
+            ProviderConfig::OpenAI {
+                api_key: Some(raw_provider.to_string()),
+                api_endpoint: Some("https://example.invalid/v1".to_string()),
+                auth: None,
+            },
+        );
+        let config = AgentClientConfig::new()
+            .with_vac(VacCloudConfig::new(raw_vac))
+            .with_providers(providers)
+            .with_store_path(".vac/data/local.db");
+        let rendered = format!("{config:?}");
+
+        assert!(rendered.contains("provider_count"));
+        assert!(rendered.contains("[REDACTED]"));
+        assert!(!rendered.contains(raw_vac));
+        assert!(!rendered.contains(raw_provider));
     }
 }

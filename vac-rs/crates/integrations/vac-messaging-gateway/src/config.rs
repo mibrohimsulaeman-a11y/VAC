@@ -1,4 +1,7 @@
-use std::path::{Path, PathBuf};
+use std::{
+    fmt,
+    path::{Path, PathBuf},
+};
 
 use anyhow::{Result, anyhow};
 use serde::{Deserialize, Serialize};
@@ -7,7 +10,7 @@ use vac_foundation::utils::normalize_optional_string;
 
 use crate::router::{Binding, BindingMatch, DmScope, PeerMatch, PeerMatchKind, RouterConfig};
 
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Default)]
 pub struct GatewayCliFlags {
     pub url: Option<String>,
     pub token: Option<String>,
@@ -26,7 +29,7 @@ pub struct GatewayConfig {
     pub channels: ChannelConfigs,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ServerConfig {
     pub url: String,
     pub token: String,
@@ -140,7 +143,7 @@ pub struct ChannelOverrides {
     pub approval_allowlist: Option<Vec<String>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct TelegramConfig {
     pub token: String,
     #[serde(default)]
@@ -153,7 +156,7 @@ pub struct TelegramConfig {
     pub profile: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct DiscordConfig {
     pub token: String,
     #[serde(default)]
@@ -166,7 +169,7 @@ pub struct DiscordConfig {
     pub profile: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct SlackConfig {
     pub bot_token: String,
     pub app_token: String,
@@ -176,6 +179,83 @@ pub struct SlackConfig {
     pub auto_approve: Option<Vec<String>>,
     #[serde(default)]
     pub profile: Option<String>,
+}
+
+const REDACTED_TOKEN_DEBUG: &str = "[REDACTED]";
+
+fn redacted_optional_debug(value: &Option<String>) -> Option<&'static str> {
+    value.as_ref().map(|_| REDACTED_TOKEN_DEBUG)
+}
+
+impl fmt::Debug for GatewayCliFlags {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("GatewayCliFlags")
+            .field("url", &self.url)
+            .field("token", &redacted_optional_debug(&self.token))
+            .field(
+                "telegram_token",
+                &redacted_optional_debug(&self.telegram_token),
+            )
+            .field(
+                "discord_token",
+                &redacted_optional_debug(&self.discord_token),
+            )
+            .field(
+                "slack_bot_token",
+                &redacted_optional_debug(&self.slack_bot_token),
+            )
+            .field(
+                "slack_app_token",
+                &redacted_optional_debug(&self.slack_app_token),
+            )
+            .field("store", &self.store)
+            .finish()
+    }
+}
+
+impl fmt::Debug for ServerConfig {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ServerConfig")
+            .field("url", &self.url)
+            .field("token", &REDACTED_TOKEN_DEBUG)
+            .finish()
+    }
+}
+
+impl fmt::Debug for TelegramConfig {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("TelegramConfig")
+            .field("token", &REDACTED_TOKEN_DEBUG)
+            .field("require_mention", &self.require_mention)
+            .field("model", &self.model)
+            .field("auto_approve", &self.auto_approve)
+            .field("profile", &self.profile)
+            .finish()
+    }
+}
+
+impl fmt::Debug for DiscordConfig {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("DiscordConfig")
+            .field("token", &REDACTED_TOKEN_DEBUG)
+            .field("guilds", &self.guilds)
+            .field("model", &self.model)
+            .field("auto_approve", &self.auto_approve)
+            .field("profile", &self.profile)
+            .finish()
+    }
+}
+
+impl fmt::Debug for SlackConfig {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SlackConfig")
+            .field("bot_token", &REDACTED_TOKEN_DEBUG)
+            .field("app_token", &REDACTED_TOKEN_DEBUG)
+            .field("model", &self.model)
+            .field("auto_approve", &self.auto_approve)
+            .field("profile", &self.profile)
+            .finish()
+    }
 }
 
 impl Default for GatewayConfig {
@@ -872,12 +952,21 @@ impl PersistedGatewayConfig {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Default)]
+#[derive(Clone, Deserialize, Serialize, Default)]
 struct PersistedServerConfig {
     #[serde(default)]
     url: String,
     #[serde(default)]
     token: String,
+}
+
+impl fmt::Debug for PersistedServerConfig {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("PersistedServerConfig")
+            .field("url", &self.url)
+            .field("token", &REDACTED_TOKEN_DEBUG)
+            .finish()
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, Default)]
@@ -1223,6 +1312,126 @@ token = ""
         };
         assert!(config.enabled_channels().is_empty());
         assert!(config.validate().is_err());
+    }
+
+    #[test]
+    fn debug_redacts_all_messaging_token_fields() {
+        let gateway_token = "gateway-debug-raw";
+        let telegram_token = "telegram-debug-raw";
+        let discord_token = "discord-debug-raw";
+        let slack_bot_token = concat!("xox", "b-debug-raw");
+        let slack_app_token = concat!("xapp", "-debug-raw");
+
+        let cli = GatewayCliFlags {
+            token: Some(gateway_token.to_string()),
+            telegram_token: Some(telegram_token.to_string()),
+            discord_token: Some(discord_token.to_string()),
+            slack_bot_token: Some(slack_bot_token.to_string()),
+            slack_app_token: Some(slack_app_token.to_string()),
+            ..Default::default()
+        };
+        let config = GatewayConfig {
+            server: super::ServerConfig {
+                url: "http://127.0.0.1:4096".to_string(),
+                token: gateway_token.to_string(),
+            },
+            channels: ChannelConfigs {
+                telegram: Some(TelegramConfig {
+                    token: telegram_token.to_string(),
+                    require_mention: false,
+                    model: None,
+                    auto_approve: None,
+                    profile: None,
+                }),
+                discord: Some(super::DiscordConfig {
+                    token: discord_token.to_string(),
+                    guilds: Vec::new(),
+                    model: None,
+                    auto_approve: None,
+                    profile: None,
+                }),
+                slack: Some(super::SlackConfig {
+                    bot_token: slack_bot_token.to_string(),
+                    app_token: slack_app_token.to_string(),
+                    model: None,
+                    auto_approve: None,
+                    profile: None,
+                }),
+            },
+            ..GatewayConfig::default()
+        };
+        let persisted = super::PersistedGatewayConfig {
+            server: super::PersistedServerConfig {
+                url: "http://127.0.0.1:4096".to_string(),
+                token: gateway_token.to_string(),
+            },
+            channels: super::PersistedChannelConfigs {
+                telegram: config.channels.telegram.clone(),
+                discord: config.channels.discord.clone(),
+                slack: config.channels.slack.clone(),
+            },
+            ..Default::default()
+        };
+
+        let debug_output = format!(
+            "{cli:?}
+{config:?}
+{persisted:?}"
+        );
+        assert!(debug_output.contains("[REDACTED]"));
+        for raw in [
+            gateway_token,
+            telegram_token,
+            discord_token,
+            slack_bot_token,
+            slack_app_token,
+        ] {
+            assert!(
+                !debug_output.contains(raw),
+                "debug output leaked raw messaging credential material: {raw}"
+            );
+        }
+    }
+
+    #[test]
+    fn save_preserves_raw_messaging_tokens_for_config_roundtrip() {
+        let dir = tempfile::tempdir().expect("temp dir");
+        let path = dir.path().join("gateway.toml");
+        let gateway_token = "gateway-config-raw";
+        let telegram_token = "telegram-config-raw";
+        let slack_bot_token = concat!("xox", "b-config-raw");
+        let slack_app_token = concat!("xapp", "-config-raw");
+        let mut config = GatewayConfig::default();
+        config.server.token = gateway_token.to_string();
+        config.channels.telegram = Some(TelegramConfig {
+            token: telegram_token.to_string(),
+            require_mention: false,
+            model: None,
+            auto_approve: None,
+            profile: None,
+        });
+        config.channels.slack = Some(super::SlackConfig {
+            bot_token: slack_bot_token.to_string(),
+            app_token: slack_app_token.to_string(),
+            model: None,
+            auto_approve: None,
+            profile: None,
+        });
+
+        config.save(&path).expect("save config");
+        let saved = fs::read_to_string(&path).expect("read saved config");
+
+        for raw in [
+            gateway_token,
+            telegram_token,
+            slack_bot_token,
+            slack_app_token,
+        ] {
+            assert!(
+                saved.contains(raw),
+                "config persistence should preserve raw credential material required for runtime auth"
+            );
+        }
     }
 
     #[test]

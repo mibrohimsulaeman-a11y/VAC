@@ -46,6 +46,20 @@ def case_combined_text(case: dict[str, Any]) -> str:
     return "\n".join(chunks)
 
 
+
+def redaction_fixture_is_valid(fixture: dict[str, Any]) -> bool:
+    outputs = fixture.get("redacted_outputs", [])
+    required = fixture.get("redacted_required", [])
+    forbidden = fixture.get("raw_forbidden", fixture.get("raw_secrets", []))
+    if not isinstance(outputs, list) or not all(isinstance(item, str) for item in outputs):
+        return False
+    if not isinstance(required, list) or not all(isinstance(item, str) for item in required):
+        return False
+    if not isinstance(forbidden, list) or not all(isinstance(item, str) for item in forbidden):
+        return False
+    combined = "\n".join(outputs)
+    return all(token in combined for token in required) and all(token not in combined for token in forbidden)
+
 def case_is_valid(case: dict[str, Any], combined: str) -> bool:
     required = case.get("required_tokens", [])
     forbidden = case.get("forbidden_tokens", [])
@@ -94,10 +108,39 @@ for raw_case in cases if isinstance(cases, list) else []:
         mutated = combined + "\n" + forbidden[0] + "\n"
         require(f"{case_id}:negative_forbidden_token_rejected", not case_is_valid(raw_case, mutated))
 
+    redaction_fixture = raw_case.get("redaction_fixture")
+    if redaction_fixture is not None:
+        require(f"{case_id}:redaction_fixture_object", isinstance(redaction_fixture, dict))
+        if isinstance(redaction_fixture, dict):
+            require(
+                f"{case_id}:redaction_fixture_valid",
+                redaction_fixture_is_valid(redaction_fixture),
+            )
+            raw_forbidden = redaction_fixture.get(
+                "raw_forbidden", redaction_fixture.get("raw_secrets", [])
+            )
+            outputs = redaction_fixture.get("redacted_outputs", [])
+            if (
+                isinstance(raw_forbidden, list)
+                and raw_forbidden
+                and isinstance(raw_forbidden[0], str)
+                and isinstance(outputs, list)
+                and outputs
+                and isinstance(outputs[0], str)
+            ):
+                mutated_fixture = dict(redaction_fixture)
+                mutated_fixture["redacted_outputs"] = [outputs[0] + raw_forbidden[0], *outputs[1:]]
+                require(
+                    f"{case_id}:negative_raw_secret_rejected",
+                    not redaction_fixture_is_valid(mutated_fixture),
+                )
+
 required_cases = {
     "broker_no_l2_overclaim",
     "autopilot_cli_no_release_overclaim",
     "messaging_delivery_failure_explicit",
+    "messaging_tokens_redacted",
+    "remote_credential_material_redacted",
 }
 for case_id in sorted(required_cases - seen):
     errors.append(f"missing required executable case: {case_id}")

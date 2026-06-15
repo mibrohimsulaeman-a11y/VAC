@@ -3,6 +3,7 @@
 //! Provides a unified interface for session and checkpoint management
 //! with implementations for both VAC API and local SQLite storage.
 
+use crate::redaction::redact_json_secret_values;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -375,7 +376,7 @@ impl CreateCheckpointRequest {
     }
 
     pub fn with_metadata(mut self, metadata: serde_json::Value) -> Self {
-        self.state.metadata = Some(metadata);
+        self.state.metadata = Some(redact_json_secret_values(metadata));
         self
     }
 }
@@ -494,4 +495,29 @@ pub struct ToolUsageCounts {
     pub successful: u32,
     pub failed: u32,
     pub aborted: u32,
+}
+
+#[cfg(test)]
+mod redaction_tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn checkpoint_request_metadata_redacts_credential_material() {
+        let raw = "checkpoint-api-key-raw";
+        let request = CreateCheckpointRequest::new(Vec::new()).with_metadata(json!({
+            "safe": "keep-me",
+            "api_key": raw,
+            "nested": { "access_token": raw }
+        }));
+        let rendered = request
+            .state
+            .metadata
+            .expect("metadata should be present")
+            .to_string();
+
+        assert!(rendered.contains("[REDACTED]"));
+        assert!(rendered.contains("keep-me"));
+        assert!(!rendered.contains(raw));
+    }
 }

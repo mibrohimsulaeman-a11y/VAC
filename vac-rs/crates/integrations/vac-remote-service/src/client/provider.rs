@@ -7,6 +7,7 @@
 
 use crate::AgentProvider;
 use crate::models::*;
+use crate::redaction::redact_json_secret_values;
 use crate::storage::{
     CreateCheckpointRequest as StorageCreateCheckpointRequest,
     CreateSessionRequest as StorageCreateSessionRequest,
@@ -235,7 +236,10 @@ impl AgentProvider for AgentClient {
             );
         }
         if let Some(state_metadata) = &ctx.state.metadata {
-            meta.insert("state_metadata".to_string(), state_metadata.clone());
+            meta.insert(
+                "state_metadata".to_string(),
+                redact_json_secret_values(state_metadata.clone()),
+            );
         }
 
         let response_message = ctx
@@ -389,7 +393,7 @@ impl AgentProvider for AgentClient {
                                     meta.insert("checkpoint_id".to_string(), serde_json::Value::String(checkpoint_id.to_string()));
                                 }
                                 if let Some(state_metadata) = &ctx.state.metadata {
-                                    meta.insert("state_metadata".to_string(), state_metadata.clone());
+                                    meta.insert("state_metadata".to_string(), redact_json_secret_values(state_metadata.clone()));
                                 }
                                 yield Ok(ChatCompletionStreamResponse {
                                     id: ctx.request_id.to_string(),

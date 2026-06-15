@@ -12,6 +12,7 @@ pub mod client;
 pub mod commands;
 pub mod local;
 pub mod models;
+pub(crate) mod redaction;
 pub mod storage;
 pub mod vac;
 

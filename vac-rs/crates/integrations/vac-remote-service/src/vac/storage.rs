@@ -2,6 +2,7 @@
 //!
 //! Implements SessionStorage using VAC's /v1/sessions API.
 
+use crate::redaction::redact_optional_json_secret_values;
 use crate::storage::{
     BackendInfo, Checkpoint, CheckpointState, CheckpointSummary, CreateCheckpointRequest,
     CreateSessionRequest, CreateSessionResult, ListCheckpointsQuery, ListCheckpointsResult,
@@ -135,7 +136,7 @@ impl SessionStorage for VACStorage {
                 parent_id: c.parent_id,
                 state: CheckpointState {
                     messages: c.state.messages,
-                    metadata: c.state.metadata,
+                    metadata: redact_optional_json_secret_values(c.state.metadata),
                 },
                 created_at: c.created_at,
                 updated_at: c.updated_at,
@@ -156,7 +157,9 @@ impl SessionStorage for VACStorage {
             cwd: request.cwd.clone(),
             state: vac_remote_service::CheckpointState {
                 messages: request.initial_state.messages.clone(),
-                metadata: request.initial_state.metadata.clone(),
+                metadata: redact_optional_json_secret_values(
+                    request.initial_state.metadata.clone(),
+                ),
             },
         };
 
@@ -174,7 +177,9 @@ impl SessionStorage for VACStorage {
                 parent_id: response.checkpoint.parent_id,
                 state: CheckpointState {
                     messages: response.checkpoint.state.messages,
-                    metadata: response.checkpoint.state.metadata,
+                    metadata: redact_optional_json_secret_values(
+                        response.checkpoint.state.metadata,
+                    ),
                 },
                 created_at: response.checkpoint.created_at,
                 updated_at: response.checkpoint.updated_at,
@@ -222,7 +227,7 @@ impl SessionStorage for VACStorage {
                 parent_id: c.parent_id,
                 state: CheckpointState {
                     messages: c.state.messages,
-                    metadata: c.state.metadata,
+                    metadata: redact_optional_json_secret_values(c.state.metadata),
                 },
                 created_at: c.created_at,
                 updated_at: c.updated_at,
@@ -285,7 +290,7 @@ impl SessionStorage for VACStorage {
             parent_id: c.parent_id,
             state: CheckpointState {
                 messages: c.state.messages,
-                metadata: c.state.metadata,
+                metadata: redact_optional_json_secret_values(c.state.metadata),
             },
             created_at: c.created_at,
             updated_at: c.updated_at,
@@ -300,7 +305,7 @@ impl SessionStorage for VACStorage {
         let api_request = vac_remote_service::CreateCheckpointRequest {
             state: vac_remote_service::CheckpointState {
                 messages: request.state.messages.clone(),
-                metadata: request.state.metadata.clone(),
+                metadata: redact_optional_json_secret_values(request.state.metadata.clone()),
             },
             parent_id: request.parent_id,
         };
@@ -317,7 +322,7 @@ impl SessionStorage for VACStorage {
             parent_id: response.checkpoint.parent_id,
             state: CheckpointState {
                 messages: response.checkpoint.state.messages,
-                metadata: response.checkpoint.state.metadata,
+                metadata: redact_optional_json_secret_values(response.checkpoint.state.metadata),
             },
             created_at: response.checkpoint.created_at,
             updated_at: response.checkpoint.updated_at,
