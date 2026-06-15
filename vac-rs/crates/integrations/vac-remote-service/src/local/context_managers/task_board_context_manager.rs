@@ -379,25 +379,25 @@ fn merge_consecutive_same_role(messages: Vec<LLMMessage>) -> Vec<LLMMessage> {
     let mut result: Vec<LLMMessage> = Vec::with_capacity(messages.len());
 
     for msg in messages {
-        let should_merge = result.last().is_some_and(|prev| prev.role == msg.role);
-
-        if should_merge {
-            let prev = result.last_mut().expect("checked above");
-            let new_parts = msg.content.into_parts();
-            prev.content = match std::mem::take(&mut prev.content) {
-                LLMMessageContent::String(s) if s.is_empty() => LLMMessageContent::List(new_parts),
-                LLMMessageContent::String(s) => {
-                    let mut parts = vec![LLMMessageTypedContent::Text { text: s }];
-                    parts.extend(new_parts);
-                    LLMMessageContent::List(parts)
-                }
-                LLMMessageContent::List(mut existing) => {
-                    existing.extend(new_parts);
-                    LLMMessageContent::List(existing)
-                }
-            };
-        } else {
-            result.push(msg);
+        match result.last_mut() {
+            Some(prev) if prev.role == msg.role => {
+                let new_parts = msg.content.into_parts();
+                prev.content = match std::mem::take(&mut prev.content) {
+                    LLMMessageContent::String(s) if s.is_empty() => {
+                        LLMMessageContent::List(new_parts)
+                    }
+                    LLMMessageContent::String(s) => {
+                        let mut parts = vec![LLMMessageTypedContent::Text { text: s }];
+                        parts.extend(new_parts);
+                        LLMMessageContent::List(parts)
+                    }
+                    LLMMessageContent::List(mut existing) => {
+                        existing.extend(new_parts);
+                        LLMMessageContent::List(existing)
+                    }
+                };
+            }
+            _ => result.push(msg),
         }
     }
 

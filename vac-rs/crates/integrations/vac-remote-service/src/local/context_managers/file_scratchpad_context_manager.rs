@@ -6,6 +6,7 @@ use std::{
     path::{Path, PathBuf},
     sync::RwLock,
 };
+use tracing::warn;
 use uuid::Uuid;
 use vac_foundation::models::{
     integrations::openai::{ChatMessage, Role},
@@ -95,13 +96,31 @@ impl FileScratchpadContextManager {
     ) -> Vec<LLMMessage> {
         let session_key = session_id.map(|u| u.to_string()).unwrap_or_default();
         let should_recover = {
-            let recovered = self.recovered_sessions.read().unwrap();
+            let recovered = match self.recovered_sessions.read() {
+                Ok(recovered) => recovered,
+                Err(poisoned) => {
+                    warn!(
+                        session_key = %session_key,
+                        "file scratchpad recovered-session read lock was poisoned; continuing with recovered guard"
+                    );
+                    poisoned.into_inner()
+                }
+            };
             !recovered.contains(&session_key)
         };
 
         if should_recover {
             self.recover_from_history(&messages, session_id);
-            let mut recovered = self.recovered_sessions.write().unwrap();
+            let mut recovered = match self.recovered_sessions.write() {
+                Ok(recovered) => recovered,
+                Err(poisoned) => {
+                    warn!(
+                        session_key = %session_key,
+                        "file scratchpad recovered-session write lock was poisoned; continuing with recovered guard"
+                    );
+                    poisoned.into_inner()
+                }
+            };
             recovered.insert(session_key);
         }
 

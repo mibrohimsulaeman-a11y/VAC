@@ -595,7 +595,10 @@ impl TaskManager {
         }
 
         // Update the task to Running and start a new execution
-        let entry = self.tasks.get_mut(&id).unwrap();
+        let entry = self
+            .tasks
+            .get_mut(&id)
+            .ok_or_else(|| TaskError::TaskNotFound(id.clone()))?;
         entry.task.status = TaskStatus::Running;
         entry.task.command = command.clone();
         entry.task.pause_info = None;
@@ -753,8 +756,22 @@ impl TaskManager {
         }
 
         // Take stdout and stderr for streaming
-        let stdout = child.stdout.take().unwrap();
-        let stderr = child.stderr.take().unwrap();
+        let Some(stdout) = child.stdout.take() else {
+            let _ = child.start_kill();
+            return TaskCompletion {
+                output: String::new(),
+                error: Some("local task stdout pipe unavailable after spawn".to_string()),
+                final_status: TaskStatus::Failed,
+            };
+        };
+        let Some(stderr) = child.stderr.take() else {
+            let _ = child.start_kill();
+            return TaskCompletion {
+                output: String::new(),
+                error: Some("local task stderr pipe unavailable after spawn".to_string()),
+                final_status: TaskStatus::Failed,
+            };
+        };
 
         let stdout_reader = BufReader::new(stdout);
         let stderr_reader = BufReader::new(stderr);

@@ -17,6 +17,7 @@ use vac_foundation::cert_utils::CertificateChain;
 use vac_foundation::task_manager::{TaskManager, TaskManagerHandle};
 use vac_remote_service::AgentProvider;
 
+pub mod approval_boundary;
 pub mod integrations;
 pub mod local_tools;
 pub mod remote_tools;

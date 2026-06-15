@@ -125,9 +125,11 @@ pub fn messages_to_history(
 // }
 
 pub fn remove_xml_tag(tag_name: &str, content: &str) -> String {
-    #[allow(clippy::unwrap_used)]
-    let xml_tag_regex =
-        Regex::new(format!("<{}>(?s)(.*?)</{}>", tag_name, tag_name).as_str()).unwrap();
+    let escaped_tag_name = regex::escape(tag_name);
+    let pattern = format!("(?s)<{}>(.*?)</{}>", escaped_tag_name, escaped_tag_name);
+    let Ok(xml_tag_regex) = Regex::new(&pattern) else {
+        return content.trim().to_string();
+    };
     xml_tag_regex.replace_all(content, "").trim().to_string()
 }
 
