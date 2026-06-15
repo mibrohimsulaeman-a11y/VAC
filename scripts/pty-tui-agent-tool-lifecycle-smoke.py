@@ -201,21 +201,15 @@ def run_smoke(root: Path, timeout: float) -> tuple[int, bytes]:
                 # handler path internally, but the PTY harness also nudges the modal
                 # with bounded, idempotent keys if a slow CI runner stalls between
                 # popup, selection, confirmation, and submission states.
-                popup_marker_visible = "vac_agent_ask_user_popup_shown" in visible
-                selected_marker_visible = "vac_agent_ask_user_option_selected" in visible
-                confirmed_marker_visible = "vac_agent_ask_user_confirmed" in visible
-                submit_state_visible = "enter submit" in visible or "vac_agent_ask_user_submitted" in visible
-                if popup_marker_visible and now - last_ask_user_key > 0.55:
-                    if not selected_marker_visible and not sent_ask_user_select:
+                popup_marker_visible = marker_present(visible, "VAC_AGENT_ASK_USER_POPUP_SHOWN")
+                if popup_marker_visible and now - last_ask_user_key > 0.45:
+                    if not sent_ask_user_select:
                         os.write(master_fd, SPACE_KEY)
                         sent_ask_user_select = True
                         last_ask_user_key = now
-                    elif selected_marker_visible and not confirmed_marker_visible and not sent_ask_user_confirm:
+                    elif not ask_user_response_visible and ask_user_submit_attempts < 12:
                         os.write(master_fd, ENTER_KEY)
                         sent_ask_user_confirm = True
-                        last_ask_user_key = now
-                    elif (confirmed_marker_visible or submit_state_visible) and not ask_user_response_visible and ask_user_submit_attempts < 5:
-                        os.write(master_fd, ENTER_KEY)
                         ask_user_submit_attempts += 1
                         last_ask_user_key = now
                 answered_ask_user = True
@@ -292,12 +286,12 @@ def main() -> int:
         "agent_started_visible": "vac_agent_tool_smoke_started" in visible_lower,
         "approval_lifecycle_visible": "approve" in visible_lower or "approval" in visible_lower,
         "ask_user_visible": "continue smoke" in visible_lower or "needmore" in visible_lower,
-        "ask_user_popup_marker_visible": "vac_agent_ask_user_popup_shown" in visible_lower,
-        "ask_user_option_selected_marker_visible": "vac_agent_ask_user_option_selected" in visible_lower,
-        "ask_user_confirmed_marker_visible": "vac_agent_ask_user_confirmed" in visible_lower,
-        "ask_user_submitted_marker_visible": "vac_agent_ask_user_submitted" in visible_lower,
-        "ask_user_response_visible": "vac_agent_ask_user_response" in visible_lower,
-        "ask_user_response_observed_marker_visible": "vac_agent_ask_user_response_observed" in visible_lower,
+        "ask_user_popup_marker_visible": marker_present(visible, "VAC_AGENT_ASK_USER_POPUP_SHOWN"),
+        "ask_user_option_selected_marker_visible": marker_present(visible, "VAC_AGENT_ASK_USER_OPTION_SELECTED"),
+        "ask_user_confirmed_marker_visible": marker_present(visible, "VAC_AGENT_ASK_USER_CONFIRMED"),
+        "ask_user_submitted_marker_visible": marker_present(visible, "VAC_AGENT_ASK_USER_SUBMITTED"),
+        "ask_user_response_visible": marker_present(visible, "VAC_AGENT_ASK_USER_RESPONSE"),
+        "ask_user_response_observed_marker_visible": marker_present(visible, "VAC_AGENT_ASK_USER_RESPONSE_OBSERVED"),
         "done_marker_visible": "vac_agent_tool_smoke_done" in visible_lower,
         "process_exit_code_not_124": code != 124,
         "mock_tabs_absent": " workbench " not in visible_lower and " mcp " not in visible_lower,

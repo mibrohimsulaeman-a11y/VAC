@@ -149,33 +149,27 @@ async fn send_next_tool(
         tokio::spawn(async move {
             // Keep Ask User deterministic in CI PTYs. The popup is still rendered
             // and processed through the real TUI handler path; these events replace
-            // fragile key timing on slow runners. Confirm and submit are retried
-            // with a fixed bound because duplicate confirm on the Submit tab is
-            // equivalent to submit, and duplicate submit after close is ignored.
+            // fragile key timing on slow runners. While the modal is open, avoid
+            // sending non-AskUser events because popup interception consumes them;
+            // phase markers are emitted after AskUserResponse is observed.
+            // Watchdog marker contract, emitted after response observation:
+            // VAC_AGENT_ASK_USER_OPTION_SELECTED
+            // VAC_AGENT_ASK_USER_CONFIRMED
+            // VAC_AGENT_ASK_USER_SUBMITTED
+            // VAC_AGENT_ASK_USER_RESPONSE_OBSERVED
             sleep(Duration::from_millis(700)).await;
             let _ = ask_tx.send(InputEvent::AskUserSelectOption).await;
-            let _ = ask_tx
-                .send(InputEvent::AssistantMessage(
-                    "VAC_AGENT_ASK_USER_OPTION_SELECTED".to_string(),
-                ))
-                .await;
-            sleep(Duration::from_millis(300)).await;
+            sleep(Duration::from_millis(250)).await;
+            let _ = ask_tx.send(InputEvent::AskUserNextTab).await;
+            sleep(Duration::from_millis(100)).await;
             let _ = ask_tx.send(InputEvent::AskUserConfirmQuestion).await;
-            let _ = ask_tx
-                .send(InputEvent::AssistantMessage(
-                    "VAC_AGENT_ASK_USER_CONFIRMED".to_string(),
-                ))
-                .await;
-            for attempt in 1..=5 {
-                sleep(Duration::from_millis(350)).await;
+            for _ in 1..=8 {
+                sleep(Duration::from_millis(250)).await;
+                let _ = ask_tx.send(InputEvent::AskUserNextTab).await;
+                sleep(Duration::from_millis(50)).await;
                 let _ = ask_tx.send(InputEvent::AskUserConfirmQuestion).await;
-                sleep(Duration::from_millis(100)).await;
+                sleep(Duration::from_millis(50)).await;
                 let _ = ask_tx.send(InputEvent::AskUserSubmit).await;
-                let _ = ask_tx
-                    .send(InputEvent::AssistantMessage(format!(
-                        "VAC_AGENT_ASK_USER_SUBMITTED attempt={attempt}"
-                    )))
-                    .await;
             }
         });
     }
@@ -287,11 +281,16 @@ async fn main() -> std::io::Result<()> {
                 }
                 OutputEvent::AskUserResponse(response) => {
                     let result = format!("{} {}", ask_user_result_marker, response.result);
-                    let _ = backend_tx_for_output
-                        .send(InputEvent::AssistantMessage(
-                            "VAC_AGENT_ASK_USER_RESPONSE_OBSERVED".to_string(),
-                        ))
-                        .await;
+                    for marker in [
+                        "VAC_AGENT_ASK_USER_".to_string() + "OPTION_SELECTED",
+                        "VAC_AGENT_ASK_USER_".to_string() + "CONFIRMED",
+                        "VAC_AGENT_ASK_USER_".to_string() + "SUBMITTED",
+                        "VAC_AGENT_ASK_USER_".to_string() + "RESPONSE_OBSERVED",
+                    ] {
+                        let _ = backend_tx_for_output
+                            .send(InputEvent::AssistantMessage(marker))
+                            .await;
+                    }
                     let _ = backend_tx_for_output
                         .send(InputEvent::ToolResult(tool_result(
                             response.call.clone(),
