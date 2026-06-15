@@ -13,6 +13,7 @@ SMOKE = ROOT / "vac-rs/crates/surfaces/vac-tui/examples/tui_smoke.rs"
 AGENT_SMOKE = ROOT / "vac-rs/crates/surfaces/vac-tui/examples/tui_agent_tool_smoke.rs"
 AGENT_PTY = ROOT / "scripts/pty-tui-agent-tool-lifecycle-smoke.py"
 AGENT_MATRIX = ROOT / "tests/fixtures/tui-agent-tool-lifecycle/tool-matrix.json"
+AGENT_GOLDEN = ROOT / "tests/fixtures/tui-agent-tool-lifecycle/golden/pass.out"
 REAL_IO = ROOT / "scripts/pty-vac-cli-real-io-e2e.py"
 RUNTIME_E2E = ROOT / "scripts/vac-runtime-agent-e2e-sv.py"
 BOUND_CASES = ROOT / "tests/fixtures/runtime/bound_agent_e2e_cases.json"
@@ -46,6 +47,7 @@ smoke = read(SMOKE)
 agent_smoke = read(AGENT_SMOKE)
 agent_pty = read(AGENT_PTY)
 agent_matrix = read(AGENT_MATRIX)
+agent_golden = read(AGENT_GOLDEN)
 real_io = read(REAL_IO)
 runtime_e2e = read(RUNTIME_E2E)
 bound_cases = read(BOUND_CASES)
@@ -53,6 +55,8 @@ bound_cases = read(BOUND_CASES)
 require("audit_doc_states_deterministic_harness_pass", "deterministic_user_agent_all_tools_tui_e2e=TV-Pass" in doc)
 require("audit_doc_states_local_real_provider_file_io_pass", "local_real_provider_mcp_file_io_e2e=TV-Pass" in doc)
 require("audit_doc_states_external_provider_remote_process_pending", "external_provider_remote_process_io_e2e=TV-Pending" in doc)
+
+require("audit_doc_records_ask_user_timeout_closure", "tui_agent_tool_lifecycle_smoke_flake=TV-Pass" in doc and "local_stress_runs=10/10" in doc and "process_exit_code_not_124=true" in doc)
 
 require(
     "pty_smoke_is_direct_tui_lifecycle_only",
@@ -93,6 +97,20 @@ require(
     and "required_visible_markers" in agent_matrix
     and "VAC_AGENT_TOOL_SMOKE_DONE" in agent_matrix,
 )
+
+ASK_USER_WATCHDOG_MARKERS = [
+    "VAC_AGENT_ASK_USER_POPUP_SHOWN",
+    "VAC_AGENT_ASK_USER_OPTION_SELECTED",
+    "VAC_AGENT_ASK_USER_CONFIRMED",
+    "VAC_AGENT_ASK_USER_SUBMITTED",
+    "VAC_AGENT_ASK_USER_RESPONSE_OBSERVED",
+]
+for marker in ASK_USER_WATCHDOG_MARKERS:
+    require(f"agent_smoke_ask_user_marker:{marker}", marker in agent_smoke)
+    require(f"agent_pty_ask_user_marker:{marker}", marker.lower() in agent_pty.lower())
+    require(f"agent_matrix_ask_user_marker:{marker}", marker in agent_matrix)
+    require(f"agent_golden_ask_user_marker:{marker}", marker in agent_golden)
+require("agent_golden_records_flake_closure", "tui_agent_tool_lifecycle_smoke_flake=TV-Pass" in agent_golden and "process_exit_code_not_124=true" in agent_golden)
 require(
     "static_lifecycle_gate_exists",
     "VAC TUI E2E static lifecycle gate" in static

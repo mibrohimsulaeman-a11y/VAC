@@ -21,6 +21,7 @@ ENTER_ALT = b"\x1b[?1049h"
 EXIT_ALT = b"\x1b[?1049l"
 CTRL_C = b"\x03"
 ENTER_KEY = b"\r\n"
+SPACE_KEY = b" "
 
 
 def strip_ansi(text: str) -> str:
@@ -145,6 +146,10 @@ def run_smoke(root: Path, timeout: float) -> tuple[int, bytes]:
     prompt_started_at: float | None = None
     answered_ask_user = False
     last_enter = 0.0
+    sent_ask_user_select = False
+    sent_ask_user_confirm = False
+    ask_user_submit_attempts = 0
+    last_ask_user_key = 0.0
 
     def pump(seconds: float) -> None:
         captured.extend(read_available(master_fd, selector, min(deadline, time.monotonic() + seconds)))
@@ -188,15 +193,33 @@ def run_smoke(root: Path, timeout: float) -> tuple[int, bytes]:
                 or "continue smoke" in visible
                 or "needmore" in visible
                 or "enter submit" in visible
+                or "vac_agent_ask_user_popup_shown" in visible
             )
+            ask_user_response_visible = "vac_agent_ask_user_response" in visible
             if ask_user_active and "vac_agent_tool_smoke_done" not in visible:
-                # The Rust smoke example injects Ask User select/confirm/submit
-                # events internally after rendering the popup. Keep the PTY side
-                # passive here; extra Space/Enter writes can race with the
-                # deterministic handler on slow CI runners and leave the modal
-                # open until timeout.
+                # State-aware Ask User fallback. The Rust example drives the same
+                # handler path internally, but the PTY harness also nudges the modal
+                # with bounded, idempotent keys if a slow CI runner stalls between
+                # popup, selection, confirmation, and submission states.
+                popup_marker_visible = "vac_agent_ask_user_popup_shown" in visible
+                selected_marker_visible = "vac_agent_ask_user_option_selected" in visible
+                confirmed_marker_visible = "vac_agent_ask_user_confirmed" in visible
+                submit_state_visible = "enter submit" in visible or "vac_agent_ask_user_submitted" in visible
+                if popup_marker_visible and now - last_ask_user_key > 0.55:
+                    if not selected_marker_visible and not sent_ask_user_select:
+                        os.write(master_fd, SPACE_KEY)
+                        sent_ask_user_select = True
+                        last_ask_user_key = now
+                    elif selected_marker_visible and not confirmed_marker_visible and not sent_ask_user_confirm:
+                        os.write(master_fd, ENTER_KEY)
+                        sent_ask_user_confirm = True
+                        last_ask_user_key = now
+                    elif (confirmed_marker_visible or submit_state_visible) and not ask_user_response_visible and ask_user_submit_attempts < 5:
+                        os.write(master_fd, ENTER_KEY)
+                        ask_user_submit_attempts += 1
+                        last_ask_user_key = now
                 answered_ask_user = True
-                pump(0.6)
+                pump(0.35)
                 continue
 
             if "vac_agent_tool_smoke_done" in visible:
@@ -269,7 +292,14 @@ def main() -> int:
         "agent_started_visible": "vac_agent_tool_smoke_started" in visible_lower,
         "approval_lifecycle_visible": "approve" in visible_lower or "approval" in visible_lower,
         "ask_user_visible": "continue smoke" in visible_lower or "needmore" in visible_lower,
+        "ask_user_popup_marker_visible": "vac_agent_ask_user_popup_shown" in visible_lower,
+        "ask_user_option_selected_marker_visible": "vac_agent_ask_user_option_selected" in visible_lower,
+        "ask_user_confirmed_marker_visible": "vac_agent_ask_user_confirmed" in visible_lower,
+        "ask_user_submitted_marker_visible": "vac_agent_ask_user_submitted" in visible_lower,
+        "ask_user_response_visible": "vac_agent_ask_user_response" in visible_lower,
+        "ask_user_response_observed_marker_visible": "vac_agent_ask_user_response_observed" in visible_lower,
         "done_marker_visible": "vac_agent_tool_smoke_done" in visible_lower,
+        "process_exit_code_not_124": code != 124,
         "mock_tabs_absent": " workbench " not in visible_lower and " mcp " not in visible_lower,
     }
     for tool in required_tool_names:
@@ -293,6 +323,9 @@ def main() -> int:
         return 1
 
     print("VAC TUI agent tool lifecycle smoke: PASS")
+    print("tui_agent_tool_lifecycle_smoke_flake=TV-Pass")
+    print("ask_user_watchdog_markers=5")
+    print("process_exit_code_not_124=true")
     print(f"tool_count={len(required_tool_names)}")
     print(f"marker_count={len(matrix['required_visible_markers'])}")
     for name in checks:

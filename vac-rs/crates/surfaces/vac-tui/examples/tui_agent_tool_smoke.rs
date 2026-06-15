@@ -140,18 +140,42 @@ async fn send_next_tool(
                 ask_user_questions.to_vec(),
             ))
             .await;
+        let _ = backend_tx
+            .send(InputEvent::AssistantMessage(
+                "VAC_AGENT_ASK_USER_POPUP_SHOWN".to_string(),
+            ))
+            .await;
         let ask_tx = backend_tx.clone();
         tokio::spawn(async move {
             // Keep Ask User deterministic in CI PTYs. The popup is still rendered
             // and processed through the real TUI handler path; these events replace
-            // fragile second-Enter timing on slow runners.
+            // fragile key timing on slow runners. Confirm and submit are retried
+            // with a fixed bound because duplicate confirm on the Submit tab is
+            // equivalent to submit, and duplicate submit after close is ignored.
             sleep(Duration::from_millis(700)).await;
             let _ = ask_tx.send(InputEvent::AskUserSelectOption).await;
+            let _ = ask_tx
+                .send(InputEvent::AssistantMessage(
+                    "VAC_AGENT_ASK_USER_OPTION_SELECTED".to_string(),
+                ))
+                .await;
             sleep(Duration::from_millis(300)).await;
             let _ = ask_tx.send(InputEvent::AskUserConfirmQuestion).await;
-            for _ in 0..4 {
-                sleep(Duration::from_millis(300)).await;
+            let _ = ask_tx
+                .send(InputEvent::AssistantMessage(
+                    "VAC_AGENT_ASK_USER_CONFIRMED".to_string(),
+                ))
+                .await;
+            for attempt in 1..=5 {
+                sleep(Duration::from_millis(350)).await;
+                let _ = ask_tx.send(InputEvent::AskUserConfirmQuestion).await;
+                sleep(Duration::from_millis(100)).await;
                 let _ = ask_tx.send(InputEvent::AskUserSubmit).await;
+                let _ = ask_tx
+                    .send(InputEvent::AssistantMessage(format!(
+                        "VAC_AGENT_ASK_USER_SUBMITTED attempt={attempt}"
+                    )))
+                    .await;
             }
         });
     }
@@ -263,6 +287,11 @@ async fn main() -> std::io::Result<()> {
                 }
                 OutputEvent::AskUserResponse(response) => {
                     let result = format!("{} {}", ask_user_result_marker, response.result);
+                    let _ = backend_tx_for_output
+                        .send(InputEvent::AssistantMessage(
+                            "VAC_AGENT_ASK_USER_RESPONSE_OBSERVED".to_string(),
+                        ))
+                        .await;
                     let _ = backend_tx_for_output
                         .send(InputEvent::ToolResult(tool_result(
                             response.call.clone(),

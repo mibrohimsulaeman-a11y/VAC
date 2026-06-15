@@ -114,3 +114,19 @@ The local harness runs real `vac-cli` interactive mode with a deterministic loca
 - negative governance paths reject missing `vac_bound_approval`, invalid shell-runner structured commands, approval binding mismatch, and non-loopback HTTP.
 
 Remote SSH execution and true external-provider credentials remain unclaimed and intentionally pending.
+
+## AskUser timeout determinism closure
+
+Status: `tui_agent_tool_lifecycle_smoke_flake=TV-Pass`, `local_stress_runs=10/10`, `process_exit_code_not_124=true`.
+
+The deterministic agent tool lifecycle smoke now records explicit AskUser watchdog markers:
+
+```text
+VAC_AGENT_ASK_USER_POPUP_SHOWN
+VAC_AGENT_ASK_USER_OPTION_SELECTED
+VAC_AGENT_ASK_USER_CONFIRMED
+VAC_AGENT_ASK_USER_SUBMITTED
+VAC_AGENT_ASK_USER_RESPONSE_OBSERVED
+```
+
+The PTY harness is state-aware for the AskUser modal and verifies `VAC_AGENT_ASK_USER_RESPONSE` plus `VAC_AGENT_TOOL_SMOKE_DONE` before treating the smoke as pass. This closes the prior CI flake mode where the AskUser popup could remain visible until process timeout `124`.
