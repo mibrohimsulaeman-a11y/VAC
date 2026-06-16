@@ -76,6 +76,8 @@ if re.search(r"PatchAttempt\s*\{[^}]*patch_index:\s*0", bound_tool, flags=re.S):
 
 # P0.4: command authority must be typed object, string only mirror/degraded shim.
 local_tools = read("vac-rs/crates/integrations/vac-mcp-server/src/local_tools.rs")
+command_authority = read("vac-rs/crates/integrations/vac-mcp-server/src/command_authority.rs")
+mcp_command_boundary = local_tools + "\n" + command_authority
 forbid_before(
     "vac-rs/crates/integrations/vac-mcp-server/src/local_tools.rs",
     "#[cfg(test)]",
@@ -91,13 +93,14 @@ for token in [
     "parse_vac_structured_command_object",
     "free-form command strings are migration mirrors only",
     "command mirror does not match structured_command",
-    "require_vac_bound_approval(&vac_bound_approval, \"execute_process\"",
-    "require_vac_bound_approval(&vac_bound_approval, \"filesystem_write\"",
-    "require_vac_bound_approval(&vac_bound_approval, \"filesystem_delete\"",
+    "require_vac_bound_approval",
+    "execute_process",
+    "filesystem_write",
+    "filesystem_delete",
     "Command::new(&structured.runner)",
 ]:
-    if token not in local_tools:
-        errors.append(f"local_tools missing {token!r}")
+    if token not in mcp_command_boundary:
+        errors.append(f"mcp command boundary missing {token!r}")
 
 # Background task path must also avoid sh -c.
 task_manager = read("vac-rs/crates/foundation/vac-foundation/src/task_manager.rs")

@@ -1,12 +1,17 @@
 use crate::approval_boundary::require_vac_bound_approval;
 pub use crate::approval_boundary::{VacBoundApproval, VacSignatureHint};
+pub use crate::command_authority::VacStructuredCommandRequest;
+use crate::command_authority::{
+    VacStructuredCommand, normalized_vac_structured_command_parts, parse_vac_structured_command,
+    resolve_vac_structured_command_authority,
+};
 pub use crate::read_authorization::VacReadPlanTicket;
 use crate::read_authorization::require_vac_view_governance;
 use crate::tool_container::ToolContainer;
 use rmcp::service::RequestContext;
 use rmcp::{ErrorData as McpError, handler::server::wrapper::Parameters, model::*, schemars, tool};
 use rmcp::{RoleServer, tool_router};
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Deserializer};
 use vac_foundation::file_backup_manager::FileBackupManager;
 use vac_foundation::remote_connection::{
     PathLocation, RemoteConnection, RemoteConnectionInfo, RemoteFileSystemProvider,
@@ -107,26 +112,6 @@ pub struct CommandResult {
     pub exit_code: i32,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, schemars::JsonSchema)]
-#[serde(deny_unknown_fields)]
-pub struct VacStructuredCommandRequest {
-    pub id: String,
-    pub runner: String,
-    #[serde(default)]
-    pub args: Vec<String>,
-    #[serde(default)]
-    pub risk: Option<String>,
-    #[serde(default)]
-    pub approval: Option<String>,
-}
-
-#[derive(Debug, Clone)]
-struct VacStructuredCommand {
-    id: String,
-    runner: String,
-    args: Vec<String>,
-}
-
 fn is_loopback_http_url(parsed_url: &url::Url) -> bool {
     if parsed_url.scheme() != "http" {
         return false;
@@ -141,129 +126,6 @@ fn is_loopback_http_url(parsed_url: &url::Url) -> bool {
     normalized_host
         .parse::<std::net::IpAddr>()
         .is_ok_and(|addr| addr.is_loopback())
-}
-
-fn parse_vac_structured_command(command: &str) -> Result<VacStructuredCommand, CallToolResult> {
-    if command.trim().is_empty() {
-        return Err(vac_command_error("empty command"));
-    }
-    if command.contains('\n') || command.contains('\r') {
-        return Err(vac_command_error(
-            "multi-line shell commands are not a structured command",
-        ));
-    }
-    let mut parts = Vec::new();
-    for raw in command.split_whitespace() {
-        if raw.contains('"') || raw.contains('\'') || contains_shell_metachar(raw) {
-            return Err(vac_command_error(&format!(
-                "shell syntax/metacharacter is not allowed in structured command token: {raw}"
-            )));
-        }
-        parts.push(raw.to_string());
-    }
-    let Some(runner) = parts.first().cloned() else {
-        return Err(vac_command_error("missing runner"));
-    };
-    if runner.contains('/')
-        || runner.contains('\\')
-        || matches!(
-            runner.as_str(),
-            "sh" | "bash" | "zsh" | "fish" | "cmd" | "powershell"
-        )
-    {
-        return Err(vac_command_error(
-            "runner must be a registry executable name and cannot be a shell/path",
-        ));
-    }
-    Ok(VacStructuredCommand {
-        id: "legacy-string-migration-shim".to_string(),
-        runner,
-        args: parts.into_iter().skip(1).collect(),
-    })
-}
-
-fn parse_vac_structured_command_object(
-    request: &VacStructuredCommandRequest,
-) -> Result<VacStructuredCommand, CallToolResult> {
-    if request.id.trim().is_empty() {
-        return Err(vac_command_error("structured_command.id is required"));
-    }
-    if request.runner.trim().is_empty() {
-        return Err(vac_command_error("structured_command.runner is required"));
-    }
-    if request.runner.contains('/')
-        || request.runner.contains('\\')
-        || matches!(
-            request.runner.as_str(),
-            "sh" | "bash" | "zsh" | "fish" | "cmd" | "powershell"
-        )
-    {
-        return Err(vac_command_error(
-            "structured_command.runner must be registry executable name, not shell/path",
-        ));
-    }
-    for arg in &request.args {
-        if arg.contains('"')
-            || arg.contains('\'')
-            || arg.contains('\n')
-            || arg.contains('\r')
-            || contains_shell_metachar(arg)
-        {
-            return Err(vac_command_error(&format!(
-                "structured_command arg contains shell syntax/metacharacter: {arg}"
-            )));
-        }
-    }
-    Ok(VacStructuredCommand {
-        id: request.id.clone(),
-        runner: request.runner.clone(),
-        args: request.args.clone(),
-    })
-}
-
-fn resolve_vac_structured_command_authority(
-    command: &str,
-    structured_command: &Option<VacStructuredCommandRequest>,
-) -> Result<VacStructuredCommand, CallToolResult> {
-    let Some(request) = structured_command else {
-        return Err(vac_command_error(
-            "free-form command strings are migration mirrors only; structured_command object is required",
-        ));
-    };
-    let structured = parse_vac_structured_command_object(request)?;
-    let normalized = normalized_vac_structured_command_parts(&structured);
-    if !command.trim().is_empty() && command.trim() != normalized {
-        return Err(vac_command_error(&format!(
-            "command mirror does not match structured_command {}: expected `{}`",
-            structured.id, normalized
-        )));
-    }
-    Ok(structured)
-}
-
-fn normalized_vac_structured_command_parts(command: &VacStructuredCommand) -> String {
-    let mut tokens = Vec::with_capacity(command.args.len() + 1);
-    tokens.push(command.runner.clone());
-    tokens.extend(command.args.clone());
-    tokens.join(" ")
-}
-
-fn vac_command_error(detail: &str) -> CallToolResult {
-    CallToolResult::error(vec![
-        Content::text("VAC_STRUCTURED_COMMAND_REQUIRED"),
-        Content::text(format!(
-            "VAC v1.5 requires structured runner+args; free-form shell is blocked: {detail}"
-        )),
-    ])
-}
-
-fn contains_shell_metachar(token: &str) -> bool {
-    token.chars().any(|ch| {
-        matches!(
-            ch,
-            '|' | '>' | '<' | ';' | '&' | '`' | '$' | '*' | '?' | '~'
-        )
-    })
 }
 
 /// Validate and normalize a remote connection string.

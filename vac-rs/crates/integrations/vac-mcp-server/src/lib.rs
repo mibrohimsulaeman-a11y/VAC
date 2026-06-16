@@ -18,6 +18,7 @@ use vac_foundation::task_manager::{TaskManager, TaskManagerHandle};
 use vac_remote_service::AgentProvider;
 
 pub mod approval_boundary;
+pub mod command_authority;
 pub mod integrations;
 pub mod local_tools;
 pub mod read_authorization;

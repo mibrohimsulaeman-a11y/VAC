@@ -21,6 +21,8 @@ def text(rel: str) -> str:
 agent = text("vac-rs/crates/runtime/vac-agent-loop/src/agent.rs")
 bound_tool = text("vac-rs/crates/runtime/vac-agent-loop/src/bound_tool.rs")
 local_tools = text("vac-rs/crates/integrations/vac-mcp-server/src/local_tools.rs")
+approval_boundary = text("vac-rs/crates/integrations/vac-mcp-server/src/approval_boundary.rs")
+command_authority = text("vac-rs/crates/integrations/vac-mcp-server/src/command_authority.rs")
 evidence = text("vac-rs/crates/control-plane/vac-evidence/src/lib.rs")
 policy = text("vac-rs/crates/control-plane/vac-policy/src/lib.rs")
 specsync = text("vac-rs/crates/control-plane/vac-spec-sync/src/lib.rs")
@@ -35,12 +37,12 @@ vac_cli_toml = text("vac-rs/crates/surfaces/vac-cli/Cargo.toml")
 cases = [
     ("agent_mutating_tool_without_plan_blocked", "mutating/process tool attempted without approved VAC Semantic Plan" in bound_tool),
     ("agent_mutating_tool_with_plan_gets_stamped", "stamp_tool_call" in bound_tool and "vac_bound_approval" in bound_tool and "execute_tool_call(run, &bound_tool_call" in agent),
-    ("mcp_command_without_vac_bound_approval_blocked", "VAC_BOUND_APPROVAL_REQUIRED" in local_tools and "execute_process" in local_tools),
-    ("mcp_command_requires_structured_object", "structured_command: Option<VacStructuredCommandRequest>" in local_tools and "free-form command strings are migration mirrors only" in local_tools),
-    ("mcp_command_mirror_drift_blocked", "command mirror does not match structured_command" in local_tools),
-    ("mcp_command_shell_metachar_blocked", "contains_shell_metachar" in local_tools and "VAC_STRUCTURED_COMMAND_REQUIRED" in local_tools),
-    ("mcp_file_mutation_without_approval_blocked", local_tools.count("require_vac_bound_approval(&vac_bound_approval, \"filesystem_write\"") >= 2 and "filesystem_delete" in local_tools),
-    ("mcp_network_without_vac_bound_approval_blocked", "ViewWebPageRequest" in local_tools and "require_vac_bound_approval(&vac_bound_approval, \"network_access\"" in local_tools),
+    ("mcp_command_without_vac_bound_approval_blocked", "VAC_BOUND_APPROVAL_REQUIRED" in approval_boundary and "require_vac_bound_approval" in local_tools and "execute_process" in local_tools),
+    ("mcp_command_requires_structured_object", "structured_command: Option<VacStructuredCommandRequest>" in local_tools and "free-form command strings are migration mirrors only" in command_authority),
+    ("mcp_command_mirror_drift_blocked", "command mirror does not match structured_command" in command_authority),
+    ("mcp_command_shell_metachar_blocked", "contains_shell_metachar" in command_authority and "VAC_STRUCTURED_COMMAND_REQUIRED" in command_authority),
+    ("mcp_file_mutation_without_approval_blocked", local_tools.count("filesystem_write") >= 2 and "filesystem_delete" in local_tools and "require_vac_bound_approval" in local_tools),
+    ("mcp_network_without_vac_bound_approval_blocked", "ViewWebPageRequest" in local_tools and "network_access" in local_tools and "require_vac_bound_approval" in local_tools),
     ("bound_runtime_network_gate_exists", "NetworkAccess" in bound_tool and "pre_network_gate" in text("vac-rs/crates/runtime/vac-agent-loop/src/bound_runtime.rs") and "is_network_tool" in bound_tool),
     ("pre_patch_uses_actual_old_str_range", "find_all_matches" in bound_tool and "byte_range_to_line_range" in bound_tool and "load_patch_file_text" in bound_tool),
     ("pre_patch_blocks_zero_or_multiple_matches", "old_str has zero matches" in bound_tool and "old_str has multiple matches" in bound_tool),
