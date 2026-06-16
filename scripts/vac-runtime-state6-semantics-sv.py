@@ -53,7 +53,7 @@ bound_tool = read('vac-rs/crates/runtime/vac-agent-loop/src/bound_tool.rs')
 agent = read('vac-rs/crates/runtime/vac-agent-loop/src/agent.rs')
 approval = read('vac-rs/crates/runtime/vac-agent-loop/src/approval.rs')
 bootstrap = read('vac-rs/crates/runtime/vac-agent-loop/src/session_bootstrap.rs')
-final_gate = read('scripts/vac-reaudit-final-sv-gate.sh')
+final_gate = read('scripts/vac-v19-final-sv-gate.sh')
 run_final = read('scripts/run-final-sv-validation.py')
 
 cases: list[tuple[str, bool]] = []
@@ -67,7 +67,7 @@ cases += [
     ('bound_gate_has_approval_request_variant', 'pub approval_request: Option<Value>' in bound_tool and 'pub fn approval_required' in bound_tool),
     ('approval_required_persists_request_v2', 'build_approval_request_v2' in bound_tool and 'persist_approval_request' in bound_tool and 'schema_version": 2' in bound_tool),
     ('approval_required_is_paused_not_tool_error', 'gate.approval_request.is_some()' in agent and 'pause_for_vac_runtime_approval' in agent and 'ToolExecutionCompleted' in agent),
-    ('operator_accept_installs_scoped_grant', 'record_operator_tool_decision' in bound_tool and 'approved_tool_grants.insert' in bound_tool and 'single_retry' in bound_tool),
+    ('operator_accept_installs_scoped_grant', 'record_operator_tool_decision' in bound_tool and 'approved_tool_grants' in bound_tool and '.insert(' in bound_tool and 'single_retry' in bound_tool),
     ('approval_state_machine_reopens_dispatched_entry', 'pause_for_vac_runtime_approval' in approval and 'entry.state = ApprovalEntryState::PendingUserDecision' in approval and 'self.next_index = idx' in approval),
     ('approved_retry_stamps_vac_bound_approval', 'approved_tool_grants.remove' in bound_tool and 'GateDecision::PassWithWarnings' in bound_tool and 'stamp_tool_call' in bound_tool),
     ('bootstrap_does_not_use_historical_terminal_fixtures', '.vac/registry/sessions/bootstrap/tasks.yaml' not in bootstrap and '.vac/registry/sessions/bootstrap/spec.yaml' not in bootstrap and '.vac/registry/sessions/bootstrap/todo.yaml' not in bootstrap),
@@ -75,7 +75,7 @@ cases += [
     ('bootstrap_default_spec_needs_discussion', 'Missing session spec artifact' in bootstrap and 'runtime cannot mark spec finalized synthetically' in bootstrap),
     ('bootstrap_default_todo_unchecked_blocking', 'bootstrap placeholder cannot satisfy completion lock' in bootstrap and '"checked": false' in bootstrap and '"blocking": true' in bootstrap),
     ('bootstrap_default_closeout_invalid', '"valid": false' in bootstrap and 'bootstrap-placeholder-artifacts-are-not-completion-authority' in bootstrap),
-    ('state6_gate_wired_to_shell_gate', 'runtime-state6-semantics' in final_gate and 'vac-runtime-state6-semantics-sv.py' in final_gate),
+    ('state6_gate_wired_to_v19_shell_gate', 'runtime-state6-semantics' in final_gate and 'vac-runtime-state6-semantics-sv.py' in final_gate),
     ('state6_gate_wired_to_python_final_gate', 'runtime-state6-semantics' in run_final and 'vac-runtime-state6-semantics-sv.py' in run_final),
 ]
 

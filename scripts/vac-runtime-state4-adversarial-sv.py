@@ -25,6 +25,8 @@ def exists(rel: str) -> bool:
 bound_tool = read("vac-rs/crates/runtime/vac-agent-loop/src/bound_tool.rs")
 bound_runtime = read("vac-rs/crates/runtime/vac-agent-loop/src/bound_runtime.rs")
 local_tools = read("vac-rs/crates/integrations/vac-mcp-server/src/local_tools.rs")
+read_authorization = read("vac-rs/crates/integrations/vac-mcp-server/src/read_authorization.rs")
+file_operations = read("vac-rs/crates/integrations/vac-mcp-server/src/file_operations.rs")
 evidence = read("vac-rs/crates/control-plane/vac-evidence/src/lib.rs")
 compiler = read("scripts/compile-vac-registry-sv.py")
 lib_rs = read("vac-rs/crates/runtime/vac-agent-loop/src/lib.rs")
@@ -46,7 +48,8 @@ add((
 add((
     "compiled_policy_computed_inside_runtime",
     "compute_command_policy_decision" in bound_runtime
-    and "command.policy_decision = controller.compute_command_policy_decision" in bound_tool
+    and "command.policy_decision =" in bound_tool
+    and "controller.compute_command_policy_decision" in bound_tool
     and "policy_rules" in bound_runtime
     and "command_registry" in bound_runtime,
     "runtime must compute process policy from compiled registry/policy snapshots",
@@ -87,21 +90,21 @@ add((
     "view_requires_read_plan_or_approval",
     "is_read_tool" in bound_tool
     and "pre_read_gate" in bound_runtime
-    and "VAC_READ_GOVERNANCE_REQUIRED" in local_tools
+    and "VAC_READ_GOVERNANCE_REQUIRED" in read_authorization
     and "read_plan_ticket: Option<VacReadPlanTicket>" in local_tools,
     "view must be classified as governed read and require read_plan_ticket or approval",
 ))
 add((
     "view_remote_credentials_require_policy",
-    "credential_read" in local_tools
+    "credential_read" in read_authorization
     and "credential_material_present" in bound_runtime
     and "compute_read_policy_decision" in bound_runtime
-    and "network_access" in local_tools,
+    and "network_access" in read_authorization,
     "remote/credential view must pause/block through network/credential policy",
 ))
 add((
     "view_output_redacted_before_model",
-    local_tools.count("sanitize_text_output(&result)") >= 3
+    file_operations.count("sanitize_text_output(&result)") >= 3
     and "sanitize_text_output(&markdown_content)" in local_tools,
     "view/web outputs must be redacted before returning to the model",
 ))

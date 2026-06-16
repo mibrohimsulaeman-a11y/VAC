@@ -31,6 +31,9 @@ else
   printf 'source_workspace_mode=skip_root_checkpoint_manifest\n'
 fi
 run checkpoint-integrity python3 scripts/check-checkpoint-integrity.py .
+run runtime-state4-adversarial python3 scripts/vac-runtime-state4-adversarial-sv.py .
+run runtime-state5-operational python3 scripts/vac-runtime-state5-operational-sv.py .
+run runtime-state6-semantics python3 scripts/vac-runtime-state6-semantics-sv.py .
 run runtime-state7 python3 scripts/vac-runtime-state7-merged-audit-sv.py .
 printf '\nVAC v1.9 final SV gate: PASS\n'
 printf 'cargo_tv=NotEvaluated\n'

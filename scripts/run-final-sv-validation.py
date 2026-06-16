@@ -27,7 +27,7 @@ commands = [
 
 LOG.parent.mkdir(parents=True, exist_ok=True)
 with LOG.open('w') as log:
-    log.write('VAC final SV validation v1.5/state7\n')
+    log.write('VAC final SV validation v1.9/state7\n')
     log.write(f'log_path={LOG}\n')
     log.write('log_hygiene=outside_indexed_root_before_index_generation\n')
     for name, cmd in commands:
@@ -48,7 +48,7 @@ with LOG.open('w') as log:
         if p.returncode != 0:
             print(f"SV validation failed at {name}")
             sys.exit(p.returncode)
-    log.write('\nVAC re-audit final SV gate: PASS\n')
+    log.write('\nVAC v1.9 final SV replay: PASS\n')
     log.write('final_gate_order_replayable=true\n')
     log.write('final_gate_idempotence_checked_by=scripts/vac-final-idempotence-sv.py\n')
     log.write('assessment_regenerated_after_index=true\n')

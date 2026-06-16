@@ -21,6 +21,8 @@ bound_runtime=read('vac-rs/crates/runtime/vac-agent-loop/src/bound_runtime.rs')
 policy=read('vac-rs/crates/control-plane/vac-policy/src/lib.rs')
 compiler=read('scripts/compile-vac-registry-sv.py')
 local_tools=read('vac-rs/crates/integrations/vac-mcp-server/src/local_tools.rs')
+approval_boundary=read('vac-rs/crates/integrations/vac-mcp-server/src/approval_boundary.rs')
+read_authorization=read('vac-rs/crates/integrations/vac-mcp-server/src/read_authorization.rs')
 assessment_script=read('scripts/generate-assessment-report-sv.py')
 integrity=read('scripts/check-checkpoint-integrity.py')
 manifest_gen=read('scripts/generate-checkpoint-manifest.py')
@@ -36,8 +38,8 @@ cases=[
  ('compiled_policy_snapshot_emitted', 'policy_snapshot' in compiler and 'compile_policy_snapshot' in compiler and 'default_decision' in compiler),
  ('validation_commands_no_bash_runner', 'runner: bash' not in ''.join(p.read_text(errors='replace') for p in (ROOT/'.vac').rglob('*.yaml'))),
  ('script_runner_bindings_compiled', 'script_runner_bindings' in compiler and 'script_sha256' in compiler and 'vac-script-runner' in compiler),
- ('mcp_approval_recomputes_binding', 'recompute_vac_bound_binding_hash' in local_tools and 'verify_vac_bound_approval' in local_tools and 'binding_hash mismatch' in local_tools),
- ('mcp_read_ticket_validates_index_path', 'verify_vac_read_plan_ticket' in local_tools and '.vac/index/read_plans.jsonl' in local_tools),
+ ('mcp_approval_recomputes_binding', 'recompute_vac_bound_binding_hash' in approval_boundary and 'verify_vac_bound_approval' in approval_boundary and 'binding_hash mismatch' in approval_boundary),
+ ('mcp_read_ticket_validates_index_path', 'verify_vac_read_plan_ticket' in read_authorization and '.vac/index/read_plans.jsonl' in read_authorization),
  ('assessment_full_join_expanded', 'intent_without_code' in assessment_script and 'code_without_intent' in assessment_script and 'baseline_to_code' in assessment_script and 'call_path_impact' in assessment_script),
  ('evidence_log_freshness_gate_wired', 'check_evidence_log_freshness' in integrity and 'VAC evidence log freshness' in read('scripts/check-evidence-log-freshness.py')),
  ('checkpoint_manifest_records_state5', 'state5-operational-closure' in manifest_gen and 'assessment_summary' in manifest_gen),

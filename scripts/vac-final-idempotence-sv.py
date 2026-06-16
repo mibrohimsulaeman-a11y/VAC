@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Two-pass idempotence gate for VAC v1.5 packaged final validation.
+"""Two-pass idempotence gate for VAC v1.9 packaged final validation.
 
 It intentionally runs the mutating SV generators in the release order:
 compiled registry -> deterministic index -> assessment. The second pass must
