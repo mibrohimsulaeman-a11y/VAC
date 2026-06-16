@@ -7,6 +7,10 @@ use crate::command_authority::{
 };
 pub use crate::read_authorization::VacReadPlanTicket;
 use crate::read_authorization::require_vac_view_governance;
+use crate::remote_authority::{
+    is_remote_path, remote_connection_error, resolve_remote_path_authority,
+    validate_remote_connection,
+};
 use crate::tool_container::ToolContainer;
 use rmcp::service::RequestContext;
 use rmcp::{ErrorData as McpError, handler::server::wrapper::Parameters, model::*, schemars, tool};
@@ -14,7 +18,7 @@ use rmcp::{RoleServer, tool_router};
 use serde::{Deserialize, Deserializer};
 use vac_foundation::file_backup_manager::FileBackupManager;
 use vac_foundation::remote_connection::{
-    PathLocation, RemoteConnection, RemoteConnectionInfo, RemoteFileSystemProvider,
+    RemoteConnection, RemoteConnectionInfo, RemoteFileSystemProvider,
 };
 
 use globset::Glob;
@@ -126,56 +130,6 @@ fn is_loopback_http_url(parsed_url: &url::Url) -> bool {
     normalized_host
         .parse::<std::net::IpAddr>()
         .is_ok_and(|addr| addr.is_loopback())
-}
-
-/// Validate and normalize a remote connection string.
-///
-/// Enforces the same structure expected by `RemoteConnectionInfo::parse_connection_string()`:
-/// exactly one `@`, non-empty username, non-empty hostname, and optional port that parses as u16.
-/// Returns the trimmed string on success, or a structured `CallToolResult` error.
-fn validate_remote_connection(raw: &str) -> Result<String, CallToolResult> {
-    let trimmed = raw.trim().to_string();
-
-    let make_err = |detail: &str| {
-        CallToolResult::error(vec![
-            Content::text("INVALID_REMOTE_CONNECTION"),
-            Content::text(format!(
-                "Invalid remote connection string '{}'. {}. Expected format: user@host or user@host:port",
-                trimmed, detail
-            )),
-        ])
-    };
-
-    let (username, host_port) = trimmed
-        .split_once('@')
-        .ok_or_else(|| make_err("Missing '@'"))?;
-
-    if username.is_empty() {
-        return Err(make_err("Username is empty"));
-    }
-
-    // Reject multiple '@' — the host_port portion must not contain another '@'
-    if host_port.contains('@') {
-        return Err(make_err("Contains multiple '@' characters"));
-    }
-
-    let (hostname, port_str) = if let Some((h, p)) = host_port.split_once(':') {
-        (h, Some(p))
-    } else {
-        (host_port, None)
-    };
-
-    if hostname.is_empty() {
-        return Err(make_err("Hostname is empty"));
-    }
-
-    if let Some(port) = port_str
-        && port.parse::<u16>().is_err()
-    {
-        return Err(make_err(&format!("Invalid port '{port}'")));
-    }
-
-    Ok(trimmed)
 }
 
 fn deserialize_optional_nonempty_trimmed_string<'de, D>(
@@ -1053,7 +1007,7 @@ A maximum of 300 lines will be shown at a time, the rest will be truncated."
         }
 
         // Check if this is a remote path
-        if Self::is_remote_path(&path) {
+        if is_remote_path(&path) {
             // Handle remote file/directory viewing
             match self
                 .get_remote_connection(&path, password, private_key_path)
@@ -1129,7 +1083,7 @@ When replacing code, ensure the new text maintains proper syntax, indentation, a
             return Ok(error_result);
         }
         // Check if this is a remote path
-        if Self::is_remote_path(&path) {
+        if is_remote_path(&path) {
             // Handle remote file replacement
             match self
                 .get_remote_connection(&path, password, private_key_path)
@@ -1195,7 +1149,7 @@ REMOTE FILE CREATION:
             return Ok(error_result);
         }
         // Check if this is a remote path
-        if Self::is_remote_path(&path) {
+        if is_remote_path(&path) {
             // Handle remote file creation
             match self
                 .get_remote_connection(&path, password, private_key_path)
@@ -1421,7 +1375,7 @@ SAFETY NOTES:
         }
         let recursive = recursive.unwrap_or(false);
 
-        if Self::is_remote_path(&path) {
+        if is_remote_path(&path) {
             match self
                 .get_remote_connection(&path, password, private_key_path)
                 .await
@@ -1444,52 +1398,18 @@ SAFETY NOTES:
         password: Option<String>,
         private_key_path: Option<String>,
     ) -> Result<(Arc<RemoteConnection>, String), CallToolResult> {
-        let path_location = PathLocation::parse(path).map_err(|e| {
-            CallToolResult::error(vec![
-                Content::text("INVALID_PATH"),
-                Content::text(format!("Failed to parse path: {}", e)),
-            ])
-        })?;
+        let remote_authority = resolve_remote_path_authority(path, password, private_key_path)?;
 
-        match path_location {
-            PathLocation::Remote {
-                mut connection,
-                path: remote_path,
-            } => {
-                // Override connection details if provided
-                if let Some(pwd) = password {
-                    connection.password = Some(pwd);
-                }
-                if let Some(key_path) = private_key_path {
-                    connection.private_key_path = Some(key_path);
-                }
+        let connection_manager = self.get_remote_connection_manager();
+        let conn = connection_manager
+            .get_connection(&remote_authority.connection)
+            .await
+            .map_err(|e| {
+                error!("Failed to establish remote connection: {}", e);
+                remote_connection_error(&e)
+            })?;
 
-                let connection_manager = self.get_remote_connection_manager();
-                let conn = connection_manager
-                    .get_connection(&connection)
-                    .await
-                    .map_err(|e| {
-                        error!("Failed to establish remote connection: {}", e);
-                        CallToolResult::error(vec![
-                            Content::text("REMOTE_CONNECTION_ERROR"),
-                            Content::text(format!("Failed to connect to remote host: {}", e)),
-                        ])
-                    })?;
-
-                Ok((conn, remote_path))
-            }
-            PathLocation::Local(_) => Err(CallToolResult::error(vec![
-                Content::text("NOT_REMOTE"),
-                Content::text("This helper is for remote connections only"),
-            ])),
-        }
-    }
-
-    /// Check if a path is remote
-    fn is_remote_path(path: &str) -> bool {
-        PathLocation::parse(path)
-            .map(|loc| loc.is_remote())
-            .unwrap_or(false)
+        Ok((conn, remote_authority.remote_path))
     }
 
     /// Format a command result into a CallToolResult
@@ -3804,97 +3724,6 @@ mod tests {
         assert!(
             !child_env.contains_key("VAC_PROFILE"),
             "remote task child env must not inherit the local profile"
-        );
-    }
-
-    // ---------------------------------------------------------------
-    // validate_remote_connection
-    // ---------------------------------------------------------------
-
-    #[test]
-    fn validate_remote_rejects_empty() {
-        let err = validate_remote_connection("").unwrap_err();
-        let text = format!("{:?}", err);
-        assert!(text.contains("INVALID_REMOTE_CONNECTION"));
-    }
-
-    #[test]
-    fn validate_remote_rejects_whitespace_only() {
-        let err = validate_remote_connection("   ").unwrap_err();
-        let text = format!("{:?}", err);
-        assert!(text.contains("INVALID_REMOTE_CONNECTION"));
-    }
-
-    #[test]
-    fn validate_remote_rejects_missing_at() {
-        let err = validate_remote_connection("hostname").unwrap_err();
-        let text = format!("{:?}", err);
-        assert!(text.contains("INVALID_REMOTE_CONNECTION"));
-    }
-
-    #[test]
-    fn validate_remote_accepts_user_at_host() {
-        let result = validate_remote_connection("user@host");
-        assert_eq!(result.unwrap(), "user@host");
-    }
-
-    #[test]
-    fn validate_remote_accepts_user_at_host_port() {
-        let result = validate_remote_connection("user@host:2222");
-        assert_eq!(result.unwrap(), "user@host:2222");
-    }
-
-    #[test]
-    fn validate_remote_trims_whitespace() {
-        let result = validate_remote_connection("  user@host  ");
-        assert_eq!(result.unwrap(), "user@host");
-    }
-
-    #[test]
-    fn validate_remote_rejects_empty_username() {
-        let err = validate_remote_connection("@host").unwrap_err();
-        let text = format!("{:?}", err);
-        assert!(text.contains("INVALID_REMOTE_CONNECTION"));
-        assert!(text.contains("Username is empty"));
-    }
-
-    #[test]
-    fn validate_remote_rejects_empty_hostname() {
-        let err = validate_remote_connection("user@").unwrap_err();
-        let text = format!("{:?}", err);
-        assert!(text.contains("INVALID_REMOTE_CONNECTION"));
-        assert!(text.contains("Hostname is empty"));
-    }
-
-    #[test]
-    fn validate_remote_rejects_multiple_at() {
-        let err = validate_remote_connection("user@@host").unwrap_err();
-        let text = format!("{:?}", err);
-        assert!(text.contains("INVALID_REMOTE_CONNECTION"));
-        assert!(text.contains("multiple '@'"));
-    }
-
-    #[test]
-    fn validate_remote_rejects_invalid_port() {
-        let err = validate_remote_connection("user@host:abc").unwrap_err();
-        let text = format!("{:?}", err);
-        assert!(text.contains("INVALID_REMOTE_CONNECTION"));
-        assert!(text.contains("Invalid port"));
-    }
-
-    #[test]
-    fn validate_remote_rejects_port_out_of_range() {
-        let err = validate_remote_connection("user@host:99999").unwrap_err();
-        let text = format!("{:?}", err);
-        assert!(text.contains("INVALID_REMOTE_CONNECTION"));
-        assert!(text.contains("Invalid port"));
-    }
-
-    #[test]
-    fn validate_remote_accepts_port_22() {
-        assert_eq!(
-            validate_remote_connection("user@host:22").unwrap(),
-            "user@host:22"
         );
     }
 
