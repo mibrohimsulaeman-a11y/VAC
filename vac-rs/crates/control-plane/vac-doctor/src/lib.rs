@@ -46,6 +46,8 @@ pub enum DoctorGate {
     Workflow,
     Memory,
     Enforcement,
+    RuntimeDb,
+    ManifestSync,
     Release,
 }
 
@@ -122,6 +124,120 @@ impl ReleaseDoctorReport {
 #[must_use]
 pub fn aggregate_release_status(checks: Vec<DoctorResult>) -> DoctorStatus {
     ReleaseDoctorReport::aggregate(checks).status()
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ManifestSyncDoctorRecord {
+    pub record_id: String,
+    pub record_type: String,
+    pub record_manifest_set_hash: String,
+    pub git_head: Option<String>,
+    pub would_authorize_current_action: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ManifestSyncDoctorInput {
+    pub current_manifest_set_hash: String,
+    pub current_git_head: Option<String>,
+    pub known_snapshot_hashes: Vec<String>,
+    pub records: Vec<ManifestSyncDoctorRecord>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ManifestSyncDoctorRecordStatus {
+    pub record_id: String,
+    pub record_type: String,
+    pub classification: vac_state::ManifestSyncClassification,
+    pub action: String,
+}
+
+#[must_use]
+pub fn classify_manifest_sync_doctor_records(
+    input: &ManifestSyncDoctorInput,
+) -> Vec<ManifestSyncDoctorRecordStatus> {
+    input
+        .records
+        .iter()
+        .map(|record| {
+            let classification =
+                vac_state::classify_manifest_sync_record(&vac_state::ManifestSyncRecordProbe {
+                    record_manifest_set_hash: record.record_manifest_set_hash.clone(),
+                    current_manifest_set_hash: input.current_manifest_set_hash.clone(),
+                    known_snapshot_hashes: input.known_snapshot_hashes.clone(),
+                    git_head_changed: record.git_head != input.current_git_head,
+                    would_authorize_current_action: record.would_authorize_current_action,
+                });
+            ManifestSyncDoctorRecordStatus {
+                record_id: record.record_id.clone(),
+                record_type: record.record_type.clone(),
+                classification,
+                action: classification.action_label().to_string(),
+            }
+        })
+        .collect()
+}
+
+#[must_use]
+pub fn doctor_manifest_sync_records(input: &ManifestSyncDoctorInput) -> DoctorResult {
+    if input.current_manifest_set_hash.trim().is_empty() {
+        return DoctorResult::fail(
+            "manifest-sync",
+            "current manifest_set_hash is empty; compile registry before manifest-sync doctor",
+        );
+    }
+
+    let statuses = classify_manifest_sync_doctor_records(input);
+    let mut warnings = Vec::new();
+    let mut failures = Vec::new();
+
+    if input.records.is_empty() {
+        warnings.push(
+            "runtime.db absent or empty in source checkout; no runtime records to classify"
+                .to_string(),
+        );
+    }
+
+    for status in statuses {
+        match status.classification {
+            vac_state::ManifestSyncClassification::Current => {}
+            vac_state::ManifestSyncClassification::BranchDrift => warnings.push(format!(
+                "branch_drift: {} {} remains usable but should record manifest-sync refresh",
+                status.record_type, status.record_id
+            )),
+            vac_state::ManifestSyncClassification::StaleManifest => failures.push(format!(
+                "stale_manifest: {} {} must not authorize new work until refreshed",
+                status.record_type, status.record_id
+            )),
+            vac_state::ManifestSyncClassification::GhostState => failures.push(format!(
+                "ghost_state: {} {} is quarantined; stale record would authorize current action",
+                status.record_type, status.record_id
+            )),
+            vac_state::ManifestSyncClassification::OrphanState => failures.push(format!(
+                "orphan_state: {} {} references unknown snapshot hash; operator review required",
+                status.record_type, status.record_id
+            )),
+        }
+    }
+
+    if failures.is_empty() {
+        DoctorResult {
+            gate: "manifest-sync".to_string(),
+            status: if warnings.is_empty() {
+                DoctorStatus::Pass
+            } else {
+                DoctorStatus::Warn
+            },
+            warnings,
+            failures,
+        }
+    } else {
+        DoctorResult {
+            gate: "manifest-sync".to_string(),
+            status: DoctorStatus::Fail,
+            warnings,
+            failures,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -371,6 +487,102 @@ pub fn doctor_release_trust_language(input: &ReleaseTrustClaimInput) -> DoctorRe
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn manifest_sync_doctor_warns_on_empty_source_checkout() {
+        let result = doctor_manifest_sync_records(&ManifestSyncDoctorInput {
+            current_manifest_set_hash: "sha256:current".to_string(),
+            current_git_head: Some("git-current".to_string()),
+            known_snapshot_hashes: vec!["sha256:current".to_string()],
+            records: Vec::new(),
+        });
+
+        assert_eq!(result.status, DoctorStatus::Warn);
+        assert!(
+            result
+                .warnings
+                .iter()
+                .any(|warning| warning.contains("no runtime records to classify"))
+        );
+        assert!(result.failures.is_empty());
+    }
+
+    #[test]
+    fn manifest_sync_doctor_warns_for_branch_drift_without_blocking() {
+        let result = doctor_manifest_sync_records(&ManifestSyncDoctorInput {
+            current_manifest_set_hash: "sha256:current".to_string(),
+            current_git_head: Some("git-new".to_string()),
+            known_snapshot_hashes: vec!["sha256:current".to_string()],
+            records: vec![ManifestSyncDoctorRecord {
+                record_id: "session.1".to_string(),
+                record_type: "runtime_session".to_string(),
+                record_manifest_set_hash: "sha256:current".to_string(),
+                git_head: Some("git-old".to_string()),
+                would_authorize_current_action: false,
+            }],
+        });
+
+        assert_eq!(result.status, DoctorStatus::Warn);
+        assert!(result.failures.is_empty());
+        assert!(
+            result
+                .warnings
+                .iter()
+                .any(|warning| warning.contains("branch_drift"))
+        );
+    }
+
+    #[test]
+    fn manifest_sync_doctor_blocks_ghost_stale_and_orphan_records() {
+        let result = doctor_manifest_sync_records(&ManifestSyncDoctorInput {
+            current_manifest_set_hash: "sha256:current".to_string(),
+            current_git_head: Some("git-current".to_string()),
+            known_snapshot_hashes: vec!["sha256:old".to_string(), "sha256:current".to_string()],
+            records: vec![
+                ManifestSyncDoctorRecord {
+                    record_id: "decision.ghost".to_string(),
+                    record_type: "runtime_decision".to_string(),
+                    record_manifest_set_hash: "sha256:old".to_string(),
+                    git_head: Some("git-current".to_string()),
+                    would_authorize_current_action: true,
+                },
+                ManifestSyncDoctorRecord {
+                    record_id: "validation.stale".to_string(),
+                    record_type: "runtime_validation_summary".to_string(),
+                    record_manifest_set_hash: "sha256:old".to_string(),
+                    git_head: Some("git-current".to_string()),
+                    would_authorize_current_action: false,
+                },
+                ManifestSyncDoctorRecord {
+                    record_id: "plan.orphan".to_string(),
+                    record_type: "runtime_plan_revision".to_string(),
+                    record_manifest_set_hash: "sha256:unknown".to_string(),
+                    git_head: Some("git-current".to_string()),
+                    would_authorize_current_action: false,
+                },
+            ],
+        });
+
+        assert_eq!(result.status, DoctorStatus::Fail);
+        assert!(
+            result
+                .failures
+                .iter()
+                .any(|failure| failure.contains("ghost_state"))
+        );
+        assert!(
+            result
+                .failures
+                .iter()
+                .any(|failure| failure.contains("stale_manifest"))
+        );
+        assert!(
+            result
+                .failures
+                .iter()
+                .any(|failure| failure.contains("orphan_state"))
+        );
+    }
 
     #[test]
     fn governance_zero_denominator_uses_max_one_and_passes() {

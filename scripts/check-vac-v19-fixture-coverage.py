@@ -64,9 +64,20 @@ TOKEN_CHECKS = {
             "stale_decision_cannot_authorize_current_action",
             "evaluate_runtime_decision_authorization",
         ],
+        "vac-rs/crates/control-plane/vac-doctor/src/lib.rs": [
+            "ManifestSyncDoctorInput",
+            "doctor_manifest_sync_records",
+            "manifest_sync_doctor_blocks_ghost_stale_and_orphan_records",
+        ],
         "vac-rs/crates/surfaces/vac-cli/src/commands/control_plane.rs": [
             "doctor_manifest_sync",
-            "cached compiled manifest_set_hash differs",
+            "doctor_manifest_sync_records",
+            "compiled snapshot is missing snapshot_hash",
+        ],
+        "tests/fixtures/v19/manifest-sync/classification-cases.json": [
+            "v19.manifest_sync.classification_cases",
+            "ghost_state_quarantined_when_stale_record_would_authorize",
+            "orphan_state_quarantined_for_unknown_snapshot_hash",
         ],
     },
     "trust-vector-critical": {
@@ -228,6 +239,7 @@ def check_json_fixtures(errors: list[str]) -> None:
     required = [
         "tests/fixtures/v19/governance/zero-denominator.json",
         "tests/fixtures/v19/governance/spec-window-example.json",
+        "tests/fixtures/v19/manifest-sync/classification-cases.json",
         "tests/fixtures/v19/missing-code/triad.json",
         "tests/fixtures/v19/patch/hard-deny-vac-db.json",
         "tests/fixtures/v19/index/crlf-normalization.json",
@@ -330,7 +342,7 @@ def main() -> int:
     print("VAC v1.9 fixture coverage: PASS")
     print(f"fixture_groups={len(REQUIRED_FIXTURE_GROUPS)}")
     print(f"critical_acceptance_checks={len(CRITICAL_ACCEPTANCE_IDS)}")
-    print("v19_fixture_files=6")
+    print("v19_fixture_files=7")
     print("sqlite_duplicate_session_seq_rejected=true")
     print("full_p0_acceptance_claimed=false")
     return 0

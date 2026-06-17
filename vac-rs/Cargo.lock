@@ -7310,6 +7310,7 @@ dependencies = [
  "chrono",
  "serde",
  "serde_json",
+ "vac-state",
 ]
 
 [[package]]

@@ -1,0 +1,67 @@
+{
+  "cases": [
+    {
+      "current_manifest_set_hash": "sha256:current",
+      "expected_action": "usable",
+      "expected_classification": "current",
+      "git_head_changed": false,
+      "id": "current_record_is_usable",
+      "known_snapshot_hashes": [
+        "sha256:current"
+      ],
+      "record_manifest_set_hash": "sha256:current",
+      "would_authorize_current_action": false
+    },
+    {
+      "current_manifest_set_hash": "sha256:current",
+      "expected_action": "warn_keep_usable",
+      "expected_classification": "branch_drift",
+      "git_head_changed": true,
+      "id": "branch_drift_warns_but_remains_usable",
+      "known_snapshot_hashes": [
+        "sha256:current"
+      ],
+      "record_manifest_set_hash": "sha256:current",
+      "would_authorize_current_action": false
+    },
+    {
+      "current_manifest_set_hash": "sha256:current",
+      "expected_action": "mark_stale_block_authorization",
+      "expected_classification": "stale_manifest",
+      "git_head_changed": false,
+      "id": "stale_manifest_blocks_authorization",
+      "known_snapshot_hashes": [
+        "sha256:old",
+        "sha256:current"
+      ],
+      "record_manifest_set_hash": "sha256:old",
+      "would_authorize_current_action": false
+    },
+    {
+      "current_manifest_set_hash": "sha256:current",
+      "expected_action": "quarantine_require_plan_or_decision_refresh",
+      "expected_classification": "ghost_state",
+      "git_head_changed": false,
+      "id": "ghost_state_quarantined_when_stale_record_would_authorize",
+      "known_snapshot_hashes": [
+        "sha256:old",
+        "sha256:current"
+      ],
+      "record_manifest_set_hash": "sha256:old",
+      "would_authorize_current_action": true
+    },
+    {
+      "current_manifest_set_hash": "sha256:current",
+      "expected_action": "quarantine_require_operator_review",
+      "expected_classification": "orphan_state",
+      "git_head_changed": false,
+      "id": "orphan_state_quarantined_for_unknown_snapshot_hash",
+      "known_snapshot_hashes": [
+        "sha256:current"
+      ],
+      "record_manifest_set_hash": "sha256:unknown",
+      "would_authorize_current_action": false
+    }
+  ],
+  "fixture_id": "v19.manifest_sync.classification_cases"
+}

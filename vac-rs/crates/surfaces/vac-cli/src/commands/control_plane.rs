@@ -449,30 +449,15 @@ fn doctor_runtime_db(root: &Path) -> vac_doctor::DoctorResult {
 }
 
 fn doctor_manifest_sync(root: &Path) -> vac_doctor::DoctorResult {
-    let report = match vac_registry_compiler::compile_registry_from_disk(root) {
-        Ok(report) => report,
-        Err(err) => {
-            return vac_doctor::DoctorResult {
-                gate: "manifest-sync".to_string(),
-                status: vac_doctor::DoctorStatus::Fail,
-                warnings: Vec::new(),
-                failures: vec![format!("{err:?}")],
-            };
-        }
-    };
-    let current_hash = report.snapshot.snapshot_hash.clone();
     let cached = root.join(".vac/cache/compiled/workspace.json");
-    if cached.is_file() {
+    let current_hash = if cached.is_file() {
         match read_json(&cached) {
-            Ok(value) => {
-                let cached_hash = value
-                    .get("snapshot_hash")
-                    .and_then(Value::as_str)
-                    .unwrap_or("");
-                if cached_hash != current_hash {
-                    return vac_doctor::DoctorResult { gate: "manifest-sync".to_string(), status: vac_doctor::DoctorStatus::Fail, warnings: Vec::new(), failures: vec!["cached compiled manifest_set_hash differs from current authority manifests".to_string()] };
-                }
-            }
+            Ok(value) => value
+                .get("snapshot_hash")
+                .and_then(Value::as_str)
+                .filter(|hash| !hash.is_empty())
+                .map(str::to_string)
+                .unwrap_or_else(|| "".to_string()),
             Err(err) => {
                 return vac_doctor::DoctorResult {
                     gate: "manifest-sync".to_string(),
@@ -482,12 +467,57 @@ fn doctor_manifest_sync(root: &Path) -> vac_doctor::DoctorResult {
                 };
             }
         }
+    } else {
+        match vac_registry_compiler::compile_registry_from_disk(root) {
+            Ok(report) => report.snapshot.snapshot_hash,
+            Err(err) => {
+                return vac_doctor::DoctorResult {
+                    gate: "manifest-sync".to_string(),
+                    status: vac_doctor::DoctorStatus::Fail,
+                    warnings: Vec::new(),
+                    failures: vec![format!("{err:?}")],
+                };
+            }
+        }
+    };
+
+    if current_hash.is_empty() {
+        return vac_doctor::DoctorResult {
+            gate: "manifest-sync".to_string(),
+            status: vac_doctor::DoctorStatus::Fail,
+            warnings: Vec::new(),
+            failures: vec!["compiled snapshot is missing snapshot_hash".to_string()],
+        };
     }
-    vac_doctor::product_path_gate(
-        "manifest-sync",
-        true,
-        vec![format!("manifest_set_hash={current_hash}")],
-    )
+
+    let known_snapshot_hashes = vec![current_hash.clone()];
+    let mut result =
+        vac_doctor::doctor_manifest_sync_records(&vac_doctor::ManifestSyncDoctorInput {
+            current_manifest_set_hash: current_hash.clone(),
+            current_git_head: current_git_head(root),
+            known_snapshot_hashes,
+            records: Vec::new(),
+        });
+    result
+        .warnings
+        .insert(0, format!("manifest_set_hash={current_hash}"));
+    result
+}
+
+fn current_git_head(root: &Path) -> Option<String> {
+    let output = std::process::Command::new("git")
+        .arg("-C")
+        .arg(root)
+        .arg("rev-parse")
+        .arg("HEAD")
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    let head = String::from_utf8(output.stdout).ok()?;
+    let head = head.trim();
+    (!head.is_empty()).then(|| head.to_string())
 }
 
 fn read_json(path: &Path) -> Result<Value, String> {
