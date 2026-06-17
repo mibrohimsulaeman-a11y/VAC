@@ -7375,6 +7375,7 @@ dependencies = [
  "urlencoding",
  "uuid",
  "vac-provider-core",
+ "vac-state",
  "walkdir",
 ]
 

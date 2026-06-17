@@ -21,4 +21,6 @@ pub mod tls_client;
 pub mod utils;
 
 #[cfg(feature = "sqlite")]
+pub mod runtime_journal_writer;
+#[cfg(feature = "sqlite")]
 pub mod sqlite;
