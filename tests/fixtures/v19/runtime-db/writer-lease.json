@@ -1,0 +1,17 @@
+{
+  "covers": [
+    "Writer lease prevents two VAC-managed writers from mutating concurrently",
+    "stale recovery uses heartbeat_counter liveness instead of wall-clock expiry",
+    "event seq allocation and event insertion happen in the same transaction",
+    "SQLite DEFERRED stale recovery race is rejected"
+  ],
+  "expected": {
+    "begin_immediate_writer_lock": "TV-Pass",
+    "deferred_stale_recovery_rejected": true,
+    "duplicate_session_seq_rejected": true,
+    "expires_at_not_authority": true,
+    "heartbeat_counter_recovery": "TV-Pass",
+    "sequence_allocation_transactional": true
+  },
+  "fixture_id": "v19.runtime_db.writer_lease"
+}

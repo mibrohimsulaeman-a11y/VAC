@@ -12,6 +12,7 @@ run refresh-evidence-logs python3 scripts/refresh-evidence-logs-sv.py .
 run assessment-freshness python3 scripts/check-assessment-freshness.py .
 run evidence-log-freshness python3 scripts/check-evidence-log-freshness.py .
 run runtime-db-schema python3 scripts/check-v19-runtime-db-schema.py .
+run runtime-journal-writer python3 scripts/check-v19-runtime-journal-writer.py .
 run fixture-coverage python3 scripts/check-vac-v19-fixture-coverage.py .
 run tui-lifecycle-static python3 scripts/check-tui-lifecycle-e2e-static.py .
 run tui-e2e-coverage python3 scripts/check-vac-tui-e2e-coverage.py .

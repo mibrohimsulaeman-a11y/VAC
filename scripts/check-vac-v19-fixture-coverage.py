@@ -27,6 +27,7 @@ REQUIRED_FIXTURE_GROUPS = [
 
 CRITICAL_ACCEPTANCE_IDS = [
     "Duplicate `(session_id, seq)` rejected",
+    "Writer lease prevents two VAC-managed writers",
     "Stale decision cannot authorize current action",
     "Ghost state quarantine",
     "Derived trust recomputed at read time",
@@ -54,6 +55,21 @@ TOKEN_CHECKS = {
             "BEGIN IMMEDIATE",
             "ALLOCATE_EVENT_SEQUENCE_SQL",
             "runtime_event_append_requires_current_manifest_binding",
+        ],
+    },
+    "runtime-journal-writer": {
+        "scripts/check-v19-runtime-journal-writer.py": [
+            "BEGIN IMMEDIATE",
+            "begin_immediate_writer_lock=TV-Pass",
+            "heartbeat_counter_recovery=TV-Pass",
+            "expires_at_not_authority=true",
+            "sequence_allocation_transactional=true",
+            "deferred_stale_recovery_rejected=true",
+        ],
+        "tests/fixtures/v19/runtime-db/writer-lease.json": [
+            "v19.runtime_db.writer_lease",
+            "Writer lease prevents two VAC-managed writers",
+            "SQLite DEFERRED stale recovery race is rejected",
         ],
     },
     "manifest-sync-critical": {
@@ -238,6 +254,7 @@ def check_tokens(errors: list[str]) -> None:
 def check_json_fixtures(errors: list[str]) -> None:
     required = [
         "tests/fixtures/v19/governance/zero-denominator.json",
+        "tests/fixtures/v19/runtime-db/writer-lease.json",
         "tests/fixtures/v19/governance/spec-window-example.json",
         "tests/fixtures/v19/manifest-sync/classification-cases.json",
         "tests/fixtures/v19/missing-code/triad.json",
@@ -342,7 +359,7 @@ def main() -> int:
     print("VAC v1.9 fixture coverage: PASS")
     print(f"fixture_groups={len(REQUIRED_FIXTURE_GROUPS)}")
     print(f"critical_acceptance_checks={len(CRITICAL_ACCEPTANCE_IDS)}")
-    print("v19_fixture_files=7")
+    print("v19_fixture_files=8")
     print("sqlite_duplicate_session_seq_rejected=true")
     print("full_p0_acceptance_claimed=false")
     return 0
