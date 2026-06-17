@@ -6,6 +6,14 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from external_provider_remote_process_io_status import (
+    TV_FAIL,
+    TV_PASS,
+    TV_PENDING,
+    TV_STALE,
+    external_provider_remote_process_io_summary,
+)
+
 ROOT = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 DOMAIN_MAP = ROOT / "tests/fixtures/confirmed-intent/domain-map.json"
 COVERAGE_DOC = ROOT / "docs/audit/VAC_CONFIRMED_INTENT_COVERAGE_AUDIT.md"
@@ -18,13 +26,15 @@ REQUIRED_STATUS = {
     "confirmed_intent_executable_fixtures": "SV-Pass",
     "all_negative_cases_rejected": True,
     "crate_without_intent_or_rationale": 0,
-    "external_provider_remote_process_io_e2e": "TV-Pending",
 }
 
-FORBIDDEN_OVERCLAIMS = [
+PROOF_GATED_OVERCLAIMS = [
     "external_provider_remote_process_io_e2e=TV-Pass",
     "remote_process_io_e2e=TV-Pass",
     "remote_process_io=TV-Pass",
+]
+
+FORBIDDEN_OVERCLAIMS = [
     "broker_attested_l2_enforcement=TV-Pass",
     "P1 acceptance=Pass",
     "release_ready=Pass",
@@ -76,6 +86,11 @@ def load_json(path: Path) -> dict[str, Any]:
 payload = load_json(DOMAIN_MAP)
 coverage_doc = read_text(COVERAGE_DOC, "confirmed intent coverage audit")
 trace_doc = read_text(TRACE_DOC, "confirmed intent traceability doc")
+external_io = external_provider_remote_process_io_summary(ROOT)
+external_status = external_io["status"]
+remote_process_status = external_io["remote_process_status"]
+if external_status in {TV_FAIL, TV_STALE}:
+    errors.append("external_provider_remote_process_io_e2e_proof_invalid:" + ",".join(str(item) for item in external_io.get("errors", [])))
 
 require("fixture_id_is_confirmed_intent_domain_coverage", payload.get("fixture_id") == "confirmed_intent.domain_coverage.v1")
 status_expectations = payload.get("status_expectations", {})
@@ -162,6 +177,9 @@ for domain in domains if isinstance(domains, list) else []:
     require(f"{domain_id}:trace_doc_mentions_intent", intent_rel in trace_doc)
 
 combined = "\n".join([json.dumps(payload, sort_keys=True), coverage_doc, trace_doc])
+if external_status != TV_PASS:
+    for token in PROOF_GATED_OVERCLAIMS:
+        require(f"no_forbidden_overclaim_without_proof:{token}", token not in combined)
 for token in FORBIDDEN_OVERCLAIMS:
     require(f"no_forbidden_overclaim:{token}", token not in combined)
 
@@ -169,8 +187,9 @@ remote_pending_tokens = [
     "external_provider_remote_process_io_e2e=TV-Pending",
     "remote_process_io_e2e=TV-Pending",
 ]
-for token in remote_pending_tokens:
-    require(f"pending_status_present:{token}", token in combined)
+if external_status == TV_PENDING:
+    for token in remote_pending_tokens:
+        require(f"pending_status_present:{token}", token in combined)
 
 if errors:
     print("VAC confirmed intent coverage: FAIL")
@@ -187,4 +206,5 @@ print("confirmed_intent_traceability=SV-Pass")
 print("confirmed_intent_negative_fixtures=SV-Pass")
 print("confirmed_intent_executable_fixtures=SV-Pass")
 print("all_negative_cases_rejected=true")
-print("external_provider_remote_process_io_e2e=TV-Pending")
+print(f"external_provider_remote_process_io_e2e={external_status}")
+print(f"remote_process_io_e2e={remote_process_status}")

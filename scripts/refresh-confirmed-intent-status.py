@@ -6,6 +6,12 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from external_provider_remote_process_io_status import (
+    TV_FAIL,
+    TV_STALE,
+    external_provider_remote_process_io_summary,
+)
+
 ROOT = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 DOMAIN_MAP = ROOT / "tests/fixtures/confirmed-intent/domain-map.json"
 STATUS = ROOT / ".vac/registry/status.json"
@@ -31,6 +37,11 @@ if not isinstance(expectations, dict):
 if not isinstance(domains, list):
     raise SystemExit("domain-map domains must be a list")
 
+external_io = external_provider_remote_process_io_summary(ROOT)
+external_status = external_io["status"]
+if external_status in {TV_FAIL, TV_STALE}:
+    raise SystemExit("invalid external provider remote process IO proof: " + ",".join(str(item) for item in external_io.get("errors", [])))
+
 summary: dict[str, Any] = {
     "confirmed_intent_domain_coverage": expectations.get("confirmed_intent_domain_coverage"),
     "confirmed_intent_traceability_gate": expectations.get("confirmed_intent_traceability_gate"),
@@ -39,7 +50,12 @@ summary: dict[str, Any] = {
     "confirmed_intent_executable_fixtures": expectations.get("confirmed_intent_executable_fixtures"),
     "all_negative_cases_rejected": expectations.get("all_negative_cases_rejected"),
     "crate_without_intent_or_rationale": expectations.get("crate_without_intent_or_rationale"),
-    "external_provider_remote_process_io_e2e": expectations.get("external_provider_remote_process_io_e2e"),
+    "external_provider_remote_process_io_e2e": external_status,
+    "remote_process_io_e2e": external_io.get("remote_process_status"),
+    "external_provider_remote_process_io_e2e_execution": external_io.get("execution"),
+    "external_provider_remote_process_io_e2e_custody": external_io.get("custody"),
+    "external_provider_remote_process_io_e2e_proof_ref": external_io.get("proof_ref"),
+    "external_provider_remote_process_io_e2e_proof_hash": external_io.get("proof_hash"),
     "domain_count": len(domains),
     "domain_map": str(DOMAIN_MAP.relative_to(ROOT)),
     "coverage_audit": COVERAGE_DOC,
@@ -54,7 +70,6 @@ required = {
     "confirmed_intent_executable_fixtures": "SV-Pass",
     "all_negative_cases_rejected": True,
     "crate_without_intent_or_rationale": 0,
-    "external_provider_remote_process_io_e2e": "TV-Pending",
 }
 for key, expected in required.items():
     if summary.get(key) != expected:
@@ -84,4 +99,5 @@ print("confirmed_intent_negative_fixtures=SV-Pass")
 print("confirmed_intent_executable_fixtures=SV-Pass")
 print("all_negative_cases_rejected=true")
 print("crate_without_intent_or_rationale=0")
-print("external_provider_remote_process_io_e2e=TV-Pending")
+print(f"external_provider_remote_process_io_e2e={external_status}")
+print(f"remote_process_io_e2e={external_io.get('remote_process_status')}")

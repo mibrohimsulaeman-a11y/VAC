@@ -31,6 +31,12 @@ jobs:
       - name: Format Check
         run: cargo fmt --manifest-path vac-rs/Cargo.toml --all -- --check
 
+      - name: External Provider Remote Process IO Proof
+        run: python3 scripts/ci-external-provider-remote-process-io-proof.py .
+        env:
+          VAC_EXTERNAL_PROVIDER_REMOTE_PROCESS_IO_RESULT_B64: ${{ secrets.VAC_EXTERNAL_PROVIDER_REMOTE_PROCESS_IO_RESULT_B64 }}
+          VAC_EXTERNAL_PROVIDER_REMOTE_PROCESS_IO_RESULT: ${{ vars.VAC_EXTERNAL_PROVIDER_REMOTE_PROCESS_IO_RESULT }}
+
       - name: VAC v1.9 SV Gate
         run: ./scripts/vac-v19-final-sv-gate.sh
 
@@ -59,6 +65,14 @@ jobs:
           cargo test --manifest-path vac-rs/Cargo.toml -p vac-cli --features libsql-test --verbose
           cargo test --manifest-path vac-rs/Cargo.toml -p vac-messaging-gateway --features libsql-test --verbose
           cargo test --manifest-path vac-rs/Cargo.toml -p vac-provider-core --features network-tests --verbose
+
+      - name: Upload scoped proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vac-scoped-proof
+          path: .vac/evidence/external-provider-remote-process-io-e2e.json
+          if-no-files-found: ignore
 
       - name: Free build artifacts before cache save
         if: always()

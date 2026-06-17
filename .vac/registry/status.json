@@ -15,12 +15,12 @@
     "proof_ref": ".vac/evidence/cargo-tv-current.json",
     "status": "TV-Pass"
   },
-  "compiled_snapshot_hash": "sha256:fa68fb75267e5f147cffbb49bdec259727fa5a98d585e013cb50769846b1cd6b",
+  "compiled_snapshot_hash": "sha256:33d6a0634204771567fccef5771555ceb290261e87f39aa5a9846fb28fc6f763",
   "control_plane": {
     "audit": "jcs_json",
     "authoring": "yaml",
     "capabilities_snapshot_hash": "sha256:d2b8bf2cdae622bbf711bb32e89c35a5863bb206ac048dbdfc681e693aaafd33",
-    "compiled_snapshot_hash": "sha256:fa68fb75267e5f147cffbb49bdec259727fa5a98d585e013cb50769846b1cd6b",
+    "compiled_snapshot_hash": "sha256:33d6a0634204771567fccef5771555ceb290261e87f39aa5a9846fb28fc6f763",
     "compiled_snapshot_location": ".vac/cache/compiled",
     "compiled_snapshots_current": true,
     "generated_mirror_location": ".vac/registry/compiled",
@@ -36,6 +36,11 @@
     "all_negative_cases_rejected": true,
     "crate_without_intent_or_rationale": 0,
     "external_provider_remote_process_io_e2e": "TV-Pending",
+    "remote_process_io_e2e": "TV-Pending",
+    "external_provider_remote_process_io_e2e_execution": "observed_l1",
+    "external_provider_remote_process_io_e2e_custody": "local_only",
+    "external_provider_remote_process_io_e2e_proof_ref": null,
+    "external_provider_remote_process_io_e2e_proof_hash": null,
     "domain_count": 7,
     "domain_map": "tests/fixtures/confirmed-intent/domain-map.json",
     "coverage_audit": "docs/audit/VAC_CONFIRMED_INTENT_COVERAGE_AUDIT.md",
@@ -104,7 +109,7 @@
   "workspace": {
     "conformance_level": "L1",
     "enforcement_level": "L1",
-    "file_count": 777,
+    "file_count": 781,
     "rust_crate_count": 38
   },
   "rust_ast_index": {

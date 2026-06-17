@@ -1,4 +1,3 @@
 VAC confirmed intent coverage: FAIL
-- trace_doc_status_token:external_provider_remote_process_io_e2e
-- no_forbidden_overclaim:external_provider_remote_process_io_e2e=TV-Pass
-- no_forbidden_overclaim:remote_process_io_e2e=TV-Pass
+- no_forbidden_overclaim_without_proof:external_provider_remote_process_io_e2e=TV-Pass
+- no_forbidden_overclaim_without_proof:remote_process_io_e2e=TV-Pass

@@ -5,6 +5,12 @@ import re
 import sys
 from pathlib import Path
 
+from external_provider_remote_process_io_status import (
+    TV_FAIL,
+    TV_STALE,
+    external_provider_remote_process_io_summary,
+)
+
 ROOT = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 DOC = ROOT / "docs/audit/VAC_TUI_LIFECYCLE_E2E_COVERAGE_AUDIT.md"
 PTY = ROOT / "scripts/pty-tui-lifecycle-smoke.py"
@@ -51,6 +57,11 @@ agent_golden = read(AGENT_GOLDEN)
 real_io = read(REAL_IO)
 runtime_e2e = read(RUNTIME_E2E)
 bound_cases = read(BOUND_CASES)
+external_io = external_provider_remote_process_io_summary(ROOT)
+external_status = external_io["status"]
+remote_process_status = external_io["remote_process_status"]
+if external_status in {TV_FAIL, TV_STALE}:
+    errors.append("external_provider_remote_process_io_e2e_proof_invalid:" + ",".join(str(item) for item in external_io.get("errors", [])))
 
 require("audit_doc_states_deterministic_harness_pass", "deterministic_user_agent_all_tools_tui_e2e=TV-Pass" in doc)
 require("audit_doc_states_local_real_provider_file_io_pass", "local_real_provider_mcp_file_io_e2e=TV-Pass" in doc)
@@ -185,5 +196,10 @@ print("deterministic_user_agent_all_tools_tui_e2e=TV-Pass")
 print("local_real_provider_mcp_file_io_e2e=TV-Pass")
 print("local_real_provider_mcp_process_delete_loopback_network_io_e2e=TV-Pass")
 print("local_real_provider_mcp_negative_governance_io_e2e=TV-Pass")
-print("external_provider_remote_process_io_e2e=TV-Pending")
+print(f"external_provider_remote_process_io_e2e={external_status}")
+print(f"remote_process_io_e2e={remote_process_status}")
+if external_io.get("proof_ref"):
+    print(f"external_provider_remote_process_io_e2e_proof_ref={external_io['proof_ref']}")
+if external_io.get("proof_hash"):
+    print(f"external_provider_remote_process_io_e2e_proof_hash={external_io['proof_hash']}")
 print(f"uncovered_bridge_files={len(KEY_UNCOVERED_BRIDGE_FILES)}")
