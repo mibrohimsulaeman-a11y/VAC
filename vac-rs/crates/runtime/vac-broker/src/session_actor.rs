@@ -10,20 +10,32 @@ use rmcp::model::{
     CallToolRequestParam, CancelledNotification, CancelledNotificationMethod,
     CancelledNotificationParam, ServerResult,
 };
-use serde_json::json;
+use serde_json::{Value, json};
+use sha2::{Digest, Sha256};
 use std::{path::Path, sync::Arc};
 use tokio::sync::{Mutex, mpsc};
 use tokio_util::sync::CancellationToken;
 use uuid::Uuid;
 use vac_agent_loop::{
     AgentCommand, AgentConfig, AgentEvent, AgentHook, AgentRunContext, BudgetAwareContextReducer,
-    CheckpointEnvelopeV1, CompactionConfig, PassthroughCompactionEngine, ProposedToolCall,
-    RetryConfig, ToolExecutionResult, ToolExecutor, VacRuntimeMetadataBootstrap, run_agent,
+    CheckpointEnvelopeV1, CloseoutState, CompactionConfig, PassthroughCompactionEngine, PlanStatus,
+    ProposedToolCall, RetryConfig, RuntimeJournalCloseoutState, SemanticPlan, StopReason,
+    ToolExecutionResult, ToolExecutor, VacRuntimeMetadataBootstrap, canonical_json_sha256,
+    evaluate_completion_lock_v1_5, run_agent,
 };
-use vac_foundation::utils::sanitize_text_output;
+use vac_foundation::{
+    runtime_journal_writer::{
+        RuntimeJournalDecisionDraft, RuntimeJournalEvidenceHintDraft, RuntimeJournalSessionDraft,
+        RuntimeJournalValidationSummaryDraft, RuntimeJournalWriter, RuntimeJournalWriterError,
+    },
+    utils::sanitize_text_output,
+};
 use vac_mcp_client::McpClient;
 use vac_provider_core::{ContentPart, Message, MessageContent, Role};
 use vac_remote_service::CreateCheckpointRequest;
+use vac_state::{
+    RuntimeJournalEventDraft, RuntimeJournalOpenRequest, RuntimeManifestBinding, RuntimeTrustClaim,
+};
 
 const CHECKPOINT_FLUSH_INTERVAL: std::time::Duration = std::time::Duration::from_secs(5);
 pub(crate) const ACTIVE_MODEL_METADATA_KEY: &str = "active_model";
@@ -38,6 +50,331 @@ pub fn build_checkpoint_envelope(
     metadata: serde_json::Value,
 ) -> CheckpointEnvelopeV1 {
     CheckpointEnvelopeV1::new(Some(run_id), messages, metadata)
+}
+
+const VAC_RUNTIME_METADATA_KEY: &str = "vac_runtime";
+const LOCAL_RUNTIME_TRUST_WORDING: &str = "local self-reported trace; integrity hint only";
+
+async fn bootstrap_runtime_journal_product_path(
+    workspace_root: &Path,
+    session_id: &str,
+    run_id: Uuid,
+    metadata: &mut Value,
+) -> Result<RuntimeJournalCloseoutState, String> {
+    let manifest_binding = runtime_manifest_binding_from_workspace(workspace_root)?;
+    let trust_claim = local_runtime_trust_claim();
+    let writer = RuntimeJournalWriter::open(RuntimeJournalOpenRequest {
+        workspace_id: workspace_id(workspace_root),
+        db_path: workspace_root
+            .join(".vac/db/runtime.db")
+            .to_string_lossy()
+            .to_string(),
+        manifest_binding: manifest_binding.clone(),
+        writer_id: runtime_journal_writer_id(run_id),
+        session_id: session_id.to_string(),
+        lease_reason: "VAC-managed broker session lifecycle".to_string(),
+    })
+    .await
+    .map_err(runtime_journal_error)?;
+    writer
+        .acquire_writer_lease(0)
+        .await
+        .map_err(runtime_journal_error)?;
+
+    let plan: SemanticPlan = metadata_runtime_value(metadata, "plan")?;
+    let closeout: CloseoutState = metadata_runtime_value(metadata, "closeout")?;
+    writer
+        .ensure_session(&RuntimeJournalSessionDraft {
+            status: "open".to_string(),
+            user_prompt_summary: "VAC broker managed session".to_string(),
+            current_phase: "intake".to_string(),
+            default_trust_claim: trust_claim.clone(),
+        })
+        .await
+        .map_err(runtime_journal_error)?;
+    writer
+        .append_event(RuntimeJournalEventDraft {
+            session_id: session_id.to_string(),
+            phase: "intake".to_string(),
+            event_type: "runtime_journal_product_path_bootstrap".to_string(),
+            severity: "info".to_string(),
+            summary: "VAC broker attached runtime journal to managed session lifecycle".to_string(),
+            manifest_binding: manifest_binding.clone(),
+            payload_cbor_sha256: Some(canonical_json_sha256(metadata)),
+            trust_claim_override: Some(trust_claim.clone()),
+            proof_ref: None,
+        })
+        .await
+        .map_err(runtime_journal_error)?;
+
+    let plan_terminal = matches!(plan.status, PlanStatus::Completed);
+    let validation_terminal = closeout.evidence.valid && closeout.artifacts.all_complete();
+    writer
+        .record_validation_summary(&RuntimeJournalValidationSummaryDraft {
+            validation_id: format!("validation.{session_id}.closeout"),
+            command_id: plan
+                .validation_commands
+                .first()
+                .cloned()
+                .unwrap_or_else(|| "vac.completion_lock.closeout".to_string()),
+            structured_command_hash: canonical_json_sha256(&json!(plan.validation_commands)),
+            exit_code: validation_terminal.then_some(0),
+            stdout_hash: None,
+            stderr_hash: None,
+            duration_ms: None,
+            status: if validation_terminal {
+                "done"
+            } else {
+                "pending"
+            }
+            .to_string(),
+        })
+        .await
+        .map_err(runtime_journal_error)?;
+    writer
+        .record_decision(&RuntimeJournalDecisionDraft {
+            decision_id: format!("decision.{session_id}.manifest_refresh"),
+            decision_class: "slice_local".to_string(),
+            decision_type: "manifest_sync_refresh".to_string(),
+            subject_type: "session".to_string(),
+            subject_id: session_id.to_string(),
+            decided_by: "vac-broker".to_string(),
+            decision: "refreshed_current_manifest".to_string(),
+            reason_summary:
+                "Runtime journal product path refreshed session decision under current manifest set"
+                    .to_string(),
+            scope_hash: sha256_string(format!(
+                "{}|{}|{}",
+                session_id, plan.id, manifest_binding.manifest_set_hash
+            )),
+            policy_snapshot_hash: None,
+            locked: true,
+            proof_ref: None,
+        })
+        .await
+        .map_err(runtime_journal_error)?;
+
+    let evidence_summary_present = closeout.evidence.valid
+        && closeout.evidence.self_hash.starts_with("sha256:")
+        && !closeout.evidence.self_hash.trim().is_empty();
+    if evidence_summary_present {
+        writer
+            .record_evidence_hint(&RuntimeJournalEvidenceHintDraft {
+                evidence_id: format!("evidence.{session_id}.closeout"),
+                capability_id: plan.capability.clone(),
+                evidence_class: "completion_summary".to_string(),
+                content_hash: closeout.evidence.self_hash.clone(),
+                previous_hash: None,
+                trust_claim: trust_claim.clone(),
+                proof_ref: None,
+            })
+            .await
+            .map_err(runtime_journal_error)?;
+    }
+
+    let counts = writer
+        .product_projection_counts()
+        .await
+        .map_err(runtime_journal_error)?;
+    let projection = RuntimeJournalCloseoutState {
+        session_recorded: counts.sessions > 0,
+        event_count: counts.events.try_into().unwrap_or(u32::MAX),
+        plan_terminal,
+        plan_manifest_current: true,
+        validation_terminal: validation_terminal && counts.validation_summaries > 0,
+        validation_manifest_current: true,
+        decisions_locked_and_current: counts.decisions > 0,
+        manifest_sync: vac_agent_loop::ManifestSyncCloseoutState::current(),
+        evidence_summary_present: evidence_summary_present && counts.evidence_hints > 0,
+        evidence_summary_trust_wording: evidence_summary_present
+            .then(|| LOCAL_RUNTIME_TRUST_WORDING.to_string()),
+    };
+    set_runtime_journal_projection(metadata, &projection)?;
+    Ok(projection)
+}
+
+async fn finalize_runtime_journal_product_path(
+    workspace_root: &Path,
+    session_id: &str,
+    run_id: Uuid,
+    metadata: &Value,
+    stop_reason: StopReason,
+) -> Result<(), String> {
+    let closeout: CloseoutState = metadata_runtime_value(metadata, "closeout")?;
+    let completion = evaluate_completion_lock_v1_5(&closeout);
+    let Some((status, phase, expected_heartbeat_counter)) = (match completion.disposition {
+        vac_agent_loop::CompletionDisposition::Done
+            if matches!(stop_reason, StopReason::Completed) =>
+        {
+            Some(("done", "done", 1))
+        }
+        vac_agent_loop::CompletionDisposition::PausedForDiscussion => {
+            Some(("paused_for_operator", "paused_for_operator", 1))
+        }
+        _ => None,
+    }) else {
+        return Ok(());
+    };
+
+    let writer = RuntimeJournalWriter::open(RuntimeJournalOpenRequest {
+        workspace_id: workspace_id(workspace_root),
+        db_path: workspace_root
+            .join(".vac/db/runtime.db")
+            .to_string_lossy()
+            .to_string(),
+        manifest_binding: runtime_manifest_binding_from_workspace(workspace_root)?,
+        writer_id: runtime_journal_writer_id(run_id),
+        session_id: session_id.to_string(),
+        lease_reason: "VAC-managed broker session closeout".to_string(),
+    })
+    .await
+    .map_err(runtime_journal_error)?;
+    writer
+        .acquire_writer_lease(expected_heartbeat_counter)
+        .await
+        .map_err(runtime_journal_error)?;
+    writer
+        .close_session(status, phase)
+        .await
+        .map_err(runtime_journal_error)
+}
+
+fn metadata_runtime_value<T>(metadata: &Value, key: &str) -> Result<T, String>
+where
+    T: serde::de::DeserializeOwned,
+{
+    metadata
+        .get(VAC_RUNTIME_METADATA_KEY)
+        .and_then(|runtime| runtime.get(key))
+        .cloned()
+        .ok_or_else(|| format!("vac runtime metadata missing {key}"))
+        .and_then(|value| {
+            serde_json::from_value(value)
+                .map_err(|error| format!("invalid vac runtime metadata {key}: {error}"))
+        })
+}
+
+fn set_runtime_journal_projection(
+    metadata: &mut Value,
+    projection: &RuntimeJournalCloseoutState,
+) -> Result<(), String> {
+    let closeout = metadata
+        .get_mut(VAC_RUNTIME_METADATA_KEY)
+        .and_then(|runtime| runtime.get_mut("closeout"))
+        .ok_or_else(|| "vac runtime metadata missing closeout".to_string())?;
+    let object = closeout
+        .as_object_mut()
+        .ok_or_else(|| "vac runtime closeout must be a JSON object".to_string())?;
+    object.insert(
+        "runtime_journal".to_string(),
+        serde_json::to_value(projection)
+            .map_err(|error| format!("cannot serialize runtime journal projection: {error}"))?,
+    );
+    Ok(())
+}
+
+fn runtime_manifest_binding_from_workspace(root: &Path) -> Result<RuntimeManifestBinding, String> {
+    let (snapshot_hash, compiled_snapshot_id) = read_compiled_snapshot_identity(root)?;
+    Ok(RuntimeManifestBinding {
+        manifest_set_hash: snapshot_hash,
+        compiled_snapshot_id,
+        git_head: git_output(root, &["rev-parse", "HEAD"]),
+        git_dirty_tree_hash: git_output(root, &["status", "--short", "--untracked-files=all"])
+            .map(sha256_string),
+    })
+}
+
+fn read_compiled_snapshot_identity(root: &Path) -> Result<(String, String), String> {
+    for candidate in [
+        ".vac/cache/compiled/workspace.json",
+        ".vac/cache/compiled/runtime/current.json",
+        ".vac/registry/compiled/workspace.json",
+        ".vac/registry/compiled/runtime/current.json",
+    ] {
+        let path = root.join(candidate);
+        if !path.is_file() {
+            continue;
+        }
+        let text = std::fs::read_to_string(&path)
+            .map_err(|error| format!("{}: {error}", path.display()))?;
+        let value: Value =
+            serde_json::from_str(&text).map_err(|error| format!("{}: {error}", path.display()))?;
+        let snapshot_hash = value
+            .get("snapshot_hash")
+            .or_else(|| value.get("manifest_set_hash"))
+            .or_else(|| value.pointer("/runtime_registry_snapshot/snapshot_hash"))
+            .and_then(Value::as_str)
+            .filter(|hash| hash.starts_with("sha256:") && !hash.trim().is_empty())
+            .map(ToString::to_string);
+        if let Some(snapshot_hash) = snapshot_hash {
+            let compiled_snapshot_id = value
+                .get("id")
+                .and_then(Value::as_str)
+                .filter(|id| !id.trim().is_empty())
+                .map(ToString::to_string)
+                .unwrap_or_else(|| {
+                    format!("snapshot.{}", snapshot_hash.trim_start_matches("sha256:"))
+                });
+            return Ok((snapshot_hash, compiled_snapshot_id));
+        }
+    }
+    Err(
+        "compiled snapshot hash missing; run `vac compile registry .` before VAC-managed session"
+            .to_string(),
+    )
+}
+
+fn workspace_id(root: &Path) -> String {
+    root.canonicalize()
+        .unwrap_or_else(|_| root.to_path_buf())
+        .to_string_lossy()
+        .to_string()
+}
+
+fn runtime_journal_writer_id(run_id: Uuid) -> String {
+    format!("vac-broker.{run_id}")
+}
+
+fn local_runtime_trust_claim() -> RuntimeTrustClaim {
+    RuntimeTrustClaim {
+        execution: "observed_l1".to_string(),
+        custody: "local_only".to_string(),
+        proof_ref: None,
+    }
+}
+
+fn git_output(root: &Path, args: &[&str]) -> Option<String> {
+    let output = std::process::Command::new("git")
+        .arg("-C")
+        .arg(root)
+        .args(args)
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    let text = String::from_utf8(output.stdout).ok()?;
+    Some(text.trim().to_string())
+}
+
+fn sha256_string(value: impl AsRef<str>) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(value.as_ref().as_bytes());
+    format!("sha256:{}", hex_lower(&hasher.finalize()))
+}
+
+fn hex_lower(bytes: &[u8]) -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    let mut out = String::with_capacity(bytes.len() * 2);
+    for byte in bytes {
+        out.push(HEX[(byte >> 4) as usize] as char);
+        out.push(HEX[(byte & 0x0f) as usize] as char);
+    }
+    out
+}
+
+fn runtime_journal_error(error: RuntimeJournalWriterError) -> String {
+    format!("runtime journal product path failed: {error}")
 }
 
 pub fn spawn_session_actor(
@@ -174,6 +511,7 @@ async fn run_session_actor(
 
     let is_new_session = is_new_session_history(&initial_messages);
     let session_cwd = resolve_session_cwd(&state, session_id).await;
+    let session_id_text = session_id.to_string();
 
     // State5 VAC v1.5 operational closure: broker/session startup must attach
     // compiled-registry runtime authority, approved Semantic Plan JSON, mandatory
@@ -182,7 +520,7 @@ async fn run_session_actor(
     // execution without a VAC runtime contract.
     let vac_bootstrap = VacRuntimeMetadataBootstrap::new(&session_cwd);
     let bootstrap_report = vac_bootstrap
-        .set_vac_runtime_metadata(&mut initial_metadata, &session_id.to_string())
+        .set_vac_runtime_metadata(&mut initial_metadata, &session_id_text)
         .map_err(|error| {
             format!("VAC runtime metadata bootstrap failed for session {session_id}: {error}")
         })?;
@@ -191,6 +529,20 @@ async fn run_session_actor(
             "vac_runtime_bootstrap_report".to_string(),
             serde_json::to_value(bootstrap_report)
                 .unwrap_or_else(|_| json!({"error":"bootstrap_report_serialize_failed"})),
+        );
+    }
+    let journal_projection = bootstrap_runtime_journal_product_path(
+        Path::new(&session_cwd),
+        &session_id_text,
+        run_id,
+        &mut initial_metadata,
+    )
+    .await?;
+    if let Some(obj) = initial_metadata.as_object_mut() {
+        obj.insert(
+            "vac_runtime_journal_projection".to_string(),
+            serde_json::to_value(journal_projection)
+                .unwrap_or_else(|_| json!({"error":"journal_projection_serialize_failed"})),
         );
     }
 
@@ -324,6 +676,14 @@ async fn run_session_actor(
 
     match &run_result {
         Ok(result) => {
+            finalize_runtime_journal_product_path(
+                Path::new(&session_cwd),
+                &session_id_text,
+                run_id,
+                &result.metadata,
+                result.stop_reason,
+            )
+            .await?;
             checkpoint_runtime.update_messages(&result.messages).await;
             checkpoint_runtime.update_metadata(&result.metadata).await;
             checkpoint_runtime

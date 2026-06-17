@@ -12,9 +12,10 @@ workspace = true
 [dependencies]
 vac-provider-core = { workspace = true }
 vac-agent-loop = { workspace = true }
+vac-state = { workspace = true }
 vac-remote-service = { workspace = true }
 vac-mcp-client = { workspace = true }
-vac-foundation = { workspace = true }
+vac-foundation = { workspace = true, features = ["sqlite"] }
 vac-mcp-proxy = { workspace = true }
 rmcp = { workspace = true }
 reqwest = { workspace = true }
@@ -25,6 +26,7 @@ serde_json = { workspace = true }
 uuid = { workspace = true }
 tokio = { workspace = true }
 chrono = { workspace = true }
+sha2 = { workspace = true }
 thiserror = { workspace = true }
 axum = { workspace = true }
 async-trait = { workspace = true }

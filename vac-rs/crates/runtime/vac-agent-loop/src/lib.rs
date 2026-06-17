@@ -50,13 +50,14 @@ pub use bound_runtime::{
     BoundRuntimeE2eInput, BoundRuntimeE2eResult, BoundRuntimePhase, BoundRuntimeTraceEvent,
     CapabilityRuntimeRecord, CloseoutState, CommandApproval, CommandRisk, CompletionDisposition,
     CompletionLockResult, EvidenceState, FileOperation, GateDecision, GateOutcome, LineRange,
-    OwnershipState, PatchAttempt, PatchBudget, PlanApproval, PlanFileScope, PlanStatus,
-    PolicyDecision, ReadinessLevel, ReadinessState, ReadinessTriplet, RuntimeAuthority,
-    RuntimeConformanceLevel, RuntimeGate, RuntimeRegistrySnapshot, SemanticAnchor, SemanticPlan,
-    SessionArtifacts, SessionState, SignatureAlgorithm, SignatureMode, SourceHash, SpecArtifact,
-    SpecArtifactState, SpecSyncState, StructuredCommand, TaskArtifact, TaskArtifactState,
-    TodoArtifact, TodoArtifactState, TodoItem, ValidationState, approval_binding_hash,
-    canonical_json_sha256, completed_artifacts, evaluate_completion_lock_v1_5, successful_closeout,
+    ManifestSyncCloseoutState, OwnershipState, PatchAttempt, PatchBudget, PlanApproval,
+    PlanFileScope, PlanStatus, PolicyDecision, ReadinessLevel, ReadinessState, ReadinessTriplet,
+    RuntimeAuthority, RuntimeConformanceLevel, RuntimeGate, RuntimeJournalCloseoutState,
+    RuntimeRegistrySnapshot, SemanticAnchor, SemanticPlan, SessionArtifacts, SessionState,
+    SignatureAlgorithm, SignatureMode, SourceHash, SpecArtifact, SpecArtifactState, SpecSyncState,
+    StructuredCommand, TaskArtifact, TaskArtifactState, TodoArtifact, TodoArtifactState, TodoItem,
+    ValidationState, approval_binding_hash, canonical_json_sha256, completed_artifacts,
+    evaluate_completion_lock_v1_5, successful_closeout,
 };
 
 pub use runtime_e2e::{BoundAgentE2EInput, BoundAgentE2EReport, run_bound_agent_e2e};

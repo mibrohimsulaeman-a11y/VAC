@@ -7179,6 +7179,7 @@ dependencies = [
  "rustls 0.23.35",
  "serde",
  "serde_json",
+ "sha2",
  "tempfile",
  "thiserror 2.0.17",
  "tokio",
@@ -7193,6 +7194,7 @@ dependencies = [
  "vac-mcp-proxy",
  "vac-provider-core",
  "vac-remote-service",
+ "vac-state",
 ]
 
 [[package]]

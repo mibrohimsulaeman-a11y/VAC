@@ -997,6 +997,63 @@ pub struct AssessmentState {
     pub unresolved_critical_findings: u32,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+pub struct ManifestSyncCloseoutState {
+    pub no_ghost_state: bool,
+    pub ghost_state: u32,
+    pub no_orphan_state: bool,
+    pub orphan_state: u32,
+    pub no_stale_authorization: bool,
+    pub stale_authorization: u32,
+}
+
+impl ManifestSyncCloseoutState {
+    #[must_use]
+    pub fn current() -> Self {
+        Self {
+            no_ghost_state: true,
+            ghost_state: 0,
+            no_orphan_state: true,
+            orphan_state: 0,
+            no_stale_authorization: true,
+            stale_authorization: 0,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+pub struct RuntimeJournalCloseoutState {
+    pub session_recorded: bool,
+    pub event_count: u32,
+    pub plan_terminal: bool,
+    pub plan_manifest_current: bool,
+    pub validation_terminal: bool,
+    pub validation_manifest_current: bool,
+    pub decisions_locked_and_current: bool,
+    pub manifest_sync: ManifestSyncCloseoutState,
+    pub evidence_summary_present: bool,
+    #[serde(default)]
+    pub evidence_summary_trust_wording: Option<String>,
+}
+
+impl RuntimeJournalCloseoutState {
+    #[must_use]
+    pub fn product_path_complete(trust_wording: impl Into<String>) -> Self {
+        Self {
+            session_recorded: true,
+            event_count: 1,
+            plan_terminal: true,
+            plan_manifest_current: true,
+            validation_terminal: true,
+            validation_manifest_current: true,
+            decisions_locked_and_current: true,
+            manifest_sync: ManifestSyncCloseoutState::current(),
+            evidence_summary_present: true,
+            evidence_summary_trust_wording: Some(trust_wording.into()),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CloseoutState {
     pub artifacts: SessionArtifacts,
@@ -1006,6 +1063,8 @@ pub struct CloseoutState {
     pub readiness: ReadinessState,
     pub ownership: OwnershipState,
     pub assessment: AssessmentState,
+    #[serde(default)]
+    pub runtime_journal: RuntimeJournalCloseoutState,
     #[serde(default)]
     pub explicit_open_question: Option<String>,
     #[serde(default)]
@@ -1746,7 +1805,67 @@ pub fn evaluate_completion_lock_v1_5(closeout: &CloseoutState) -> CompletionLock
         "no_code_without_capability".to_string(),
         "no_capability_without_current_intent_spec".to_string(),
         "assessment_findings_have_span_evidence".to_string(),
+        "runtime_session_recorded".to_string(),
+        "runtime_event_recorded".to_string(),
+        "runtime_plan_terminal".to_string(),
+        "runtime_plan_manifest_current".to_string(),
+        "runtime_validation_terminal".to_string(),
+        "runtime_validation_manifest_current".to_string(),
+        "runtime_decisions_locked_and_current".to_string(),
+        "manifest_sync_no_ghost_state".to_string(),
+        "manifest_sync_no_orphan_state".to_string(),
+        "manifest_sync_no_stale_authorization".to_string(),
+        "evidence_summary_present".to_string(),
+        "evidence_summary_true_derived_trust_present".to_string(),
     ];
+
+    let runtime_journal = &closeout.runtime_journal;
+    if !runtime_journal.session_recorded {
+        blockers.push("runtime_session_recorded".to_string());
+    }
+    if runtime_journal.event_count == 0 {
+        blockers.push("runtime_event_recorded".to_string());
+    }
+    if !runtime_journal.plan_terminal {
+        blockers.push("runtime_plan_terminal".to_string());
+    }
+    if !runtime_journal.plan_manifest_current {
+        blockers.push("runtime_plan_manifest_current".to_string());
+    }
+    if !runtime_journal.validation_terminal {
+        blockers.push("runtime_validation_terminal".to_string());
+    }
+    if !runtime_journal.validation_manifest_current {
+        blockers.push("runtime_validation_manifest_current".to_string());
+    }
+    if !runtime_journal.decisions_locked_and_current {
+        blockers.push("runtime_decisions_locked_and_current".to_string());
+    }
+    if !runtime_journal.manifest_sync.no_ghost_state
+        || runtime_journal.manifest_sync.ghost_state > 0
+    {
+        blockers.push("manifest_sync_no_ghost_state".to_string());
+    }
+    if !runtime_journal.manifest_sync.no_orphan_state
+        || runtime_journal.manifest_sync.orphan_state > 0
+    {
+        blockers.push("manifest_sync_no_orphan_state".to_string());
+    }
+    if !runtime_journal.manifest_sync.no_stale_authorization
+        || runtime_journal.manifest_sync.stale_authorization > 0
+    {
+        blockers.push("manifest_sync_no_stale_authorization".to_string());
+    }
+    if !runtime_journal.evidence_summary_present {
+        blockers.push("evidence_summary_present".to_string());
+    }
+    if runtime_journal
+        .evidence_summary_trust_wording
+        .as_ref()
+        .is_none_or(|wording| wording.trim().is_empty())
+    {
+        blockers.push("evidence_summary_true_derived_trust_present".to_string());
+    }
 
     if !closeout.artifacts.task.terminal() {
         blockers.push("tasks_terminal".to_string());
@@ -1959,6 +2078,9 @@ pub fn successful_closeout(session: &str, plan_id: &str, evidence_id: &str) -> C
             findings_have_span_evidence: true,
             unresolved_critical_findings: 0,
         },
+        runtime_journal: RuntimeJournalCloseoutState::product_path_complete(
+            "local self-reported trace; integrity hint only",
+        ),
         explicit_open_question: None,
         blocking_reason: None,
         operator_visible_status: true,
@@ -2257,6 +2379,77 @@ mod tests {
         assert_eq!(
             result.disposition,
             CompletionDisposition::PausedForDiscussion
+        );
+    }
+
+    #[test]
+    fn completion_lock_needs_discussion_cannot_close_done() {
+        let mut closeout = successful_closeout("s1", "plan.ok", "evidence.ok");
+        closeout.artifacts.task.state = TaskArtifactState::NeedsDiscussion;
+        closeout.artifacts.task.open_questions =
+            vec!["Operator must classify this decision.".to_string()];
+        closeout.explicit_open_question = Some("Operator must classify this decision.".to_string());
+        closeout.blocking_reason = Some("needs discussion is not done-state".to_string());
+        closeout.operator_visible_status = true;
+
+        let result = evaluate_completion_lock_v1_5(&closeout);
+
+        assert_ne!(result.disposition, CompletionDisposition::Done);
+        assert_eq!(
+            result.disposition,
+            CompletionDisposition::PausedForDiscussion
+        );
+    }
+
+    #[test]
+    fn completion_lock_blocks_stale_validation_projection() {
+        let mut closeout = successful_closeout("s1", "plan.ok", "evidence.ok");
+        closeout.runtime_journal.validation_manifest_current = false;
+
+        let result = evaluate_completion_lock_v1_5(&closeout);
+
+        assert_eq!(result.disposition, CompletionDisposition::Blocked);
+        assert!(
+            result
+                .blockers
+                .contains(&"runtime_validation_manifest_current".to_string())
+        );
+    }
+
+    #[test]
+    fn completion_lock_blocks_ghost_manifest_state_projection() {
+        let mut closeout = successful_closeout("s1", "plan.ok", "evidence.ok");
+        closeout.runtime_journal.manifest_sync.no_ghost_state = false;
+        closeout.runtime_journal.manifest_sync.ghost_state = 1;
+
+        let result = evaluate_completion_lock_v1_5(&closeout);
+
+        assert_eq!(result.disposition, CompletionDisposition::Blocked);
+        assert!(
+            result
+                .blockers
+                .contains(&"manifest_sync_no_ghost_state".to_string())
+        );
+    }
+
+    #[test]
+    fn completion_lock_blocks_missing_evidence_summary_projection() {
+        let mut closeout = successful_closeout("s1", "plan.ok", "evidence.ok");
+        closeout.runtime_journal.evidence_summary_present = false;
+        closeout.runtime_journal.evidence_summary_trust_wording = None;
+
+        let result = evaluate_completion_lock_v1_5(&closeout);
+
+        assert_eq!(result.disposition, CompletionDisposition::Blocked);
+        assert!(
+            result
+                .blockers
+                .contains(&"evidence_summary_present".to_string())
+        );
+        assert!(
+            result
+                .blockers
+                .contains(&"evidence_summary_true_derived_trust_present".to_string())
         );
     }
 

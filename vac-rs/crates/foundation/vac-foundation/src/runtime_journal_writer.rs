@@ -47,6 +47,54 @@ pub struct RuntimeJournalSessionDraft {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RuntimeJournalValidationSummaryDraft {
+    pub validation_id: String,
+    pub command_id: String,
+    pub structured_command_hash: String,
+    pub exit_code: Option<i64>,
+    pub stdout_hash: Option<String>,
+    pub stderr_hash: Option<String>,
+    pub duration_ms: Option<i64>,
+    pub status: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RuntimeJournalDecisionDraft {
+    pub decision_id: String,
+    pub decision_class: String,
+    pub decision_type: String,
+    pub subject_type: String,
+    pub subject_id: String,
+    pub decided_by: String,
+    pub decision: String,
+    pub reason_summary: String,
+    pub scope_hash: String,
+    pub policy_snapshot_hash: Option<String>,
+    pub locked: bool,
+    pub proof_ref: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RuntimeJournalEvidenceHintDraft {
+    pub evidence_id: String,
+    pub capability_id: String,
+    pub evidence_class: String,
+    pub content_hash: String,
+    pub previous_hash: Option<String>,
+    pub trust_claim: RuntimeTrustClaim,
+    pub proof_ref: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RuntimeJournalProductProjectionCounts {
+    pub sessions: i64,
+    pub events: i64,
+    pub validation_summaries: i64,
+    pub decisions: i64,
+    pub evidence_hints: i64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RuntimeJournalLeaseResult {
     pub acquired: bool,
     pub holder_id: String,
@@ -261,6 +309,255 @@ impl RuntimeJournalWriter {
         commit_or_rollback(&conn, result).await
     }
 
+    pub async fn record_validation_summary(
+        &self,
+        draft: &RuntimeJournalValidationSummaryDraft,
+    ) -> Result<(), RuntimeJournalWriterError> {
+        validate_required("validation_id", &draft.validation_id)?;
+        validate_required("command_id", &draft.command_id)?;
+        validate_required("structured_command_hash", &draft.structured_command_hash)?;
+        validate_required("status", &draft.status)?;
+
+        let conn = self.connection().await?;
+        conn.execute("BEGIN IMMEDIATE", ())
+            .await
+            .map_err(|err| RuntimeJournalWriterError::Database(err.to_string()))?;
+        let result = async {
+            self.require_writer_lease_on(&conn).await?;
+            conn.execute(
+                "INSERT INTO runtime_validation_summaries(
+                    validation_id, session_id, command_id, structured_command_hash, exit_code,
+                    stdout_hash, stderr_hash, duration_ms, status, manifest_set_hash, git_head, recorded_at
+                  ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)
+                  ON CONFLICT(validation_id) DO UPDATE SET
+                    command_id=excluded.command_id,
+                    structured_command_hash=excluded.structured_command_hash,
+                    exit_code=excluded.exit_code,
+                    stdout_hash=excluded.stdout_hash,
+                    stderr_hash=excluded.stderr_hash,
+                    duration_ms=excluded.duration_ms,
+                    status=excluded.status,
+                    manifest_set_hash=excluded.manifest_set_hash,
+                    git_head=excluded.git_head,
+                    recorded_at=excluded.recorded_at",
+                libsql::params![
+                    draft.validation_id.clone(),
+                    self.session_id.clone(),
+                    draft.command_id.clone(),
+                    draft.structured_command_hash.clone(),
+                    draft.exit_code,
+                    draft.stdout_hash.clone(),
+                    draft.stderr_hash.clone(),
+                    draft.duration_ms,
+                    draft.status.clone(),
+                    self.manifest_binding.manifest_set_hash.clone(),
+                    self.manifest_binding.git_head.clone(),
+                    now_utc_string(),
+                ],
+            )
+            .await
+            .map_err(|err| RuntimeJournalWriterError::Database(err.to_string()))?;
+            Ok::<_, RuntimeJournalWriterError>(())
+        }
+        .await;
+        commit_or_rollback(&conn, result).await
+    }
+
+    pub async fn record_decision(
+        &self,
+        draft: &RuntimeJournalDecisionDraft,
+    ) -> Result<(), RuntimeJournalWriterError> {
+        for (label, value) in [
+            ("decision_id", draft.decision_id.as_str()),
+            ("decision_class", draft.decision_class.as_str()),
+            ("decision_type", draft.decision_type.as_str()),
+            ("subject_type", draft.subject_type.as_str()),
+            ("subject_id", draft.subject_id.as_str()),
+            ("decided_by", draft.decided_by.as_str()),
+            ("decision", draft.decision.as_str()),
+            ("reason_summary", draft.reason_summary.as_str()),
+            ("scope_hash", draft.scope_hash.as_str()),
+        ] {
+            validate_required(label, value)?;
+        }
+        let content_hash = content_hash_from_parts(&[
+            "runtime_decision".to_string(),
+            self.session_id.clone(),
+            draft.decision_id.clone(),
+            draft.decision_class.clone(),
+            draft.decision_type.clone(),
+            draft.subject_type.clone(),
+            draft.subject_id.clone(),
+            draft.decision.clone(),
+            draft.scope_hash.clone(),
+            self.manifest_binding.manifest_set_hash.clone(),
+        ]);
+
+        let conn = self.connection().await?;
+        conn.execute("BEGIN IMMEDIATE", ())
+            .await
+            .map_err(|err| RuntimeJournalWriterError::Database(err.to_string()))?;
+        let result = async {
+            self.require_writer_lease_on(&conn).await?;
+            conn.execute(
+                "INSERT INTO runtime_decisions(
+                    decision_id, session_id, decision_class, decision_type, subject_type, subject_id,
+                    decided_by, decided_at, decision, reason_summary, scope_hash, policy_snapshot_hash,
+                    manifest_set_hash, git_head, content_hash, locked, superseded_by, proof_ref
+                  ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, NULL, ?17)
+                  ON CONFLICT(decision_id) DO UPDATE SET
+                    decision_class=excluded.decision_class,
+                    decision_type=excluded.decision_type,
+                    subject_type=excluded.subject_type,
+                    subject_id=excluded.subject_id,
+                    decided_by=excluded.decided_by,
+                    decided_at=excluded.decided_at,
+                    decision=excluded.decision,
+                    reason_summary=excluded.reason_summary,
+                    scope_hash=excluded.scope_hash,
+                    policy_snapshot_hash=excluded.policy_snapshot_hash,
+                    manifest_set_hash=excluded.manifest_set_hash,
+                    git_head=excluded.git_head,
+                    content_hash=excluded.content_hash,
+                    locked=excluded.locked,
+                    superseded_by=NULL,
+                    proof_ref=excluded.proof_ref",
+                libsql::params![
+                    draft.decision_id.clone(),
+                    self.session_id.clone(),
+                    draft.decision_class.clone(),
+                    draft.decision_type.clone(),
+                    draft.subject_type.clone(),
+                    draft.subject_id.clone(),
+                    draft.decided_by.clone(),
+                    now_utc_string(),
+                    draft.decision.clone(),
+                    draft.reason_summary.clone(),
+                    draft.scope_hash.clone(),
+                    draft.policy_snapshot_hash.clone(),
+                    self.manifest_binding.manifest_set_hash.clone(),
+                    self.manifest_binding.git_head.clone(),
+                    content_hash,
+                    i64::from(draft.locked),
+                    draft.proof_ref.clone(),
+                ],
+            )
+            .await
+            .map_err(|err| RuntimeJournalWriterError::Database(err.to_string()))?;
+            Ok::<_, RuntimeJournalWriterError>(())
+        }
+        .await;
+        commit_or_rollback(&conn, result).await
+    }
+
+    pub async fn record_evidence_hint(
+        &self,
+        draft: &RuntimeJournalEvidenceHintDraft,
+    ) -> Result<(), RuntimeJournalWriterError> {
+        for (label, value) in [
+            ("evidence_id", draft.evidence_id.as_str()),
+            ("capability_id", draft.capability_id.as_str()),
+            ("evidence_class", draft.evidence_class.as_str()),
+            ("content_hash", draft.content_hash.as_str()),
+        ] {
+            validate_required(label, value)?;
+        }
+        let conn = self.connection().await?;
+        conn.execute("BEGIN IMMEDIATE", ())
+            .await
+            .map_err(|err| RuntimeJournalWriterError::Database(err.to_string()))?;
+        let result = async {
+            self.require_writer_lease_on(&conn).await?;
+            conn.execute(
+                "INSERT INTO runtime_evidence_hints(
+                    evidence_id, session_id, capability_id, evidence_class, content_hash, previous_hash,
+                    trust_execution_claim, trust_custody_claim, proof_ref, manifest_set_hash, git_head, recorded_at
+                  ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)
+                  ON CONFLICT(evidence_id) DO UPDATE SET
+                    capability_id=excluded.capability_id,
+                    evidence_class=excluded.evidence_class,
+                    content_hash=excluded.content_hash,
+                    previous_hash=excluded.previous_hash,
+                    trust_execution_claim=excluded.trust_execution_claim,
+                    trust_custody_claim=excluded.trust_custody_claim,
+                    proof_ref=excluded.proof_ref,
+                    manifest_set_hash=excluded.manifest_set_hash,
+                    git_head=excluded.git_head,
+                    recorded_at=excluded.recorded_at",
+                libsql::params![
+                    draft.evidence_id.clone(),
+                    self.session_id.clone(),
+                    draft.capability_id.clone(),
+                    draft.evidence_class.clone(),
+                    draft.content_hash.clone(),
+                    draft.previous_hash.clone(),
+                    draft.trust_claim.execution.clone(),
+                    draft.trust_claim.custody.clone(),
+                    draft.proof_ref.clone(),
+                    self.manifest_binding.manifest_set_hash.clone(),
+                    self.manifest_binding.git_head.clone(),
+                    now_utc_string(),
+                ],
+            )
+            .await
+            .map_err(|err| RuntimeJournalWriterError::Database(err.to_string()))?;
+            Ok::<_, RuntimeJournalWriterError>(())
+        }
+        .await;
+        commit_or_rollback(&conn, result).await
+    }
+
+    pub async fn close_session(
+        &self,
+        status: &str,
+        current_phase: &str,
+    ) -> Result<(), RuntimeJournalWriterError> {
+        validate_required("status", status)?;
+        validate_required("current_phase", current_phase)?;
+        let conn = self.connection().await?;
+        conn.execute("BEGIN IMMEDIATE", ())
+            .await
+            .map_err(|err| RuntimeJournalWriterError::Database(err.to_string()))?;
+        let result = async {
+            self.require_writer_lease_on(&conn).await?;
+            conn.execute(
+                "UPDATE runtime_sessions
+                 SET status = ?1, current_phase = ?2, closed_at = ?3
+                 WHERE session_id = ?4",
+                libsql::params![
+                    status.to_string(),
+                    current_phase.to_string(),
+                    now_utc_string(),
+                    self.session_id.clone(),
+                ],
+            )
+            .await
+            .map_err(|err| RuntimeJournalWriterError::Database(err.to_string()))?;
+            Ok::<_, RuntimeJournalWriterError>(())
+        }
+        .await;
+        commit_or_rollback(&conn, result).await
+    }
+
+    pub async fn product_projection_counts(
+        &self,
+    ) -> Result<RuntimeJournalProductProjectionCounts, RuntimeJournalWriterError> {
+        let conn = self.connection().await?;
+        Ok(RuntimeJournalProductProjectionCounts {
+            sessions: count_session_rows(&conn, "runtime_sessions", &self.session_id).await?,
+            events: count_session_rows(&conn, "runtime_events", &self.session_id).await?,
+            validation_summaries: count_session_rows(
+                &conn,
+                "runtime_validation_summaries",
+                &self.session_id,
+            )
+            .await?,
+            decisions: count_session_rows(&conn, "runtime_decisions", &self.session_id).await?,
+            evidence_hints: count_session_rows(&conn, "runtime_evidence_hints", &self.session_id)
+                .await?,
+        })
+    }
+
     pub async fn event_sequences(&self) -> Result<Vec<i64>, RuntimeJournalWriterError> {
         let conn = self.connection().await?;
         let mut rows = conn
@@ -362,6 +659,27 @@ impl RuntimeJournalWriter {
     }
 }
 
+async fn count_session_rows(
+    conn: &Connection,
+    table: &str,
+    session_id: &str,
+) -> Result<i64, RuntimeJournalWriterError> {
+    let sql = format!("SELECT COUNT(*) FROM {table} WHERE session_id = ?1");
+    let mut rows = conn
+        .query(&sql, libsql::params![session_id.to_string()])
+        .await
+        .map_err(|err| RuntimeJournalWriterError::Database(err.to_string()))?;
+    let row = rows
+        .next()
+        .await
+        .map_err(|err| RuntimeJournalWriterError::Database(err.to_string()))?
+        .ok_or_else(|| {
+            RuntimeJournalWriterError::Database(format!("count returned no row for {table}"))
+        })?;
+    row.get(0)
+        .map_err(|err| RuntimeJournalWriterError::Database(err.to_string()))
+}
+
 async fn allocate_sequence(
     conn: &Connection,
     session_id: &str,
@@ -405,6 +723,24 @@ async fn commit_or_rollback<T>(
             Err(err)
         }
     }
+}
+
+fn validate_required(label: &str, value: &str) -> Result<(), RuntimeJournalWriterError> {
+    if value.trim().is_empty() {
+        return Err(RuntimeJournalWriterError::InvalidOpenRequest(format!(
+            "{label} is required"
+        )));
+    }
+    Ok(())
+}
+
+fn content_hash_from_parts(parts: &[String]) -> String {
+    let mut hasher = Sha256::new();
+    for item in parts {
+        hasher.update(item.as_bytes());
+        hasher.update([0]);
+    }
+    format!("sha256:{}", hex_lower(&hasher.finalize()))
 }
 
 fn validate_open_request(
@@ -522,6 +858,48 @@ mod tests {
         }
     }
 
+    fn validation_draft(status: &str) -> RuntimeJournalValidationSummaryDraft {
+        RuntimeJournalValidationSummaryDraft {
+            validation_id: "validation.live-writer".to_string(),
+            command_id: "cargo.test.live-writer".to_string(),
+            structured_command_hash: "sha256:command".to_string(),
+            exit_code: Some(0),
+            stdout_hash: Some("sha256:stdout".to_string()),
+            stderr_hash: Some("sha256:stderr".to_string()),
+            duration_ms: Some(12),
+            status: status.to_string(),
+        }
+    }
+
+    fn decision_draft() -> RuntimeJournalDecisionDraft {
+        RuntimeJournalDecisionDraft {
+            decision_id: "decision.live-writer".to_string(),
+            decision_class: "slice_local".to_string(),
+            decision_type: "completion_lock_refresh".to_string(),
+            subject_type: "session".to_string(),
+            subject_id: "session.live-writer".to_string(),
+            decided_by: "vac-runtime".to_string(),
+            decision: "current".to_string(),
+            reason_summary: "refresh decision under current manifest".to_string(),
+            scope_hash: "sha256:scope".to_string(),
+            policy_snapshot_hash: None,
+            locked: true,
+            proof_ref: None,
+        }
+    }
+
+    fn evidence_draft() -> RuntimeJournalEvidenceHintDraft {
+        RuntimeJournalEvidenceHintDraft {
+            evidence_id: "evidence.live-writer".to_string(),
+            capability_id: "vac.runtime.agent_loop".to_string(),
+            evidence_class: "completion_summary".to_string(),
+            content_hash: "sha256:evidence".to_string(),
+            previous_hash: None,
+            trust_claim: trust_claim(),
+            proof_ref: None,
+        }
+    }
+
     #[tokio::test]
     async fn live_writer_acquires_lease_creates_session_and_appends_manifest_bound_events() {
         let dir = tempfile::tempdir().expect("tempdir");
@@ -555,6 +933,52 @@ mod tests {
             writer.event_sequences().await.expect("sequences"),
             vec![1, 2]
         );
+    }
+
+    #[tokio::test]
+    async fn live_writer_records_completion_projection_tables() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let writer = RuntimeJournalWriter::open(open_request(&dir, "writer.a"))
+            .await
+            .expect("open writer");
+        writer
+            .acquire_writer_lease(0)
+            .await
+            .expect("acquire writer lease");
+        writer
+            .ensure_session(&session_draft())
+            .await
+            .expect("ensure session");
+        writer
+            .append_event(event_draft("runtime_journal_product_projection"))
+            .await
+            .expect("append product projection event");
+        writer
+            .record_validation_summary(&validation_draft("done"))
+            .await
+            .expect("record validation summary");
+        writer
+            .record_decision(&decision_draft())
+            .await
+            .expect("record decision");
+        writer
+            .record_evidence_hint(&evidence_draft())
+            .await
+            .expect("record evidence hint");
+        writer
+            .close_session("done", "done")
+            .await
+            .expect("close session");
+
+        let counts = writer
+            .product_projection_counts()
+            .await
+            .expect("projection counts");
+        assert_eq!(counts.sessions, 1);
+        assert_eq!(counts.events, 1);
+        assert_eq!(counts.validation_summaries, 1);
+        assert_eq!(counts.decisions, 1);
+        assert_eq!(counts.evidence_hints, 1);
     }
 
     #[tokio::test]

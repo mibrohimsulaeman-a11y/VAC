@@ -12,7 +12,8 @@
 //! enforcement. L2 still requires broker-held FS/proc/network and key custody.
 
 use crate::bound_runtime::{
-    CloseoutState, RuntimeRegistrySnapshot, SemanticPlan, SessionArtifacts, canonical_json_sha256,
+    CloseoutState, RuntimeJournalCloseoutState, RuntimeRegistrySnapshot, SemanticPlan,
+    SessionArtifacts, canonical_json_sha256,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value, json};
@@ -363,6 +364,8 @@ fn default_closeout_json(artifacts: &Value) -> Value {
         "readiness": {"no_unresolved_readiness_mismatch": true, "unresolved_mismatches": 0},
         "ownership": {"no_code_without_capability": true, "no_capability_without_current_intent_spec": true, "code_without_capability": 0, "capabilities_without_intent": 0},
         "assessment": {"findings_have_span_evidence": true, "unresolved_critical_findings": 0},
+        "runtime_journal": serde_json::to_value(RuntimeJournalCloseoutState::default())
+            .unwrap_or_else(|_| json!({"session_recorded": false})),
         "explicit_open_question": "Missing real session task/spec/todo artifacts; runtime must pause for operator discussion.",
         "blocking_reason": "bootstrap-placeholder-artifacts-are-not-completion-authority",
         "operator_visible_status": true

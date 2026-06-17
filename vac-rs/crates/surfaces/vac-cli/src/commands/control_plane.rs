@@ -23,7 +23,7 @@ pub async fn run_doctor(gate: String, path: Option<String>) -> Result<(), String
         "registry" => doctor_registry(&root),
         "compiled" => doctor_compiled(&root),
         "runtime-db" => doctor_runtime_db(&root),
-        "manifest-sync" => doctor_manifest_sync(&root),
+        "manifest-sync" => doctor_manifest_sync(&root).await,
         "index" => doctor_index(&root),
         "intent" => doctor_intent(&root),
         "ownership" => doctor_ownership(&root),
@@ -49,7 +49,7 @@ pub async fn run_doctor(gate: String, path: Option<String>) -> Result<(), String
                 doctor_memory(&root),
                 doctor_enforcement(&root),
                 doctor_runtime_db(&root),
-                doctor_manifest_sync(&root),
+                doctor_manifest_sync(&root).await,
             ];
             let failures = gates
                 .iter()
@@ -430,14 +430,26 @@ fn doctor_runtime_db(root: &Path) -> vac_doctor::DoctorResult {
             );
         }
     }
-    if root.join(".vac/db/runtime.db").exists() {
+    let runtime_db = root.join(".vac/db/runtime.db");
+    if runtime_db.exists() && git_tracks_path(root, ".vac/db/runtime.db") {
         failures.push(
-            ".vac/db/runtime.db is local runtime state and must not be packaged as source"
+            ".vac/db/runtime.db is local runtime state and must not be tracked by source control"
                 .to_string(),
         );
     }
     if failures.is_empty() {
-        vac_doctor::product_path_gate("runtime-db", true, vec!["runtime.db may be absent in a clean source checkout; migration is source authority".to_string()])
+        let warnings = if runtime_db.exists() {
+            vec![
+                "runtime.db present as local ignored runtime journal; source authority remains the migration"
+                    .to_string(),
+            ]
+        } else {
+            vec![
+                "runtime.db may be absent in a clean source checkout; migration is source authority"
+                    .to_string(),
+            ]
+        };
+        vac_doctor::product_path_gate("runtime-db", true, warnings)
     } else {
         vac_doctor::DoctorResult {
             gate: "runtime-db".to_string(),
@@ -448,7 +460,7 @@ fn doctor_runtime_db(root: &Path) -> vac_doctor::DoctorResult {
     }
 }
 
-fn doctor_manifest_sync(root: &Path) -> vac_doctor::DoctorResult {
+async fn doctor_manifest_sync(root: &Path) -> vac_doctor::DoctorResult {
     let cached = root.join(".vac/cache/compiled/workspace.json");
     let current_hash = if cached.is_file() {
         match read_json(&cached) {
@@ -490,18 +502,106 @@ fn doctor_manifest_sync(root: &Path) -> vac_doctor::DoctorResult {
         };
     }
 
-    let known_snapshot_hashes = vec![current_hash.clone()];
+    let records = match load_runtime_manifest_sync_records(root).await {
+        Ok(records) => records,
+        Err(err) => {
+            return vac_doctor::DoctorResult {
+                gate: "manifest-sync".to_string(),
+                status: vac_doctor::DoctorStatus::Fail,
+                warnings: Vec::new(),
+                failures: vec![err],
+            };
+        }
+    };
+    let mut known_snapshot_hashes = vec![current_hash.clone()];
+    for record in &records {
+        if record.record_manifest_set_hash.starts_with("sha256:")
+            && !known_snapshot_hashes.contains(&record.record_manifest_set_hash)
+        {
+            known_snapshot_hashes.push(record.record_manifest_set_hash.clone());
+        }
+    }
     let mut result =
         vac_doctor::doctor_manifest_sync_records(&vac_doctor::ManifestSyncDoctorInput {
             current_manifest_set_hash: current_hash.clone(),
             current_git_head: current_git_head(root),
             known_snapshot_hashes,
-            records: Vec::new(),
+            records,
         });
     result
         .warnings
         .insert(0, format!("manifest_set_hash={current_hash}"));
     result
+}
+
+async fn load_runtime_manifest_sync_records(
+    root: &Path,
+) -> Result<Vec<vac_doctor::ManifestSyncDoctorRecord>, String> {
+    let db_path = root.join(".vac/db/runtime.db");
+    if !db_path.is_file() {
+        return Ok(Vec::new());
+    }
+    let db = libsql::Builder::new_local(&db_path)
+        .build()
+        .await
+        .map_err(|err| format!("{}: {err}", db_path.display()))?;
+    let conn = db
+        .connect()
+        .map_err(|err| format!("{}: {err}", db_path.display()))?;
+    let sql = concat!(
+        "SELECT session_id, 'runtime_session', manifest_set_hash, git_head, 1 FROM runtime_sessions ",
+        "UNION ALL SELECT event_id, 'runtime_event', manifest_set_hash, git_head, 0 FROM runtime_events ",
+        "UNION ALL SELECT decision_id, 'runtime_decision', manifest_set_hash, git_head, ",
+        "CASE WHEN locked = 1 AND superseded_by IS NULL THEN 1 ELSE 0 END FROM runtime_decisions ",
+        "UNION ALL SELECT validation_id, 'runtime_validation_summary', manifest_set_hash, git_head, ",
+        "CASE WHEN status IN ('done', 'passed', 'terminal') THEN 1 ELSE 0 END FROM runtime_validation_summaries ",
+        "UNION ALL SELECT evidence_id, 'runtime_evidence_hint', manifest_set_hash, git_head, 1 FROM runtime_evidence_hints"
+    );
+    let mut rows = conn
+        .query(sql, ())
+        .await
+        .map_err(|err| format!("{}: {err}", db_path.display()))?;
+    let mut records = Vec::new();
+    while let Some(row) = rows
+        .next()
+        .await
+        .map_err(|err| format!("{}: {err}", db_path.display()))?
+    {
+        let record_id: String = row
+            .get(0)
+            .map_err(|err| format!("{}: {err}", db_path.display()))?;
+        let record_type: String = row
+            .get(1)
+            .map_err(|err| format!("{}: {err}", db_path.display()))?;
+        let record_manifest_set_hash: String = row
+            .get(2)
+            .map_err(|err| format!("{}: {err}", db_path.display()))?;
+        let git_head: Option<String> = row
+            .get(3)
+            .map_err(|err| format!("{}: {err}", db_path.display()))?;
+        let would_authorize_current_action: i64 = row
+            .get(4)
+            .map_err(|err| format!("{}: {err}", db_path.display()))?;
+        records.push(vac_doctor::ManifestSyncDoctorRecord {
+            record_id,
+            record_type,
+            record_manifest_set_hash,
+            git_head,
+            would_authorize_current_action: would_authorize_current_action != 0,
+        });
+    }
+    Ok(records)
+}
+
+fn git_tracks_path(root: &Path, path: &str) -> bool {
+    std::process::Command::new("git")
+        .arg("-C")
+        .arg(root)
+        .arg("ls-files")
+        .arg("--error-unmatch")
+        .arg(path)
+        .output()
+        .is_ok_and(|output| output.status.success())
 }
 
 fn current_git_head(root: &Path) -> Option<String> {
