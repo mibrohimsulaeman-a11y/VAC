@@ -567,3 +567,74 @@ pub fn classify_evidence_authority(value: &serde_json::Value) -> EvidenceAuthori
         },
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn sig() -> SignatureRecord {
+        SignatureRecord::integrity_hint("test-key")
+    }
+
+    fn record(id: &str, capability: &str, seq: u64, prev_hash: Option<String>) -> EvidenceRecordV2 {
+        EvidenceRecordV2 {
+            schema_version: 2,
+            kind: "evidence".to_string(),
+            id: id.to_string(),
+            capability: capability.to_string(),
+            seq,
+            session: "session.fixture".to_string(),
+            sub_chain: SubChain {
+                prev_id: None,
+                prev_hash,
+                self_hash: String::new(),
+            },
+            git: GitBinding {
+                code_commit: "commit".to_string(),
+                parent_commit: "parent".to_string(),
+                worktree_ref: "refs/vac/worktree".to_string(),
+            },
+            cross_capability_refs: vec![],
+            approval: ApprovalBinding {
+                approval_id: "approval".to_string(),
+                content_hash: "sha256:test".to_string(),
+            },
+            validation: ValidationSummary::default(),
+            attribution: Attribution {
+                agent_id: "agent".to_string(),
+                model: "model".to_string(),
+                rationale_ref: "rationale".to_string(),
+            },
+            seal: SealState { merkle_epoch: None },
+            broker_sig: sig(),
+        }
+    }
+
+    #[test]
+    fn append_enforces_cas_previous_head() {
+        let mut store = InMemoryEvidenceStore::default();
+        let first = store
+            .append(record("ev1", "cap", 1, None))
+            .expect("first append");
+
+        let conflict = store.append(record("ev2", "cap", 2, Some("wrong".to_string())));
+        assert_eq!(conflict, Err(EvidenceStoreError::CasConflict));
+
+        let second = store
+            .append(record("ev2", "cap", 2, first.head_hash.clone()))
+            .expect("second append");
+        assert_eq!(
+            store.head("cap").and_then(|h| h.head_id),
+            Some("ev2".to_string())
+        );
+        assert_eq!(second.head_seq, 2);
+    }
+
+    #[test]
+    fn integrity_hint_is_labeled_as_not_tamper_evident() {
+        assert_eq!(
+            sig().warning_label(),
+            Some("integrity-hint, NOT tamper-evident")
+        );
+    }
+}

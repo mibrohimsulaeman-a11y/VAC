@@ -1,0 +1,21 @@
+schema_version: 1
+kind: intent_spec
+id: intent.vac.control_plane.index
+status: confirmed
+source: vac_assessment_A_002_closure
+business_processes:
+  - id: vac.index.semantic_anchor_resolution
+    description: "The index maps source files to deterministic spans, symbols, relations, risks, and read-plan tickets without overclaiming parser confidence."
+    required_capability: vac.control_plane.index
+    invariants:
+      - span_hashes_bind_to_current_source
+      - parser_confidence_is_reported_fail_closed
+      - read_plan_tickets_reference_indexed_spans
+      - semantic_anchor_resolution_is_deterministic
+expected_code:
+  modules:
+    - vac-rs/crates/control-plane/vac-index
+    - .vac/capabilities/vac-control_plane-index.yaml
+out_of_scope:
+  - runtime_authority_from_raw_index_json
+  - unbounded_source_read_without_ticket

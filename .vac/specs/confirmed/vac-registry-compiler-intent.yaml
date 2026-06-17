@@ -1,0 +1,22 @@
+schema_version: 1
+kind: intent_spec
+id: intent.vac.control_plane.registry_compiler
+status: confirmed
+source: vac_assessment_A_002_closure
+business_processes:
+  - id: vac.registry_compiler_authoring_to_runtime_truth
+    description: "The registry compiler is the only path from YAML authoring manifests to deterministic compiled JSON runtime truth."
+    required_capability: vac.control_plane.registry_compiler
+    invariants:
+      - source_hashes_are_sorted_and_stable
+      - duplicate_manifest_ids_fail_closed
+      - compiled_snapshot_hash_excludes_nondeterministic_fields
+      - readiness_effective_never_exceeds_computed
+expected_code:
+  modules:
+    - vac-rs/crates/control-plane/vac-registry-compiler
+    - scripts/compile-vac-registry-sv.py
+    - .vac/capabilities/vac-control_plane-registry_compiler.yaml
+out_of_scope:
+  - raw_yaml_runtime_authority
+  - nondeterministic_timestamp_in_snapshot_hash

@@ -1,0 +1,21 @@
+schema_version: 1
+kind: intent_spec
+id: intent.vac.control_plane.evidence
+status: confirmed
+source: vac_assessment_A_002_closure
+business_processes:
+  - id: vac.evidence.cas_audit_chain
+    description: "Evidence records append through a CAS sub-chain, preserve cross-capability references, and label integrity-hint signatures honestly."
+    required_capability: vac.control_plane.evidence
+    invariants:
+      - evidence_append_requires_matching_previous_head
+      - xref_append_preserves_target_reference
+      - merkle_root_sorts_capability_heads
+      - integrity_hint_never_claims_tamper_evidence
+expected_code:
+  modules:
+    - vac-rs/crates/control-plane/vac-evidence
+    - .vac/capabilities/vac-control_plane-evidence.yaml
+out_of_scope:
+  - remote_attested_signature_custody
+  - pretending_algorithm_none_is_signed

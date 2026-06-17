@@ -170,3 +170,45 @@ pub fn detect_symbol_invariant_drift(
     }
     drift
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn missing_intent_spec_creates_critical_approval_bound_proposal() {
+        let changed = vec![ChangedFile {
+            path: "vac-rs/crates/control-plane/vac-policy/src/lib.rs".to_string(),
+            sha256_before: None,
+            sha256_after: "sha256:after".to_string(),
+        }];
+        let maps = vec![CapabilityPathMap {
+            capability: "vac.control_plane.policy".to_string(),
+            include: vec!["vac-rs/crates/control-plane/vac-policy/**".to_string()],
+        }];
+
+        let report = detect_spec_drift(&changed, &maps, &[]);
+
+        assert_eq!(report.unresolved_critical_drift, 1);
+        assert!(closeout_blocks_on_critical_drift(&report));
+        assert_eq!(report.proposals.len(), 1);
+        assert!(report.proposals[0].requires_approval);
+    }
+
+    #[test]
+    fn changed_symbol_without_invariant_is_reported() {
+        let drift = detect_symbol_invariant_drift(
+            &[(
+                "vac.control_plane.policy".to_string(),
+                "evaluate".to_string(),
+            )],
+            &[],
+        );
+
+        assert_eq!(drift.len(), 1);
+        assert_eq!(
+            drift[0].drift_type,
+            "changed_symbol_without_intent_invariant"
+        );
+    }
+}

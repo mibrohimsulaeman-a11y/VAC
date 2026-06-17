@@ -483,3 +483,59 @@ pub fn verify_source_manifest_hashes(
     }
     mismatches
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn cap(id: &str) -> CompiledCapabilityRef {
+        CompiledCapabilityRef {
+            id: id.to_string(),
+            declared: "partial".to_string(),
+            computed: "partial".to_string(),
+            effective: "partial".to_string(),
+            source_path: format!(".vac/capabilities/{id}.yaml"),
+            source_hash: format!("sha256:{id}"),
+        }
+    }
+
+    #[test]
+    fn compiled_registry_sorting_makes_hash_order_independent() {
+        let left = compile_deterministic_registry(
+            vec![
+                source_manifest_hash("b.yaml", b"b"),
+                source_manifest_hash("a.yaml", b"a"),
+            ],
+            vec![cap("z"), cap("a")],
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+        );
+        let right = compile_deterministic_registry(
+            vec![
+                source_manifest_hash("a.yaml", b"a"),
+                source_manifest_hash("b.yaml", b"b"),
+            ],
+            vec![cap("a"), cap("z")],
+            vec![],
+            vec![],
+            vec![],
+            vec![],
+        );
+
+        assert_eq!(left.source_hashes, right.source_hashes);
+        assert_eq!(left.capabilities, right.capabilities);
+        assert_eq!(left.snapshot_hash, right.snapshot_hash);
+    }
+
+    #[test]
+    fn compiled_snapshot_hash_ignores_existing_hash_field() {
+        let mut snapshot =
+            compile_deterministic_registry(vec![], vec![], vec![], vec![], vec![], vec![]);
+        let original = snapshot.snapshot_hash.clone();
+        snapshot.snapshot_hash = "sha256:stale".to_string();
+
+        assert_eq!(compiled_snapshot_hash(&snapshot), original);
+    }
+}

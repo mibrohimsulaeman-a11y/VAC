@@ -261,3 +261,123 @@ pub fn option_pattern_matches(pattern: Option<&str>, value: Option<&str>) -> boo
 pub fn path_pattern_matches(pattern: &str, value: &str) -> bool {
     matches!(pattern, "any" | "workspace" | "project") || shared_path_matches(pattern, value)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn rule(id: &str, action: PolicyAction, path: Option<&str>, decision: Decision) -> PolicyRule {
+        PolicyRule {
+            id: id.to_string(),
+            matcher: PolicyMatch {
+                action,
+                path: path.map(str::to_string),
+                data_class: None,
+                network_host: None,
+                network_protocol: None,
+            },
+            decision,
+            reason: "test".to_string(),
+        }
+    }
+
+    fn request(action: PolicyAction, path: &str) -> PolicyRequest {
+        PolicyRequest {
+            action,
+            path: Some(path.to_string()),
+            data_class: None,
+            network_host: None,
+            network_protocol: None,
+            capability: None,
+            plan_id: None,
+            session_id: None,
+        }
+    }
+
+    #[test]
+    fn default_decision_applies_only_when_no_rule_matches() {
+        let snapshot = PolicySnapshot {
+            id: "policy.fixture".to_string(),
+            default_decision: Decision::Deny,
+            hardcoded_safety_denials: vec![],
+            workspace_rules: vec![rule(
+                "allow-src",
+                PolicyAction::FilesystemRead,
+                Some("src/**"),
+                Decision::Allow,
+            )],
+            capability_rules: vec![],
+            workflow_rules: vec![],
+            plan_rules: vec![],
+            scoped_grants: vec![],
+        };
+
+        assert_eq!(
+            snapshot
+                .evaluate(&request(PolicyAction::FilesystemRead, "src/lib.rs"))
+                .decision,
+            Decision::Allow
+        );
+        assert_eq!(
+            snapshot
+                .evaluate(&request(PolicyAction::FilesystemRead, "secrets.txt"))
+                .decision,
+            Decision::Deny
+        );
+    }
+
+    #[test]
+    fn scoped_grant_can_lower_approval_but_not_hard_deny() {
+        let grant = ScopedGrant {
+            id: "grant.once".to_string(),
+            action: PolicyAction::FilesystemWrite,
+            path: Some("workspace/**".to_string()),
+            expires_at: "2999-01-01T00:00:00Z".to_string(),
+            evidence: "approval.fixture".to_string(),
+            decision: Decision::Allow,
+        };
+        let mut snapshot = PolicySnapshot {
+            id: "policy.fixture".to_string(),
+            default_decision: Decision::Deny,
+            hardcoded_safety_denials: vec![],
+            workspace_rules: vec![rule(
+                "write-needs-approval",
+                PolicyAction::FilesystemWrite,
+                Some("workspace/**"),
+                Decision::ApprovalRequired,
+            )],
+            capability_rules: vec![],
+            workflow_rules: vec![],
+            plan_rules: vec![],
+            scoped_grants: vec![grant.clone()],
+        };
+
+        assert_eq!(
+            snapshot
+                .evaluate(&request(
+                    PolicyAction::FilesystemWrite,
+                    "workspace/file.txt"
+                ))
+                .decision,
+            Decision::Allow
+        );
+
+        snapshot.hardcoded_safety_denials.push(rule(
+            "hard-deny",
+            PolicyAction::FilesystemWrite,
+            Some("workspace/**"),
+            Decision::Deny,
+        ));
+        snapshot.scoped_grants = vec![grant];
+
+        assert_eq!(
+            snapshot
+                .evaluate(&request(
+                    PolicyAction::FilesystemWrite,
+                    "workspace/file.txt"
+                ))
+                .decision,
+            Decision::Deny
+        );
+    }
+}

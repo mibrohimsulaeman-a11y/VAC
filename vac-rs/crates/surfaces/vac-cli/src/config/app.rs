@@ -961,7 +961,7 @@ impl AppConfig {
 
     /// Get the default Model from config
     ///
-    /// Uses the `model` field if set, otherwise falls back to a default Claude Opus model.
+    /// Uses runtime/config state if set, otherwise asks the model catalog layer for its declared default.
     ///
     /// If `cli_override` is provided, it takes highest priority over config values.
     ///
@@ -971,14 +971,15 @@ impl AppConfig {
     pub fn get_default_model(&self, cli_override: Option<&str>) -> vac_remote_service::Model {
         let has_vac_key = self.get_vac_remote_service_key().is_some();
 
-        // Priority: cli_override > recent_models[0] > model > default
+        // Priority: cli_override > recent_models[0] > model > catalog default.
         // The most recently used model takes precedence over the static config model,
         // so re-opening vac continues with the last model you were using.
         let most_recent = self.recent_models.first().map(|s| s.as_str());
-        let model_str = cli_override
-            .or(most_recent)
-            .or(self.model.as_deref())
-            .unwrap_or("claude-opus-4-6");
+        let configured_model = cli_override.or(most_recent).or(self.model.as_deref());
+
+        let Some(model_str) = configured_model else {
+            return vac_remote_service::catalog_default_model(false);
+        };
 
         // Extract explicit provider prefix if present (e.g., "amazon-bedrock/claude-sonnet-4-5")
         let explicit_provider = model_str.find('/').map(|idx| &model_str[..idx]);

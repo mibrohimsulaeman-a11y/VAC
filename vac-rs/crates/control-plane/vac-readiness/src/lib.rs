@@ -91,3 +91,46 @@ pub fn compute_readiness(declared: ReadinessLevel, signals: &ReadinessSignals) -
 pub fn weakest_readiness(a: ReadinessLevel, b: ReadinessLevel) -> ReadinessLevel {
     if a <= b { a } else { b }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn all_signals_pass() -> ReadinessSignals {
+        ReadinessSignals {
+            registry_valid: true,
+            policy_valid: true,
+            ownership_valid: true,
+            index_current: true,
+            assessment_span_grounded: true,
+            spec_sync_clean: true,
+            evidence_valid: true,
+            tv_cargo_gates_passed: true,
+        }
+    }
+
+    #[test]
+    fn effective_readiness_is_lowered_to_weakest_declared_and_computed() {
+        let triplet = ReadinessTriplet {
+            declared: ReadinessLevel::Partial,
+            computed: ReadinessLevel::Planned,
+            effective: ReadinessLevel::Ready,
+            reason: "fixture".to_string(),
+            blockers: vec![],
+        };
+
+        assert_eq!(triplet.fail_closed().effective, ReadinessLevel::Planned);
+    }
+
+    #[test]
+    fn compute_readiness_reports_blockers_and_clamps_effective() {
+        let mut signals = all_signals_pass();
+        signals.policy_valid = false;
+
+        let triplet = compute_readiness(ReadinessLevel::Ready, &signals);
+
+        assert_eq!(triplet.computed, ReadinessLevel::Planned);
+        assert_eq!(triplet.effective, ReadinessLevel::Planned);
+        assert_eq!(triplet.blockers, vec!["policy".to_string()]);
+    }
+}

@@ -22,6 +22,37 @@ pub use client::{AgentClient, AgentClientConfig, DEFAULT_VAC_ENDPOINT, VacCloudC
 // Re-export Model types from vac-provider-core
 pub use vac_provider_core::{Model, ModelCost, ModelLimit};
 
+/// Default model identity declared by the provider catalog layer.
+///
+/// CLI/runtime code must not carry its own last-resort model literal; it should
+/// ask this layer for the catalog default so the active model source is explicit
+/// and testable.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CatalogDefaultModel {
+    pub provider: &'static str,
+    pub model_id: &'static str,
+}
+
+pub const CATALOG_DEFAULT_MODEL: CatalogDefaultModel = CatalogDefaultModel {
+    provider: "anthropic",
+    model_id: "claude-opus-4-6",
+};
+
+#[must_use]
+pub fn catalog_default_model(use_vac: bool) -> Model {
+    let model = find_model(CATALOG_DEFAULT_MODEL.model_id, false).unwrap_or_else(|| {
+        Model::custom(
+            CATALOG_DEFAULT_MODEL.model_id,
+            CATALOG_DEFAULT_MODEL.provider,
+        )
+    });
+    if use_vac {
+        transform_for_vac(model)
+    } else {
+        model
+    }
+}
+
 // Re-export storage types
 pub use storage::{
     BackendInfo, BackendKind, BoxedSessionStorage, Checkpoint, CheckpointState, CheckpointSummary,
@@ -195,4 +226,32 @@ pub trait AgentProvider: SessionStorage + Send + Sync {
 
     // Models
     async fn list_models(&self) -> Vec<Model>;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn catalog_default_model_is_declared_outside_cli_runtime_state() {
+        let model = catalog_default_model(false);
+
+        assert_eq!(CATALOG_DEFAULT_MODEL.provider, "anthropic");
+        assert_eq!(model.id, CATALOG_DEFAULT_MODEL.model_id);
+        assert_eq!(model.provider, CATALOG_DEFAULT_MODEL.provider);
+    }
+
+    #[test]
+    fn catalog_default_model_can_be_transformed_for_vac_routing() {
+        let model = catalog_default_model(true);
+
+        assert_eq!(model.provider, "vac");
+        assert_eq!(
+            model.id,
+            format!(
+                "{}/{}",
+                CATALOG_DEFAULT_MODEL.provider, CATALOG_DEFAULT_MODEL.model_id
+            )
+        );
+    }
 }

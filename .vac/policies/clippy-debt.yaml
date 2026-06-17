@@ -31,3 +31,16 @@ debt_baseline:
     - run cargo clippy from vac-rs successfully
     - reduce or waive production unwrap/expect/panic hotspots per crate
     - raise workspace lints from allow to deny only after TV proof exists
+
+assessment_closure:
+  finding_id: C-001
+  status: closed_controlled_debt
+  rationale: >
+    Workspace unwrap/expect/string-slice lints remain explicit allow-level debt
+    until the deny migration is viable, but the risk is no longer an untracked
+    assessment finding: CI runs workspace clippy with -D warnings, production
+    hotspot debt is governed by this policy, and the assessment closure gate
+    fails if the policy or CI clippy command disappears.
+  closure_gate: scripts/check-vac-assessment-closure.py
+  ci_clippy_command: cargo clippy --manifest-path vac-rs/Cargo.toml --workspace --all-targets -- -D warnings
+  deny_lint_migration: deferred_until_production_hotspots_waived_or_removed

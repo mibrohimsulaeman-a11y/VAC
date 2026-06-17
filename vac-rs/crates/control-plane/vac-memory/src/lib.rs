@@ -249,3 +249,50 @@ pub fn propose_memory_write(
         requires_operator_approval: matches!(tier, MemoryTier::Team),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn failure(attempted_fix: &str) -> FailureObservation {
+        FailureObservation {
+            fingerprint: "fp".to_string(),
+            command_id: "cmd".to_string(),
+            stderr_hash: "sha256:stderr".to_string(),
+            attempted_fix: attempted_fix.to_string(),
+        }
+    }
+
+    #[test]
+    fn memory_redaction_removes_secret_like_tokens() {
+        let redacted = redact_for_memory("token=abcdef ghp_abcdefghijklmnopqrstuvwxyz123456");
+
+        assert!(redacted.contains("[REDACTED]"));
+        assert!(!redacted.contains("ghp_abcdefghijklmnopqrstuvwxyz123456"));
+    }
+
+    #[test]
+    fn memory_never_relaxes_policy() {
+        let record = MemoryRecord {
+            tier: MemoryTier::Semantic,
+            id: "mem".to_string(),
+            source: "test".to_string(),
+            summary: "summary".to_string(),
+            authority: MemoryAuthority::HumanApprovedTeamRule,
+            references: vec![],
+        };
+
+        assert!(!memory_can_relax_policy(&record));
+    }
+
+    #[test]
+    fn anti_loop_blocks_repeated_same_fix() {
+        let previous = failure("retry same thing");
+        let next = failure("retry same thing");
+
+        let decision = anti_loop_decision(&[previous], &next);
+
+        assert!(decision.blocked);
+        assert!(decision.reason.contains("require new plan"));
+    }
+}

@@ -1,0 +1,21 @@
+schema_version: 1
+kind: intent_spec
+id: intent.vac.control_plane.policy
+status: confirmed
+source: vac_assessment_A_002_closure
+business_processes:
+  - id: vac.policy.fail_closed_decision_engine
+    description: "Policy evaluation deterministically maps runtime requests to allow, approval_required, or deny; missing policy or unmatched requests fail closed."
+    required_capability: vac.control_plane.policy
+    invariants:
+      - default_decision_applies_only_when_no_rule_matches
+      - deny_is_most_restrictive
+      - scoped_grant_cannot_override_hard_deny
+      - policy_snapshot_id_required_for_runtime_authority
+expected_code:
+  modules:
+    - vac-rs/crates/control-plane/vac-policy
+    - .vac/capabilities/vac-control_plane-policy.yaml
+out_of_scope:
+  - external_policy_service_authority
+  - memory_or_provider_layer_policy_override

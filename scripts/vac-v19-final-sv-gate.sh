@@ -22,6 +22,7 @@ run rust-ast-index-status python3 scripts/refresh-rust-ast-index-status.py .
 run storage-classes python3 scripts/check-v19-storage-classes.py .
 run ci-workdir python3 scripts/check-ci-workdir-v19.py .
 run clippy-debt-strategy python3 scripts/check-clippy-debt-strategy.py .
+run assessment-closure python3 scripts/check-vac-assessment-closure.py .
 run sv-static python3 scripts/sv_static_validate.py .
 run sv-deep python3 scripts/vac-sv-deep-validate.py .
 if [[ "${VAC_GENERATE_ROOT_CHECKPOINT_MANIFEST:-0}" == "1" ]]; then

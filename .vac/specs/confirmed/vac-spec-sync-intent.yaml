@@ -1,0 +1,21 @@
+schema_version: 1
+kind: intent_spec
+id: intent.vac.control_plane.spec_sync
+status: confirmed
+source: vac_assessment_A_002_closure
+business_processes:
+  - id: vac.spec_sync_drift_to_proposal
+    description: "SpecSync maps changed files to capabilities, detects missing or stale intent coverage, and produces approval-bound proposals instead of mutating runtime authority directly."
+    required_capability: vac.control_plane.spec_sync
+    invariants:
+      - changed_files_map_to_capabilities_by_declared_patterns
+      - critical_drift_blocks_closeout
+      - generated_spec_update_requires_approval
+      - changed_symbol_without_invariant_is_reported
+expected_code:
+  modules:
+    - vac-rs/crates/control-plane/vac-spec-sync
+    - .vac/capabilities/vac-control_plane-spec_sync.yaml
+out_of_scope:
+  - automatic_runtime_authority_mutation_from_specsync
+  - silently_dropping_critical_drift

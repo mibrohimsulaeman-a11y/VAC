@@ -1,0 +1,516 @@
+{
+  "entries": [
+    {
+      "code": "let _ = std::fs::create_dir_all(&root);",
+      "code_sha256": "f3a6e71a9cb2c46bf304e63d0e8e325e0798ec8edde4662f7207a2d8e33dd630",
+      "line": 14,
+      "path": "vac-rs/crates/runtime/vac-broker/src/checkpoint_store.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = Command::new(\"git\")",
+      "code_sha256": "04eb99c18a7b311fb445043fb3e096b941b1861ebbd0db81f93b3d5f3704b107",
+      "line": 280,
+      "path": "vac-rs/crates/runtime/vac-broker/src/context/environment.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = Command::new(\"git\")",
+      "code_sha256": "04eb99c18a7b311fb445043fb3e096b941b1861ebbd0db81f93b3d5f3704b107",
+      "line": 284,
+      "path": "vac-rs/crates/runtime/vac-broker/src/context/environment.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = Command::new(\"git\")",
+      "code_sha256": "04eb99c18a7b311fb445043fb3e096b941b1861ebbd0db81f93b3d5f3704b107",
+      "line": 291,
+      "path": "vac-rs/crates/runtime/vac-broker/src/context/environment.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = Command::new(\"git\")",
+      "code_sha256": "04eb99c18a7b311fb445043fb3e096b941b1861ebbd0db81f93b3d5f3704b107",
+      "line": 325,
+      "path": "vac-rs/crates/runtime/vac-broker/src/context/environment.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = Command::new(\"git\")",
+      "code_sha256": "04eb99c18a7b311fb445043fb3e096b941b1861ebbd0db81f93b3d5f3704b107",
+      "line": 329,
+      "path": "vac-rs/crates/runtime/vac-broker/src/context/environment.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = Command::new(\"git\")",
+      "code_sha256": "04eb99c18a7b311fb445043fb3e096b941b1861ebbd0db81f93b3d5f3704b107",
+      "line": 335,
+      "path": "vac-rs/crates/runtime/vac-broker/src/context/environment.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = ring.pop_front();",
+      "code_sha256": "ed702741e7a38597bff183219cad08393585bdb7ac33eff340970f2fe7905a14",
+      "line": 97,
+      "path": "vac-rs/crates/runtime/vac-broker/src/event_log.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = buffer.tx.send(envelope.clone());",
+      "code_sha256": "f718b65c06fb67667d54d38627d98480e0e5b240193ed6159242d94803079e9b",
+      "line": 100,
+      "path": "vac-rs/crates/runtime/vac-broker/src/event_log.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = log",
+      "code_sha256": "bd34ab63b94f54520535a06670a0aa157f2586e93b4ea8e55d31148390d0f3f6",
+      "line": 221,
+      "path": "vac-rs/crates/runtime/vac-broker/src/event_log.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = log",
+      "code_sha256": "bd34ab63b94f54520535a06670a0aa157f2586e93b4ea8e55d31148390d0f3f6",
+      "line": 250,
+      "path": "vac-rs/crates/runtime/vac-broker/src/event_log.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = log",
+      "code_sha256": "bd34ab63b94f54520535a06670a0aa157f2586e93b4ea8e55d31148390d0f3f6",
+      "line": 284,
+      "path": "vac-rs/crates/runtime/vac-broker/src/event_log.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = log",
+      "code_sha256": "bd34ab63b94f54520535a06670a0aa157f2586e93b4ea8e55d31148390d0f3f6",
+      "line": 301,
+      "path": "vac-rs/crates/runtime/vac-broker/src/event_log.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = log",
+      "code_sha256": "bd34ab63b94f54520535a06670a0aa157f2586e93b4ea8e55d31148390d0f3f6",
+      "line": 304,
+      "path": "vac-rs/crates/runtime/vac-broker/src/event_log.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = state",
+      "code_sha256": "7aaa0ccdc80b6f1d7d37ee0754d8c48613d74e0062222f8dccd3b70bf4ed29d5",
+      "line": 942,
+      "path": "vac-rs/crates/runtime/vac-broker/src/routes/tests.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = state",
+      "code_sha256": "7aaa0ccdc80b6f1d7d37ee0754d8c48613d74e0062222f8dccd3b70bf4ed29d5",
+      "line": 946,
+      "path": "vac-rs/crates/runtime/vac-broker/src/routes/tests.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = state",
+      "code_sha256": "7aaa0ccdc80b6f1d7d37ee0754d8c48613d74e0062222f8dccd3b70bf4ed29d5",
+      "line": 1196,
+      "path": "vac-rs/crates/runtime/vac-broker/src/routes/tests.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = state",
+      "code_sha256": "7aaa0ccdc80b6f1d7d37ee0754d8c48613d74e0062222f8dccd3b70bf4ed29d5",
+      "line": 1200,
+      "path": "vac-rs/crates/runtime/vac-broker/src/routes/tests.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = state",
+      "code_sha256": "7aaa0ccdc80b6f1d7d37ee0754d8c48613d74e0062222f8dccd3b70bf4ed29d5",
+      "line": 1399,
+      "path": "vac-rs/crates/runtime/vac-broker/src/routes/tests.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = state",
+      "code_sha256": "7aaa0ccdc80b6f1d7d37ee0754d8c48613d74e0062222f8dccd3b70bf4ed29d5",
+      "line": 1403,
+      "path": "vac-rs/crates/runtime/vac-broker/src/routes/tests.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = state.run_manager.cancel_run(session_id, run_id).await;",
+      "code_sha256": "31699c11948d4a87e91fa2690a90744163324483ce56ff51c81805f2e9e8799b",
+      "line": 488,
+      "path": "vac-rs/crates/runtime/vac-broker/src/routes.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = state",
+      "code_sha256": "7aaa0ccdc80b6f1d7d37ee0754d8c48613d74e0062222f8dccd3b70bf4ed29d5",
+      "line": 506,
+      "path": "vac-rs/crates/runtime/vac-broker/src/routes.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = state.refresh_mcp_tools().await;",
+      "code_sha256": "ab621010d727a323dca783c3087b25cbfdb7d4cff418ea9f2313787220109238",
+      "line": 543,
+      "path": "vac-rs/crates/runtime/vac-broker/src/routes.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = health_tx.send(health);",
+      "code_sha256": "cf7f9e2496fc5d502132785647a04278aaf6bc2111a2fd279090d6a757394dd3",
+      "line": 326,
+      "path": "vac-rs/crates/runtime/vac-broker/src/sandbox.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = health_tx.send(health.clone());",
+      "code_sha256": "e13143653654a8d0ad16fe38cc83d68b39e8f2d40d035b140209ea639842ddfd",
+      "line": 365,
+      "path": "vac-rs/crates/runtime/vac-broker/src/sandbox.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = self.proxy_shutdown_tx.send(());",
+      "code_sha256": "af3427bc09c9c46bd171ee3d453807ab3b0795e9c9b92a3335cb05a0a96086a4",
+      "line": 514,
+      "path": "vac-rs/crates/runtime/vac-broker/src/sandbox.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = tokio::process::Command::new(\"kill\")",
+      "code_sha256": "4d6f1fe665d338a049706acca8dec58b6ef8f26d7c0f3a8ebd909c0d33b6e2ac",
+      "line": 520,
+      "path": "vac-rs/crates/runtime/vac-broker/src/sandbox.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = self.container_process.kill().await;",
+      "code_sha256": "a2f422e6dd8a25a4d2ac92342a2769c56c789267c9a2be58c766552cdb91a2a0",
+      "line": 538,
+      "path": "vac-rs/crates/runtime/vac-broker/src/sandbox.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = self.container_process.wait().await;",
+      "code_sha256": "0bd82ae7bc58d85a25e3d557f6b18010284bb2cf187d8a3fdc9004e61280fbef",
+      "line": 539,
+      "path": "vac-rs/crates/runtime/vac-broker/src/sandbox.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = process.kill().await;",
+      "code_sha256": "ca76a9bdacfe8fb919716085f6f135dd8d8005d4845bc943338559628e7e87f1",
+      "line": 729,
+      "path": "vac-rs/crates/runtime/vac-broker/src/sandbox.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = rustls::crypto::aws_lc_rs::default_provider().install_default();",
+      "code_sha256": "4d6e282e15d2a2fd579fbf2284a4f7bca7a1fb26b47dc6878df91955a768af08",
+      "line": 996,
+      "path": "vac-rs/crates/runtime/vac-broker/src/sandbox.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = state_for_task",
+      "code_sha256": "b0373053731d5d8ce136256c0ed3d654b2da83369c51badc65597263d2e9c585",
+      "line": 73,
+      "path": "vac-rs/crates/runtime/vac-broker/src/session_actor.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": ".ok();",
+      "code_sha256": "61e6da10094488a32da28d042e20fc0bbf075a8339b7bdda159df1c28f003983",
+      "line": 98,
+      "path": "vac-rs/crates/runtime/vac-broker/src/session_actor.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = periodic_checkpoint_runtime.persist_snapshot().await;",
+      "code_sha256": "f75dce002d93161e82705c74fcc3f601f5ad18f83d25f3fad1bf08f11b9fb230",
+      "line": 258,
+      "path": "vac-rs/crates/runtime/vac-broker/src/session_actor.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = periodic_task.await;",
+      "code_sha256": "265d3eb287d6bafc73b17b0b70c368f2af09737f6a4a4d2660349bac1729b1bf",
+      "line": 315,
+      "path": "vac-rs/crates/runtime/vac-broker/src/session_actor.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = checkpoint_runtime.persist_snapshot().await;",
+      "code_sha256": "5e3b5f891a1ed85a82938f5a1ad4fa2f5f7861a2bd48589c0620c5aa411ab00b",
+      "line": 336,
+      "path": "vac-rs/crates/runtime/vac-broker/src/session_actor.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = tokio::time::timeout(std::time::Duration::from_secs(2), event_forwarder).await;",
+      "code_sha256": "3c15d2698961b925ab3ac5b1f719d40f0ce7e17dc1dbe4a7a0d82097c5af013b",
+      "line": 340,
+      "path": "vac-rs/crates/runtime/vac-broker/src/session_actor.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = self.checkpoint_runtime.persist_snapshot().await;",
+      "code_sha256": "59a833da9d05a09ade90371602dd5cd6fe526dbc80064a9d85fedfb428f12fa4",
+      "line": 597,
+      "path": "vac-rs/crates/runtime/vac-broker/src/session_actor.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = peer_for_cancel.send_notification(notification.into()).await;",
+      "code_sha256": "16eb8b457edd222d4950e825ee38b071149a66a7cd765b9a6e0849a47498ff18",
+      "line": 683,
+      "path": "vac-rs/crates/runtime/vac-broker/src/session_actor.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = tx.send(Err(e)).await;",
+      "code_sha256": "f0b90611d79cf57de1ec96f2c30be3769b3db4a58af4de95aa776008910653b0",
+      "line": 337,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/client/provider.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = tx.send(Err(e)).await;",
+      "code_sha256": "f0b90611d79cf57de1ec96f2c30be3769b3db4a58af4de95aa776008910653b0",
+      "line": 370,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/client/provider.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = tx.send(Ok(StreamMessage::Ctx(Box::new(ctx_clone)))).await;",
+      "code_sha256": "6b822a53534933b157a5331bd2799d98314c99a788d2788bfd7a8fd15e924ccb",
+      "line": 374,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/client/provider.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = client",
+      "code_sha256": "d2a1b37dfd97e5f9158f8280ad3b2cf42c85b44bfb4cc2cc97eb4963fd989558",
+      "line": 741,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/client/provider.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = client",
+      "code_sha256": "d2a1b37dfd97e5f9158f8280ad3b2cf42c85b44bfb4cc2cc97eb4963fd989558",
+      "line": 788,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/client/provider.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = fs::create_dir_all(parent);",
+      "code_sha256": "9901b8191539b12e783a6d0312c5098faa978f10018cc5c5acf38b98bd722e03",
+      "line": 51,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/local/context_managers/file_scratchpad_context_manager.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = fs::create_dir_all(parent);",
+      "code_sha256": "9901b8191539b12e783a6d0312c5098faa978f10018cc5c5acf38b98bd722e03",
+      "line": 54,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/local/context_managers/file_scratchpad_context_manager.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = fs::create_dir_all(parent);",
+      "code_sha256": "9901b8191539b12e783a6d0312c5098faa978f10018cc5c5acf38b98bd722e03",
+      "line": 168,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/local/context_managers/file_scratchpad_context_manager.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = fs::write(path, content);",
+      "code_sha256": "2d0835900d8d5ad6170fdd43fe05faaa2f186aebb974b13f58d471b05d90714f",
+      "line": 170,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/local/context_managers/file_scratchpad_context_manager.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let parent_id: Option<String> = row.get(2).ok();",
+      "code_sha256": "88c3d0f6191e21b8827d158b8c8e6b96beefdd9da90dd62457ee2ee97265ecdc",
+      "line": 155,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/local/storage.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let state: Option<String> = row.get(3).ok();",
+      "code_sha256": "53a7ff6f05b927f8f9cf72558ccc5d45907e96c856c21ad7fa6982e5b1511a69",
+      "line": 156,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/local/storage.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let cwd: Option<String> = row.get(4).ok();",
+      "code_sha256": "e1305ca138f4f9e5cdc3c4c3f25d833c3809e21d1370a00f486c5c44cd8df835",
+      "line": 259,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/local/storage.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let active_checkpoint_id: Option<String> = row.get(8).ok();",
+      "code_sha256": "7550fe9400dde785e33f9e1da6c6ba89c8df9f8a690a3a7eca9fd4892ccaa798",
+      "line": 267,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/local/storage.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let cwd: Option<String> = row.get(4).ok();",
+      "code_sha256": "e1305ca138f4f9e5cdc3c4c3f25d833c3809e21d1370a00f486c5c44cd8df835",
+      "line": 312,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/local/storage.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": ".ok();",
+      "code_sha256": "61e6da10094488a32da28d042e20fc0bbf075a8339b7bdda159df1c28f003983",
+      "line": 324,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/local/storage.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let parent_id: Option<String> = row.get(2).ok();",
+      "code_sha256": "88c3d0f6191e21b8827d158b8c8e6b96beefdd9da90dd62457ee2ee97265ecdc",
+      "line": 478,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/local/storage.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let state: Option<String> = row.get(3).ok();",
+      "code_sha256": "53a7ff6f05b927f8f9cf72558ccc5d45907e96c856c21ad7fa6982e5b1511a69",
+      "line": 479,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/local/storage.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let parent_id: Option<String> = row.get(2).ok();",
+      "code_sha256": "88c3d0f6191e21b8827d158b8c8e6b96beefdd9da90dd62457ee2ee97265ecdc",
+      "line": 527,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/local/storage.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let state: Option<String> = row.get(3).ok();",
+      "code_sha256": "53a7ff6f05b927f8f9cf72558ccc5d45907e96c856c21ad7fa6982e5b1511a69",
+      "line": 528,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/local/storage.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = fs::remove_file(&tmp).await;",
+      "code_sha256": "2a47ad2c04afd567e1b1c3cf9a716884a8b828e6274bbfd9e29eea121b434506",
+      "line": 108,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/vac/knowledge/cache.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = write!(&mut out, \"{:02x}\", b);",
+      "code_sha256": "6a0ee6c24b57d97dcd8e846954ca1cb4ef74365d053f1c95b61c8db21bc08b36",
+      "line": 143,
+      "path": "vac-rs/crates/integrations/vac-remote-service/src/vac/knowledge/cache.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = searcher.search_path(",
+      "code_sha256": "7118d36144f1457b6f34e416eb4cd2a12a76cf05cfdf182a56d0cb5af95e6baa",
+      "line": 313,
+      "path": "vac-rs/crates/integrations/vac-mcp-server/src/file_operations.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = searcher.search_path(",
+      "code_sha256": "7118d36144f1457b6f34e416eb4cd2a12a76cf05cfdf182a56d0cb5af95e6baa",
+      "line": 416,
+      "path": "vac-rs/crates/integrations/vac-mcp-server/src/file_operations.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = shutdown_rx.recv().await;",
+      "code_sha256": "2672f1239ec25e72273f2f769c9547fa6d299aa9661cb6c9f69fb83cfa0ee0f2",
+      "line": 160,
+      "path": "vac-rs/crates/integrations/vac-mcp-server/src/lib.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = sigint.recv().await;",
+      "code_sha256": "ca009f09c7b7293881f981aefc5b9c50f4c450425fbeaeeae2548e067b96af9d",
+      "line": 189,
+      "path": "vac-rs/crates/integrations/vac-mcp-server/src/lib.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = ctx",
+      "code_sha256": "8366e141a986e9f3623723c0cdb82b275fb95261cebd42055eadc818d8d7bccf",
+      "line": 632,
+      "path": "vac-rs/crates/integrations/vac-mcp-server/src/local_tools.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = ctx",
+      "code_sha256": "8366e141a986e9f3623723c0cdb82b275fb95261cebd42055eadc818d8d7bccf",
+      "line": 847,
+      "path": "vac-rs/crates/integrations/vac-mcp-server/src/local_tools.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = ctx",
+      "code_sha256": "8366e141a986e9f3623723c0cdb82b275fb95261cebd42055eadc818d8d7bccf",
+      "line": 1594,
+      "path": "vac-rs/crates/integrations/vac-mcp-server/src/local_tools.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = ctx.peer.notify_progress(ProgressNotificationParam {",
+      "code_sha256": "875fec252bc12c60172b72f4a8596678138ab3fa055413a18d5e0b3564e70503",
+      "line": 1640,
+      "path": "vac-rs/crates/integrations/vac-mcp-server/src/local_tools.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = child.kill().await;",
+      "code_sha256": "e95d3cfe222111d01cc516f547cab688775d38284599d1cd0c095cb99c55c89e",
+      "line": 1682,
+      "path": "vac-rs/crates/integrations/vac-mcp-server/src/local_tools.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = child.kill().await;",
+      "code_sha256": "e95d3cfe222111d01cc516f547cab688775d38284599d1cd0c095cb99c55c89e",
+      "line": 1693,
+      "path": "vac-rs/crates/integrations/vac-mcp-server/src/local_tools.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = child.kill().await;",
+      "code_sha256": "e95d3cfe222111d01cc516f547cab688775d38284599d1cd0c095cb99c55c89e",
+      "line": 1712,
+      "path": "vac-rs/crates/integrations/vac-mcp-server/src/local_tools.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    },
+    {
+      "code": "let _ = ctx",
+      "code_sha256": "8366e141a986e9f3623723c0cdb82b275fb95261cebd42055eadc818d8d7bccf",
+      "line": 1868,
+      "path": "vac-rs/crates/integrations/vac-mcp-server/src/local_tools.rs",
+      "reason": "triaged_intentional_non_authority_discard"
+    }
+  ],
+  "finding": "Q-003",
+  "kind": "vac_assessment_boundary_discard_allowlist",
+  "schema_version": 1,
+  "scope": [
+    "vac-broker",
+    "vac-remote-service",
+    "vac-mcp-server"
+  ]
+}
