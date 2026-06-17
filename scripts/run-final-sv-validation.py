@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import pathlib, shlex, subprocess, sys, tempfile
+import os, pathlib, shlex, subprocess, sys, tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
@@ -12,17 +12,18 @@ def resolve_log() -> pathlib.Path:
 
 LOG = resolve_log()
 commands = [
-    ('deterministic-index', ['python3', 'scripts/generate-deterministic-index-sv.py', '.']),
-    ('compile-registry', ['python3', 'scripts/compile-vac-registry-sv.py', '.']),
-    ('assessment-report', ['python3', 'scripts/generate-assessment-report-sv.py', '.']),
-    ('assessment-freshness', ['python3', 'scripts/check-assessment-freshness.py', '.']),
-    ('sv-static', ['python3', 'scripts/sv_static_validate.py', '.']),
-    ('sv-deep', ['python3', 'scripts/vac-sv-deep-validate.py', str(ROOT)]),
-    ('runtime-state5-operational', ['python3', 'scripts/vac-runtime-state5-operational-sv.py', '.']),
-    ('runtime-state6-semantics', ['python3', 'scripts/vac-runtime-state6-semantics-sv.py', '.']),
-    ('runtime-state7-merged-audit', ['python3', 'scripts/vac-runtime-state7-merged-audit-sv.py', '.']),
-    ('refresh-evidence-logs', ['python3', 'scripts/refresh-evidence-logs-sv.py', '.']),
-    ('evidence-log-freshness', ['python3', 'scripts/check-evidence-log-freshness.py', '.']),
+    ('cargo-tv', ['python3', 'scripts/check-cargo-tv.py', '.', '--summary-only'] if os.environ.get('VAC_CARGO_TV_CONSUME_PROOF') == '1' else ['python3', 'scripts/check-cargo-tv.py', '.'], 7200),
+    ('deterministic-index', ['python3', 'scripts/generate-deterministic-index-sv.py', '.'], 300),
+    ('compile-registry', ['python3', 'scripts/compile-vac-registry-sv.py', '.'], 300),
+    ('assessment-report', ['python3', 'scripts/generate-assessment-report-sv.py', '.'], 300),
+    ('assessment-freshness', ['python3', 'scripts/check-assessment-freshness.py', '.'], 300),
+    ('sv-static', ['python3', 'scripts/sv_static_validate.py', '.'], 300),
+    ('sv-deep', ['python3', 'scripts/vac-sv-deep-validate.py', str(ROOT)], 300),
+    ('runtime-state5-operational', ['python3', 'scripts/vac-runtime-state5-operational-sv.py', '.'], 300),
+    ('runtime-state6-semantics', ['python3', 'scripts/vac-runtime-state6-semantics-sv.py', '.'], 300),
+    ('runtime-state7-merged-audit', ['python3', 'scripts/vac-runtime-state7-merged-audit-sv.py', '.'], 300),
+    ('refresh-evidence-logs', ['python3', 'scripts/refresh-evidence-logs-sv.py', '.'], 300),
+    ('evidence-log-freshness', ['python3', 'scripts/check-evidence-log-freshness.py', '.'], 300),
 ]
 
 LOG.parent.mkdir(parents=True, exist_ok=True)
@@ -30,11 +31,11 @@ with LOG.open('w') as log:
     log.write('VAC final SV validation v1.9/state7\n')
     log.write(f'log_path={LOG}\n')
     log.write('log_hygiene=outside_indexed_root_before_index_generation\n')
-    for name, cmd in commands:
+    for name, cmd, timeout_seconds in commands:
         log.write(f"\n== {name} ==\n$ {' '.join(shlex.quote(x) for x in cmd)}\n")
         log.flush()
         try:
-            p = subprocess.run(cmd, cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=300)
+            p = subprocess.run(cmd, cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=timeout_seconds)
         except subprocess.TimeoutExpired as e:
             if isinstance(e.stdout, str):
                 log.write(e.stdout)
@@ -52,6 +53,10 @@ with LOG.open('w') as log:
     log.write('final_gate_order_replayable=true\n')
     log.write('final_gate_idempotence_checked_by=scripts/vac-final-idempotence-sv.py\n')
     log.write('assessment_regenerated_after_index=true\n')
-    log.write('cargo_tv=NotEvaluated\n')
+    p = subprocess.run(['python3', 'scripts/check-cargo-tv.py', '.', '--summary-only'], cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=300)
+    log.write(p.stdout or '')
+    if p.returncode != 0:
+        print('SV validation failed at cargo-tv-summary')
+        sys.exit(p.returncode)
     log.write('l2_broker=NotImplemented\n')
 print(f"wrote {LOG}")

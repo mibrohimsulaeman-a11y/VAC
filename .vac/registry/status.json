@@ -1,10 +1,26 @@
 {
-  "compiled_snapshot_hash": "sha256:1fdeb66f1ec9656db591d9eee976d589ce6bdde430e30a26ea9e0e7534f2536e",
+  "cargo_tv": {
+    "cargo_workspace_hash": "sha256:6ddfcc177e2e26a88a7f8e593020a3c61482d558589920565b6ef214354e3cd5",
+    "checks": {
+      "cargo_check": "TV-Pass",
+      "cargo_clippy": "TV-Pass",
+      "cargo_fmt": "TV-Pass",
+      "cargo_metadata": "TV-Pass",
+      "cargo_test": "TV-Pass"
+    },
+    "errors": [],
+    "generated_at": "2026-06-17T11:49:59Z",
+    "git_head": "d212691c040eab2d5fc689eec8f511cfc4c9b2a9",
+    "proof_hash": "sha256:f9b04497f3dcb196ab6161c4057d66f8f6bb23c6cad9783d3512d1d7338ea724",
+    "proof_ref": ".vac/evidence/cargo-tv-current.json",
+    "status": "TV-Pass"
+  },
+  "compiled_snapshot_hash": "sha256:fa68fb75267e5f147cffbb49bdec259727fa5a98d585e013cb50769846b1cd6b",
   "control_plane": {
     "audit": "jcs_json",
     "authoring": "yaml",
     "capabilities_snapshot_hash": "sha256:d2b8bf2cdae622bbf711bb32e89c35a5863bb206ac048dbdfc681e693aaafd33",
-    "compiled_snapshot_hash": "sha256:1fdeb66f1ec9656db591d9eee976d589ce6bdde430e30a26ea9e0e7534f2536e",
+    "compiled_snapshot_hash": "sha256:fa68fb75267e5f147cffbb49bdec259727fa5a98d585e013cb50769846b1cd6b",
     "compiled_snapshot_location": ".vac/cache/compiled",
     "compiled_snapshots_current": true,
     "generated_mirror_location": ".vac/registry/compiled",
@@ -48,7 +64,7 @@
     "partial": 24,
     "planned": 1,
     "ready": 0,
-    "source": "canonical compiled capabilities/current.json; cargo gates not evaluated",
+    "source": "canonical compiled capabilities/current.json; cargo TV current-run proof",
     "valid_percent": 0
   },
   "readiness_summary": {
@@ -83,18 +99,12 @@
     "generated_artifacts": "export_only_by_default",
     "runtime_journal": "local_sqlite_ignored"
   },
-  "tv_pending": [
-    "cargo_metadata",
-    "cargo_fmt",
-    "cargo_check",
-    "cargo_clippy",
-    "cargo_test"
-  ],
+  "tv_pending": [],
   "updated_at": "1970-01-01T00:00:00Z",
   "workspace": {
     "conformance_level": "L1",
     "enforcement_level": "L1",
-    "file_count": 772,
+    "file_count": 777,
     "rust_crate_count": 38
   },
   "rust_ast_index": {

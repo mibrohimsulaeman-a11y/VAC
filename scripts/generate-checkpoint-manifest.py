@@ -9,6 +9,8 @@ import sys
 from datetime import datetime, timezone
 from typing import Any
 
+from cargo_tv_status import REQUIRED_CHECKS, TV_PASS, cargo_tv_summary
+
 ROOT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 SLUG = sys.argv[2] if len(sys.argv) > 2 else "vac-runtime-v19-storage-cleanup-source-clean"
 EXCLUDED_DIRS = {".git", "target", "node_modules", "__pycache__"}
@@ -65,6 +67,9 @@ def main() -> int:
     workspace = read_json(ROOT / ".vac/cache/compiled/workspace.json", {}) or read_json(ROOT / ".vac/registry/compiled/workspace.json", {})
     assessment = read_json(ROOT / ".vac/assessment/baseline.json", {})
     gap = read_json(ROOT / ".vac/assessment/gap_report.json", {})
+    cargo_tv = cargo_tv_summary(ROOT)
+    cargo_tv_status = cargo_tv.get("status", "NotEvaluated")
+    cargo_pending = [] if cargo_tv_status == TV_PASS else list(REQUIRED_CHECKS)
     manifest = {
         "schema_version": 1,
         "kind": "registry_status",
@@ -74,8 +79,18 @@ def main() -> int:
         "baseline": "vac-runtime-v15-state7-merged-audit-closure-checkpoint-20260611T0132Z.zip",
         "runtime_label": "VAC Runtime v1.9 L1 Static Closure Candidate — storage split and runtime-journal scaffold",
         "sv_done": True,
-        "tv_pending": ["cargo_metadata", "cargo_fmt", "cargo_check", "cargo_clippy", "cargo_test", "tui_pty_visual_qa", "l2_broker_os_sandbox"],
+        "tv_pending": cargo_pending + ["tui_pty_visual_qa", "l2_broker_os_sandbox"],
         "l2": "not_implemented",
+        "cargo_tv": {
+            "status": cargo_tv_status,
+            "checks": cargo_tv.get("checks", {}),
+            "proof_ref": cargo_tv.get("proof_ref"),
+            "proof_hash": cargo_tv.get("proof_hash"),
+            "cargo_workspace_hash": cargo_tv.get("cargo_workspace_hash"),
+            "git_head": cargo_tv.get("git_head"),
+            "generated_at": cargo_tv.get("generated_at"),
+            "errors": cargo_tv.get("errors", []),
+        },
         "runtime_authority": status.get("runtime_authority"),
         "compiled_snapshot_hash": status.get("compiled_snapshot_hash"),
         "readiness_summary": status.get("readiness_summary"),
@@ -91,7 +106,7 @@ def main() -> int:
             "approval_required_flow": "ApprovalRequired persists approval_request v2, pauses agent loop, resumes with single-retry scoped grant",
             "bootstrap_artifact_truth": "missing task/spec/todo become needs_discussion and closeout evidence is invalid/blocking",
             "sv_gate": "scripts/vac-runtime-state6-semantics-sv.py",
-            "cargo_tv": "NotEvaluated",
+            "cargo_tv": cargo_tv_status,
             "l2_broker": "NotImplemented"
         },
         "state5-operational-closure": {
@@ -99,7 +114,7 @@ def main() -> int:
             "broker_bootstrap": "VacRuntimeMetadataBootstrap wired into session_actor",
             "policy_authority": "vac-policy::PolicySnapshot",
             "mcp_proof": "broker recomputes action/target/capability/session binding hash at L1",
-            "cargo_tv": "NotEvaluated",
+            "cargo_tv": cargo_tv_status,
             "l2_broker": "NotImplemented"
         },
         "compiled_outputs": workspace.get("compiled_outputs", []),

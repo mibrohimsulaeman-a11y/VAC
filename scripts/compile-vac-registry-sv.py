@@ -26,6 +26,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 import yaml
+from cargo_tv_status import REQUIRED_CHECKS, TV_PASS, cargo_tv_summary
 
 ROOT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 NOW = os.environ.get("VAC_SV_GENERATED_AT", "1970-01-01T00:00:00Z")
@@ -618,6 +619,13 @@ def compile_workspace(compiled_caps: dict[str, Any], runtime_jobs: dict[str, Any
     workspace["snapshot_hash"] = canonical_hash({k: v for k, v in workspace.items() if k != "snapshot_hash"})
     write_compiled("workspace.json", workspace)
     workspace_hash = sha256_file(ROOT / ".vac/cache/compiled/workspace.json")
+    cargo_tv = cargo_tv_summary(ROOT)
+    cargo_tv_status = cargo_tv.get("status")
+    cargo_tv_source = (
+        "canonical compiled capabilities/current.json; cargo TV current-run proof"
+        if cargo_tv_status == TV_PASS
+        else "canonical compiled capabilities/current.json; cargo gates not evaluated"
+    )
     summary = compiled_caps["summary"]
     total = int(summary.get("total", 0))
     ready = int(summary.get("ready", 0))
@@ -653,7 +661,7 @@ def compile_workspace(compiled_caps: dict[str, Any], runtime_jobs: dict[str, Any
         "runtime": {"server_default": False, "gateway_default": False, "jobs": ".vac/registry/runtime/jobs.json", "journal": ".vac/db/runtime.db", "compiled_cache": ".vac/cache/compiled"},
         "runtime_jobs": {"queued": runtime_jobs["queue"]["queued"], "running": runtime_jobs["queue"]["running"]},
         "readiness": {
-            "source": "canonical compiled capabilities/current.json; cargo gates not evaluated",
+            "source": cargo_tv_source,
             "valid_percent": valid_percent,
             "effective_percent": valid_percent,
             "ready": summary.get("ready", 0),
@@ -664,7 +672,17 @@ def compile_workspace(compiled_caps: dict[str, Any], runtime_jobs: dict[str, Any
         "readiness_summary": summary,
         "spec_sync": {"unresolved_critical_drift": 0},
         "storage_class": {"authority_manifests": "tracked", "runtime_journal": "local_sqlite_ignored", "compiled_snapshot": "cache_or_db", "generated_artifacts": "export_only_by_default"},
-        "tv_pending": ["cargo_metadata", "cargo_fmt", "cargo_check", "cargo_clippy", "cargo_test"],
+        "cargo_tv": {
+            "status": cargo_tv_status,
+            "checks": cargo_tv.get("checks", {}),
+            "proof_ref": cargo_tv.get("proof_ref"),
+            "proof_hash": cargo_tv.get("proof_hash"),
+            "cargo_workspace_hash": cargo_tv.get("cargo_workspace_hash"),
+            "git_head": cargo_tv.get("git_head"),
+            "generated_at": cargo_tv.get("generated_at"),
+            "errors": cargo_tv.get("errors", []),
+        },
+        "tv_pending": cargo_tv.get("tv_pending", REQUIRED_CHECKS),
     }
     write_json(ROOT / ".vac/registry/status.json", status)
 

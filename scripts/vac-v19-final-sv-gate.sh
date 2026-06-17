@@ -3,6 +3,12 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 run() { local label="$1"; shift; printf '\n== %s ==\n' "$label"; timeout 120 "$@"; }
+run_long() { local label="$1"; shift; printf '\n== %s ==\n' "$label"; timeout "${VAC_GATE_LONG_STEP_TIMEOUT_SECONDS:-7200}" "$@"; }
+if [[ "${VAC_CARGO_TV_CONSUME_PROOF:-0}" == "1" ]]; then
+  run cargo-tv python3 scripts/check-cargo-tv.py . --summary-only
+else
+  run_long cargo-tv python3 scripts/check-cargo-tv.py .
+fi
 run deterministic-index python3 scripts/generate-deterministic-index-sv.py .
 run rust-ast-index-coverage python3 scripts/check-rust-ast-index-coverage.py .
 run compile-registry python3 scripts/compile-vac-registry-sv.py .
@@ -38,5 +44,5 @@ run runtime-state5-operational python3 scripts/vac-runtime-state5-operational-sv
 run runtime-state6-semantics python3 scripts/vac-runtime-state6-semantics-sv.py .
 run runtime-state7 python3 scripts/vac-runtime-state7-merged-audit-sv.py .
 printf '\nVAC v1.9 final SV gate: PASS\n'
-printf 'cargo_tv=NotEvaluated\n'
+python3 scripts/check-cargo-tv.py . --summary-only
 printf 'l2_broker=NotImplemented\n'

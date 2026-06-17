@@ -7,6 +7,16 @@ run() {
   printf '\n== %s ==\n' "$label"
   timeout 90 "$@"
 }
+run_long() {
+  local label="$1"; shift
+  printf '\n== %s ==\n' "$label"
+  timeout "${VAC_GATE_LONG_STEP_TIMEOUT_SECONDS:-7200}" "$@"
+}
+if [[ "${VAC_CARGO_TV_CONSUME_PROOF:-0}" == "1" ]]; then
+  run cargo-tv python3 scripts/check-cargo-tv.py . --summary-only
+else
+  run_long cargo-tv python3 scripts/check-cargo-tv.py .
+fi
 run compile-registry python3 scripts/compile-vac-registry-sv.py .
 run deterministic-index python3 scripts/generate-deterministic-index-sv.py .
 run assessment-report python3 scripts/generate-assessment-report-sv.py .
@@ -35,6 +45,8 @@ run py-compile python3 -m py_compile \
   scripts/generate-deterministic-index-sv.py \
   scripts/generate-assessment-report-sv.py \
   scripts/check-assessment-freshness.py \
+  scripts/cargo_tv_status.py \
+  scripts/check-cargo-tv.py \
   scripts/generate-checkpoint-manifest.py \
   scripts/sv_static_validate.py \
   scripts/vac-sv-deep-validate.py \
@@ -54,5 +66,5 @@ run py-compile python3 -m py_compile \
   scripts/vac-final-idempotence-sv.py \
   scripts/check-evidence-log-freshness.py
 printf '\nVAC re-audit final SV gate: PASS\n'
-printf 'cargo_tv=NotEvaluated\n'
+python3 scripts/check-cargo-tv.py . --summary-only
 printf 'l2_broker=NotImplemented\n'
