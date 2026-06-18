@@ -353,6 +353,10 @@ fn custody_requires_proof(custody: &str) -> bool {
     )
 }
 
+fn optional_text_is_blank(value: Option<&String>) -> bool {
+    value.is_none_or(|value| value.trim().is_empty())
+}
+
 #[must_use]
 fn trust_wording(execution: &str, custody: &str) -> &'static str {
     TRUST_WORDING_MATRIX
@@ -433,11 +437,7 @@ pub fn evaluate_runtime_broker_mediated_record(
     if probe.intent_id.trim().is_empty() {
         return blocked("missing_broker_intent");
     }
-    if probe
-        .decision_id
-        .as_ref()
-        .is_none_or(|value| value.trim().is_empty())
-    {
+    if optional_text_is_blank(probe.decision_id.as_ref()) {
         return blocked("execution_record_without_broker_decision");
     }
     if probe.policy_snapshot_hash.trim().is_empty() {
@@ -446,19 +446,13 @@ pub fn evaluate_runtime_broker_mediated_record(
     if probe.policy_snapshot_hash != probe.current_policy_snapshot_hash {
         return blocked("stale_policy_snapshot_hash");
     }
-    if probe.execution_mode == "mediated_l2"
-        && probe
-            .broker_record_hash
-            .as_ref()
-            .is_none_or(|value| value.trim().is_empty())
+    if probe.execution_mode == TRUST_EXECUTION_MEDIATED_L2
+        && optional_text_is_blank(probe.broker_record_hash.as_ref())
     {
         return blocked("mediated_l2_without_broker_record_hash");
     }
-    if probe.custody == "broker_attested"
-        && probe
-            .broker_signature_hash
-            .as_ref()
-            .is_none_or(|value| value.trim().is_empty())
+    if probe.custody == TRUST_CUSTODY_BROKER_ATTESTED
+        && optional_text_is_blank(probe.broker_signature_hash.as_ref())
     {
         return blocked("broker_attested_without_broker_signature_hash");
     }
@@ -739,8 +733,8 @@ mod tests {
             decision_id: Some("decision.1".to_string()),
             policy_snapshot_hash: "sha256:policy".to_string(),
             current_policy_snapshot_hash: "sha256:policy".to_string(),
-            execution_mode: "mediated_l2".to_string(),
-            custody: "broker_attested".to_string(),
+            execution_mode: TRUST_EXECUTION_MEDIATED_L2.to_string(),
+            custody: TRUST_CUSTODY_BROKER_ATTESTED.to_string(),
             broker_record_hash: Some("sha256:broker-record".to_string()),
             broker_signature_hash: Some("sha256:broker-signature".to_string()),
             tool_supplied_policy_decision: false,
