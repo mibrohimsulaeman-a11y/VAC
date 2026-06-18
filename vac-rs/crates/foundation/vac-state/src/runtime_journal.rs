@@ -97,6 +97,8 @@ pub const RUNTIME_DB_REQUIRED_PRAGMAS: &[&str] = &[
     "PRAGMA busy_timeout = 5000;",
 ];
 
+const RUNTIME_TRANSACTION_BEGIN_IMMEDIATE: &str = "BEGIN IMMEDIATE";
+
 pub const ACQUIRE_WRITER_LEASE_SQL: &str = "BEGIN IMMEDIATE; INSERT INTO runtime_writer_leases(workspace_id, holder_id, lease_reason, acquired_at, heartbeat_at, heartbeat_counter, session_id) VALUES (?1, ?2, ?3, ?4, ?4, 1, ?5) ON CONFLICT(workspace_id) DO UPDATE SET holder_id=excluded.holder_id, lease_reason=excluded.lease_reason, heartbeat_at=excluded.heartbeat_at, heartbeat_counter=runtime_writer_leases.heartbeat_counter + 1, session_id=excluded.session_id WHERE runtime_writer_leases.heartbeat_counter = ?6;";
 
 pub const ALLOCATE_EVENT_SEQUENCE_SQL: &str = "INSERT INTO runtime_session_sequences(session_id, next_seq, updated_at) VALUES (?1, 2, ?2) ON CONFLICT(session_id) DO UPDATE SET next_seq=runtime_session_sequences.next_seq + 1, updated_at=excluded.updated_at RETURNING next_seq - 1;";
@@ -124,7 +126,7 @@ pub fn runtime_db_migration_has_required_pragmas(sql: &str) -> Vec<String> {
 #[must_use]
 pub fn runtime_journal_write_plan() -> RuntimeJournalWritePlan {
     RuntimeJournalWritePlan {
-        transaction_mode: "BEGIN IMMEDIATE".to_string(),
+        transaction_mode: RUNTIME_TRANSACTION_BEGIN_IMMEDIATE.to_string(),
         pragmas: RUNTIME_DB_REQUIRED_PRAGMAS.to_vec(),
         migration_files: vec![".vac/migrations/runtime-db/0001_runtime_journal.sql"],
         lease_sql: ACQUIRE_WRITER_LEASE_SQL,
@@ -149,10 +151,15 @@ pub fn evaluate_runtime_event_append(
     if draft.session_id.trim().is_empty() || draft.event_type.trim().is_empty() {
         return blocked("event draft missing session_id or event_type");
     }
+    allowed_manifest_bound_record("manifest-bound event may be appended under writer lease")
+}
+
+#[must_use]
+fn allowed_manifest_bound_record(reason: impl Into<String>) -> RuntimeJournalAppendDecision {
     RuntimeJournalAppendDecision {
         allow: true,
-        reason: "manifest-bound event may be appended under writer lease".to_string(),
-        required_transaction: "BEGIN IMMEDIATE".to_string(),
+        reason: reason.into(),
+        required_transaction: RUNTIME_TRANSACTION_BEGIN_IMMEDIATE.to_string(),
         writes_manifest_bound_record: true,
     }
 }
@@ -162,7 +169,7 @@ fn blocked(reason: &str) -> RuntimeJournalAppendDecision {
     RuntimeJournalAppendDecision {
         allow: false,
         reason: reason.to_string(),
-        required_transaction: "BEGIN IMMEDIATE".to_string(),
+        required_transaction: RUNTIME_TRANSACTION_BEGIN_IMMEDIATE.to_string(),
         writes_manifest_bound_record: false,
     }
 }
@@ -258,12 +265,7 @@ pub fn evaluate_runtime_decision_authorization(
         };
     }
 
-    RuntimeJournalAppendDecision {
-        allow: true,
-        reason: "locked current-manifest decision may authorize scoped work".to_string(),
-        required_transaction: "BEGIN IMMEDIATE".to_string(),
-        writes_manifest_bound_record: true,
-    }
+    allowed_manifest_bound_record("locked current-manifest decision may authorize scoped work")
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -403,15 +405,10 @@ pub fn evaluate_subprocess_runtime_db_mutation(
     if probe.before_hashes != probe.after_hashes {
         return blocked("runtime_db_touched_by_subprocess");
     }
-    RuntimeJournalAppendDecision {
-        allow: true,
-        reason: format!(
-            "structured command {} did not mutate .vac/db/**",
-            probe.command_id
-        ),
-        required_transaction: "BEGIN IMMEDIATE".to_string(),
-        writes_manifest_bound_record: true,
-    }
+    allowed_manifest_bound_record(format!(
+        "structured command {} did not mutate .vac/db/**",
+        probe.command_id
+    ))
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -456,12 +453,7 @@ pub fn evaluate_runtime_broker_mediated_record(
     {
         return blocked("broker_attested_without_broker_signature_hash");
     }
-    RuntimeJournalAppendDecision {
-        allow: true,
-        reason: "broker-mediated runtime journal record passes schema boundary".to_string(),
-        required_transaction: "BEGIN IMMEDIATE".to_string(),
-        writes_manifest_bound_record: true,
-    }
+    allowed_manifest_bound_record("broker-mediated runtime journal record passes schema boundary")
 }
 
 #[cfg(test)]
@@ -574,11 +566,14 @@ mod tests {
     #[test]
     fn runtime_journal_write_plan_requires_begin_immediate_and_wal() {
         let plan = runtime_journal_write_plan();
-        assert_eq!(plan.transaction_mode, "BEGIN IMMEDIATE");
+        assert_eq!(plan.transaction_mode, RUNTIME_TRANSACTION_BEGIN_IMMEDIATE);
         assert!(plan.pragmas.contains(&"PRAGMA journal_mode = WAL;"));
         assert!(plan.pragmas.contains(&"PRAGMA foreign_keys = ON;"));
         assert!(plan.pragmas.contains(&"PRAGMA busy_timeout = 5000;"));
-        assert!(plan.lease_sql.starts_with("BEGIN IMMEDIATE;"));
+        assert!(
+            plan.lease_sql
+                .starts_with(&format!("{RUNTIME_TRANSACTION_BEGIN_IMMEDIATE};"))
+        );
         assert!(plan.lease_sql.contains("heartbeat_counter"));
         assert!(plan.sequence_sql.contains("RETURNING next_seq - 1"));
         assert!(plan.insert_event_sql.contains("manifest_set_hash"));
@@ -599,7 +594,10 @@ mod tests {
 
         let current = evaluate_runtime_event_append(&event_draft(current_hash), current_hash);
         assert!(current.allow);
-        assert_eq!(current.required_transaction, "BEGIN IMMEDIATE");
+        assert_eq!(
+            current.required_transaction,
+            RUNTIME_TRANSACTION_BEGIN_IMMEDIATE
+        );
         assert!(current.writes_manifest_bound_record);
     }
 
@@ -795,7 +793,10 @@ mod tests {
 
         let current = evaluate_runtime_broker_mediated_record(&broker_probe());
         assert!(current.allow);
-        assert_eq!(current.required_transaction, "BEGIN IMMEDIATE");
+        assert_eq!(
+            current.required_transaction,
+            RUNTIME_TRANSACTION_BEGIN_IMMEDIATE
+        );
         assert!(current.writes_manifest_bound_record);
     }
 
