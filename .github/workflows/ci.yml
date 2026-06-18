@@ -66,12 +66,19 @@ jobs:
           cargo test --manifest-path vac-rs/Cargo.toml -p vac-messaging-gateway --features libsql-test --verbose
           cargo test --manifest-path vac-rs/Cargo.toml -p vac-provider-core --features network-tests --verbose
 
+      - name: CI Scoped Validation Proof
+        run: |
+          python3 scripts/ci-scoped-validation-proof.py .
+          python3 scripts/check-ci-scoped-validation-proof.py . --require-proof
+
       - name: Upload scoped proof
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: vac-scoped-proof
-          path: .vac/evidence/external-provider-remote-process-io-e2e.json
+          path: |
+            .vac/evidence/external-provider-remote-process-io-e2e.json
+            .vac/evidence/ci-scoped-validation-current.json
           if-no-files-found: ignore
 
       - name: Free build artifacts before cache save

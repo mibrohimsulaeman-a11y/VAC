@@ -27,6 +27,7 @@ from typing import Any
 
 import yaml
 from cargo_tv_status import REQUIRED_CHECKS, TV_PASS, cargo_tv_summary
+from ci_scoped_validation_status import ci_scoped_validation_summary
 
 ROOT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 NOW = os.environ.get("VAC_SV_GENERATED_AT", "1970-01-01T00:00:00Z")
@@ -620,6 +621,7 @@ def compile_workspace(compiled_caps: dict[str, Any], runtime_jobs: dict[str, Any
     write_compiled("workspace.json", workspace)
     workspace_hash = sha256_file(ROOT / ".vac/cache/compiled/workspace.json")
     cargo_tv = cargo_tv_summary(ROOT)
+    ci_validation = ci_scoped_validation_summary(ROOT)
     cargo_tv_status = cargo_tv.get("status")
     cargo_tv_source = (
         "canonical compiled capabilities/current.json; cargo TV current-run proof"
@@ -681,6 +683,15 @@ def compile_workspace(compiled_caps: dict[str, Any], runtime_jobs: dict[str, Any
             "git_head": cargo_tv.get("git_head"),
             "generated_at": cargo_tv.get("generated_at"),
             "errors": cargo_tv.get("errors", []),
+        },
+        "ci_scoped_validation": {
+            "status": ci_validation.get("status"),
+            "execution": ci_validation.get("execution"),
+            "custody": ci_validation.get("custody"),
+            "proof_ref": ci_validation.get("proof_ref"),
+            "proof_hash": ci_validation.get("proof_hash"),
+            "source_scope_hash": ci_validation.get("source_scope_hash"),
+            "errors": ci_validation.get("errors", []),
         },
         "tv_pending": cargo_tv.get("tv_pending", REQUIRED_CHECKS),
     }

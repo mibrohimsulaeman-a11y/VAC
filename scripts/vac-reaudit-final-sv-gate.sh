@@ -31,6 +31,7 @@ run runtime-v15-e2e python3 scripts/vac-runtime-v15-e2e.py .
 run runtime-audit-closure python3 scripts/vac-runtime-audit-closure-sv.py .
 run runtime-realpath-e2e python3 scripts/vac-runtime-realpath-e2e.py .
 run external-provider-remote-process-io python3 scripts/check-external-provider-remote-process-io-e2e.py .
+run scoped-validation-proof python3 scripts/check-ci-scoped-validation-proof.py .
 run runtime-state4-adversarial python3 scripts/vac-runtime-state4-adversarial-sv.py .
 run runtime-state5-operational python3 scripts/vac-runtime-state5-operational-sv.py .
 run runtime-state6-semantics python3 scripts/vac-runtime-state6-semantics-sv.py .
@@ -56,6 +57,9 @@ run py-compile python3 -m py_compile \
   scripts/external_provider_remote_process_io_status.py \
   scripts/check-external-provider-remote-process-io-e2e.py \
   scripts/ci-external-provider-remote-process-io-proof.py \
+  scripts/ci_scoped_validation_status.py \
+  scripts/check-ci-scoped-validation-proof.py \
+  scripts/ci-scoped-validation-proof.py \
   scripts/generate-checkpoint-manifest.py \
   scripts/sv_static_validate.py \
   scripts/vac-sv-deep-validate.py \

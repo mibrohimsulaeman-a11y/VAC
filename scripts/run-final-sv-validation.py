@@ -18,6 +18,7 @@ commands = [
     ('assessment-report', ['python3', 'scripts/generate-assessment-report-sv.py', '.'], 300),
     ('assessment-freshness', ['python3', 'scripts/check-assessment-freshness.py', '.'], 300),
     ('external-provider-remote-process-io', ['python3', 'scripts/check-external-provider-remote-process-io-e2e.py', '.'], 300),
+    ('scoped-validation-proof', ['python3', 'scripts/check-ci-scoped-validation-proof.py', '.'], 300),
     ('confirmed-intent-coverage', ['python3', 'scripts/check-confirmed-intent-coverage.py', '.'], 300),
     ('confirmed-intent-negative-fixtures', ['python3', 'scripts/check-confirmed-intent-negative-fixtures.py', '.'], 300),
     ('confirmed-intent-status', ['python3', 'scripts/refresh-confirmed-intent-status.py', '.'], 300),
