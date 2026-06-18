@@ -83,4 +83,4 @@ run py-compile python3 -m py_compile \
   scripts/check-evidence-log-freshness.py
 printf '\nVAC re-audit final SV gate: PASS\n'
 python3 scripts/check-cargo-tv.py . --summary-only
-printf 'l2_broker=NotImplemented\n'
+python3 scripts/check-l2-broker-status.py . --summary-only

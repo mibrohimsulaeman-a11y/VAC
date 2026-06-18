@@ -13,11 +13,14 @@ def main() -> int:
     parser.add_argument("root", nargs="?", default=".")
     parser.add_argument("--require-implemented", action="store_true")
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--summary-only", action="store_true")
     args = parser.parse_args()
 
     root = Path(args.root).resolve()
     summary = l2_broker_summary(root)
-    if args.json:
+    if args.summary_only:
+        print_summary(summary)
+    elif args.json:
         print(json.dumps(summary, indent=2, sort_keys=True))
     else:
         print("VAC L2 broker status: " + str(summary["status"]))

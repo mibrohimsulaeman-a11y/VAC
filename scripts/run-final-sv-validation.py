@@ -65,5 +65,9 @@ with LOG.open('w') as log:
     if p.returncode != 0:
         print('SV validation failed at cargo-tv-summary')
         sys.exit(p.returncode)
-    log.write('l2_broker=NotImplemented\n')
+    p = subprocess.run(['python3', 'scripts/check-l2-broker-status.py', '.', '--summary-only'], cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=300)
+    log.write(p.stdout or '')
+    if p.returncode != 0:
+        print('SV validation failed at l2-broker-summary')
+        sys.exit(p.returncode)
 print(f"wrote {LOG}")

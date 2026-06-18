@@ -48,4 +48,4 @@ run runtime-state6-semantics python3 scripts/vac-runtime-state6-semantics-sv.py 
 run runtime-state7 python3 scripts/vac-runtime-state7-merged-audit-sv.py .
 printf '\nVAC v1.9 final SV gate: PASS\n'
 python3 scripts/check-cargo-tv.py . --summary-only
-printf 'l2_broker=NotImplemented\n'
+python3 scripts/check-l2-broker-status.py . --summary-only
