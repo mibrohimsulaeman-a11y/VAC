@@ -858,12 +858,16 @@ mod tests {
         spawn_background_auto_update_with_exe(&fake_vac, &cli)
             .expect("spawn background auto update");
 
-        let deadline = Instant::now() + Duration::from_secs(2);
-        while !log_path.exists() && Instant::now() < deadline {
+        let deadline = Instant::now() + Duration::from_secs(10);
+        let mut log = String::new();
+        while Instant::now() < deadline {
+            log = std::fs::read_to_string(&log_path).unwrap_or_default();
+            if log.contains("args=update --background") {
+                break;
+            }
             std::thread::sleep(Duration::from_millis(20));
         }
 
-        let log = std::fs::read_to_string(&log_path).expect("read background update log");
         assert!(log.contains("args=update --background"), "got: {log}");
     }
 
