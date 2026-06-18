@@ -362,10 +362,10 @@ pub fn evaluate_runtime_broker_mediated_record(
     if probe.intent_id.trim().is_empty() {
         return blocked("missing_broker_intent");
     }
-    if !probe
+    if probe
         .decision_id
         .as_ref()
-        .is_some_and(|value| !value.trim().is_empty())
+        .is_none_or(|value| value.trim().is_empty())
     {
         return blocked("execution_record_without_broker_decision");
     }
@@ -376,18 +376,18 @@ pub fn evaluate_runtime_broker_mediated_record(
         return blocked("stale_policy_snapshot_hash");
     }
     if probe.execution_mode == "mediated_l2"
-        && !probe
+        && probe
             .broker_record_hash
             .as_ref()
-            .is_some_and(|value| !value.trim().is_empty())
+            .is_none_or(|value| value.trim().is_empty())
     {
         return blocked("mediated_l2_without_broker_record_hash");
     }
     if probe.custody == "broker_attested"
-        && !probe
+        && probe
             .broker_signature_hash
             .as_ref()
-            .is_some_and(|value| !value.trim().is_empty())
+            .is_none_or(|value| value.trim().is_empty())
     {
         return blocked("broker_attested_without_broker_signature_hash");
     }
