@@ -757,33 +757,41 @@ mod tests {
         missing_decision.decision_id = None;
         let decision = evaluate_runtime_broker_mediated_record(&missing_decision);
         assert!(!decision.allow);
-        assert!(decision
-            .reason
-            .contains("execution_record_without_broker_decision"));
+        assert!(
+            decision
+                .reason
+                .contains("execution_record_without_broker_decision")
+        );
 
         let mut mediated_without_hash = broker_probe();
         mediated_without_hash.broker_record_hash = None;
         let mediated = evaluate_runtime_broker_mediated_record(&mediated_without_hash);
         assert!(!mediated.allow);
-        assert!(mediated
-            .reason
-            .contains("mediated_l2_without_broker_record_hash"));
+        assert!(
+            mediated
+                .reason
+                .contains("mediated_l2_without_broker_record_hash")
+        );
 
         let mut broker_attested_without_signature = broker_probe();
         broker_attested_without_signature.broker_signature_hash = None;
         let attested = evaluate_runtime_broker_mediated_record(&broker_attested_without_signature);
         assert!(!attested.allow);
-        assert!(attested
-            .reason
-            .contains("broker_attested_without_broker_signature_hash"));
+        assert!(
+            attested
+                .reason
+                .contains("broker_attested_without_broker_signature_hash")
+        );
 
         let mut injected_decision = broker_probe();
         injected_decision.tool_supplied_policy_decision = true;
         let injected = evaluate_runtime_broker_mediated_record(&injected_decision);
         assert!(!injected.allow);
-        assert!(injected
-            .reason
-            .contains("tool_supplied_policy_decision_rejected"));
+        assert!(
+            injected
+                .reason
+                .contains("tool_supplied_policy_decision_rejected")
+        );
 
         let mut stale_policy = broker_probe();
         stale_policy.policy_snapshot_hash = "sha256:old".to_string();
