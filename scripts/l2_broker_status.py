@@ -47,6 +47,8 @@ SOURCE_SCOPE_PATHS = [
     "docs/audit/VAC_L2_BROKER_P2_FIRST_SLICE.md",
     "docs/VAC_Init_Control_Plane_Spec_v1_9.md",
     "vac-rs/crates/runtime/vac-broker/src/envelope.rs",
+    "vac-rs/crates/foundation/vac-state/src/runtime_journal.rs",
+    ".vac/migrations/runtime-db/0001_runtime_journal.sql",
     ".vac/schemas/broker-envelope.schema.json",
 ]
 

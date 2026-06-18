@@ -13,6 +13,11 @@ REQUIRED_TABLES = [
     "runtime_plan_revisions",
     "runtime_validation_summaries",
     "runtime_evidence_hints",
+    "runtime_broker_intents",
+    "runtime_broker_decisions",
+    "runtime_broker_execution_records",
+    "runtime_broker_evidence_records",
+    "runtime_broker_denials",
     "runtime_specsync_proposals",
     "runtime_writer_leases",
     "runtime_lease_observations",
@@ -48,7 +53,7 @@ if not runtime_journal.is_file():
     errors.append("missing vac-state runtime_journal.rs source API")
 else:
     journal_src = runtime_journal.read_text(errors="ignore")
-    for token in ["RuntimeJournalOpenRequest", "RuntimeJournalEventDraft", "RuntimeJournalAppendDecision", "BEGIN IMMEDIATE", "runtime_journal_write_plan", "evaluate_runtime_event_append"]:
+    for token in ["RuntimeJournalOpenRequest", "RuntimeJournalEventDraft", "RuntimeJournalAppendDecision", "RuntimeBrokerMediatedRecordProbe", "BEGIN IMMEDIATE", "runtime_journal_write_plan", "evaluate_runtime_event_append", "evaluate_runtime_broker_mediated_record"]:
         if token not in journal_src:
             errors.append(f"runtime_journal.rs missing v1.9 operational API token: {token}")
 if (ROOT / ".vac/db/runtime.db").exists():

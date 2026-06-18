@@ -80,6 +80,11 @@ pub const RUNTIME_DB_REQUIRED_TABLES: &[&str] = &[
     "runtime_plan_revisions",
     "runtime_validation_summaries",
     "runtime_evidence_hints",
+    "runtime_broker_intents",
+    "runtime_broker_decisions",
+    "runtime_broker_execution_records",
+    "runtime_broker_evidence_records",
+    "runtime_broker_denials",
     "runtime_specsync_proposals",
     "runtime_writer_leases",
     "runtime_lease_observations",
@@ -334,6 +339,66 @@ pub fn evaluate_subprocess_runtime_db_mutation(
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RuntimeBrokerMediatedRecordProbe {
+    pub intent_id: String,
+    pub decision_id: Option<String>,
+    pub policy_snapshot_hash: String,
+    pub current_policy_snapshot_hash: String,
+    pub execution_mode: String,
+    pub custody: String,
+    pub broker_record_hash: Option<String>,
+    pub broker_signature_hash: Option<String>,
+    pub tool_supplied_policy_decision: bool,
+}
+
+#[must_use]
+pub fn evaluate_runtime_broker_mediated_record(
+    probe: &RuntimeBrokerMediatedRecordProbe,
+) -> RuntimeJournalAppendDecision {
+    if probe.tool_supplied_policy_decision {
+        return blocked("tool_supplied_policy_decision_rejected");
+    }
+    if probe.intent_id.trim().is_empty() {
+        return blocked("missing_broker_intent");
+    }
+    if !probe
+        .decision_id
+        .as_ref()
+        .is_some_and(|value| !value.trim().is_empty())
+    {
+        return blocked("execution_record_without_broker_decision");
+    }
+    if probe.policy_snapshot_hash.trim().is_empty() {
+        return blocked("missing_policy_snapshot_hash");
+    }
+    if probe.policy_snapshot_hash != probe.current_policy_snapshot_hash {
+        return blocked("stale_policy_snapshot_hash");
+    }
+    if probe.execution_mode == "mediated_l2"
+        && !probe
+            .broker_record_hash
+            .as_ref()
+            .is_some_and(|value| !value.trim().is_empty())
+    {
+        return blocked("mediated_l2_without_broker_record_hash");
+    }
+    if probe.custody == "broker_attested"
+        && !probe
+            .broker_signature_hash
+            .as_ref()
+            .is_some_and(|value| !value.trim().is_empty())
+    {
+        return blocked("broker_attested_without_broker_signature_hash");
+    }
+    RuntimeJournalAppendDecision {
+        allow: true,
+        reason: "broker-mediated runtime journal record passes schema boundary".to_string(),
+        required_transaction: "BEGIN IMMEDIATE".to_string(),
+        writes_manifest_bound_record: true,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -389,6 +454,11 @@ mod tests {
             "runtime_plan_revisions",
             "runtime_validation_summaries",
             "runtime_evidence_hints",
+            "runtime_broker_intents",
+            "runtime_broker_decisions",
+            "runtime_broker_execution_records",
+            "runtime_broker_evidence_records",
+            "runtime_broker_denials",
             "runtime_specsync_proposals",
         ] {
             let statement = create_table_statement(RUNTIME_DB_MIGRATION_SQL, table);
@@ -405,6 +475,35 @@ mod tests {
                 "{table} must carry compiled_snapshot_id for snapshot provenance"
             );
         }
+    }
+
+    #[test]
+    fn runtime_broker_mediated_schema_constraints_are_fail_closed() {
+        let broker_intents =
+            create_table_statement(RUNTIME_DB_MIGRATION_SQL, "runtime_broker_intents");
+        assert!(broker_intents.contains("intent_id TEXT PRIMARY KEY"));
+        assert!(broker_intents.contains("UNIQUE(session_id, seq)"));
+
+        let broker_decisions =
+            create_table_statement(RUNTIME_DB_MIGRATION_SQL, "runtime_broker_decisions");
+        assert!(broker_decisions.contains("FOREIGN KEY(intent_id)"));
+        assert!(broker_decisions.contains("policy_snapshot_hash TEXT NOT NULL"));
+
+        let execution_records =
+            create_table_statement(RUNTIME_DB_MIGRATION_SQL, "runtime_broker_execution_records");
+        assert!(execution_records.contains("decision_id TEXT NOT NULL"));
+        assert!(execution_records.contains("FOREIGN KEY(decision_id)"));
+        assert!(execution_records.contains("execution_mode != 'mediated_l2'"));
+        assert!(execution_records.contains("broker_record_hash IS NOT NULL"));
+
+        let evidence_records =
+            create_table_statement(RUNTIME_DB_MIGRATION_SQL, "runtime_broker_evidence_records");
+        assert!(evidence_records.contains("custody != 'broker_attested'"));
+        assert!(evidence_records.contains("broker_signature_hash IS NOT NULL"));
+
+        let denials = create_table_statement(RUNTIME_DB_MIGRATION_SQL, "runtime_broker_denials");
+        assert!(denials.contains("decision_id TEXT NOT NULL"));
+        assert!(denials.contains("FOREIGN KEY(decision_id)"));
     }
 
     #[test]
@@ -498,6 +597,78 @@ mod tests {
             Some("missing_or_invalid_proof")
         );
         assert!(derived.wording.contains("not tamper-evident"));
+    }
+
+    fn broker_probe() -> RuntimeBrokerMediatedRecordProbe {
+        RuntimeBrokerMediatedRecordProbe {
+            intent_id: "intent.1".to_string(),
+            decision_id: Some("decision.1".to_string()),
+            policy_snapshot_hash: "sha256:policy".to_string(),
+            current_policy_snapshot_hash: "sha256:policy".to_string(),
+            execution_mode: "mediated_l2".to_string(),
+            custody: "broker_attested".to_string(),
+            broker_record_hash: Some("sha256:broker-record".to_string()),
+            broker_signature_hash: Some("sha256:broker-signature".to_string()),
+            tool_supplied_policy_decision: false,
+        }
+    }
+
+    #[test]
+    fn runtime_broker_mediated_record_negative_fixtures_fail_closed() {
+        let duplicate_intent_schema =
+            create_table_statement(RUNTIME_DB_MIGRATION_SQL, "runtime_broker_intents");
+        assert!(duplicate_intent_schema.contains("intent_id TEXT PRIMARY KEY"));
+
+        let mut missing_decision = broker_probe();
+        missing_decision.decision_id = None;
+        let decision = evaluate_runtime_broker_mediated_record(&missing_decision);
+        assert!(!decision.allow);
+        assert!(
+            decision
+                .reason
+                .contains("execution_record_without_broker_decision")
+        );
+
+        let mut mediated_without_hash = broker_probe();
+        mediated_without_hash.broker_record_hash = None;
+        let mediated = evaluate_runtime_broker_mediated_record(&mediated_without_hash);
+        assert!(!mediated.allow);
+        assert!(
+            mediated
+                .reason
+                .contains("mediated_l2_without_broker_record_hash")
+        );
+
+        let mut broker_attested_without_signature = broker_probe();
+        broker_attested_without_signature.broker_signature_hash = None;
+        let attested = evaluate_runtime_broker_mediated_record(&broker_attested_without_signature);
+        assert!(!attested.allow);
+        assert!(
+            attested
+                .reason
+                .contains("broker_attested_without_broker_signature_hash")
+        );
+
+        let mut injected_decision = broker_probe();
+        injected_decision.tool_supplied_policy_decision = true;
+        let injected = evaluate_runtime_broker_mediated_record(&injected_decision);
+        assert!(!injected.allow);
+        assert!(
+            injected
+                .reason
+                .contains("tool_supplied_policy_decision_rejected")
+        );
+
+        let mut stale_policy = broker_probe();
+        stale_policy.policy_snapshot_hash = "sha256:old".to_string();
+        let stale = evaluate_runtime_broker_mediated_record(&stale_policy);
+        assert!(!stale.allow);
+        assert!(stale.reason.contains("stale_policy_snapshot_hash"));
+
+        let current = evaluate_runtime_broker_mediated_record(&broker_probe());
+        assert!(current.allow);
+        assert_eq!(current.required_transaction, "BEGIN IMMEDIATE");
+        assert!(current.writes_manifest_bound_record);
     }
 
     #[test]

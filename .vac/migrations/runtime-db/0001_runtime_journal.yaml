@@ -12,3 +12,6 @@ verification_command:
 notes:
   - runtime.db is ignored local journal state, not source authority.
   - every runtime record that can authorize future work carries manifest_set_hash and git state.
+
+  - P2.2 broker-mediated intent/decision/execution/evidence/denial tables are schema-only until broker mediation is implemented.
+  - mediated_l2 records require broker_record_hash; broker_attested records require broker_signature_hash.

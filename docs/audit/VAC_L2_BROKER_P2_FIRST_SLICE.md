@@ -48,3 +48,18 @@ vac-rs/crates/runtime/vac-broker/src/envelope.rs
 Executable fixtures cover canonical intent hashing and negative injection cases for tool-supplied policy decision, tool-supplied mediated execution mode, self-assigned broker custody, missing policy snapshot, missing approval/read-plan binding, missing broker record hash for mediated evidence, and missing broker signature hash for broker-attested evidence.
 
 This still does not implement broker-supervised OS execution. The aggregate broker status remains `NotImplemented` until a current mediated execution proof exists and the L2 verifier accepts it.
+
+
+## P2.2 runtime journal mediated-record schema
+
+P2.2 extends the runtime journal source schema with broker-mediated tables while keeping execution claims non-promotional:
+
+```text
+runtime_broker_intents
+runtime_broker_decisions
+runtime_broker_execution_records
+runtime_broker_evidence_records
+runtime_broker_denials
+```
+
+The schema and reducer fixtures are fail-closed for duplicate intent IDs, execution records without broker decisions, mediated_l2 records without broker_record_hash, broker_attested records without broker_signature_hash, tool-supplied policy decisions, and stale policy snapshots. These records are storage substrate only; broker-supervised filesystem/process/network execution is still future P2 work, so `l2_broker=NotImplemented` remains the correct aggregate status.
