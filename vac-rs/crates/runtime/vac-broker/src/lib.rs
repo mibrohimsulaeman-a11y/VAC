@@ -1,6 +1,7 @@
 pub mod auth;
 pub mod checkpoint_store;
 pub mod context;
+pub mod envelope;
 pub mod error;
 pub mod event_log;
 pub mod idempotency;

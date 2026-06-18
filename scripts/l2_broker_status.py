@@ -46,6 +46,8 @@ SOURCE_SCOPE_PATHS = [
     "scripts/compile-vac-registry-sv.py",
     "docs/audit/VAC_L2_BROKER_P2_FIRST_SLICE.md",
     "docs/VAC_Init_Control_Plane_Spec_v1_9.md",
+    "vac-rs/crates/runtime/vac-broker/src/envelope.rs",
+    ".vac/schemas/broker-envelope.schema.json",
 ]
 
 SCAN_ROOTS = [

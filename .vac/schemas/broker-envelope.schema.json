@@ -1,0 +1,207 @@
+{
+  "$id": "vac.broker_envelope.schema",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "definitions": {
+    "approvalBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "approval_ref": {
+          "type": ["string", "null"]
+        },
+        "preimage_ref": {
+          "type": ["string", "null"]
+        },
+        "read_plan_ref": {
+          "type": ["string", "null"]
+        }
+      },
+      "required": ["approval_ref", "read_plan_ref", "preimage_ref"],
+      "type": "object"
+    },
+    "custody": {
+      "enum": [
+        "local_only",
+        "self_promoted",
+        "ci_attested",
+        "broker_attested",
+        "external_attested"
+      ],
+      "type": "string"
+    },
+    "decisionVerdict": {
+      "enum": ["allow", "deny"],
+      "type": "string"
+    },
+    "executionMode": {
+      "default": "observed_l1",
+      "enum": ["observed_l1", "mediated_l2"],
+      "type": "string"
+    },
+    "hash": {
+      "pattern": "^sha256:[0-9A-Za-z._:-]+$",
+      "type": "string"
+    },
+    "intent": {
+      "additionalProperties": false,
+      "properties": {
+        "actor": {
+          "$ref": "#/$defs/subject"
+        },
+        "approval_ref": {
+          "type": ["string", "null"]
+        },
+        "capability_id": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "execution_mode": {
+          "const": "observed_l1"
+        },
+        "intent_id": {
+          "type": "string"
+        },
+        "operation_kind": {
+          "$ref": "#/$defs/operationKind"
+        },
+        "policy_snapshot_hash": {
+          "type": ["string", "null"]
+        },
+        "preimage_ref": {
+          "type": ["string", "null"]
+        },
+        "read_plan_ref": {
+          "type": ["string", "null"]
+        },
+        "resource_kind": {
+          "$ref": "#/$defs/resourceKind"
+        },
+        "resource_ref": {
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "vac.broker.envelope.v1"
+        },
+        "session_id": {
+          "type": "string"
+        },
+        "structured_args_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "tool_name": {
+          "type": "string"
+        },
+        "turn_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "intent_id",
+        "session_id",
+        "turn_id",
+        "actor",
+        "capability_id",
+        "tool_name",
+        "operation_kind",
+        "resource_kind",
+        "resource_ref",
+        "structured_args_hash",
+        "policy_snapshot_hash",
+        "approval_ref",
+        "read_plan_ref",
+        "preimage_ref",
+        "created_at"
+      ],
+      "type": "object"
+    },
+    "operationKind": {
+      "enum": [
+        "filesystem_read",
+        "filesystem_create",
+        "filesystem_str_replace",
+        "filesystem_remove",
+        "process_spawn",
+        "network_http_request",
+        "remote_process_io"
+      ],
+      "type": "string"
+    },
+    "resourceKind": {
+      "enum": ["filesystem", "process", "network", "credential_bearing_remote_io"],
+      "type": "string"
+    },
+    "subject": {
+      "additionalProperties": false,
+      "properties": {
+        "subject_id": {
+          "type": "string"
+        },
+        "subject_kind": {
+          "enum": ["agent", "broker", "operator", "system"],
+          "type": "string"
+        }
+      },
+      "required": ["subject_kind", "subject_id"],
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "approvalBinding": {
+      "$ref": "#/definitions/approvalBinding"
+    },
+    "custody": {
+      "$ref": "#/definitions/custody"
+    },
+    "decisionVerdict": {
+      "$ref": "#/definitions/decisionVerdict"
+    },
+    "executionMode": {
+      "$ref": "#/definitions/executionMode"
+    },
+    "hash": {
+      "$ref": "#/definitions/hash"
+    },
+    "intent": {
+      "$ref": "#/definitions/intent"
+    },
+    "operationKind": {
+      "$ref": "#/definitions/operationKind"
+    },
+    "resourceKind": {
+      "$ref": "#/definitions/resourceKind"
+    },
+    "subject": {
+      "$ref": "#/definitions/subject"
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/intent"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "created_at": {
+          "type": "string"
+        },
+        "decision": {
+          "type": "object"
+        },
+        "execution_mode": {
+          "const": "mediated_l2"
+        },
+        "intent": {
+          "$ref": "#/$defs/intent"
+        },
+        "schema_version": {
+          "const": "vac.broker.envelope.v1"
+        }
+      },
+      "required": ["schema_version", "intent", "decision", "execution_mode", "created_at"],
+      "type": "object"
+    }
+  ],
+  "title": "VAC broker envelope v1"
+}

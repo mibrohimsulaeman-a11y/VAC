@@ -32,3 +32,19 @@ Future L2 implementation requires a current proof at:
 A future `Implemented` result must prove mediated execution rather than cooperative local execution. Required proof dimensions are structured intent only, broker process supervision, filesystem mediation, process-spawn mediation, network mediation, credential redaction before model exposure, mediated runtime-journal record, broker signature hash, direct OS bypass rejection, and rejection of tool-supplied policy decisions.
 
 The current gate passes only while the aggregate status remains `NotImplemented` and no scanned source/status surface claims an L2 pass.
+
+
+## P2.1 typed broker envelope contract
+
+P2.1 adds the typed envelope contract that later broker-mediated filesystem, process, network, and credential-bearing remote IO records must use. The contract is intentionally non-promotional: tool/MCP payloads can submit only structured intent, while broker-controlled fields such as policy decisions, mediated execution mode, broker custody, broker record hashes, and broker signatures are rejected at the intent boundary.
+
+Implemented artifacts:
+
+```text
+vac-rs/crates/runtime/vac-broker/src/envelope.rs
+.vac/schemas/broker-envelope.schema.json
+```
+
+Executable fixtures cover canonical intent hashing and negative injection cases for tool-supplied policy decision, tool-supplied mediated execution mode, self-assigned broker custody, missing policy snapshot, missing approval/read-plan binding, missing broker record hash for mediated evidence, and missing broker signature hash for broker-attested evidence.
+
+This still does not implement broker-supervised OS execution. The aggregate broker status remains `NotImplemented` until a current mediated execution proof exists and the L2 verifier accepts it.
