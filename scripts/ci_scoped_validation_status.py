@@ -39,6 +39,8 @@ SOURCE_SCOPE_PATHS = [
     "scripts/ci_scoped_validation_status.py",
     "scripts/check-ci-scoped-validation-proof.py",
     "scripts/ci-scoped-validation-proof.py",
+    "scripts/l2_broker_status.py",
+    "scripts/check-l2-broker-status.py",
     "scripts/check-cargo-tv.py",
     "scripts/cargo_tv_status.py",
     "scripts/vac-v19-final-sv-gate.sh",
@@ -48,6 +50,7 @@ SOURCE_SCOPE_PATHS = [
     "scripts/check-external-provider-remote-process-io-e2e.py",
     "scripts/ci-external-provider-remote-process-io-proof.py",
     "docs/audit/VAC_CI_SCOPED_VALIDATION_PROOF.md",
+    "docs/audit/VAC_L2_BROKER_P2_FIRST_SLICE.md",
 ]
 
 

@@ -1,0 +1,34 @@
+# VAC L2 Broker P2 First Slice
+
+Status source: fail-closed L2 broker boundary verifier.
+
+This slice does not implement L2 broker mediation. It adds an executable status gate that preserves the current aggregate claim and prevents premature promotion of L1/CI-attested evidence into L2.
+
+```text
+l2_broker=NotImplemented
+l2_broker_claim_gate=SV-Pass
+l2_broker_execution=not_mediated
+l2_broker_custody=local_only
+```
+
+Verifier:
+
+```text
+scripts/check-l2-broker-status.py
+```
+
+Shared status logic:
+
+```text
+scripts/l2_broker_status.py
+```
+
+Future L2 implementation requires a current proof at:
+
+```text
+.vac/evidence/l2-broker-mediated-execution-current.json
+```
+
+A future `Implemented` result must prove mediated execution rather than cooperative local execution. Required proof dimensions are structured intent only, broker process supervision, filesystem mediation, process-spawn mediation, network mediation, credential redaction before model exposure, mediated runtime-journal record, broker signature hash, direct OS bypass rejection, and rejection of tool-supplied policy decisions.
+
+The current gate passes only while the aggregate status remains `NotImplemented` and no scanned source/status surface claims an L2 pass.

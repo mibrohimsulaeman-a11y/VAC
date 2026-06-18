@@ -24,6 +24,7 @@ run tui-lifecycle-static python3 scripts/check-tui-lifecycle-e2e-static.py .
 run tui-e2e-coverage python3 scripts/check-vac-tui-e2e-coverage.py .
 run external-provider-remote-process-io python3 scripts/check-external-provider-remote-process-io-e2e.py .
 run scoped-validation-proof python3 scripts/check-ci-scoped-validation-proof.py .
+run l2-broker-status python3 scripts/check-l2-broker-status.py .
 run confirmed-intent-coverage python3 scripts/check-confirmed-intent-coverage.py .
 run confirmed-intent-negative-fixtures python3 scripts/check-confirmed-intent-negative-fixtures.py .
 run confirmed-intent-status python3 scripts/refresh-confirmed-intent-status.py .

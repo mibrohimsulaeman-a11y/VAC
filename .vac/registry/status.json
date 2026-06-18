@@ -23,15 +23,15 @@
     "execution": "observed_l1",
     "proof_hash": null,
     "proof_ref": null,
-    "source_scope_hash": "sha256:add3acadc0232f9f7e96486d00104b0797ad5fb7b5859f8ea101f4e8a26c9a79",
+    "source_scope_hash": "sha256:fe4435093ed771aa8004a5dbef51827ec746911513cca290a355748638691cbf",
     "status": "TV-Pending"
   },
-  "compiled_snapshot_hash": "sha256:2ca1f0905f609fbd39b2162a72c786bebada7752fffa1a1dfa726d3b4ad79e51",
+  "compiled_snapshot_hash": "sha256:7f4c6c6b79ff43692e11f931438b5f7635c7b7ca29de722351b6be1de57db9c5",
   "control_plane": {
     "audit": "jcs_json",
     "authoring": "yaml",
     "capabilities_snapshot_hash": "sha256:d2b8bf2cdae622bbf711bb32e89c35a5863bb206ac048dbdfc681e693aaafd33",
-    "compiled_snapshot_hash": "sha256:2ca1f0905f609fbd39b2162a72c786bebada7752fffa1a1dfa726d3b4ad79e51",
+    "compiled_snapshot_hash": "sha256:7f4c6c6b79ff43692e11f931438b5f7635c7b7ca29de722351b6be1de57db9c5",
     "compiled_snapshot_location": ".vac/cache/compiled",
     "compiled_snapshots_current": true,
     "generated_mirror_location": ".vac/registry/compiled",
@@ -70,6 +70,19 @@
   "generated_at": "1970-01-01T00:00:00Z",
   "id": "status.workspace.current",
   "kind": "registry_status",
+  "l2_broker": {
+    "claim_gate": "SV-Pass",
+    "custody": "local_only",
+    "errors": [],
+    "execution": "not_mediated",
+    "proof_hash": null,
+    "proof_ref": null,
+    "reasons": [
+      "missing_l2_broker_mediated_execution_proof"
+    ],
+    "source_scope_hash": "sha256:67066e8c6762530cf2994d345a556a796c48cecd6a59e2d1aeb97ddd79907708",
+    "status": "NotImplemented"
+  },
   "model": null,
   "product": "VAC",
   "profile": "default",
@@ -120,7 +133,7 @@
   "workspace": {
     "conformance_level": "L1",
     "enforcement_level": "L1",
-    "file_count": 785,
+    "file_count": 788,
     "rust_crate_count": 38
   },
   "rust_ast_index": {

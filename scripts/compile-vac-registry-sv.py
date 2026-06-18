@@ -28,6 +28,7 @@ from typing import Any
 import yaml
 from cargo_tv_status import REQUIRED_CHECKS, TV_PASS, cargo_tv_summary
 from ci_scoped_validation_status import ci_scoped_validation_summary
+from l2_broker_status import l2_broker_summary
 
 ROOT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 NOW = os.environ.get("VAC_SV_GENERATED_AT", "1970-01-01T00:00:00Z")
@@ -622,6 +623,7 @@ def compile_workspace(compiled_caps: dict[str, Any], runtime_jobs: dict[str, Any
     workspace_hash = sha256_file(ROOT / ".vac/cache/compiled/workspace.json")
     cargo_tv = cargo_tv_summary(ROOT)
     ci_validation = ci_scoped_validation_summary(ROOT)
+    l2_broker = l2_broker_summary(ROOT)
     cargo_tv_status = cargo_tv.get("status")
     cargo_tv_source = (
         "canonical compiled capabilities/current.json; cargo TV current-run proof"
@@ -692,6 +694,17 @@ def compile_workspace(compiled_caps: dict[str, Any], runtime_jobs: dict[str, Any
             "proof_hash": ci_validation.get("proof_hash"),
             "source_scope_hash": ci_validation.get("source_scope_hash"),
             "errors": ci_validation.get("errors", []),
+        },
+        "l2_broker": {
+            "status": l2_broker.get("status"),
+            "claim_gate": l2_broker.get("claim_gate"),
+            "execution": l2_broker.get("execution"),
+            "custody": l2_broker.get("custody"),
+            "proof_ref": l2_broker.get("proof_ref"),
+            "proof_hash": l2_broker.get("proof_hash"),
+            "source_scope_hash": l2_broker.get("source_scope_hash"),
+            "errors": l2_broker.get("errors", []),
+            "reasons": l2_broker.get("reasons", []),
         },
         "tv_pending": cargo_tv.get("tv_pending", REQUIRED_CHECKS),
     }
