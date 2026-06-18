@@ -275,11 +275,90 @@ pub struct RuntimeDerivedTrust {
     pub wording: String,
 }
 
+const TRUST_EXECUTION_OBSERVED_L1: &str = "observed_l1";
+const TRUST_EXECUTION_MEDIATED_L2: &str = "mediated_l2";
+
+const TRUST_CUSTODY_LOCAL_ONLY: &str = "local_only";
+const TRUST_CUSTODY_SELF_PROMOTED: &str = "self_promoted";
+const TRUST_CUSTODY_CI_ATTESTED: &str = "ci_attested";
+const TRUST_CUSTODY_BROKER_ATTESTED: &str = "broker_attested";
+const TRUST_CUSTODY_EXTERNAL_ATTESTED: &str = "external_attested";
+
+const TRUST_WORDING_LOCAL_SELF_REPORTED: &str = "local self-reported trace; integrity hint only";
+const TRUST_WORDING_SHARED_COOPERATIVE: &str = "shared cooperative record; not tamper-evident";
+const TRUST_WORDING_CI_SELF_REPORT: &str = "CI-attested self-report; execution not mediated";
+const TRUST_WORDING_EXTERNAL_SELF_REPORT: &str =
+    "externally timestamped self-report; existence not truth";
+const TRUST_WORDING_BROKER_LOCAL_RECORD: &str = "broker-mediated action with local-only record";
+const TRUST_WORDING_CI_BROKER_MEDIATED: &str =
+    "CI-attested broker-mediated record if proof validates both";
+const TRUST_WORDING_BROKER_ATTESTED: &str = "broker-attested mediated execution";
+const TRUST_WORDING_EXTERNAL_BROKER_MEDIATED: &str = "externally anchored broker-mediated evidence";
+const TRUST_WORDING_EXPLICIT_SURFACE_REQUIRED: &str =
+    "derived trust claim requires explicit surface wording";
+
+struct RuntimeTrustWordingRow {
+    execution: &'static str,
+    custody: &'static str,
+    wording: &'static str,
+}
+
+const TRUST_WORDING_MATRIX: &[RuntimeTrustWordingRow] = &[
+    RuntimeTrustWordingRow {
+        execution: TRUST_EXECUTION_OBSERVED_L1,
+        custody: TRUST_CUSTODY_LOCAL_ONLY,
+        wording: TRUST_WORDING_LOCAL_SELF_REPORTED,
+    },
+    RuntimeTrustWordingRow {
+        execution: TRUST_EXECUTION_OBSERVED_L1,
+        custody: TRUST_CUSTODY_SELF_PROMOTED,
+        wording: TRUST_WORDING_SHARED_COOPERATIVE,
+    },
+    RuntimeTrustWordingRow {
+        execution: TRUST_EXECUTION_OBSERVED_L1,
+        custody: TRUST_CUSTODY_CI_ATTESTED,
+        wording: TRUST_WORDING_CI_SELF_REPORT,
+    },
+    RuntimeTrustWordingRow {
+        execution: TRUST_EXECUTION_OBSERVED_L1,
+        custody: TRUST_CUSTODY_EXTERNAL_ATTESTED,
+        wording: TRUST_WORDING_EXTERNAL_SELF_REPORT,
+    },
+    RuntimeTrustWordingRow {
+        execution: TRUST_EXECUTION_MEDIATED_L2,
+        custody: TRUST_CUSTODY_LOCAL_ONLY,
+        wording: TRUST_WORDING_BROKER_LOCAL_RECORD,
+    },
+    RuntimeTrustWordingRow {
+        execution: TRUST_EXECUTION_MEDIATED_L2,
+        custody: TRUST_CUSTODY_CI_ATTESTED,
+        wording: TRUST_WORDING_CI_BROKER_MEDIATED,
+    },
+    RuntimeTrustWordingRow {
+        execution: TRUST_EXECUTION_MEDIATED_L2,
+        custody: TRUST_CUSTODY_BROKER_ATTESTED,
+        wording: TRUST_WORDING_BROKER_ATTESTED,
+    },
+    RuntimeTrustWordingRow {
+        execution: TRUST_EXECUTION_MEDIATED_L2,
+        custody: TRUST_CUSTODY_EXTERNAL_ATTESTED,
+        wording: TRUST_WORDING_EXTERNAL_BROKER_MEDIATED,
+    },
+];
+
 fn custody_requires_proof(custody: &str) -> bool {
     matches!(
         custody,
-        "ci_attested" | "broker_attested" | "external_attested"
+        TRUST_CUSTODY_CI_ATTESTED | TRUST_CUSTODY_BROKER_ATTESTED | TRUST_CUSTODY_EXTERNAL_ATTESTED
     )
+}
+
+#[must_use]
+fn trust_wording(execution: &str, custody: &str) -> &'static str {
+    TRUST_WORDING_MATRIX
+        .iter()
+        .find(|row| row.execution == execution && row.custody == custody)
+        .map_or(TRUST_WORDING_EXPLICIT_SURFACE_REQUIRED, |row| row.wording)
 }
 
 #[must_use]
@@ -290,27 +369,19 @@ pub fn derive_runtime_trust_at_read(
     if custody_requires_proof(&claim.custody) && !proof_material_verified {
         return RuntimeDerivedTrust {
             execution: claim.execution.clone(),
-            custody: "self_promoted".to_string(),
+            custody: TRUST_CUSTODY_SELF_PROMOTED.to_string(),
             derivation: "verified_downgrade".to_string(),
             downgrade_reason: Some("missing_or_invalid_proof".to_string()),
-            wording: "shared cooperative record; not tamper-evident".to_string(),
+            wording: TRUST_WORDING_SHARED_COOPERATIVE.to_string(),
         };
     }
-
-    let wording = match (claim.execution.as_str(), claim.custody.as_str()) {
-        ("observed_l1", "local_only") => "local self-reported trace; integrity hint only",
-        ("observed_l1", "self_promoted") => "shared cooperative record; not tamper-evident",
-        ("observed_l1", "ci_attested") => "CI-attested self-report; execution not mediated",
-        ("mediated_l2", "broker_attested") => "broker-attested mediated execution",
-        _ => "derived trust claim requires explicit surface wording",
-    };
 
     RuntimeDerivedTrust {
         execution: claim.execution.clone(),
         custody: claim.custody.clone(),
         derivation: "verified".to_string(),
         downgrade_reason: None,
-        wording: wording.to_string(),
+        wording: trust_wording(&claim.execution, &claim.custody).to_string(),
     }
 }
 
@@ -583,20 +654,83 @@ mod tests {
     }
 
     #[test]
+    fn derived_trust_uses_v19_claim_language_matrix() {
+        let cases = [
+            (
+                TRUST_EXECUTION_OBSERVED_L1,
+                TRUST_CUSTODY_LOCAL_ONLY,
+                TRUST_WORDING_LOCAL_SELF_REPORTED,
+            ),
+            (
+                TRUST_EXECUTION_OBSERVED_L1,
+                TRUST_CUSTODY_SELF_PROMOTED,
+                TRUST_WORDING_SHARED_COOPERATIVE,
+            ),
+            (
+                TRUST_EXECUTION_OBSERVED_L1,
+                TRUST_CUSTODY_CI_ATTESTED,
+                TRUST_WORDING_CI_SELF_REPORT,
+            ),
+            (
+                TRUST_EXECUTION_OBSERVED_L1,
+                TRUST_CUSTODY_EXTERNAL_ATTESTED,
+                TRUST_WORDING_EXTERNAL_SELF_REPORT,
+            ),
+            (
+                TRUST_EXECUTION_MEDIATED_L2,
+                TRUST_CUSTODY_LOCAL_ONLY,
+                TRUST_WORDING_BROKER_LOCAL_RECORD,
+            ),
+            (
+                TRUST_EXECUTION_MEDIATED_L2,
+                TRUST_CUSTODY_CI_ATTESTED,
+                TRUST_WORDING_CI_BROKER_MEDIATED,
+            ),
+            (
+                TRUST_EXECUTION_MEDIATED_L2,
+                TRUST_CUSTODY_BROKER_ATTESTED,
+                TRUST_WORDING_BROKER_ATTESTED,
+            ),
+            (
+                TRUST_EXECUTION_MEDIATED_L2,
+                TRUST_CUSTODY_EXTERNAL_ATTESTED,
+                TRUST_WORDING_EXTERNAL_BROKER_MEDIATED,
+            ),
+        ];
+
+        assert_eq!(TRUST_WORDING_MATRIX.len(), cases.len());
+
+        for (execution, custody, wording) in cases {
+            let claim = RuntimeTrustClaim {
+                execution: execution.to_string(),
+                custody: custody.to_string(),
+                proof_ref: Some("proof.valid".to_string()),
+            };
+            let derived = derive_runtime_trust_at_read(&claim, true);
+
+            assert_eq!(derived.execution, execution);
+            assert_eq!(derived.custody, custody);
+            assert_eq!(derived.derivation, "verified");
+            assert!(derived.downgrade_reason.is_none());
+            assert_eq!(derived.wording, wording);
+        }
+    }
+
+    #[test]
     fn derived_trust_downgrades_unverified_attestation_at_read_time() {
         let claim = RuntimeTrustClaim {
-            execution: "observed_l1".to_string(),
-            custody: "ci_attested".to_string(),
+            execution: TRUST_EXECUTION_OBSERVED_L1.to_string(),
+            custody: TRUST_CUSTODY_CI_ATTESTED.to_string(),
             proof_ref: Some("proof.missing".to_string()),
         };
         let derived = derive_runtime_trust_at_read(&claim, false);
-        assert_eq!(derived.custody, "self_promoted");
+        assert_eq!(derived.custody, TRUST_CUSTODY_SELF_PROMOTED);
         assert_eq!(derived.derivation, "verified_downgrade");
         assert_eq!(
             derived.downgrade_reason.as_deref(),
             Some("missing_or_invalid_proof")
         );
-        assert!(derived.wording.contains("not tamper-evident"));
+        assert_eq!(derived.wording, TRUST_WORDING_SHARED_COOPERATIVE);
     }
 
     fn broker_probe() -> RuntimeBrokerMediatedRecordProbe {
@@ -623,41 +757,33 @@ mod tests {
         missing_decision.decision_id = None;
         let decision = evaluate_runtime_broker_mediated_record(&missing_decision);
         assert!(!decision.allow);
-        assert!(
-            decision
-                .reason
-                .contains("execution_record_without_broker_decision")
-        );
+        assert!(decision
+            .reason
+            .contains("execution_record_without_broker_decision"));
 
         let mut mediated_without_hash = broker_probe();
         mediated_without_hash.broker_record_hash = None;
         let mediated = evaluate_runtime_broker_mediated_record(&mediated_without_hash);
         assert!(!mediated.allow);
-        assert!(
-            mediated
-                .reason
-                .contains("mediated_l2_without_broker_record_hash")
-        );
+        assert!(mediated
+            .reason
+            .contains("mediated_l2_without_broker_record_hash"));
 
         let mut broker_attested_without_signature = broker_probe();
         broker_attested_without_signature.broker_signature_hash = None;
         let attested = evaluate_runtime_broker_mediated_record(&broker_attested_without_signature);
         assert!(!attested.allow);
-        assert!(
-            attested
-                .reason
-                .contains("broker_attested_without_broker_signature_hash")
-        );
+        assert!(attested
+            .reason
+            .contains("broker_attested_without_broker_signature_hash"));
 
         let mut injected_decision = broker_probe();
         injected_decision.tool_supplied_policy_decision = true;
         let injected = evaluate_runtime_broker_mediated_record(&injected_decision);
         assert!(!injected.allow);
-        assert!(
-            injected
-                .reason
-                .contains("tool_supplied_policy_decision_rejected")
-        );
+        assert!(injected
+            .reason
+            .contains("tool_supplied_policy_decision_rejected"));
 
         let mut stale_policy = broker_probe();
         stale_policy.policy_snapshot_hash = "sha256:old".to_string();
