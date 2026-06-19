@@ -198,36 +198,11 @@ const MEMORY_FORBIDDEN_CLAIM_RAISE_READINESS: &str = "raise_readiness";
 const MEMORY_FORBIDDEN_CLAIM_OVERRIDE_OWNERSHIP: &str = "override_ownership";
 const MEMORY_FORBIDDEN_CLAIM_RELAX_POLICY: &str = "relax_policy";
 
-pub const ACQUIRE_WRITER_LEASE_SQL: &str = concat!(
-    "BEGIN IMMEDIATE; ",
-    "INSERT INTO runtime_writer_leases(",
-    "workspace_id, holder_id, lease_reason, acquired_at, heartbeat_at, heartbeat_counter, session_id",
-    ") VALUES (?1, ?2, ?3, ?4, ?4, 1, ?5) ",
-    "ON CONFLICT(workspace_id) DO UPDATE SET ",
-    "holder_id=excluded.holder_id, ",
-    "lease_reason=excluded.lease_reason, ",
-    "heartbeat_at=excluded.heartbeat_at, ",
-    "heartbeat_counter=runtime_writer_leases.heartbeat_counter + 1, ",
-    "session_id=excluded.session_id ",
-    "WHERE runtime_writer_leases.heartbeat_counter = ?6;",
-);
+pub const ACQUIRE_WRITER_LEASE_SQL: &str = "BEGIN IMMEDIATE; INSERT INTO runtime_writer_leases(workspace_id, holder_id, lease_reason, acquired_at, heartbeat_at, heartbeat_counter, session_id) VALUES (?1, ?2, ?3, ?4, ?4, 1, ?5) ON CONFLICT(workspace_id) DO UPDATE SET holder_id=excluded.holder_id, lease_reason=excluded.lease_reason, heartbeat_at=excluded.heartbeat_at, heartbeat_counter=runtime_writer_leases.heartbeat_counter + 1, session_id=excluded.session_id WHERE runtime_writer_leases.heartbeat_counter = ?6;";
 
-pub const ALLOCATE_EVENT_SEQUENCE_SQL: &str = concat!(
-    "INSERT INTO runtime_session_sequences(session_id, next_seq, updated_at) ",
-    "VALUES (?1, 2, ?2) ",
-    "ON CONFLICT(session_id) DO UPDATE SET ",
-    "next_seq=runtime_session_sequences.next_seq + 1, ",
-    "updated_at=excluded.updated_at ",
-    "RETURNING next_seq - 1;",
-);
+pub const ALLOCATE_EVENT_SEQUENCE_SQL: &str = "INSERT INTO runtime_session_sequences(session_id, next_seq, updated_at) VALUES (?1, 2, ?2) ON CONFLICT(session_id) DO UPDATE SET next_seq=runtime_session_sequences.next_seq + 1, updated_at=excluded.updated_at RETURNING next_seq - 1;";
 
-pub const INSERT_EVENT_SQL: &str = concat!(
-    "INSERT INTO runtime_events(",
-    "event_id, session_id, seq, occurred_at, phase, event_type, severity, ",
-    "summary, manifest_set_hash, git_head, payload_cbor, content_hash, ",
-    "previous_hash, trust_claim_override_cbor, proof_ref",
-    ") VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15);",
-);
+pub const INSERT_EVENT_SQL: &str = "INSERT INTO runtime_events(event_id, session_id, seq, occurred_at, phase, event_type, severity, summary, manifest_set_hash, git_head, payload_cbor, content_hash, previous_hash, trust_claim_override_cbor, proof_ref) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15);";
 
 #[must_use]
 pub fn runtime_db_migration_has_required_tables(sql: &str) -> Vec<String> {
@@ -358,30 +333,22 @@ fn allowed_episodic_memory_candidate() -> RuntimeMemoryCandidateDecision {
 }
 
 #[must_use]
-fn non_empty_forbidden_authority_claims(
-    candidate: &RuntimeMemoryCandidateDraft,
-) -> impl Iterator<Item = &str> {
-    candidate
-        .forbidden_authority_claims
-        .iter()
-        .map(String::as_str)
-        .map(str::trim)
-        .filter(|claim| !claim.is_empty())
-}
-
-#[must_use]
 fn memory_candidate_has_forbidden_claim(
     candidate: &RuntimeMemoryCandidateDraft,
     forbidden_claim: &str,
 ) -> bool {
-    non_empty_forbidden_authority_claims(candidate).any(|claim| claim == forbidden_claim)
+    candidate
+        .forbidden_authority_claims
+        .iter()
+        .any(|claim| claim.trim() == forbidden_claim)
 }
 
 #[must_use]
 fn memory_candidate_has_any_forbidden_claim(candidate: &RuntimeMemoryCandidateDraft) -> bool {
-    non_empty_forbidden_authority_claims(candidate)
-        .next()
-        .is_some()
+    candidate
+        .forbidden_authority_claims
+        .iter()
+        .any(|claim| !claim.trim().is_empty())
 }
 
 #[must_use]
@@ -862,9 +829,10 @@ mod tests {
         assert!(plan.pragmas.contains(&"PRAGMA journal_mode = WAL;"));
         assert!(plan.pragmas.contains(&"PRAGMA foreign_keys = ON;"));
         assert!(plan.pragmas.contains(&"PRAGMA busy_timeout = 5000;"));
-        assert!(plan
-            .lease_sql
-            .starts_with(&format!("{RUNTIME_TRANSACTION_BEGIN_IMMEDIATE};")));
+        assert!(
+            plan.lease_sql
+                .starts_with(&format!("{RUNTIME_TRANSACTION_BEGIN_IMMEDIATE};"))
+        );
         assert!(plan.lease_sql.contains("heartbeat_counter"));
         assert!(plan.sequence_sql.contains("RETURNING next_seq - 1"));
         assert!(plan.insert_event_sql.contains("manifest_set_hash"));
@@ -1224,17 +1192,21 @@ mod tests {
         mediated_without_hash.broker_record_hash = None;
         let mediated = evaluate_runtime_broker_mediated_record(&mediated_without_hash);
         assert!(!mediated.allow);
-        assert!(mediated
-            .reason
-            .contains(REASON_MEDIATED_L2_WITHOUT_BROKER_RECORD_HASH));
+        assert!(
+            mediated
+                .reason
+                .contains(REASON_MEDIATED_L2_WITHOUT_BROKER_RECORD_HASH)
+        );
 
         let mut broker_attested_without_signature = broker_probe();
         broker_attested_without_signature.broker_signature_hash = None;
         let attested = evaluate_runtime_broker_mediated_record(&broker_attested_without_signature);
         assert!(!attested.allow);
-        assert!(attested
-            .reason
-            .contains(REASON_BROKER_ATTESTED_WITHOUT_BROKER_SIGNATURE_HASH));
+        assert!(
+            attested
+                .reason
+                .contains(REASON_BROKER_ATTESTED_WITHOUT_BROKER_SIGNATURE_HASH)
+        );
 
         let mut injected_decision = broker_probe();
         injected_decision.tool_supplied_policy_decision = true;
