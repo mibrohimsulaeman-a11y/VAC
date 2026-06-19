@@ -195,7 +195,7 @@ fn get_version_from_command(
         return Err(format!("Could not determine {} version", display_name));
     }
 
-    // Extract version from output like "warden v0.1.7 (https://github.com/Vastar-AI/vac)"
+    // Extract version from output like "warden v0.1.7 (https://github.com/mibrohimsulaeman-a11y/VAC)"
     // Split by whitespace and find the part that looks like a version
     let version = full_output
         .split_whitespace()
@@ -681,7 +681,7 @@ mod tests {
     #[test]
     fn get_download_info_uses_pinned_github_version_instead_of_latest() {
         let mut config = test_config();
-        config.base_url = "https://github.com/Vastar-AI/vac".to_string();
+        config.base_url = "https://github.com/mibrohimsulaeman-a11y/VAC".to_string();
         config.version = Some("v1.2.3".to_string());
 
         let (download_url, _, _) = get_download_info(&config).expect("download info");

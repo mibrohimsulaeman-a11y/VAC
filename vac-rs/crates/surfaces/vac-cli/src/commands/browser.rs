@@ -4,7 +4,7 @@ use std::process::Command;
 fn get_browser_config() -> PluginConfig {
     PluginConfig {
         name: "browser".to_string(),
-        base_url: "https://github.com/Vastar-AI/vac".to_string(),
+        base_url: "https://github.com/mibrohimsulaeman-a11y/VAC".to_string(),
         targets: vec![
             "linux-x86_64".to_string(),
             "darwin-x86_64".to_string(),
@@ -12,8 +12,8 @@ fn get_browser_config() -> PluginConfig {
             "windows-x86_64".to_string(),
         ],
         version: None,
-        repo: Some("vac".to_string()),
-        owner: Some("Vastar-AI".to_string()),
+        repo: Some("VAC".to_string()),
+        owner: Some("mibrohimsulaeman-a11y".to_string()),
         version_arg: Some("version".to_string()),
         prefer_server_version: false,
     }

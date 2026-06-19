@@ -7,8 +7,12 @@ use std::process::Command;
 /// The container image used for sandboxed agent sessions.
 /// Override at runtime with VAC_AGENT_IMAGE env var for local testing.
 pub fn vac_agent_image() -> String {
-    std::env::var("VAC_AGENT_IMAGE")
-        .unwrap_or_else(|_| format!("ghcr.io/vastar-ai/vac:v{}", env!("CARGO_PKG_VERSION")))
+    std::env::var("VAC_AGENT_IMAGE").unwrap_or_else(|_| {
+        format!(
+            "ghcr.io/mibrohimsulaeman-a11y/vac:v{}",
+            env!("CARGO_PKG_VERSION")
+        )
+    })
 }
 
 /// Canonical path of the AK knowledge store inside the agent container.

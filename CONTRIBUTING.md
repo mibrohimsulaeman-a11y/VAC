@@ -7,8 +7,8 @@ VAC is under active architecture migration to the **v1.9 control-plane model**. 
 Use the canonical repository or the source checkpoint supplied by the release maintainer. Cargo metadata/fmt/check/clippy/test are TV-Pending until run locally.
 
 ```bash
-git clone https://github.com/Vastar-AI/vac.git
-cd vac
+git clone https://github.com/mibrohimsulaeman-a11y/VAC.git
+cd VAC
 ```
 
 For sandbox continuation:

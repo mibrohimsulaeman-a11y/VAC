@@ -255,7 +255,7 @@ mod tests {
             tag_name: tag_name.to_string(),
             name: format!("VAC {tag_name}"),
             published_at: "2026-01-01T00:00:00Z".to_string(),
-            html_url: "https://github.com/Vastar-AI/vac/releases".to_string(),
+            html_url: "https://github.com/mibrohimsulaeman-a11y/VAC/releases".to_string(),
             prerelease: false,
             draft: false,
             body: Some("### Features\n- Faster updates".to_string()),

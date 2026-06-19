@@ -540,7 +540,7 @@ impl Commands {
             }
             Commands::Version => {
                 println!(
-                    "vac v{} (https://github.com/Vastar-AI/vac)",
+                    "vac v{} (https://github.com/mibrohimsulaeman-a11y/VAC)",
                     env!("CARGO_PKG_VERSION")
                 );
             }

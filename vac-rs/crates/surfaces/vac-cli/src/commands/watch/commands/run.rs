@@ -47,7 +47,6 @@ static WATCH_HTTP_CLIENT: OnceLock<reqwest::Client> = OnceLock::new();
 pub async fn run_scheduler(server: AgentServerConnection) -> Result<(), String> {
     print_banner();
 
-    // Load and validate configuration
     let mut config =
         ScheduleConfig::load_default().map_err(|e| format!("Failed to load config: {}", e))?;
 
@@ -61,14 +60,12 @@ pub async fn run_scheduler(server: AgentServerConnection) -> Result<(), String> 
         "Configuration loaded successfully"
     );
 
-    // Initialize database directory
     let db_path = config.db_path();
     if let Some(parent) = db_path.parent() {
         std::fs::create_dir_all(parent)
             .map_err(|e| format!("Failed to create database directory: {}", e))?;
     }
 
-    // Check for existing autopilot service via PID file
     let pid_file = db_path
         .parent()
         .unwrap_or(std::path::Path::new("."))
@@ -83,12 +80,10 @@ pub async fn run_scheduler(server: AgentServerConnection) -> Result<(), String> 
         ));
     }
 
-    // Write PID file
     let pid = std::process::id();
     std::fs::write(&pid_file, pid.to_string())
         .map_err(|e| format!("Failed to write PID file: {}", e))?;
 
-    // Ensure PID file is cleaned up on exit
     let pid_file_cleanup = pid_file.clone();
 
     let db_path_str = db_path
@@ -129,20 +124,17 @@ pub async fn run_scheduler(server: AgentServerConnection) -> Result<(), String> 
         }
     }
 
-    // Set autopilot state
     db.set_autopilot_state(pid as i64)
         .await
         .map_err(|e| format!("Failed to set autopilot state: {}", e))?;
 
     info!(pid = pid, db_path = %db_path.display(), "Autopilot state initialized");
 
-    // Print config summary
     print_config_summary(&config, pid as i64);
 
     // Keep configuration in shared state so pollers can read reloaded schedules.
     let config_state = Arc::new(RwLock::new(Arc::new(config.clone())));
 
-    // Create scheduler (returns scheduler and event receiver)
     let (mut scheduler, mut event_rx) = Scheduler::new()
         .await
         .map_err(|e| format!("Failed to create scheduler: {}", e))?;

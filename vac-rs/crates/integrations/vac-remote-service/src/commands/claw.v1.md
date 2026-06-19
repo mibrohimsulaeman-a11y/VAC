@@ -590,7 +590,7 @@ VAC Autopilot runs on your **LOCAL machine** and monitors the Lightsail instance
 # Homebrew formula is not published in this checkpoint; use source checkout below.
 
 # Linux / macOS (curl):
-git clone https://github.com/Vastar-AI/vac && cd vac && pnpm install && pnpm build
+git clone https://github.com/mibrohimsulaeman-a11y/VAC.git && cd VAC && pnpm install && pnpm build
 
 # Verify:
 vac version

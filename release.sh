@@ -342,7 +342,7 @@ main() {
     if [[ "$is_beta" == true ]]; then
         print_success "Beta release $new_version completed successfully! 🧪"
         print_info "Install beta from GitHub release:"
-        print_info "  curl -L https://github.com/Vastar-AI/vac/releases/download/v${new_version}/vac-darwin-aarch64.tar.gz | tar xz"
+        print_info "  curl -L https://github.com/mibrohimsulaeman-a11y/VAC/releases/download/v${new_version}/vac-darwin-aarch64.tar.gz | tar xz"
         print_info "  sudo mv vac /usr/local/bin/"
     else
         print_success "Release $new_version completed successfully! 🎉"

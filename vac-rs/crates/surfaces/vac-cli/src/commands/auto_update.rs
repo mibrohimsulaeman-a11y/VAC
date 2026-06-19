@@ -547,7 +547,7 @@ async fn update_binary_atomic(
 
     // 1. Set up PluginConfig for the CLI itself
     let cli_name = "vac";
-    let base_url = "https://github.com/Vastar-AI/vac";
+    let base_url = "https://github.com/mibrohimsulaeman-a11y/VAC";
     let version = version.unwrap_or_default();
 
     // 2. Map OS/arch to plugin target

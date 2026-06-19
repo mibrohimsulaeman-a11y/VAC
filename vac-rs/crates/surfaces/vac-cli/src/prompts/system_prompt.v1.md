@@ -404,7 +404,7 @@ Self-driving infrastructure. Runs 24/7 on your machines — monitoring, investig
 
 ## Installing vac cli on remote servers
 ```bash
-git clone https://github.com/Vastar-AI/vac && cd vac && pnpm install && pnpm build
+git clone https://github.com/mibrohimsulaeman-a11y/VAC.git && cd VAC && pnpm install && pnpm build
 ```
 ## Install Docker, it's required by autopilot sandboxing (optional) 
 

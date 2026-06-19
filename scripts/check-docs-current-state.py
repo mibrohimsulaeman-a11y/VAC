@@ -2,7 +2,7 @@
 """Current-state docs/link hygiene gate for VAC v1.9.
 
 This SV gate rejects obsolete upstream package/install links while allowing the
-current Vastar-AI repository coordinate and the future Vastar GHCR namespace.
+current mibrohimsulaeman-a11y repository coordinate and the future Vastar GHCR namespace.
 It does not call the network and does not run Cargo.
 """
 from __future__ import annotations
@@ -50,7 +50,7 @@ REQUIRED_DOC_TOKENS = {
         ".vac/db/runtime.db",
     ],
     "AGENTS.md": ["Runtime authority is compiled JSON under `.vac/cache/compiled`", "python3 scripts/check-v19-storage-classes.py"],
-    "CONTRIBUTING.md": ["https://github.com/Vastar-AI/vac.git", "Runtime tests", "TV-Pending"],
+    "CONTRIBUTING.md": ["https://github.com/mibrohimsulaeman-a11y/VAC.git", "Runtime tests", "TV-Pending"],
     "docs/workflow-control-plane/VAC_RUNTIME_V19_STORAGE_PACKAGING_CLOSURE_PLAN.md": [
         "tracked authority",
         "runtime.db",
@@ -69,14 +69,14 @@ REQUIRED_DOC_TOKENS = {
 }
 EXPECTED_SOURCE_TOKENS = {
     "vac-rs/crates/surfaces/vac-cli/src/config/mod.rs": "https://api.vastar.ai/vac",
-    "vac-rs/crates/foundation/vac-foundation/src/container.rs": "ghcr.io/vastar-ai/vac",
-    "vac-rs/crates/surfaces/vac-tui/src/services/helper_block.rs": "https://github.com/Vastar-AI/vac/issues/new",
-    "package.json": "https://github.com/Vastar-AI/vac.git",
-    "release.sh": "https://github.com/Vastar-AI/vac/releases",
-    "vac-rs/crates/surfaces/vac-cli/src/commands/auto_update.rs": "https://github.com/Vastar-AI/vac",
-    "vac-rs/crates/surfaces/vac-cli/src/commands/board.rs": 'owner: Some("Vastar-AI".to_string())',
-    "vac-rs/crates/surfaces/vac-cli/src/commands/browser.rs": 'owner: Some("Vastar-AI".to_string())',
-    "vac-rs/crates/surfaces/vac-cli/src/commands/mod.rs": "https://github.com/Vastar-AI/vac",
+    "vac-rs/crates/foundation/vac-foundation/src/container.rs": "ghcr.io/mibrohimsulaeman-a11y/vac",
+    "vac-rs/crates/surfaces/vac-tui/src/services/helper_block.rs": "https://github.com/mibrohimsulaeman-a11y/VAC/issues/new",
+    "package.json": "https://github.com/mibrohimsulaeman-a11y/VAC.git",
+    "release.sh": "https://github.com/mibrohimsulaeman-a11y/VAC/releases",
+    "vac-rs/crates/surfaces/vac-cli/src/commands/auto_update.rs": "https://github.com/mibrohimsulaeman-a11y/VAC",
+    "vac-rs/crates/surfaces/vac-cli/src/commands/board.rs": 'owner: Some("mibrohimsulaeman-a11y".to_string())',
+    "vac-rs/crates/surfaces/vac-cli/src/commands/browser.rs": 'owner: Some("mibrohimsulaeman-a11y".to_string())',
+    "vac-rs/crates/surfaces/vac-cli/src/commands/mod.rs": "https://github.com/mibrohimsulaeman-a11y/VAC",
 }
 
 

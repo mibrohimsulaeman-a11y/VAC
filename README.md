@@ -77,7 +77,7 @@ docker build -t vac-local:dev .
 docker run --rm -it -v "$(pwd)":/workspace -w /workspace vac-local:dev
 ```
 
-After CI publication, the intended namespace is `ghcr.io/vastar-ai/vac:<version>`. Do not document a `latest` image as available until CI publishes and verifies it.
+After CI publication, the intended namespace is `ghcr.io/mibrohimsulaeman-a11y/vac:<version>`. Do not document a `latest` image as available until CI publishes and verifies it.
 
 ## Autopilot retrospect schedule
 
