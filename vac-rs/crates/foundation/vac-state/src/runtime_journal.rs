@@ -99,6 +99,37 @@ pub const RUNTIME_DB_REQUIRED_PRAGMAS: &[&str] = &[
 
 const RUNTIME_TRANSACTION_BEGIN_IMMEDIATE: &str = "BEGIN IMMEDIATE";
 
+const REASON_MISSING_MANIFEST_SET_HASH: &str = "missing manifest_set_hash";
+const REASON_STALE_MANIFEST_SET_HASH: &str =
+    "stale manifest_set_hash; run manifest-sync refresh before authorizing new work";
+const REASON_EVENT_DRAFT_MISSING_SESSION_OR_TYPE: &str =
+    "event draft missing session_id or event_type";
+const REASON_MANIFEST_BOUND_EVENT_APPEND_ALLOWED: &str =
+    "manifest-bound event may be appended under writer lease";
+const REASON_DECISION_ID_MISSING: &str = "decision_id missing";
+const REASON_DECISION_NOT_LOCKED: &str = "decision is not locked";
+const REASON_DECISION_SUPERSEDED: &str = "decision has been superseded";
+const REASON_GHOST_STALE_DECISION_CANNOT_AUTHORIZE: &str =
+    "ghost_state: stale decision cannot authorize current action";
+const REASON_STALE_MANIFEST_REFRESH_DECISION: &str =
+    "stale_manifest: refresh decision under current manifest_set_hash";
+const REASON_LOCKED_CURRENT_MANIFEST_DECISION_ALLOWED: &str =
+    "locked current-manifest decision may authorize scoped work";
+const REASON_RUNTIME_DB_TOUCHED_BY_SUBPROCESS: &str = "runtime_db_touched_by_subprocess";
+const REASON_TOOL_SUPPLIED_POLICY_DECISION_REJECTED: &str =
+    "tool_supplied_policy_decision_rejected";
+const REASON_MISSING_BROKER_INTENT: &str = "missing_broker_intent";
+const REASON_EXECUTION_RECORD_WITHOUT_BROKER_DECISION: &str =
+    "execution_record_without_broker_decision";
+const REASON_MISSING_POLICY_SNAPSHOT_HASH: &str = "missing_policy_snapshot_hash";
+const REASON_STALE_POLICY_SNAPSHOT_HASH: &str = "stale_policy_snapshot_hash";
+const REASON_MEDIATED_L2_WITHOUT_BROKER_RECORD_HASH: &str =
+    "mediated_l2_without_broker_record_hash";
+const REASON_BROKER_ATTESTED_WITHOUT_BROKER_SIGNATURE_HASH: &str =
+    "broker_attested_without_broker_signature_hash";
+const REASON_BROKER_MEDIATED_RECORD_ALLOWED: &str =
+    "broker-mediated runtime journal record passes schema boundary";
+
 pub const ACQUIRE_WRITER_LEASE_SQL: &str = "BEGIN IMMEDIATE; INSERT INTO runtime_writer_leases(workspace_id, holder_id, lease_reason, acquired_at, heartbeat_at, heartbeat_counter, session_id) VALUES (?1, ?2, ?3, ?4, ?4, 1, ?5) ON CONFLICT(workspace_id) DO UPDATE SET holder_id=excluded.holder_id, lease_reason=excluded.lease_reason, heartbeat_at=excluded.heartbeat_at, heartbeat_counter=runtime_writer_leases.heartbeat_counter + 1, session_id=excluded.session_id WHERE runtime_writer_leases.heartbeat_counter = ?6;";
 
 pub const ALLOCATE_EVENT_SEQUENCE_SQL: &str = "INSERT INTO runtime_session_sequences(session_id, next_seq, updated_at) VALUES (?1, 2, ?2) ON CONFLICT(session_id) DO UPDATE SET next_seq=runtime_session_sequences.next_seq + 1, updated_at=excluded.updated_at RETURNING next_seq - 1;";
@@ -141,17 +172,15 @@ pub fn evaluate_runtime_event_append(
     current_manifest_set_hash: &str,
 ) -> RuntimeJournalAppendDecision {
     if draft.manifest_binding.manifest_set_hash.trim().is_empty() {
-        return blocked("missing manifest_set_hash");
+        return blocked(REASON_MISSING_MANIFEST_SET_HASH);
     }
     if draft.manifest_binding.manifest_set_hash != current_manifest_set_hash {
-        return blocked(
-            "stale manifest_set_hash; run manifest-sync refresh before authorizing new work",
-        );
+        return blocked(REASON_STALE_MANIFEST_SET_HASH);
     }
     if draft.session_id.trim().is_empty() || draft.event_type.trim().is_empty() {
-        return blocked("event draft missing session_id or event_type");
+        return blocked(REASON_EVENT_DRAFT_MISSING_SESSION_OR_TYPE);
     }
-    allowed_manifest_bound_record("manifest-bound event may be appended under writer lease")
+    allowed_manifest_bound_record(REASON_MANIFEST_BOUND_EVENT_APPEND_ALLOWED)
 }
 
 #[must_use]
@@ -249,23 +278,23 @@ pub fn evaluate_runtime_decision_authorization(
     request: &RuntimeDecisionAuthorizationRequest,
 ) -> RuntimeJournalAppendDecision {
     if request.decision_id.trim().is_empty() {
-        return blocked("decision_id missing");
+        return blocked(REASON_DECISION_ID_MISSING);
     }
     if !request.locked {
-        return blocked("decision is not locked");
+        return blocked(REASON_DECISION_NOT_LOCKED);
     }
     if request.superseded_by.is_some() {
-        return blocked("decision has been superseded");
+        return blocked(REASON_DECISION_SUPERSEDED);
     }
     if request.decision_manifest_set_hash != request.current_manifest_set_hash {
         return if request.would_authorize_current_action {
-            blocked("ghost_state: stale decision cannot authorize current action")
+            blocked(REASON_GHOST_STALE_DECISION_CANNOT_AUTHORIZE)
         } else {
-            blocked("stale_manifest: refresh decision under current manifest_set_hash")
+            blocked(REASON_STALE_MANIFEST_REFRESH_DECISION)
         };
     }
 
-    allowed_manifest_bound_record("locked current-manifest decision may authorize scoped work")
+    allowed_manifest_bound_record(REASON_LOCKED_CURRENT_MANIFEST_DECISION_ALLOWED)
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -285,6 +314,10 @@ const TRUST_CUSTODY_SELF_PROMOTED: &str = "self_promoted";
 const TRUST_CUSTODY_CI_ATTESTED: &str = "ci_attested";
 const TRUST_CUSTODY_BROKER_ATTESTED: &str = "broker_attested";
 const TRUST_CUSTODY_EXTERNAL_ATTESTED: &str = "external_attested";
+
+const TRUST_DERIVATION_VERIFIED: &str = "verified";
+const TRUST_DERIVATION_VERIFIED_DOWNGRADE: &str = "verified_downgrade";
+const TRUST_DOWNGRADE_REASON_MISSING_OR_INVALID_PROOF: &str = "missing_or_invalid_proof";
 
 const TRUST_WORDING_LOCAL_SELF_REPORTED: &str = "local self-reported trace; integrity hint only";
 const TRUST_WORDING_SHARED_COOPERATIVE: &str = "shared cooperative record; not tamper-evident";
@@ -376,8 +409,8 @@ pub fn derive_runtime_trust_at_read(
         return RuntimeDerivedTrust {
             execution: claim.execution.clone(),
             custody: TRUST_CUSTODY_SELF_PROMOTED.to_string(),
-            derivation: "verified_downgrade".to_string(),
-            downgrade_reason: Some("missing_or_invalid_proof".to_string()),
+            derivation: TRUST_DERIVATION_VERIFIED_DOWNGRADE.to_string(),
+            downgrade_reason: Some(TRUST_DOWNGRADE_REASON_MISSING_OR_INVALID_PROOF.to_string()),
             wording: TRUST_WORDING_SHARED_COOPERATIVE.to_string(),
         };
     }
@@ -385,7 +418,7 @@ pub fn derive_runtime_trust_at_read(
     RuntimeDerivedTrust {
         execution: claim.execution.clone(),
         custody: claim.custody.clone(),
-        derivation: "verified".to_string(),
+        derivation: TRUST_DERIVATION_VERIFIED.to_string(),
         downgrade_reason: None,
         wording: trust_wording(&claim.execution, &claim.custody).to_string(),
     }
@@ -403,7 +436,7 @@ pub fn evaluate_subprocess_runtime_db_mutation(
     probe: &RuntimeDbMutationProbe,
 ) -> RuntimeJournalAppendDecision {
     if probe.before_hashes != probe.after_hashes {
-        return blocked("runtime_db_touched_by_subprocess");
+        return blocked(REASON_RUNTIME_DB_TOUCHED_BY_SUBPROCESS);
     }
     allowed_manifest_bound_record(format!(
         "structured command {} did not mutate .vac/db/**",
@@ -429,31 +462,31 @@ pub fn evaluate_runtime_broker_mediated_record(
     probe: &RuntimeBrokerMediatedRecordProbe,
 ) -> RuntimeJournalAppendDecision {
     if probe.tool_supplied_policy_decision {
-        return blocked("tool_supplied_policy_decision_rejected");
+        return blocked(REASON_TOOL_SUPPLIED_POLICY_DECISION_REJECTED);
     }
     if probe.intent_id.trim().is_empty() {
-        return blocked("missing_broker_intent");
+        return blocked(REASON_MISSING_BROKER_INTENT);
     }
     if optional_text_is_blank(probe.decision_id.as_ref()) {
-        return blocked("execution_record_without_broker_decision");
+        return blocked(REASON_EXECUTION_RECORD_WITHOUT_BROKER_DECISION);
     }
     if probe.policy_snapshot_hash.trim().is_empty() {
-        return blocked("missing_policy_snapshot_hash");
+        return blocked(REASON_MISSING_POLICY_SNAPSHOT_HASH);
     }
     if probe.policy_snapshot_hash != probe.current_policy_snapshot_hash {
-        return blocked("stale_policy_snapshot_hash");
+        return blocked(REASON_STALE_POLICY_SNAPSHOT_HASH);
     }
     if probe.execution_mode == TRUST_EXECUTION_MEDIATED_L2
         && optional_text_is_blank(probe.broker_record_hash.as_ref())
     {
-        return blocked("mediated_l2_without_broker_record_hash");
+        return blocked(REASON_MEDIATED_L2_WITHOUT_BROKER_RECORD_HASH);
     }
     if probe.custody == TRUST_CUSTODY_BROKER_ATTESTED
         && optional_text_is_blank(probe.broker_signature_hash.as_ref())
     {
-        return blocked("broker_attested_without_broker_signature_hash");
+        return blocked(REASON_BROKER_ATTESTED_WITHOUT_BROKER_SIGNATURE_HASH);
     }
-    allowed_manifest_bound_record("broker-mediated runtime journal record passes schema boundary")
+    allowed_manifest_bound_record(REASON_BROKER_MEDIATED_RECORD_ALLOWED)
 }
 
 #[cfg(test)]
@@ -585,12 +618,12 @@ mod tests {
 
         let stale = evaluate_runtime_event_append(&event_draft("sha256:old"), current_hash);
         assert!(!stale.allow);
-        assert!(stale.reason.contains("stale manifest_set_hash"));
+        assert_eq!(stale.reason, REASON_STALE_MANIFEST_SET_HASH);
         assert!(!stale.writes_manifest_bound_record);
 
         let missing = evaluate_runtime_event_append(&event_draft(""), current_hash);
         assert!(!missing.allow);
-        assert!(missing.reason.contains("missing manifest_set_hash"));
+        assert_eq!(missing.reason, REASON_MISSING_MANIFEST_SET_HASH);
 
         let current = evaluate_runtime_event_append(&event_draft(current_hash), current_hash);
         assert!(current.allow);
@@ -641,8 +674,10 @@ mod tests {
                 would_authorize_current_action: true,
             });
         assert!(!decision.allow);
-        assert!(decision.reason.contains("ghost_state"));
-        assert!(decision.reason.contains("stale decision cannot authorize"));
+        assert_eq!(
+            decision.reason,
+            REASON_GHOST_STALE_DECISION_CANNOT_AUTHORIZE
+        );
     }
 
     #[test]
@@ -702,7 +737,7 @@ mod tests {
 
             assert_eq!(derived.execution, execution);
             assert_eq!(derived.custody, custody);
-            assert_eq!(derived.derivation, "verified");
+            assert_eq!(derived.derivation, TRUST_DERIVATION_VERIFIED);
             assert!(derived.downgrade_reason.is_none());
             assert_eq!(derived.wording, wording);
         }
@@ -717,10 +752,10 @@ mod tests {
         };
         let derived = derive_runtime_trust_at_read(&claim, false);
         assert_eq!(derived.custody, TRUST_CUSTODY_SELF_PROMOTED);
-        assert_eq!(derived.derivation, "verified_downgrade");
+        assert_eq!(derived.derivation, TRUST_DERIVATION_VERIFIED_DOWNGRADE);
         assert_eq!(
             derived.downgrade_reason.as_deref(),
-            Some("missing_or_invalid_proof")
+            Some(TRUST_DOWNGRADE_REASON_MISSING_OR_INVALID_PROOF)
         );
         assert_eq!(derived.wording, TRUST_WORDING_SHARED_COOPERATIVE);
     }
@@ -749,10 +784,9 @@ mod tests {
         missing_decision.decision_id = None;
         let decision = evaluate_runtime_broker_mediated_record(&missing_decision);
         assert!(!decision.allow);
-        assert!(
-            decision
-                .reason
-                .contains("execution_record_without_broker_decision")
+        assert_eq!(
+            decision.reason,
+            REASON_EXECUTION_RECORD_WITHOUT_BROKER_DECISION
         );
 
         let mut mediated_without_hash = broker_probe();
@@ -762,7 +796,7 @@ mod tests {
         assert!(
             mediated
                 .reason
-                .contains("mediated_l2_without_broker_record_hash")
+                .contains(REASON_MEDIATED_L2_WITHOUT_BROKER_RECORD_HASH)
         );
 
         let mut broker_attested_without_signature = broker_probe();
@@ -772,24 +806,23 @@ mod tests {
         assert!(
             attested
                 .reason
-                .contains("broker_attested_without_broker_signature_hash")
+                .contains(REASON_BROKER_ATTESTED_WITHOUT_BROKER_SIGNATURE_HASH)
         );
 
         let mut injected_decision = broker_probe();
         injected_decision.tool_supplied_policy_decision = true;
         let injected = evaluate_runtime_broker_mediated_record(&injected_decision);
         assert!(!injected.allow);
-        assert!(
-            injected
-                .reason
-                .contains("tool_supplied_policy_decision_rejected")
+        assert_eq!(
+            injected.reason,
+            REASON_TOOL_SUPPLIED_POLICY_DECISION_REJECTED
         );
 
         let mut stale_policy = broker_probe();
         stale_policy.policy_snapshot_hash = "sha256:old".to_string();
         let stale = evaluate_runtime_broker_mediated_record(&stale_policy);
         assert!(!stale.allow);
-        assert!(stale.reason.contains("stale_policy_snapshot_hash"));
+        assert_eq!(stale.reason, REASON_STALE_POLICY_SNAPSHOT_HASH);
 
         let current = evaluate_runtime_broker_mediated_record(&broker_probe());
         assert!(current.allow);
@@ -808,7 +841,7 @@ mod tests {
             after_hashes: vec!["runtime.db=sha256:after".to_string()],
         });
         assert!(!touched.allow);
-        assert_eq!(touched.reason, "runtime_db_touched_by_subprocess");
+        assert_eq!(touched.reason, REASON_RUNTIME_DB_TOUCHED_BY_SUBPROCESS);
 
         let clean = evaluate_subprocess_runtime_db_mutation(&RuntimeDbMutationProbe {
             command_id: "cargo.test.core".to_string(),
