@@ -47,18 +47,6 @@ MATRIX_REQUIRED_STATUS_TOKENS = [
     "Full P0 acceptance | Not claimed",
 ]
 
-JSON_FIXTURE_FILES = [
-    "tests/fixtures/v19/governance/zero-denominator.json",
-    "tests/fixtures/v19/runtime-db/writer-lease.json",
-    "tests/fixtures/v19/governance/spec-window-example.json",
-    "tests/fixtures/v19/manifest-sync/classification-cases.json",
-    "tests/fixtures/v19/missing-code/triad.json",
-    "tests/fixtures/v19/patch/hard-deny-vac-db.json",
-    "tests/fixtures/v19/index/crlf-normalization.json",
-    "tests/fixtures/v19/doctor-output/trust-wording-golden.json",
-    "tests/fixtures/v19/episodic-memory/candidate-evaluator.json",
-]
-
 PASS_OUTPUT_FLAGS = [
     "sqlite_duplicate_session_seq_rejected=true",
     "episodic_memory_source_ref_required=true",
@@ -267,6 +255,13 @@ TOKEN_CHECKS = {
         ],
     },
 }
+
+JSON_FIXTURE_FILES = [
+    rel
+    for files in TOKEN_CHECKS.values()
+    for rel in files
+    if rel.startswith("tests/fixtures/v19/") and rel.endswith(".json")
+]
 
 
 def read_rel(path: str) -> str:
