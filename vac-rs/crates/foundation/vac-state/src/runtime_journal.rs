@@ -72,6 +72,38 @@ pub struct RuntimeJournalAppendDecision {
     pub writes_manifest_bound_record: bool,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RuntimeMemorySourceRef {
+    pub source_type: String,
+    pub source_id: String,
+    pub source_content_hash: String,
+    pub source_manifest_set_hash: String,
+    pub source_git_head: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RuntimeMemoryCandidateDraft {
+    pub memory_kind: String,
+    pub statement: String,
+    pub source_refs: Vec<RuntimeMemorySourceRef>,
+    pub manifest_set_hash: String,
+    pub current_manifest_set_hash: String,
+    pub confidence: String,
+    pub sensitivity: String,
+    pub forbidden_authority_claims: Vec<String>,
+    pub contains_raw_private_reasoning: bool,
+    pub contains_secret_like_material: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RuntimeMemoryCandidateDecision {
+    pub allow: bool,
+    pub quarantine: bool,
+    pub reason: String,
+    pub memory_status: String,
+    pub trust_ceiling: String,
+}
+
 pub const RUNTIME_DB_REQUIRED_TABLES: &[&str] = &[
     "runtime_schema_migrations",
     "runtime_sessions",
@@ -129,6 +161,42 @@ const REASON_BROKER_ATTESTED_WITHOUT_BROKER_SIGNATURE_HASH: &str =
     "broker_attested_without_broker_signature_hash";
 const REASON_BROKER_MEDIATED_RECORD_ALLOWED: &str =
     "broker-mediated runtime journal record passes schema boundary";
+const REASON_MISSING_MEMORY_SOURCE_REF: &str = "missing_memory_source_ref";
+const REASON_MISSING_MEMORY_MANIFEST_SET_HASH: &str = "missing_memory_manifest_set_hash";
+const REASON_MISSING_CURRENT_MEMORY_MANIFEST_SET_HASH: &str =
+    "missing_current_memory_manifest_set_hash";
+const REASON_MISSING_MEMORY_SOURCE_CONTENT_HASH: &str = "missing_memory_source_content_hash";
+const REASON_MEMORY_SOURCE_MANIFEST_STALE: &str = "memory_source_manifest_stale";
+const REASON_MEMORY_CANDIDATE_CONTAINS_RAW_PRIVATE_REASONING: &str =
+    "memory_candidate_contains_raw_private_reasoning";
+const REASON_MEMORY_CANDIDATE_CONTAINS_SECRET_LIKE_MATERIAL: &str =
+    "memory_candidate_contains_secret_like_material";
+const REASON_MEMORY_CANDIDATE_ATTEMPTS_POLICY_RELAXATION: &str =
+    "memory_candidate_attempts_policy_relaxation";
+const REASON_MEMORY_CANDIDATE_OVERCLAIMS_AUTHORITY: &str = "memory_candidate_overclaims_authority";
+const REASON_EPISODIC_HINT_ONLY_MEMORY_CANDIDATE_ALLOWED: &str =
+    "episodic_hint_only_memory_candidate_allowed";
+
+const MEMORY_STATUS_BLOCKED: &str = "blocked";
+const MEMORY_STATUS_QUARANTINED: &str = "quarantined";
+const MEMORY_STATUS_EPISODIC_HINT_ONLY: &str = "episodic_hint_only";
+const MEMORY_STATUS_STALE_HISTORICAL_HINT_ONLY: &str = "stale_historical_hint_only";
+
+const MEMORY_TRUST_CEILING_NO_AUTHORITY: &str = "no_authority";
+const MEMORY_TRUST_CEILING_HISTORICAL_HINT_ONLY: &str = "historical_hint_only";
+const MEMORY_TRUST_CEILING_EPISODIC_HINT_ONLY: &str = "episodic_hint_only";
+
+#[cfg(test)]
+const MEMORY_FORBIDDEN_CLAIM_AUTHORIZE_WORK: &str = "authorize_work";
+#[cfg(test)]
+const MEMORY_FORBIDDEN_CLAIM_ACCEPT_VALIDATION: &str = "accept_validation";
+#[cfg(test)]
+const MEMORY_FORBIDDEN_CLAIM_CLOSE_COMPLETION: &str = "close_completion";
+#[cfg(test)]
+const MEMORY_FORBIDDEN_CLAIM_RAISE_READINESS: &str = "raise_readiness";
+#[cfg(test)]
+const MEMORY_FORBIDDEN_CLAIM_OVERRIDE_OWNERSHIP: &str = "override_ownership";
+const MEMORY_FORBIDDEN_CLAIM_RELAX_POLICY: &str = "relax_policy";
 
 pub const ACQUIRE_WRITER_LEASE_SQL: &str = "BEGIN IMMEDIATE; INSERT INTO runtime_writer_leases(workspace_id, holder_id, lease_reason, acquired_at, heartbeat_at, heartbeat_counter, session_id) VALUES (?1, ?2, ?3, ?4, ?4, 1, ?5) ON CONFLICT(workspace_id) DO UPDATE SET holder_id=excluded.holder_id, lease_reason=excluded.lease_reason, heartbeat_at=excluded.heartbeat_at, heartbeat_counter=runtime_writer_leases.heartbeat_counter + 1, session_id=excluded.session_id WHERE runtime_writer_leases.heartbeat_counter = ?6;";
 
@@ -201,6 +269,139 @@ fn blocked(reason: &str) -> RuntimeJournalAppendDecision {
         required_transaction: RUNTIME_TRANSACTION_BEGIN_IMMEDIATE.to_string(),
         writes_manifest_bound_record: false,
     }
+}
+
+#[must_use]
+fn memory_candidate_decision(
+    allow: bool,
+    quarantine: bool,
+    reason: &str,
+    memory_status: &str,
+    trust_ceiling: &str,
+) -> RuntimeMemoryCandidateDecision {
+    RuntimeMemoryCandidateDecision {
+        allow,
+        quarantine,
+        reason: reason.to_string(),
+        memory_status: memory_status.to_string(),
+        trust_ceiling: trust_ceiling.to_string(),
+    }
+}
+
+#[must_use]
+fn blocked_memory_candidate(reason: &str) -> RuntimeMemoryCandidateDecision {
+    memory_candidate_decision(
+        false,
+        false,
+        reason,
+        MEMORY_STATUS_BLOCKED,
+        MEMORY_TRUST_CEILING_NO_AUTHORITY,
+    )
+}
+
+#[must_use]
+fn quarantined_memory_candidate(reason: &str) -> RuntimeMemoryCandidateDecision {
+    memory_candidate_decision(
+        false,
+        true,
+        reason,
+        MEMORY_STATUS_QUARANTINED,
+        MEMORY_TRUST_CEILING_NO_AUTHORITY,
+    )
+}
+
+#[must_use]
+fn stale_historical_memory_candidate() -> RuntimeMemoryCandidateDecision {
+    memory_candidate_decision(
+        true,
+        false,
+        REASON_MEMORY_SOURCE_MANIFEST_STALE,
+        MEMORY_STATUS_STALE_HISTORICAL_HINT_ONLY,
+        MEMORY_TRUST_CEILING_HISTORICAL_HINT_ONLY,
+    )
+}
+
+#[must_use]
+fn allowed_episodic_memory_candidate() -> RuntimeMemoryCandidateDecision {
+    memory_candidate_decision(
+        true,
+        false,
+        REASON_EPISODIC_HINT_ONLY_MEMORY_CANDIDATE_ALLOWED,
+        MEMORY_STATUS_EPISODIC_HINT_ONLY,
+        MEMORY_TRUST_CEILING_EPISODIC_HINT_ONLY,
+    )
+}
+
+#[must_use]
+fn memory_candidate_has_forbidden_claim(
+    candidate: &RuntimeMemoryCandidateDraft,
+    forbidden_claim: &str,
+) -> bool {
+    candidate
+        .forbidden_authority_claims
+        .iter()
+        .any(|claim| claim.trim() == forbidden_claim)
+}
+
+#[must_use]
+fn memory_candidate_has_any_forbidden_claim(candidate: &RuntimeMemoryCandidateDraft) -> bool {
+    candidate
+        .forbidden_authority_claims
+        .iter()
+        .any(|claim| !claim.trim().is_empty())
+}
+
+#[must_use]
+pub fn evaluate_runtime_memory_candidate(
+    candidate: &RuntimeMemoryCandidateDraft,
+) -> RuntimeMemoryCandidateDecision {
+    if candidate.source_refs.is_empty() {
+        return blocked_memory_candidate(REASON_MISSING_MEMORY_SOURCE_REF);
+    }
+    if candidate.manifest_set_hash.trim().is_empty() {
+        return blocked_memory_candidate(REASON_MISSING_MEMORY_MANIFEST_SET_HASH);
+    }
+    if candidate.current_manifest_set_hash.trim().is_empty() {
+        return blocked_memory_candidate(REASON_MISSING_CURRENT_MEMORY_MANIFEST_SET_HASH);
+    }
+    if candidate
+        .source_refs
+        .iter()
+        .any(|source| source.source_manifest_set_hash.trim().is_empty())
+    {
+        return blocked_memory_candidate(REASON_MISSING_MEMORY_MANIFEST_SET_HASH);
+    }
+    if candidate
+        .source_refs
+        .iter()
+        .any(|source| source.source_content_hash.trim().is_empty())
+    {
+        return blocked_memory_candidate(REASON_MISSING_MEMORY_SOURCE_CONTENT_HASH);
+    }
+    if candidate.contains_raw_private_reasoning {
+        return quarantined_memory_candidate(
+            REASON_MEMORY_CANDIDATE_CONTAINS_RAW_PRIVATE_REASONING,
+        );
+    }
+    if candidate.contains_secret_like_material {
+        return quarantined_memory_candidate(REASON_MEMORY_CANDIDATE_CONTAINS_SECRET_LIKE_MATERIAL);
+    }
+    if memory_candidate_has_forbidden_claim(candidate, MEMORY_FORBIDDEN_CLAIM_RELAX_POLICY) {
+        return blocked_memory_candidate(REASON_MEMORY_CANDIDATE_ATTEMPTS_POLICY_RELAXATION);
+    }
+    if memory_candidate_has_any_forbidden_claim(candidate) {
+        return blocked_memory_candidate(REASON_MEMORY_CANDIDATE_OVERCLAIMS_AUTHORITY);
+    }
+    if candidate.manifest_set_hash != candidate.current_manifest_set_hash
+        || candidate
+            .source_refs
+            .iter()
+            .any(|source| source.source_manifest_set_hash != candidate.current_manifest_set_hash)
+    {
+        return stale_historical_memory_candidate();
+    }
+
+    allowed_episodic_memory_candidate()
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
@@ -519,6 +720,31 @@ mod tests {
         }
     }
 
+    fn memory_source_ref(hash: &str) -> RuntimeMemorySourceRef {
+        RuntimeMemorySourceRef {
+            source_type: "runtime_validation_summary".to_string(),
+            source_id: "validation.test".to_string(),
+            source_content_hash: "sha256:source".to_string(),
+            source_manifest_set_hash: hash.to_string(),
+            source_git_head: Some("0123456789abcdef0123456789abcdef01234567".to_string()),
+        }
+    }
+
+    fn memory_candidate(hash: &str) -> RuntimeMemoryCandidateDraft {
+        RuntimeMemoryCandidateDraft {
+            memory_kind: "validation_lesson".to_string(),
+            statement: "feature-gated validation should use CI as source of truth".to_string(),
+            source_refs: vec![memory_source_ref(hash)],
+            manifest_set_hash: hash.to_string(),
+            current_manifest_set_hash: hash.to_string(),
+            confidence: "observed".to_string(),
+            sensitivity: "internal".to_string(),
+            forbidden_authority_claims: Vec::new(),
+            contains_raw_private_reasoning: false,
+            contains_secret_like_material: false,
+        }
+    }
+
     fn create_table_statement(sql: &str, table: &str) -> String {
         let needle = format!("CREATE TABLE IF NOT EXISTS {table}");
         let start = sql
@@ -632,6 +858,179 @@ mod tests {
             RUNTIME_TRANSACTION_BEGIN_IMMEDIATE
         );
         assert!(current.writes_manifest_bound_record);
+    }
+
+    #[test]
+    fn memory_candidate_requires_source_ref() {
+        let mut candidate = memory_candidate("sha256:current");
+        candidate.source_refs.clear();
+
+        let decision = evaluate_runtime_memory_candidate(&candidate);
+
+        assert!(!decision.allow);
+        assert!(!decision.quarantine);
+        assert_eq!(decision.reason, REASON_MISSING_MEMORY_SOURCE_REF);
+        assert_eq!(decision.memory_status, MEMORY_STATUS_BLOCKED);
+        assert_eq!(decision.trust_ceiling, MEMORY_TRUST_CEILING_NO_AUTHORITY);
+    }
+
+    #[test]
+    fn memory_candidate_requires_manifest_binding() {
+        let mut candidate = memory_candidate("sha256:current");
+        candidate.manifest_set_hash.clear();
+
+        let decision = evaluate_runtime_memory_candidate(&candidate);
+
+        assert!(!decision.allow);
+        assert_eq!(decision.reason, REASON_MISSING_MEMORY_MANIFEST_SET_HASH);
+
+        let mut source_missing_manifest = memory_candidate("sha256:current");
+        source_missing_manifest.source_refs[0]
+            .source_manifest_set_hash
+            .clear();
+
+        let source_decision = evaluate_runtime_memory_candidate(&source_missing_manifest);
+
+        assert!(!source_decision.allow);
+        assert_eq!(
+            source_decision.reason,
+            REASON_MISSING_MEMORY_MANIFEST_SET_HASH
+        );
+
+        let mut missing_current = memory_candidate("sha256:current");
+        missing_current.current_manifest_set_hash.clear();
+
+        let current_decision = evaluate_runtime_memory_candidate(&missing_current);
+
+        assert!(!current_decision.allow);
+        assert_eq!(
+            current_decision.reason,
+            REASON_MISSING_CURRENT_MEMORY_MANIFEST_SET_HASH
+        );
+    }
+
+    #[test]
+    fn memory_candidate_requires_source_content_hash() {
+        let mut candidate = memory_candidate("sha256:current");
+        candidate.source_refs[0].source_content_hash.clear();
+
+        let decision = evaluate_runtime_memory_candidate(&candidate);
+
+        assert!(!decision.allow);
+        assert_eq!(decision.reason, REASON_MISSING_MEMORY_SOURCE_CONTENT_HASH);
+        assert_eq!(decision.trust_ceiling, MEMORY_TRUST_CEILING_NO_AUTHORITY);
+    }
+
+    #[test]
+    fn memory_candidate_quarantines_raw_private_reasoning() {
+        let mut candidate = memory_candidate("sha256:current");
+        candidate.contains_raw_private_reasoning = true;
+
+        let decision = evaluate_runtime_memory_candidate(&candidate);
+
+        assert!(!decision.allow);
+        assert!(decision.quarantine);
+        assert_eq!(
+            decision.reason,
+            REASON_MEMORY_CANDIDATE_CONTAINS_RAW_PRIVATE_REASONING
+        );
+        assert_eq!(decision.memory_status, MEMORY_STATUS_QUARANTINED);
+    }
+
+    #[test]
+    fn memory_candidate_quarantines_secret_like_material() {
+        let mut candidate = memory_candidate("sha256:current");
+        candidate.contains_secret_like_material = true;
+
+        let decision = evaluate_runtime_memory_candidate(&candidate);
+
+        assert!(!decision.allow);
+        assert!(decision.quarantine);
+        assert_eq!(
+            decision.reason,
+            REASON_MEMORY_CANDIDATE_CONTAINS_SECRET_LIKE_MATERIAL
+        );
+        assert_eq!(decision.trust_ceiling, MEMORY_TRUST_CEILING_NO_AUTHORITY);
+    }
+
+    #[test]
+    fn memory_candidate_blocks_policy_relaxation() {
+        let mut candidate = memory_candidate("sha256:current");
+        candidate
+            .forbidden_authority_claims
+            .push(MEMORY_FORBIDDEN_CLAIM_RELAX_POLICY.to_string());
+
+        let decision = evaluate_runtime_memory_candidate(&candidate);
+
+        assert!(!decision.allow);
+        assert!(!decision.quarantine);
+        assert_eq!(
+            decision.reason,
+            REASON_MEMORY_CANDIDATE_ATTEMPTS_POLICY_RELAXATION
+        );
+        assert_eq!(decision.memory_status, MEMORY_STATUS_BLOCKED);
+    }
+
+    #[test]
+    fn memory_candidate_blocks_authority_overclaims() {
+        for forbidden_claim in [
+            MEMORY_FORBIDDEN_CLAIM_AUTHORIZE_WORK,
+            MEMORY_FORBIDDEN_CLAIM_ACCEPT_VALIDATION,
+            MEMORY_FORBIDDEN_CLAIM_CLOSE_COMPLETION,
+            MEMORY_FORBIDDEN_CLAIM_RAISE_READINESS,
+            MEMORY_FORBIDDEN_CLAIM_OVERRIDE_OWNERSHIP,
+        ] {
+            let mut candidate = memory_candidate("sha256:current");
+            candidate
+                .forbidden_authority_claims
+                .push(forbidden_claim.to_string());
+
+            let decision = evaluate_runtime_memory_candidate(&candidate);
+
+            assert!(!decision.allow, "{forbidden_claim} must not be allowed");
+            assert_eq!(
+                decision.reason, REASON_MEMORY_CANDIDATE_OVERCLAIMS_AUTHORITY,
+                "{forbidden_claim} must be blocked as an authority overclaim"
+            );
+            assert_eq!(decision.trust_ceiling, MEMORY_TRUST_CEILING_NO_AUTHORITY);
+        }
+    }
+
+    #[test]
+    fn stale_memory_source_is_historical_hint_only() {
+        let mut candidate = memory_candidate("sha256:old");
+        candidate.current_manifest_set_hash = "sha256:current".to_string();
+
+        let decision = evaluate_runtime_memory_candidate(&candidate);
+
+        assert!(decision.allow);
+        assert!(!decision.quarantine);
+        assert_eq!(decision.reason, REASON_MEMORY_SOURCE_MANIFEST_STALE);
+        assert_eq!(
+            decision.memory_status,
+            MEMORY_STATUS_STALE_HISTORICAL_HINT_ONLY
+        );
+        assert_eq!(
+            decision.trust_ceiling,
+            MEMORY_TRUST_CEILING_HISTORICAL_HINT_ONLY
+        );
+    }
+
+    #[test]
+    fn valid_memory_candidate_is_episodic_hint_only() {
+        let decision = evaluate_runtime_memory_candidate(&memory_candidate("sha256:current"));
+
+        assert!(decision.allow);
+        assert!(!decision.quarantine);
+        assert_eq!(
+            decision.reason,
+            REASON_EPISODIC_HINT_ONLY_MEMORY_CANDIDATE_ALLOWED
+        );
+        assert_eq!(decision.memory_status, MEMORY_STATUS_EPISODIC_HINT_ONLY);
+        assert_eq!(
+            decision.trust_ceiling,
+            MEMORY_TRUST_CEILING_EPISODIC_HINT_ONLY
+        );
     }
 
     #[test]
