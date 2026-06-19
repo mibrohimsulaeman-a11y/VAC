@@ -283,7 +283,6 @@ async fn download_and_extract_binary(
         .await
         .map_err(|e| format!("Failed to read download response: {}", e))?;
 
-    // Create a temporary directory for extraction
     let temp_dir = binary_dir.join("temp_update");
     if temp_dir.exists() {
         fs::remove_dir_all(&temp_dir)

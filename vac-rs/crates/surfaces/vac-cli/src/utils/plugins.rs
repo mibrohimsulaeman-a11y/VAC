@@ -39,7 +39,7 @@ fn latest_version_source(config: &PluginConfig) -> LatestVersionSource {
 pub async fn get_plugin_path(config: PluginConfig) -> String {
     let config = PluginConfig {
         name: config.name,
-        base_url: config.base_url.trim_end_matches('/').to_string(), // Remove trailing slash
+        base_url: config.base_url.trim_end_matches('/').to_string(),
         targets: config.targets,
         version: config.version,
         repo: config.repo,
@@ -48,7 +48,6 @@ pub async fn get_plugin_path(config: PluginConfig) -> String {
         prefer_server_version: config.prefer_server_version,
     };
 
-    // Get the target version from the server or GitHub
     let target_version = match config.version.clone() {
         Some(version) => match normalize_version(&version) {
             Ok(v) => v,
