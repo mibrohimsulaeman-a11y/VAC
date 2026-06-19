@@ -23,6 +23,7 @@ REQUIRED_FIXTURE_GROUPS = [
     "FG-readiness",
     "FG-assessment",
     "FG-adoption-friction",
+    "FG-episodic-memory",
 ]
 
 CRITICAL_ACCEPTANCE_IDS = [
@@ -208,6 +209,35 @@ TOKEN_CHECKS = {
             "unverified_attestation_blocks",
         ],
     },
+    "episodic-memory-fixture": {
+        "vac-rs/crates/foundation/vac-state/src/runtime_journal.rs": [
+            "RuntimeMemorySourceRef",
+            "RuntimeMemoryCandidateDraft",
+            "RuntimeMemoryCandidateDecision",
+            "evaluate_runtime_memory_candidate",
+            "memory_candidate_requires_source_ref",
+            "memory_candidate_requires_manifest_binding",
+            "memory_candidate_requires_source_content_hash",
+            "memory_candidate_quarantines_raw_private_reasoning",
+            "memory_candidate_quarantines_secret_like_material",
+            "memory_candidate_blocks_policy_relaxation",
+            "memory_candidate_blocks_authority_overclaim",
+            "stale_memory_source_is_historical_hint_only",
+            "valid_memory_candidate_is_episodic_hint_only",
+        ],
+        "tests/fixtures/v19/episodic-memory/candidate-evaluator.json": [
+            "v19.episodic_memory.candidate_evaluator",
+            "source_ref_required",
+            "manifest_binding_required",
+            "source_content_hash_required",
+            "raw_private_reasoning_quarantined",
+            "secret_like_material_quarantined",
+            "policy_relaxation_blocked",
+            "authority_overclaims_blocked",
+            "stale_memory_historical_hint_only",
+            "valid_memory_episodic_hint_only",
+        ],
+    },
 }
 
 
@@ -261,6 +291,7 @@ def check_json_fixtures(errors: list[str]) -> None:
         "tests/fixtures/v19/patch/hard-deny-vac-db.json",
         "tests/fixtures/v19/index/crlf-normalization.json",
         "tests/fixtures/v19/doctor-output/trust-wording-golden.json",
+        "tests/fixtures/v19/episodic-memory/candidate-evaluator.json",
     ]
     for rel in required:
         path = ROOT / rel
@@ -359,8 +390,13 @@ def main() -> int:
     print("VAC v1.9 fixture coverage: PASS")
     print(f"fixture_groups={len(REQUIRED_FIXTURE_GROUPS)}")
     print(f"critical_acceptance_checks={len(CRITICAL_ACCEPTANCE_IDS)}")
-    print("v19_fixture_files=8")
+    print("v19_fixture_files=9")
     print("sqlite_duplicate_session_seq_rejected=true")
+    print("episodic_memory_source_ref_required=true")
+    print("episodic_memory_hint_only=true")
+    print("episodic_memory_secret_quarantine=true")
+    print("episodic_memory_policy_relaxation_blocked=true")
+    print("episodic_memory_authority_overclaim_blocked=true")
     print("full_p0_acceptance_claimed=false")
     return 0
 

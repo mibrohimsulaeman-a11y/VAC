@@ -972,7 +972,7 @@ mod tests {
     }
 
     #[test]
-    fn memory_candidate_blocks_authority_overclaims() {
+    fn memory_candidate_blocks_authority_overclaim() {
         for forbidden_claim in [
             MEMORY_FORBIDDEN_CLAIM_AUTHORIZE_WORK,
             MEMORY_FORBIDDEN_CLAIM_ACCEPT_VALIDATION,

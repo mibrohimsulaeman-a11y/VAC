@@ -1,0 +1,83 @@
+{
+  "fixture_id": "v19.episodic_memory.candidate_evaluator",
+  "spec_section": "18",
+  "implementation": "vac-state::evaluate_runtime_memory_candidate",
+  "claim_scope": "primitive evaluator and fixture coverage only; not DB-backed memory infrastructure closure",
+  "invariants": [
+    "episodic memory is a hint layer only",
+    "memory cannot authorize work",
+    "memory cannot relax policy",
+    "memory cannot accept validation",
+    "memory cannot close completion",
+    "memory cannot raise readiness",
+    "memory cannot override ownership",
+    "raw private chain-of-thought must not be persisted",
+    "secret-like material must be quarantined",
+    "stale memory may only be historical hint context"
+  ],
+  "cases": [
+    {
+      "case_id": "source_ref_required",
+      "input_violation": "candidate.source_refs is empty",
+      "expected_reason": "missing_memory_source_ref",
+      "expected_memory_status": "blocked",
+      "expected_trust_ceiling": "no_authority"
+    },
+    {
+      "case_id": "manifest_binding_required",
+      "input_violation": "candidate or source manifest_set_hash is missing",
+      "expected_reason": "missing_memory_manifest_set_hash",
+      "expected_memory_status": "blocked",
+      "expected_trust_ceiling": "no_authority"
+    },
+    {
+      "case_id": "source_content_hash_required",
+      "input_violation": "source_content_hash is missing",
+      "expected_reason": "missing_memory_source_content_hash",
+      "expected_memory_status": "blocked",
+      "expected_trust_ceiling": "no_authority"
+    },
+    {
+      "case_id": "raw_private_reasoning_quarantined",
+      "input_violation": "candidate contains raw private reasoning marker",
+      "expected_reason": "memory_candidate_contains_raw_private_reasoning",
+      "expected_memory_status": "quarantined",
+      "expected_trust_ceiling": "no_authority"
+    },
+    {
+      "case_id": "secret_like_material_quarantined",
+      "input_violation": "candidate contains secret-like material marker",
+      "expected_reason": "memory_candidate_contains_secret_like_material",
+      "expected_memory_status": "quarantined",
+      "expected_trust_ceiling": "no_authority"
+    },
+    {
+      "case_id": "policy_relaxation_blocked",
+      "input_violation": "forbidden_authority_claims includes relax_policy",
+      "expected_reason": "memory_candidate_attempts_policy_relaxation",
+      "expected_memory_status": "blocked",
+      "expected_trust_ceiling": "no_authority"
+    },
+    {
+      "case_id": "authority_overclaims_blocked",
+      "input_violation": "forbidden_authority_claims includes authorize_work, accept_validation, close_completion, raise_readiness, or override_ownership",
+      "expected_reason": "memory_candidate_overclaims_authority",
+      "expected_memory_status": "blocked",
+      "expected_trust_ceiling": "no_authority"
+    },
+    {
+      "case_id": "stale_memory_historical_hint_only",
+      "input_violation": "candidate/source manifest_set_hash differs from current_manifest_set_hash",
+      "expected_reason": "memory_source_manifest_stale",
+      "expected_memory_status": "stale_historical_hint_only",
+      "expected_trust_ceiling": "historical_hint_only"
+    },
+    {
+      "case_id": "valid_memory_episodic_hint_only",
+      "input_violation": null,
+      "expected_reason": "episodic_hint_only_memory_candidate_allowed",
+      "expected_memory_status": "episodic_hint_only",
+      "expected_trust_ceiling": "episodic_hint_only"
+    }
+  ]
+}

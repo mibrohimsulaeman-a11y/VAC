@@ -44,7 +44,7 @@ Status: working P0 closure artifact. This matrix maps v1.9 normative requirement
 | R-015-assessment-grounding | §15 | Semantic findings must cite deterministic evidence or bounded missing-code proof; baseline debt carries manifest binding and cannot authorize after drift. | `vac-assessment`; `.vac/assessment`; `check-assessment-freshness.py`; `vac-state` stale decision primitive | `assessment`, `manifest-sync` | `vac-assessment` tests; freshness script; `stale_decision_cannot_authorize_current_action` | TV-Pass | Baseline debt DB persistence fixture still pending. |
 | R-016-completion-lock | §16 | Done only if plan/todos/validation/decisions/ownership/manifest-sync/spec-sync/governance/evidence terminal/current. | runtime e2e scripts; `vac-state` decision/manifest primitives | `release`, `manifest-sync`, `readiness`, `governance`, `evidence` | v1.5 runtime e2e fixture set | TV-Pending | DB-backed closeout/terminal-state fixture needed. |
 | R-017-micro-slice | §17 | Micro-slice eligibility is classifier-driven and cannot be agent-self-declared. | runtime classifier/e2e scripts | `policy`, `governance` | v1.5 runtime e2e adoption/friction fixtures | TV-Pending | Add v1.9 micro-slice classifier fixture. |
-| R-018-memory | §18 | Memory never relaxes policy/ownership/readiness/approval/command gates; secrets/raw CoT not persisted. | `vac-memory`; `vac-foundation::secret_manager`; runtime journal storage classes | `memory`, `policy`, `evidence` | `secret_redaction_regressions`; memory crate tests | TV-Pending | Add memory-does-not-authorize policy fixture. |
+| R-018-memory | §18 | Memory never relaxes policy/ownership/readiness/approval/command gates; secrets/raw CoT not persisted. | `vac-memory`; `vac-foundation::secret_manager`; runtime journal storage classes; `vac-state::evaluate_runtime_memory_candidate` | `memory`, `policy`, `evidence` | `secret_redaction_regressions`; memory crate tests; `memory_candidate_*`; `tests/fixtures/v19/episodic-memory/candidate-evaluator.json`; coverage script tokens | TV-Pass | Evaluator/fixture primitive closed; DB-backed memory source ledger, retrieval trace, and doctor memory integration remain pending. |
 | R-019-evidence | §19 | P0 evidence is local cooperative integrity hint unless proof upgrades custody. | `vac-evidence`; `RuntimeTrustClaim`; `doctor_release_trust_language` | `evidence`, `release` | `vac-evidence` tests; `vac-doctor` release tests | TV-Pass | Add evidence doctor proof-material fixtures. |
 | R-020-governance | §20 | Governance records raw events and advisory score; denominator/numerator reproducible; no release-grade enforcement overclaim in P0. | `vac-doctor::reduce_governance_window`; `GovernanceWindowReport`; `.vac/vac.toml` L1 claim wording | `governance`, `release` | `governance_zero_denominator_uses_max_one_and_passes`; `governance_reducer_matches_spec_denominator_breakdown`; governance JSON fixtures | TV-Pass | Wire reducer into `vac doctor governance` CLI output path. |
 | R-023-cli-doctor-surfaces | §23 | Required P0 commands/gates exist: compile registry, doctor registry/manifest-sync/runtime-db/policy/ownership/index/readiness/governance, why. | `vac-cli::commands::control_plane`; CLI command parser | doctor gates | CLI tests + command parser tests | TV-Pending | `doctor governance`, `doctor readiness`, and `vac why` require explicit command-path verification. |
@@ -67,6 +67,7 @@ Status: working P0 closure artifact. This matrix maps v1.9 normative requirement
 | FG-readiness | explicit state reduction and trust wording; assessment cannot raise readiness | `vac-readiness`; compiler readiness summary | SV-Pass | Add v1.9 blocked/deprecated state model and trust wording output. |
 | FG-assessment | findings cite deterministic evidence or valid missing-code proof; text cannot raise readiness | `vac-assessment`; assessment freshness scripts; missing-code proof triad | TV-Pass | Baseline debt persistence fixture still pending. |
 | FG-adoption-friction | low-risk micro-slice and pause UX; low-risk typo avoids high-risk closeout | v1.5 runtime e2e fixtures | TV-Pending | v1.9 micro-slice classifier fixture pending. |
+| FG-episodic-memory | source refs required; manifest binding required; source content hash required; stale memory cannot become current guidance; raw CoT/secret-like memory quarantined; policy relaxation and authority overclaims blocked | `vac-state::evaluate_runtime_memory_candidate`; `tests/fixtures/v19/episodic-memory/candidate-evaluator.json`; coverage script tokens | TV-Pass | Primitive evaluator closed; persistence/retrieval/doctor command-path fixtures pending. |
 
 ## Critical P0 acceptance closure checklist
 
@@ -84,6 +85,7 @@ Status: working P0 closure artifact. This matrix maps v1.9 normative requirement
 | Bounded patch hard-deny `.vac/db/**` rejected | `vac-agent-loop::BoundRuntimeController::pre_patch_gate`; hard-deny JSON fixture. | TV-Pass |
 | Span CRLF raw/normalized behavior deterministic | `vac-index::raw_span_sha256`; `normalized_text_fingerprint`; CRLF fixture. | TV-Pass |
 | Doctor trust wording golden snapshots | `vac-doctor::doctor_trust_wording_golden_snapshots_match`; doctor-output JSON fixture. | TV-Pass |
+| Episodic memory candidate evaluator is hint-only | `vac-state::evaluate_runtime_memory_candidate`; `tests/fixtures/v19/episodic-memory/candidate-evaluator.json`; coverage script output `episodic_memory_*`. | TV-Pass primitive; persistence/retrieval/doctor integration pending |
 | Full P0 acceptance | Not claimed. Pending groups remain. | TV-Pending |
 
 ## Remaining fixture closure order
@@ -92,5 +94,5 @@ Status: working P0 closure artifact. This matrix maps v1.9 normative requirement
 2. Ownership fixtures for hidden, unowned, overclaimed, and shared-role paths.
 3. DB-backed completion-lock fixture over real runtime journal state.
 4. v1.9 micro-slice classifier/adoption-friction fixture.
-5. Memory-does-not-authorize policy fixture.
+5. DB-backed memory source ledger, retrieval trace, and `vac doctor memory` command-path fixtures.
 6. Full doctor command output snapshots for every required gate, beyond trust wording.
