@@ -41,6 +41,34 @@ CRITICAL_ACCEPTANCE_IDS = [
     "Doctor trust wording golden snapshots",
 ]
 
+MATRIX_REQUIRED_STATUS_TOKENS = [
+    "R-025-fixtures-traceability",
+    "R-027-acceptance",
+    "Full P0 acceptance | Not claimed",
+]
+
+JSON_FIXTURE_FILES = [
+    "tests/fixtures/v19/governance/zero-denominator.json",
+    "tests/fixtures/v19/runtime-db/writer-lease.json",
+    "tests/fixtures/v19/governance/spec-window-example.json",
+    "tests/fixtures/v19/manifest-sync/classification-cases.json",
+    "tests/fixtures/v19/missing-code/triad.json",
+    "tests/fixtures/v19/patch/hard-deny-vac-db.json",
+    "tests/fixtures/v19/index/crlf-normalization.json",
+    "tests/fixtures/v19/doctor-output/trust-wording-golden.json",
+    "tests/fixtures/v19/episodic-memory/candidate-evaluator.json",
+]
+
+PASS_OUTPUT_FLAGS = [
+    "sqlite_duplicate_session_seq_rejected=true",
+    "episodic_memory_source_ref_required=true",
+    "episodic_memory_hint_only=true",
+    "episodic_memory_secret_quarantine=true",
+    "episodic_memory_policy_relaxation_blocked=true",
+    "episodic_memory_authority_overclaim_blocked=true",
+    "full_p0_acceptance_claimed=false",
+]
+
 TOKEN_CHECKS = {
     "runtime-db-schema": {
         ".vac/migrations/runtime-db/0001_runtime_journal.sql": [
@@ -259,11 +287,7 @@ def check_matrix(errors: list[str]) -> None:
     for item in CRITICAL_ACCEPTANCE_IDS:
         if item not in text:
             errors.append(f"traceability matrix missing critical acceptance item: {item}")
-    for token in [
-        "R-025-fixtures-traceability",
-        "R-027-acceptance",
-        "Full P0 acceptance | Not claimed",
-    ]:
+    for token in MATRIX_REQUIRED_STATUS_TOKENS:
         if token not in text:
             errors.append(f"traceability matrix missing required status token: {token}")
 
@@ -282,18 +306,7 @@ def check_tokens(errors: list[str]) -> None:
 
 
 def check_json_fixtures(errors: list[str]) -> None:
-    required = [
-        "tests/fixtures/v19/governance/zero-denominator.json",
-        "tests/fixtures/v19/runtime-db/writer-lease.json",
-        "tests/fixtures/v19/governance/spec-window-example.json",
-        "tests/fixtures/v19/manifest-sync/classification-cases.json",
-        "tests/fixtures/v19/missing-code/triad.json",
-        "tests/fixtures/v19/patch/hard-deny-vac-db.json",
-        "tests/fixtures/v19/index/crlf-normalization.json",
-        "tests/fixtures/v19/doctor-output/trust-wording-golden.json",
-        "tests/fixtures/v19/episodic-memory/candidate-evaluator.json",
-    ]
-    for rel in required:
+    for rel in JSON_FIXTURE_FILES:
         path = ROOT / rel
         if not path.is_file():
             errors.append(f"missing v1.9 fixture file: {rel}")
@@ -390,14 +403,9 @@ def main() -> int:
     print("VAC v1.9 fixture coverage: PASS")
     print(f"fixture_groups={len(REQUIRED_FIXTURE_GROUPS)}")
     print(f"critical_acceptance_checks={len(CRITICAL_ACCEPTANCE_IDS)}")
-    print("v19_fixture_files=9")
-    print("sqlite_duplicate_session_seq_rejected=true")
-    print("episodic_memory_source_ref_required=true")
-    print("episodic_memory_hint_only=true")
-    print("episodic_memory_secret_quarantine=true")
-    print("episodic_memory_policy_relaxation_blocked=true")
-    print("episodic_memory_authority_overclaim_blocked=true")
-    print("full_p0_acceptance_claimed=false")
+    print(f"v19_fixture_files={len(JSON_FIXTURE_FILES)}")
+    for flag in PASS_OUTPUT_FLAGS:
+        print(flag)
     return 0
 
 
