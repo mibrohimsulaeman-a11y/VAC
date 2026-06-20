@@ -55,8 +55,7 @@ pub fn should_include_entry(entry: &DirEntry, base_dir: &str, ignore_patterns: &
 /// Check if a path matches a gitignore pattern
 #[allow(clippy::string_slice)] // pattern[1..len-1] guarded by starts_with('*')/ends_with('*'), '*' is ASCII
 pub fn matches_gitignore_pattern(pattern: &str, path: &str) -> bool {
-    // Basic gitignore pattern matching
-    let pattern = pattern.trim_end_matches('/'); // Remove trailing slash
+    let pattern = pattern.trim_end_matches('/');
 
     if pattern.contains('*') {
         if pattern == "*" {
