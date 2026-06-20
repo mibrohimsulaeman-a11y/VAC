@@ -104,7 +104,7 @@ impl Gateway {
 
         if api_state.auth_token.is_none() {
             warn!(
-                "gateway API auth token is not configured; /v1/gateway/send interactive requests will be rejected"
+                "gateway API auth token is not configured; protected gateway API routes will reject requests"
             );
         }
 

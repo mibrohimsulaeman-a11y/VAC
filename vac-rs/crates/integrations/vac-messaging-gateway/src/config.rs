@@ -67,6 +67,8 @@ pub enum GatewayConfigValidationError {
     EmptySlackBotToken,
     #[error("slack app_token cannot be empty")]
     EmptySlackAppToken,
+    #[error("server token cannot be empty when channels are configured")]
+    EmptyServerToken,
     #[error("approval_mode=allowlist requires non-empty approval_allowlist")]
     EmptyApprovalAllowlist,
 }
@@ -413,6 +415,10 @@ impl GatewayConfig {
     pub fn validate_with_error(&self) -> std::result::Result<(), GatewayConfigValidationError> {
         if self.enabled_channels().is_empty() {
             return Err(GatewayConfigValidationError::MissingChannels);
+        }
+
+        if self.server.token.trim().is_empty() {
+            return Err(GatewayConfigValidationError::EmptyServerToken);
         }
 
         if let Some(telegram) = &self.channels.telegram
@@ -1079,8 +1085,27 @@ mod tests {
     }
 
     #[test]
+    fn validate_requires_gateway_server_token_when_channels_are_enabled() {
+        let mut config = GatewayConfig::default();
+        config.channels.telegram = Some(TelegramConfig {
+            token: "abc".to_string(),
+            require_mention: false,
+            model: None,
+            auto_approve: None,
+            profile: None,
+        });
+
+        let result = config.validate_with_error();
+        assert_eq!(
+            result,
+            Err(super::GatewayConfigValidationError::EmptyServerToken)
+        );
+    }
+
+    #[test]
     fn validate_allowlist_requires_items() {
         let mut config = GatewayConfig::default();
+        config.server.token = "gateway-token".to_string();
         config.channels.telegram = Some(TelegramConfig {
             token: "abc".to_string(),
             require_mention: false,

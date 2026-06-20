@@ -85,10 +85,13 @@ impl Handler for SSHClient {
         &mut self,
         server_public_key: &russh::keys::PublicKey,
     ) -> Result<bool, Self::Error> {
-        let observed_debug_key = format!("{server_public_key:?}");
+        let Some(observed_key) = observed_known_host_key(server_public_key) else {
+            return Ok(false);
+        };
+
         Ok(self
             .known_hosts
-            .verify(&self.hostname, self.port, &observed_debug_key))
+            .verify(&self.hostname, self.port, &observed_key))
     }
 }
 
@@ -101,7 +104,14 @@ pub struct KnownHostsVerifier {
 #[derive(Debug, Clone)]
 pub struct KnownHostEntry {
     host: String,
-    key_material: String,
+    key_type: String,
+    key: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct KnownHostKey {
+    key_type: String,
+    key: String,
 }
 
 impl KnownHostsVerifier {
@@ -123,18 +133,32 @@ impl KnownHostsVerifier {
     }
 
     #[must_use]
-    pub fn verify(&self, hostname: &str, port: u16, observed_debug_key: &str) -> bool {
+    fn verify(&self, hostname: &str, port: u16, observed_key: &KnownHostKey) -> bool {
         let host_variants = [hostname.to_string(), format!("[{hostname}]:{port}")];
         let matched = self.entries.iter().any(|entry| {
             host_variants
                 .iter()
                 .any(|host| entry.host.split(',').any(|item| item == host))
-                && !entry.key_material.trim().is_empty()
-                && observed_debug_key
-                    .contains(entry.key_material.split_whitespace().last().unwrap_or(""))
+                && entry.key_type == observed_key.key_type
+                && entry.key == observed_key.key
         });
         matched || (self.allow_unknown_l1_degraded && self.entries.is_empty())
     }
+}
+
+fn observed_known_host_key(server_public_key: &russh::keys::PublicKey) -> Option<KnownHostKey> {
+    let openssh = server_public_key.to_openssh().ok()?;
+    parse_known_host_key_material(&openssh)
+}
+
+fn parse_known_host_key_material(value: &str) -> Option<KnownHostKey> {
+    let mut parts = value.split_whitespace();
+    let key_type = parts.next()?.to_string();
+    let key = parts.next()?.to_string();
+    if key_type.is_empty() || key.is_empty() {
+        return None;
+    }
+    Some(KnownHostKey { key_type, key })
 }
 
 #[must_use]
@@ -160,11 +184,15 @@ pub fn parse_known_hosts_entries(text: &str) -> Vec<KnownHostEntry> {
             }
             let mut parts = trimmed.split_whitespace();
             let host = parts.next()?.to_string();
-            let key_type = parts.next()?;
-            let key = parts.next()?;
+            let key_type = parts.next()?.to_string();
+            let key = parts.next()?.to_string();
+            if key_type.is_empty() || key.is_empty() {
+                return None;
+            }
             Some(KnownHostEntry {
                 host,
-                key_material: format!("{key_type} {key}"),
+                key_type,
+                key,
             })
         })
         .collect()
@@ -905,5 +933,87 @@ impl PathLocation {
             PathLocation::Local(_) => None,
             PathLocation::Remote { connection, path } => Some((connection, path)),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{KnownHostEntry, KnownHostKey, KnownHostsVerifier, parse_known_hosts_entries};
+
+    fn entry(host: &str, key_type: &str, key: &str) -> KnownHostEntry {
+        KnownHostEntry {
+            host: host.to_string(),
+            key_type: key_type.to_string(),
+            key: key.to_string(),
+        }
+    }
+
+    fn observed(key_type: &str, key: &str) -> KnownHostKey {
+        KnownHostKey {
+            key_type: key_type.to_string(),
+            key: key.to_string(),
+        }
+    }
+
+    #[test]
+    fn parse_known_hosts_entries_splits_host_type_and_key() {
+        let entries = parse_known_hosts_entries("example.com ssh-ed25519 AAAAC3Nz\n");
+
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].host, "example.com");
+        assert_eq!(entries[0].key_type, "ssh-ed25519");
+        assert_eq!(entries[0].key, "AAAAC3Nz");
+    }
+
+    #[test]
+    fn known_hosts_verifier_requires_exact_key_material_match() {
+        let verifier = KnownHostsVerifier {
+            entries: vec![entry("example.com", "ssh-ed25519", "AAAAC3Nz")],
+            allow_unknown_l1_degraded: false,
+        };
+
+        assert!(verifier.verify("example.com", 22, &observed("ssh-ed25519", "AAAAC3Nz")));
+        assert!(!verifier.verify(
+            "example.com",
+            22,
+            &observed("ssh-ed25519", "prefix-AAAAC3Nz-suffix")
+        ));
+        assert!(!verifier.verify("example.com", 22, &observed("ssh-rsa", "AAAAC3Nz")));
+    }
+
+    #[test]
+    fn known_hosts_verifier_matches_bracketed_non_default_port() {
+        let verifier = KnownHostsVerifier {
+            entries: vec![entry("[example.com]:2222", "ssh-ed25519", "AAAAC3Nz")],
+            allow_unknown_l1_degraded: false,
+        };
+
+        assert!(verifier.verify("example.com", 2222, &observed("ssh-ed25519", "AAAAC3Nz")));
+        assert!(!verifier.verify("example.com", 22, &observed("ssh-ed25519", "AAAAC3Nz")));
+    }
+
+    #[test]
+    fn known_hosts_verifier_denies_empty_known_hosts_unless_explicit_degraded_mode() {
+        let strict = KnownHostsVerifier {
+            entries: Vec::new(),
+            allow_unknown_l1_degraded: false,
+        };
+        let degraded = KnownHostsVerifier {
+            entries: Vec::new(),
+            allow_unknown_l1_degraded: true,
+        };
+
+        assert!(!strict.verify("example.com", 22, &observed("ssh-ed25519", "AAAAC3Nz")));
+        assert!(degraded.verify("example.com", 22, &observed("ssh-ed25519", "AAAAC3Nz")));
+    }
+
+    #[test]
+    fn hashed_known_hosts_entries_do_not_enable_unknown_host_bypass() {
+        let verifier = KnownHostsVerifier {
+            entries: vec![entry("|1|salt|hash", "ssh-ed25519", "AAAAC3Nz")],
+            allow_unknown_l1_degraded: true,
+        };
+
+        assert!(!verifier.verify("example.com", 22, &observed("ssh-ed25519", "AAAAC3Nz")));
     }
 }

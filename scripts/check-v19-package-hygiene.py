@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate VAC v1.9 clean-source and state-export ZIP split."""
 from __future__ import annotations
-import pathlib, subprocess, sys, zipfile
+import fnmatch, pathlib, subprocess, sys, zipfile
 
 if len(sys.argv) < 3:
     print("usage: check-v19-package-hygiene.py SOURCE_CLEAN_ZIP STATE_EXPORT_ZIP")
@@ -11,15 +11,32 @@ state_zip = pathlib.Path(sys.argv[2]).resolve()
 errors: list[str] = []
 SOURCE_FORBIDDEN_PREFIXES = (
     ".git/", "target/", "node_modules/", ".vac/index/", ".vac/assessment/", ".vac/registry/", ".vac/cache/compiled/",
-    ".vac/evidence/", ".vac/plans/", ".vac/ledger/", ".vac/memories/",
+    ".vac/evidence/", ".vac/plans/", ".vac/ledger/", ".vac/memories/", ".vac/session/",
 )
 SOURCE_FORBIDDEN_EXACT = {".vac/db/runtime.db", "SV_VALIDATION.log", "SV_POST_EVIDENCE_VALIDATION.log"}
+SOURCE_ALLOWED_MARKERS = {".vac/db/.gitignore", ".vac/cache/.gitkeep", ".vac/cache/README.md", ".vac/exports/.gitkeep", ".vac/exports/README.md"}
+SOURCE_FORBIDDEN_SESSION_PATTERNS = ("secrets.json", "auto_approve.json", "prompt_*.txt")
 SOURCE_REQUIRED = {
     "README.md", "GETTING-STARTED.md", ".vac/vac.toml", ".vac/db/.gitignore", ".vac/migrations/runtime-db/0001_runtime_journal.sql",
     "vac-rs/Cargo.toml", "scripts/package-v19-checkpoint.py", "scripts/check-v19-storage-classes.py",
 }
 STATE_REQUIRED_PREFIXES = (".vac/index/", ".vac/assessment/", ".vac/cache/compiled/")
 STATE_FORBIDDEN_DEFAULT_PREFIXES = (".vac/registry/compiled/",)
+
+def path_parts(member: str) -> tuple[str, ...]:
+    return tuple(part for part in pathlib.PurePosixPath(member).parts if part not in ("", "."))
+
+def has_path_segment(member: str, *segments: str) -> bool:
+    parts = path_parts(member)
+    width = len(segments)
+    return any(parts[index:index + width] == segments for index in range(len(parts) - width + 1))
+
+def is_session_member(member: str) -> bool:
+    return has_path_segment(member, ".vac", "session")
+
+def is_sensitive_session_member(member: str) -> bool:
+    name = pathlib.PurePosixPath(member).name
+    return any(fnmatch.fnmatchcase(name, pattern) for pattern in SOURCE_FORBIDDEN_SESSION_PATTERNS)
 
 if not source_zip.exists(): errors.append(f"missing source zip: {source_zip}")
 if not state_zip.exists(): errors.append(f"missing state zip: {state_zip}")
@@ -34,9 +51,14 @@ with zipfile.ZipFile(state_zip) as zf:
 for member in source:
     if member in SOURCE_FORBIDDEN_EXACT:
         errors.append(f"source ZIP contains forbidden generated/local file: {member}")
+    if is_session_member(member):
+        if is_sensitive_session_member(member):
+            errors.append(f"source ZIP contains forbidden runtime/session artifact: {member}")
+        else:
+            errors.append(f"source ZIP contains forbidden runtime/session path: {member}")
     if any(member.startswith(prefix) for prefix in SOURCE_FORBIDDEN_PREFIXES):
         # allow marker files that document ignored dirs
-        if member not in {".vac/db/.gitignore", ".vac/cache/.gitkeep", ".vac/cache/README.md", ".vac/exports/.gitkeep", ".vac/exports/README.md"}:
+        if member not in SOURCE_ALLOWED_MARKERS:
             errors.append(f"source ZIP contains forbidden generated/local prefix: {member}")
 for req in SOURCE_REQUIRED:
     if req not in source:

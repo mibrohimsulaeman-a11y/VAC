@@ -223,82 +223,67 @@ impl RegexCompilable for GitleaksConfig {
 }
 
 /// Lazy-loaded gitleaks configuration
-pub static GITLEAKS_CONFIG: LazyLock<GitleaksConfig> =
-    LazyLock::new(|| create_gitleaks_config(false));
+pub static GITLEAKS_CONFIG: LazyLock<GitleaksConfig> = LazyLock::new(|| {
+    create_gitleaks_config(false)
+        .expect("VAC secret detector failed to initialize embedded gitleaks config")
+});
 
 /// Lazy-loaded gitleaks configuration with privacy rules
-pub static GITLEAKS_CONFIG_WITH_PRIVACY: LazyLock<GitleaksConfig> =
-    LazyLock::new(|| create_gitleaks_config(true));
+pub static GITLEAKS_CONFIG_WITH_PRIVACY: LazyLock<GitleaksConfig> = LazyLock::new(|| {
+    create_gitleaks_config(true)
+        .expect("VAC secret detector failed to initialize embedded gitleaks privacy config")
+});
 
 /// Creates a gitleaks configuration with optional privacy rules
-fn empty_gitleaks_config(reason: &str) -> GitleaksConfig {
-    eprintln!("VAC secret detector loaded degraded empty config: {reason}");
-    GitleaksConfig {
-        title: Some("vac-degraded-secret-detection".to_string()),
-        allowlist: None,
-        rules: Vec::new(),
-    }
+fn parse_embedded_gitleaks_config(label: &str, content: &str) -> Result<GitleaksConfig, String> {
+    toml::from_str(content).map_err(|error| format!("invalid embedded {label}: {error}"))
 }
 
-fn parse_embedded_gitleaks_config(label: &str, content: &str) -> Option<GitleaksConfig> {
-    match toml::from_str(content) {
-        Ok(config) => Some(config),
-        Err(error) => {
-            eprintln!("VAC secret detector ignored invalid embedded {label}: {error}");
-            None
-        }
+fn merge_embedded_gitleaks_config(
+    config: &mut GitleaksConfig,
+    label: &str,
+    content: &str,
+) -> Result<(), String> {
+    let additional_config = parse_embedded_gitleaks_config(label, content)?;
+
+    config.rules.extend(additional_config.rules);
+    if let Some(additional_allowlist) = additional_config.allowlist {
+        merge_allowlist(&mut config.allowlist, additional_allowlist);
     }
+
+    Ok(())
 }
 
-fn create_gitleaks_config(include_privacy_rules: bool) -> GitleaksConfig {
-    // Load main gitleaks configuration. Invalid embedded configs degrade detection
-    // instead of panicking in production runtime paths.
+fn create_gitleaks_config(include_privacy_rules: bool) -> Result<GitleaksConfig, String> {
     let config_str = include_str!("gitleaks.toml");
-    let Some(mut config) = parse_embedded_gitleaks_config("gitleaks.toml", config_str) else {
-        return empty_gitleaks_config("gitleaks.toml parse failed");
-    };
+    let mut config = parse_embedded_gitleaks_config("gitleaks.toml", config_str)?;
 
-    // Load additional rules configuration.
-    let additional_config_str = include_str!("additional_rules.toml");
-    if let Some(additional_config) =
-        parse_embedded_gitleaks_config("additional_rules.toml", additional_config_str)
-    {
-        // Merge additional rules into the main configuration
-        config.rules.extend(additional_config.rules);
+    merge_embedded_gitleaks_config(
+        &mut config,
+        "additional_rules.toml",
+        include_str!("additional_rules.toml"),
+    )?;
 
-        // Merge additional allowlist if present
-        if let Some(additional_allowlist) = additional_config.allowlist {
-            merge_allowlist(&mut config.allowlist, additional_allowlist);
-        }
-    }
-
-    // Load privacy rules if enabled.
     if include_privacy_rules {
-        let privacy_config_str = include_str!("privacy_rules.toml");
-        if let Some(privacy_config) =
-            parse_embedded_gitleaks_config("privacy_rules.toml", privacy_config_str)
-        {
-            // Merge privacy rules into the main configuration
-            config.rules.extend(privacy_config.rules);
-
-            // Merge privacy allowlist if present
-            if let Some(privacy_allowlist) = privacy_config.allowlist {
-                merge_allowlist(&mut config.allowlist, privacy_allowlist);
-            }
-        }
+        merge_embedded_gitleaks_config(
+            &mut config,
+            "privacy_rules.toml",
+            include_str!("privacy_rules.toml"),
+        )?;
     }
 
     let compilation_errors = config.compile_regexes();
     if !compilation_errors.regex_errors.is_empty() {
-        const ERROR_LOG_FILE: &str = ".vac_mcp_secret_detection_errors";
-        // Write errors to log file
-        if let Ok(json) = serde_json::to_string(&compilation_errors)
-            && let Err(e) = std::fs::write(ERROR_LOG_FILE, json)
-        {
-            eprintln!("Failed to write errors to log file: {}", e);
-        }
+        return Err(format!(
+            "embedded gitleaks regex compilation failed: {:?}",
+            compilation_errors.regex_errors
+        ));
     }
-    config
+    if config.rules.is_empty() {
+        return Err("embedded gitleaks config compiled to zero active rules".to_string());
+    }
+
+    Ok(config)
 }
 
 /// Helper function to merge allowlists
@@ -648,6 +633,43 @@ pub fn initialize_gitleaks_config(privacy_mode: bool) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn parse_embedded_gitleaks_config_fails_on_invalid_toml() {
+        let result = parse_embedded_gitleaks_config("fixture.toml", "[[rules]\nid =");
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn create_gitleaks_config_never_returns_zero_rule_detector() {
+        let config = create_gitleaks_config(false).expect("embedded config should compile");
+
+        assert!(!config.rules.is_empty());
+    }
+
+    #[test]
+    fn gitleaks_config_compile_reports_invalid_rule_regex() {
+        let mut config = GitleaksConfig {
+            title: Some("fixture".to_string()),
+            allowlist: None,
+            rules: vec![Rule {
+                id: "bad-rule".to_string(),
+                description: "bad".to_string(),
+                regex: Some("[".to_string()),
+                entropy: None,
+                keywords: Vec::new(),
+                path: None,
+                allowlists: None,
+                compiled_regex: None,
+            }],
+        };
+
+        let errors = config.compile_regexes();
+
+        assert_eq!(config.rules.len(), 0);
+        assert_eq!(errors.regex_errors.len(), 1);
+    }
 
     #[test]
     fn test_entropy_calculation() {

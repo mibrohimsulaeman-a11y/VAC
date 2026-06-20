@@ -72,18 +72,64 @@ pub fn globish_matches(pattern: &str, value: &str) -> bool {
     false
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum PolicyPathNormalization {
+    Path(String),
+    EscapesWorkspace,
+}
+
+#[must_use]
+pub fn normalize_policy_path(value: &str) -> PolicyPathNormalization {
+    let normalized_separators = value.replace('\\', "/");
+    if normalized_separators.starts_with('/') || has_windows_drive_prefix(&normalized_separators) {
+        return PolicyPathNormalization::EscapesWorkspace;
+    }
+
+    let mut parts: Vec<&str> = Vec::new();
+    for part in normalized_separators.split('/') {
+        match part {
+            "" | "." => {}
+            ".." => {
+                if parts.pop().is_none() {
+                    return PolicyPathNormalization::EscapesWorkspace;
+                }
+            }
+            segment => parts.push(segment),
+        }
+    }
+
+    PolicyPathNormalization::Path(parts.join("/"))
+}
+
 #[must_use]
 pub fn path_matches(pattern: &str, path: &str) -> bool {
+    let (PolicyPathNormalization::Path(pattern), PolicyPathNormalization::Path(path)) =
+        (normalize_policy_path(pattern), normalize_policy_path(path))
+    else {
+        return false;
+    };
+
+    path_matches_normalized(&pattern, &path)
+}
+
+fn path_matches_normalized(pattern: &str, path: &str) -> bool {
     if pattern == path || matches!(pattern, "**" | "*") {
         return true;
     }
-    if let Some(prefix) = pattern.strip_suffix("/**") {
+    if let Some(prefix) = pattern.strip_suffix("/**")
+        && !prefix.contains('*')
+    {
         return path == prefix || path.starts_with(&format!("{prefix}/"));
     }
     if !pattern.contains('*') {
         return false;
     }
     wildcard_match(pattern, path)
+}
+
+fn has_windows_drive_prefix(path: &str) -> bool {
+    let bytes = path.as_bytes();
+    bytes.len() >= 2 && bytes[1] == b':' && bytes[0].is_ascii_alphabetic()
 }
 
 #[must_use]
@@ -136,5 +182,32 @@ mod tests {
         assert!(path_matches("*.rs", "main.rs"));
         assert!(globish_matches("*.example.com", "api.example.com"));
         assert!(!path_matches("docs/**", "vac-rs/core/src/lib.rs"));
+    }
+
+    #[test]
+    fn policy_path_normalization_collapses_dot_and_internal_dot_dot() {
+        assert_eq!(
+            normalize_policy_path("secret/./a"),
+            PolicyPathNormalization::Path("secret/a".to_string())
+        );
+        assert_eq!(
+            normalize_policy_path("x/../secret/a"),
+            PolicyPathNormalization::Path("secret/a".to_string())
+        );
+    }
+
+    #[test]
+    fn policy_path_matching_normalizes_pattern_and_request_path() {
+        assert!(path_matches("secret/**", "secret/./a"));
+        assert!(path_matches("secret/**", "x/../secret/a"));
+        assert!(path_matches("**/auth/**", "src/./core/../auth/token.rs"));
+    }
+
+    #[test]
+    fn policy_path_matching_rejects_workspace_escape_and_absolute_paths() {
+        assert!(!path_matches("secret/**", "../secret/a"));
+        assert!(!path_matches("secret/**", "/secret/a"));
+        assert!(!path_matches("secret/**", "C:/workspace/secret/a"));
+        assert!(!path_matches("../secret/**", "secret/a"));
     }
 }

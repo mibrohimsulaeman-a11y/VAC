@@ -187,27 +187,47 @@ pub fn router(state: Arc<GatewayApiState>) -> Router {
 }
 
 fn require_auth(state: &GatewayApiState, headers: &HeaderMap) -> Option<axum::response::Response> {
-    let expected = state.auth_token.as_deref()?;
+    let Some(expected) = state
+        .auth_token
+        .as_deref()
+        .filter(|token| !token.is_empty())
+    else {
+        return Some(unauthorized_response());
+    };
 
     let provided = headers
         .get(axum::http::header::AUTHORIZATION)
         .and_then(|value| value.to_str().ok())
         .and_then(|value| value.strip_prefix("Bearer "));
 
-    if provided == Some(expected) {
+    if provided.is_some_and(|token| constant_time_eq(token.as_bytes(), expected.as_bytes())) {
         return None;
     }
 
-    Some(
-        (
-            StatusCode::UNAUTHORIZED,
-            Json(ApiError {
-                error: "unauthorized".to_string(),
-                message: "Missing or invalid bearer token".to_string(),
-            }),
-        )
-            .into_response(),
+    Some(unauthorized_response())
+}
+
+fn unauthorized_response() -> axum::response::Response {
+    (
+        StatusCode::UNAUTHORIZED,
+        Json(ApiError {
+            error: "unauthorized".to_string(),
+            message: "Missing or invalid bearer token".to_string(),
+        }),
     )
+        .into_response()
+}
+
+fn constant_time_eq(left: &[u8], right: &[u8]) -> bool {
+    if left.len() != right.len() {
+        return false;
+    }
+
+    let mut diff = 0u8;
+    for (left_byte, right_byte) in left.iter().zip(right.iter()) {
+        diff |= left_byte ^ right_byte;
+    }
+    diff == 0
 }
 
 async fn send_handler(
@@ -252,22 +272,10 @@ async fn send_handler(
             .into_response();
     };
 
-    if let Some(interactive_request) = interactive.as_ref() {
-        if state.auth_token.is_none() {
-            return (
-                StatusCode::FORBIDDEN,
-                Json(ApiError {
-                    error: "interactive_auth_required".to_string(),
-                    message: "interactive sends require gateway auth token configuration"
-                        .to_string(),
-                }),
-            )
-                .into_response();
-        }
-
-        if let Err(error) = validate_interactive_options(interactive_request) {
-            return (StatusCode::BAD_REQUEST, Json(error)).into_response();
-        }
+    if let Some(interactive_request) = interactive.as_ref()
+        && let Err(error) = validate_interactive_options(interactive_request)
+    {
+        return (StatusCode::BAD_REQUEST, Json(error)).into_response();
     }
 
     let mut effective_target = target.clone();
@@ -874,7 +882,7 @@ async fn session_status_handler(
 mod tests {
     use super::{
         CallerContextInput, GatewayApiState, GatewaySendRequest, InteractiveOptions,
-        build_interactive_prompt, extract_check_output, render_title, send_handler,
+        build_interactive_prompt, extract_check_output, render_title, require_auth, send_handler,
         validate_interactive_options,
     };
     use crate::channels::{Channel, ChannelTestResult};
@@ -887,7 +895,7 @@ mod tests {
     use crate::types::{ChannelId, InboundMessage, OutboundReply};
     use anyhow::Result;
     use async_trait::async_trait;
-    use axum::http::{HeaderMap, StatusCode};
+    use axum::http::{HeaderMap, HeaderValue, StatusCode, header::AUTHORIZATION};
     use axum::response::IntoResponse;
     use std::collections::HashMap;
     use std::sync::Arc;
@@ -942,10 +950,20 @@ mod tests {
         }
     }
 
-    #[tokio::test]
-    async fn interactive_request_without_auth_is_rejected_before_delivery() {
-        let send_count = Arc::new(AtomicUsize::new(0));
-        let channel_impl = Arc::new(MockChannel::new("slack", send_count.clone()));
+    fn bearer_headers(token: &str) -> HeaderMap {
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            AUTHORIZATION,
+            HeaderValue::from_str(&format!("Bearer {token}")).expect("valid bearer header"),
+        );
+        headers
+    }
+
+    async fn test_state(
+        auth_token: Option<String>,
+        send_count: Arc<AtomicUsize>,
+    ) -> Arc<GatewayApiState> {
+        let channel_impl = Arc::new(MockChannel::new("slack", send_count));
 
         let mut channels: HashMap<String, Arc<dyn Channel>> = HashMap::new();
         channels.insert("slack".to_string(), channel_impl);
@@ -969,39 +987,74 @@ mod tests {
             "{channel}:{chat_type}:{chat_id}".to_string(),
         ));
 
-        let state = Arc::new(GatewayApiState {
+        Arc::new(GatewayApiState {
             channels,
             store,
             started_at: Instant::now(),
             delivery_context_ttl_hours: 4,
-            auth_token: None,
+            auth_token,
             client,
             dispatcher,
             router_config: RouterConfig::default(),
             title_template: "{channel}:{chat_type}:{chat_id}".to_string(),
             inbound_tx: Arc::new(RwLock::new(None)),
-        });
+        })
+    }
 
-        let request = GatewaySendRequest {
+    fn test_send_request(interactive: Option<InteractiveOptions>) -> GatewaySendRequest {
+        GatewaySendRequest {
             channel: "slack".to_string(),
             target: serde_json::json!({"channel": "C123"}),
             text: "hello".to_string(),
             context: None,
-            interactive: Some(InteractiveOptions {
-                prompt: "run".to_string(),
-                caller_context: Vec::new(),
-                model: None,
-                sandbox: None,
-                timeout: None,
-                title: None,
-            }),
-        };
+            interactive,
+        }
+    }
+
+    #[tokio::test]
+    async fn missing_gateway_auth_token_denies_protected_routes() {
+        let state = test_state(None, Arc::new(AtomicUsize::new(0))).await;
+
+        assert!(require_auth(&state, &HeaderMap::new()).is_some());
+    }
+
+    #[tokio::test]
+    async fn invalid_gateway_bearer_token_denies_protected_routes() {
+        let state = test_state(Some("secret".to_string()), Arc::new(AtomicUsize::new(0))).await;
+
+        assert!(require_auth(&state, &bearer_headers("wrong")).is_some());
+    }
+
+    #[tokio::test]
+    async fn valid_gateway_bearer_token_allows_send() {
+        let send_count = Arc::new(AtomicUsize::new(0));
+        let state = test_state(Some("secret".to_string()), send_count.clone()).await;
+        let response = send_handler(state, bearer_headers("secret"), test_send_request(None))
+            .await
+            .into_response();
+
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(send_count.load(Ordering::SeqCst), 1);
+    }
+
+    #[tokio::test]
+    async fn interactive_request_without_auth_is_rejected_before_delivery() {
+        let send_count = Arc::new(AtomicUsize::new(0));
+        let state = test_state(None, send_count.clone()).await;
+        let request = test_send_request(Some(InteractiveOptions {
+            prompt: "run".to_string(),
+            caller_context: Vec::new(),
+            model: None,
+            sandbox: None,
+            timeout: None,
+            title: None,
+        }));
 
         let response = send_handler(state, HeaderMap::new(), request)
             .await
             .into_response();
 
-        assert_eq!(response.status(), StatusCode::FORBIDDEN);
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
         assert_eq!(send_count.load(Ordering::SeqCst), 0);
     }
 

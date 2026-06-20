@@ -266,7 +266,7 @@ def run_cargo_tv(root: pathlib.Path) -> int:
         checks.setdefault(missing, {"status": TV_FAIL, "commands": []})
     after_hash = cargo_workspace_hash(root)
     write_proof(root, checks, before_hash, after_hash)
-    summary = cargo_tv_summary(root)
+    summary = cargo_tv_summary(root, consume_proof=True)
     print_summary(summary)
     if summary.get("status") != TV_PASS:
         print("cargo_tv_errors=" + json.dumps(summary.get("errors", []), sort_keys=True))
@@ -283,7 +283,7 @@ def main() -> int:
 
     root = pathlib.Path(args.root).resolve()
     if args.summary_only:
-        summary = cargo_tv_summary(root)
+        summary = cargo_tv_summary(root, consume_proof=True)
         if args.json:
             print(json.dumps(summary, sort_keys=True))
         else:

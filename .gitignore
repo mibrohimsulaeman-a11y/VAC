@@ -10,7 +10,8 @@ experiments/
 
 # VAC local/regenerable state
 .vac/memories/*.db
-.vac/session*
+.vac/session/**
+**/.vac/session/**
 .vac/registry/sessions/*/working/**
 
 

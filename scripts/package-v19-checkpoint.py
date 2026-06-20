@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Create VAC v1.9 split artifacts: clean source ZIP + generated state export ZIP."""
 from __future__ import annotations
-import hashlib, json, os, pathlib, sys, time, zipfile
+import fnmatch, hashlib, json, os, pathlib, sys, time, zipfile
 from typing import Iterable
 
 ROOT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
@@ -16,10 +16,12 @@ MANIFEST = OUT / f"{PREFIX}-package-manifest.json"
 EXCLUDE_PARTS = {".git", "target", "node_modules", "__pycache__", ".venv"}
 SOURCE_EXCLUDE_PREFIXES = (
     ".vac/index/", ".vac/assessment/", ".vac/registry/", ".vac/cache/compiled/", ".vac/evidence/",
-    ".vac/plans/", ".vac/ledger/", ".vac/db/", ".vac/exports/", ".vac/memories/",
+    ".vac/plans/", ".vac/ledger/", ".vac/db/", ".vac/exports/", ".vac/memories/", ".vac/session/",
 )
 SOURCE_EXCLUDE_NAMES = {"SV_VALIDATION.log", "SV_POST_EVIDENCE_VALIDATION.log", "CHECKPOINT_MANIFEST.json", "SANDBOX_HANDOFF.md"}
 SOURCE_EXCLUDE_SUFFIXES = {".zip", ".db", ".db-wal", ".db-shm", ".pyc"}
+SOURCE_ALLOWED_MARKERS = {".vac/db/.gitignore", ".vac/cache/.gitkeep", ".vac/cache/README.md", ".vac/exports/.gitkeep", ".vac/exports/README.md"}
+SOURCE_EXCLUDE_SESSION_NAMES = ("secrets.json", "auto_approve.json", "prompt_*.txt")
 STATE_PREFIXES = (
     ".vac/index/", ".vac/assessment/", ".vac/cache/compiled/", ".vac/evidence/",
     ".vac/registry/evidence/", ".vac/plans/", ".vac/ledger/", ".vac/registry/spec-sync/", ".vac/registry/sessions/",
@@ -36,6 +38,20 @@ def rel(path: pathlib.Path) -> str:
 def sha(path: pathlib.Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
+def path_parts(path: pathlib.Path) -> tuple[str, ...]:
+    return path.relative_to(ROOT).parts
+
+def has_path_segment(path: pathlib.Path, *segments: str) -> bool:
+    parts = path_parts(path)
+    width = len(segments)
+    return any(parts[index:index + width] == segments for index in range(len(parts) - width + 1))
+
+def is_session_path(path: pathlib.Path) -> bool:
+    return has_path_segment(path, ".vac", "session")
+
+def has_sensitive_session_name(path: pathlib.Path) -> bool:
+    return any(fnmatch.fnmatchcase(path.name, pattern) for pattern in SOURCE_EXCLUDE_SESSION_NAMES)
+
 def all_files() -> Iterable[pathlib.Path]:
     for path in sorted(ROOT.rglob("*")):
         if not path.is_file():
@@ -49,9 +65,13 @@ def include_source(path: pathlib.Path) -> bool:
     r = rel(path)
     if path.name in SOURCE_EXCLUDE_NAMES:
         return False
+    if is_session_path(path):
+        return False
+    if has_sensitive_session_name(path):
+        return False
     if any(r.startswith(prefix) for prefix in SOURCE_EXCLUDE_PREFIXES):
         # allow source authority markers under ignored dirs
-        if r in {".vac/db/.gitignore", ".vac/cache/.gitkeep", ".vac/cache/README.md", ".vac/exports/.gitkeep", ".vac/exports/README.md"}:
+        if r in SOURCE_ALLOWED_MARKERS:
             return True
         return False
     if path.suffix in SOURCE_EXCLUDE_SUFFIXES:

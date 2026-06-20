@@ -4,6 +4,18 @@ use std::sync::Arc;
 
 pub struct RemoteStore {}
 
+fn shell_single_quote_arg(value: &str) -> String {
+    if value.is_empty() {
+        return "''".to_string();
+    }
+
+    format!("'{}'", value.replace('\'', "'\\''"))
+}
+
+fn mkdir_command(path: &str) -> String {
+    format!("mkdir -p {}", shell_single_quote_arg(path))
+}
+
 impl RemoteStore {
     /// Get the remote session store path (relative to remote working directory)
     pub fn get_remote_session_store_path() -> PathBuf {
@@ -18,7 +30,7 @@ impl RemoteStore {
         let relative_path_str = relative_path.to_string_lossy().to_string();
 
         if let Err(e) = conn
-            .execute_command(&format!("mkdir -p '{}'", relative_path_str), None, None)
+            .execute_command(&mkdir_command(&relative_path_str), None, None)
             .await
         {
             return Err(format!("Failed to create remote session directory: {}", e));
@@ -64,7 +76,7 @@ impl RemoteStore {
         let relative_backup_path = Self::get_backup_session_string(session_id);
 
         if let Err(e) = conn
-            .execute_command(&format!("mkdir -p '{}'", relative_backup_path), None, None)
+            .execute_command(&mkdir_command(&relative_backup_path), None, None)
             .await
         {
             return Err(format!("Failed to create remote backup directory: {}", e));
@@ -74,5 +86,25 @@ impl RemoteStore {
             Ok(abs_path) => Ok(abs_path),
             Err(e) => Err(format!("Failed to canonicalize remote backup path: {}", e)),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{mkdir_command, shell_single_quote_arg};
+
+    #[test]
+    fn shell_single_quote_arg_handles_empty_plain_and_embedded_quotes() {
+        assert_eq!(shell_single_quote_arg(""), "''");
+        assert_eq!(shell_single_quote_arg(".vac/session"), "'.vac/session'");
+        assert_eq!(shell_single_quote_arg("a'b"), "'a'\\''b'");
+    }
+
+    #[test]
+    fn mkdir_command_quotes_path_payload_as_single_argument() {
+        assert_eq!(
+            mkdir_command(".vac/session/a b;touch /tmp/pwn$(x)'z"),
+            "mkdir -p '.vac/session/a b;touch /tmp/pwn$(x)'\\''z'"
+        );
     }
 }

@@ -295,6 +295,40 @@ mod tests {
     }
 
     #[test]
+    fn path_pattern_matches_normalizes_lexical_path_variants() {
+        assert!(path_pattern_matches("secret/**", "secret/./a"));
+        assert!(path_pattern_matches("secret/**", "x/../secret/a"));
+        assert!(!path_pattern_matches("secret/**", "../secret/a"));
+    }
+
+    #[test]
+    fn policy_denial_cannot_be_bypassed_with_internal_dot_dot() {
+        let snapshot = PolicySnapshot {
+            id: "policy.fixture".to_string(),
+            default_decision: Decision::Allow,
+            hardcoded_safety_denials: vec![rule(
+                "deny-secret",
+                PolicyAction::FilesystemRead,
+                Some("secret/**"),
+                Decision::Deny,
+            )],
+            workspace_rules: vec![],
+            capability_rules: vec![],
+            workflow_rules: vec![],
+            plan_rules: vec![],
+            scoped_grants: vec![],
+        };
+
+        let evaluation = snapshot.evaluate(&request(
+            PolicyAction::FilesystemRead,
+            "x/../secret/token.txt",
+        ));
+
+        assert_eq!(evaluation.decision, Decision::Deny);
+        assert_eq!(evaluation.matched_rules, vec!["deny-secret".to_string()]);
+    }
+
+    #[test]
     fn default_decision_applies_only_when_no_rule_matches() {
         let snapshot = PolicySnapshot {
             id: "policy.fixture".to_string(),

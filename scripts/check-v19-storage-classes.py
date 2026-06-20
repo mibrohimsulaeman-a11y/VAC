@@ -50,7 +50,7 @@ if list((ROOT / ".vac/specs").glob("*.yaml")):
 
 ignored = (ROOT / ".gitignore").read_text(errors="ignore") if (ROOT / ".gitignore").exists() else ""
 for token in [
-    ".vac/db/*.db", ".vac/cache/**", ".vac/index/**", ".vac/assessment/**", ".vac/registry/compiled/**", ".vac/evidence/**",
+    ".vac/session/**", "**/.vac/session/**", ".vac/db/*.db", ".vac/cache/**", ".vac/index/**", ".vac/assessment/**", ".vac/registry/compiled/**", ".vac/evidence/**",
     ".vac/registry/evidence/**", ".vac/plans/**", ".vac/ledger/**", ".vac/registry/spec-sync/**",
 ]:
     if token not in ignored:

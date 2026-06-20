@@ -574,6 +574,68 @@ pub(crate) async fn view_remote_path(
     }
 }
 
+fn shell_single_quote_arg(value: &str) -> String {
+    if value.is_empty() {
+        return "''".to_string();
+    }
+
+    format!("'{}'", value.replace('\'', "'\\''"))
+}
+
+fn remote_head_limit(max_lines: usize) -> usize {
+    max_lines.saturating_add(1)
+}
+
+fn build_remote_find_glob_command(
+    remote_path: &str,
+    glob_pattern: &str,
+    max_lines: usize,
+) -> String {
+    format!(
+        "find {} -name {} 2>/dev/null | head -n {}",
+        shell_single_quote_arg(remote_path),
+        shell_single_quote_arg(glob_pattern),
+        remote_head_limit(max_lines)
+    )
+}
+
+fn build_remote_grep_file_command(remote_path: &str, pattern: &str, max_lines: usize) -> String {
+    format!(
+        "grep -En -- {} {} 2>/dev/null | head -n {}",
+        shell_single_quote_arg(pattern),
+        shell_single_quote_arg(remote_path),
+        remote_head_limit(max_lines)
+    )
+}
+
+fn build_remote_grep_directory_command(
+    remote_path: &str,
+    pattern: &str,
+    max_lines: usize,
+) -> String {
+    format!(
+        "grep -rEn --include='*' -- {} {} 2>/dev/null | head -n {}",
+        shell_single_quote_arg(pattern),
+        shell_single_quote_arg(remote_path),
+        remote_head_limit(max_lines)
+    )
+}
+
+fn build_remote_grep_directory_with_glob_command(
+    remote_path: &str,
+    pattern: &str,
+    glob_pattern: &str,
+    max_lines: usize,
+) -> String {
+    format!(
+        "find {} -name {} -type f -exec grep -EHn -- {} {{}} \\; 2>/dev/null | head -n {}",
+        shell_single_quote_arg(remote_path),
+        shell_single_quote_arg(glob_pattern),
+        shell_single_quote_arg(pattern),
+        remote_head_limit(max_lines)
+    )
+}
+
 /// View remote directory contents filtered by glob pattern using find command
 async fn view_remote_dir_with_glob(
     conn: &Arc<RemoteConnection>,
@@ -582,20 +644,7 @@ async fn view_remote_dir_with_glob(
     glob_pattern: &str,
     max_lines: usize,
 ) -> Result<CallToolResult, McpError> {
-    // Escape for double quotes (the command will be wrapped in bash -c '...' which uses double quotes internally)
-    let escaped_pattern = glob_pattern
-        .replace('\\', "\\\\")
-        .replace('"', "\\\"")
-        .replace('$', "\\$")
-        .replace('`', "\\`");
-
-    // Use double quotes for pattern since single quotes conflict with bash -c wrapper
-    let command = format!(
-        "find {} -name \"{}\" 2>/dev/null | head -n {}",
-        remote_path,
-        escaped_pattern,
-        max_lines + 1 // +1 to detect truncation
-    );
+    let command = build_remote_find_glob_command(remote_path, glob_pattern, max_lines);
 
     match conn.execute_command(&command, None, None).await {
         Ok((output, exit_code)) => {
@@ -647,22 +696,7 @@ async fn grep_remote_file(
     pattern: &str,
     max_lines: usize,
 ) -> Result<CallToolResult, McpError> {
-    // Escape for double quotes (the command will be wrapped in bash -c '...' which uses double quotes internally)
-    // Need to escape: \ " $ `
-    let escaped_pattern = pattern
-        .replace('\\', "\\\\")
-        .replace('"', "\\\"")
-        .replace('$', "\\$")
-        .replace('`', "\\`");
-
-    // Use grep -E for extended regex (supports |, +, ?, etc.)
-    // Use double quotes for pattern since single quotes conflict with bash -c wrapper
-    let command = format!(
-        "grep -En \"{}\" {} 2>/dev/null | head -n {}",
-        escaped_pattern,
-        remote_path,
-        max_lines + 1
-    );
+    let command = build_remote_grep_file_command(remote_path, pattern, max_lines);
 
     match conn.execute_command(&command, None, None).await {
         Ok((output, _exit_code)) => {
@@ -710,21 +744,7 @@ async fn grep_remote_directory(
     pattern: &str,
     max_lines: usize,
 ) -> Result<CallToolResult, McpError> {
-    // Escape for double quotes (the command will be wrapped in bash -c '...' which uses double quotes internally)
-    let escaped_pattern = pattern
-        .replace('\\', "\\\\")
-        .replace('"', "\\\"")
-        .replace('$', "\\$")
-        .replace('`', "\\`");
-
-    // Use grep -rEn for recursive search with extended regex and line numbers
-    // Use double quotes for pattern since single quotes conflict with bash -c wrapper
-    let command = format!(
-        "grep -rEn --include=\"*\" \"{}\" {} 2>/dev/null | head -n {}",
-        escaped_pattern,
-        remote_path,
-        max_lines + 1
-    );
+    let command = build_remote_grep_directory_command(remote_path, pattern, max_lines);
 
     match conn.execute_command(&command, None, None).await {
         Ok((output, _exit_code)) => {
@@ -779,26 +799,11 @@ async fn grep_remote_directory_with_glob(
     glob_pattern: &str,
     max_lines: usize,
 ) -> Result<CallToolResult, McpError> {
-    // Escape for double quotes (the command will be wrapped in bash -c '...' which uses double quotes internally)
-    let escaped_pattern = pattern
-        .replace('\\', "\\\\")
-        .replace('"', "\\\"")
-        .replace('$', "\\$")
-        .replace('`', "\\`");
-    let escaped_glob = glob_pattern
-        .replace('\\', "\\\\")
-        .replace('"', "\\\"")
-        .replace('$', "\\$")
-        .replace('`', "\\`");
-
-    // Use find with -name to filter files, then grep -E for extended regex
-    // Use double quotes for patterns since single quotes conflict with bash -c wrapper
-    let command = format!(
-        "find {} -name \"{}\" -type f -exec grep -EHn \"{}\" {{}} \\; 2>/dev/null | head -n {}",
+    let command = build_remote_grep_directory_with_glob_command(
         remote_path,
-        escaped_glob,
-        escaped_pattern,
-        max_lines + 1
+        pattern,
+        glob_pattern,
+        max_lines,
     );
 
     match conn.execute_command(&command, None, None).await {
@@ -1516,6 +1521,45 @@ fn unicode_normalized_replace(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn shell_single_quote_arg_quotes_empty_and_plain_values() {
+        assert_eq!(shell_single_quote_arg(""), "''");
+        assert_eq!(
+            shell_single_quote_arg("/tmp/path with spaces"),
+            "'/tmp/path with spaces'"
+        );
+    }
+
+    #[test]
+    fn shell_single_quote_arg_escapes_embedded_single_quote() {
+        assert_eq!(shell_single_quote_arg("a'b"), "'a'\\''b'");
+    }
+
+    #[test]
+    fn remote_read_commands_quote_dynamic_path_and_pattern_args() {
+        let path = "/tmp/a b;touch /tmp/pwn$(x)'z";
+        let pattern = "-needle$(touch nope)'|.*";
+        let glob = "*.rs';rm -rf /";
+
+        let file_command = build_remote_grep_file_command(path, pattern, 5);
+        assert_eq!(
+            file_command,
+            "grep -En -- '-needle$(touch nope)'\\''|.*' '/tmp/a b;touch /tmp/pwn$(x)'\\''z' 2>/dev/null | head -n 6"
+        );
+
+        let dir_command = build_remote_grep_directory_command(path, pattern, 5);
+        assert_eq!(
+            dir_command,
+            "grep -rEn --include='*' -- '-needle$(touch nope)'\\''|.*' '/tmp/a b;touch /tmp/pwn$(x)'\\''z' 2>/dev/null | head -n 6"
+        );
+
+        let glob_command = build_remote_grep_directory_with_glob_command(path, pattern, glob, 5);
+        assert_eq!(
+            glob_command,
+            "find '/tmp/a b;touch /tmp/pwn$(x)'\\''z' -name '*.rs'\\'';rm -rf /' -type f -exec grep -EHn -- '-needle$(touch nope)'\\''|.*' {} \\; 2>/dev/null | head -n 6"
+        );
+    }
 
     // ---------------------------------------------------------------
     // normalize_unicode_char / normalize_unicode_to_ascii

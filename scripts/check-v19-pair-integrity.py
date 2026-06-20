@@ -174,6 +174,8 @@ def main() -> int:
             "scripts/generate-assessment-report-sv.py",
             "scripts/generate-spec-sync-report-sv.py",
             "scripts/refresh-evidence-logs-sv.py",
+            "scripts/refresh-confirmed-intent-status.py",
+            "scripts/refresh-rust-ast-index-status.py",
         ]
         for script in required_scripts:
             if not (source_root / script).is_file():
@@ -184,6 +186,8 @@ def main() -> int:
             run([sys.executable, "scripts/generate-assessment-report-sv.py", "."], source_root, log)
             run([sys.executable, "scripts/generate-spec-sync-report-sv.py", "."], source_root, log)
             run([sys.executable, "scripts/refresh-evidence-logs-sv.py", "."], source_root, log)
+            run([sys.executable, "scripts/refresh-confirmed-intent-status.py", "."], source_root, log)
+            run([sys.executable, "scripts/refresh-rust-ast-index-status.py", "."], source_root, log)
 
             compare_json_value(".vac/index/index_manifest.json", state_root, source_root, errors)
             compare_json_value(".vac/assessment/baseline.json", state_root, source_root, errors)

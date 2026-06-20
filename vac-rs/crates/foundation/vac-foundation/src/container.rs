@@ -35,49 +35,70 @@ pub fn volume_container_part(vol: &str) -> &str {
 
 /// Default volume mounts for the vac agent container.
 ///
-/// Single source of truth for every path the container needs.
+/// Single source of truth for every path the container needs by default. Host
+/// cloud credentials, kube config, and SSH keys are intentionally opt-in because
+/// enabling them exposes host credentials to an L1 cooperative sandbox.
 /// Used by `WardenConfig::readonly_profile()`, `prepare_volumes()`,
 /// and `build_dynamic_subagent_command()`.
 pub fn vac_agent_default_mounts() -> Vec<String> {
-    vec![
-        // VAC config & credentials
+    let mut mounts = vec![
+        // VAC config and workspace state needed for ordinary local operation.
         "~/.vac/config.toml:/home/agent/.vac/config.toml:ro".to_string(),
-        "~/.vac/auth.toml:/home/agent/.vac/auth.toml:ro".to_string(),
-        "~/.vac/data/local.db:/home/agent/.vac/data/local.db".to_string(),
         // AK knowledge store — RW so sandboxed subagents can persist entries to the host.
         format!("~/.vac/knowledge:{}", agent_knowledge_store_path()),
-        "~/.agent-board/data.db:/home/agent/.agent-board/data.db".to_string(),
         // Working directory
         "./:/agent:ro".to_string(),
         "./.vac:/agent/.vac".to_string(),
-        // AWS — config read-only, SSO/STS cache writable for token refresh
-        "~/.aws/config:/home/agent/.aws/config:ro".to_string(),
-        "~/.aws/credentials:/home/agent/.aws/credentials:ro".to_string(),
-        "~/.aws/sso:/home/agent/.aws/sso".to_string(),
-        "~/.aws/cli:/home/agent/.aws/cli".to_string(),
-        // GCP — credential files read-only, cache/logs/db writable for gcloud to function
-        "~/.config/gcloud/active_config:/home/agent/.config/gcloud/active_config:ro".to_string(),
-        "~/.config/gcloud/configurations:/home/agent/.config/gcloud/configurations:ro".to_string(),
-        "~/.config/gcloud/application_default_credentials.json:/home/agent/.config/gcloud/application_default_credentials.json:ro".to_string(),
-        "~/.config/gcloud/credentials.db:/home/agent/.config/gcloud/credentials.db:ro".to_string(),
-        "~/.config/gcloud/access_tokens.db:/home/agent/.config/gcloud/access_tokens.db:ro".to_string(),
-        "~/.config/gcloud/logs:/home/agent/.config/gcloud/logs".to_string(),
-        "~/.config/gcloud/cache:/home/agent/.config/gcloud/cache".to_string(),
-        // Azure — config read-only, MSAL token cache and session writable
-        "~/.azure/config:/home/agent/.azure/config:ro".to_string(),
-        "~/.azure/clouds.config:/home/agent/.azure/clouds.config:ro".to_string(),
-        "~/.azure/azureProfile.json:/home/agent/.azure/azureProfile.json:ro".to_string(),
-        "~/.azure/msal_token_cache.json:/home/agent/.azure/msal_token_cache.json".to_string(),
-        "~/.azure/msal_http_cache.bin:/home/agent/.azure/msal_http_cache.bin".to_string(),
-        "~/.azure/logs:/home/agent/.azure/logs".to_string(),
-        // DigitalOcean & Kubernetes
-        "~/.digitalocean:/home/agent/.digitalocean:ro".to_string(),
-        "~/.kube:/home/agent/.kube:ro".to_string(),
-        // SSH — config and keys read-only (useful for host aliases and remote connections)
-        "~/.ssh:/home/agent/.ssh:ro".to_string(),
         // Aqua tool cache (named volume — persists downloaded CLIs across runs)
         "vac-aqua-cache:/home/agent/.local/share/aquaproj-aqua".to_string(),
-    ]
+    ];
+
+    if env_flag_enabled("VAC_AGENT_MOUNT_AWS") {
+        mounts.extend([
+            "~/.aws/config:/home/agent/.aws/config:ro".to_string(),
+            "~/.aws/credentials:/home/agent/.aws/credentials:ro".to_string(),
+            "~/.aws/sso:/home/agent/.aws/sso".to_string(),
+            "~/.aws/cli:/home/agent/.aws/cli".to_string(),
+        ]);
+    }
+    if env_flag_enabled("VAC_AGENT_MOUNT_GCP") {
+        mounts.extend([
+            "~/.config/gcloud/active_config:/home/agent/.config/gcloud/active_config:ro".to_string(),
+            "~/.config/gcloud/configurations:/home/agent/.config/gcloud/configurations:ro".to_string(),
+            "~/.config/gcloud/application_default_credentials.json:/home/agent/.config/gcloud/application_default_credentials.json:ro".to_string(),
+            "~/.config/gcloud/credentials.db:/home/agent/.config/gcloud/credentials.db:ro".to_string(),
+            "~/.config/gcloud/access_tokens.db:/home/agent/.config/gcloud/access_tokens.db:ro".to_string(),
+            "~/.config/gcloud/logs:/home/agent/.config/gcloud/logs".to_string(),
+            "~/.config/gcloud/cache:/home/agent/.config/gcloud/cache".to_string(),
+        ]);
+    }
+    if env_flag_enabled("VAC_AGENT_MOUNT_AZURE") {
+        mounts.extend([
+            "~/.azure/config:/home/agent/.azure/config:ro".to_string(),
+            "~/.azure/clouds.config:/home/agent/.azure/clouds.config:ro".to_string(),
+            "~/.azure/azureProfile.json:/home/agent/.azure/azureProfile.json:ro".to_string(),
+            "~/.azure/msal_token_cache.json:/home/agent/.azure/msal_token_cache.json".to_string(),
+            "~/.azure/msal_http_cache.bin:/home/agent/.azure/msal_http_cache.bin".to_string(),
+            "~/.azure/logs:/home/agent/.azure/logs".to_string(),
+        ]);
+    }
+    if env_flag_enabled("VAC_AGENT_MOUNT_DIGITALOCEAN") {
+        mounts.push("~/.digitalocean:/home/agent/.digitalocean:ro".to_string());
+    }
+    if env_flag_enabled("VAC_AGENT_MOUNT_KUBE") {
+        mounts.push("~/.kube:/home/agent/.kube:ro".to_string());
+    }
+    if env_flag_enabled("VAC_AGENT_MOUNT_SSH") {
+        mounts.push("~/.ssh:/home/agent/.ssh:ro".to_string());
+    }
+
+    mounts
+}
+
+fn env_flag_enabled(name: &str) -> bool {
+    std::env::var(name)
+        .map(|value| matches!(value.as_str(), "1") || value.eq_ignore_ascii_case("true"))
+        .unwrap_or(false)
 }
 
 /// Resolve the host-side AK knowledge store directory for a sandboxed subagent.
@@ -402,6 +423,80 @@ mod tests {
     // sound because the lock guarantees no concurrent reader exists in this
     // suite.
     static ENV_LOCK: Mutex<()> = Mutex::new(());
+
+    const OPT_IN_MOUNT_ENV: &[&str] = &[
+        "VAC_AGENT_MOUNT_AWS",
+        "VAC_AGENT_MOUNT_GCP",
+        "VAC_AGENT_MOUNT_AZURE",
+        "VAC_AGENT_MOUNT_DIGITALOCEAN",
+        "VAC_AGENT_MOUNT_KUBE",
+        "VAC_AGENT_MOUNT_SSH",
+    ];
+
+    fn clear_opt_in_mount_env() {
+        for name in OPT_IN_MOUNT_ENV {
+            unsafe {
+                std::env::remove_var(name);
+            }
+        }
+    }
+
+    fn assert_no_mount_contains(mounts: &[String], needle: &str) {
+        assert!(
+            mounts.iter().all(|mount| !mount.contains(needle)),
+            "mount list unexpectedly contained {needle}: {mounts:?}"
+        );
+    }
+
+    #[test]
+    fn default_mounts_exclude_host_credential_directories() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        clear_opt_in_mount_env();
+
+        let mounts = vac_agent_default_mounts();
+
+        assert_no_mount_contains(&mounts, "/home/agent/.aws");
+        assert_no_mount_contains(&mounts, "/home/agent/.config/gcloud");
+        assert_no_mount_contains(&mounts, "/home/agent/.azure");
+        assert_no_mount_contains(&mounts, "/home/agent/.digitalocean");
+        assert_no_mount_contains(&mounts, "/home/agent/.kube");
+        assert_no_mount_contains(&mounts, "/home/agent/.ssh");
+        assert_no_mount_contains(&mounts, "/home/agent/.vac/auth.toml");
+        assert_no_mount_contains(&mounts, "/home/agent/.vac/data/local.db");
+    }
+
+    #[test]
+    fn credential_mounts_require_explicit_opt_in_env_flags() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        clear_opt_in_mount_env();
+        unsafe {
+            std::env::set_var("VAC_AGENT_MOUNT_AWS", "1");
+            std::env::set_var("VAC_AGENT_MOUNT_KUBE", "true");
+            std::env::set_var("VAC_AGENT_MOUNT_SSH", "TRUE");
+        }
+
+        let mounts = vac_agent_default_mounts();
+
+        assert!(
+            mounts
+                .iter()
+                .any(|mount| mount.contains("/home/agent/.aws/credentials"))
+        );
+        assert!(
+            mounts
+                .iter()
+                .any(|mount| mount.contains("/home/agent/.kube"))
+        );
+        assert!(
+            mounts
+                .iter()
+                .any(|mount| mount.contains("/home/agent/.ssh"))
+        );
+        assert_no_mount_contains(&mounts, "/home/agent/.config/gcloud");
+        assert_no_mount_contains(&mounts, "/home/agent/.azure");
+
+        clear_opt_in_mount_env();
+    }
 
     #[test]
     fn warden_ak_store_args_empty_when_no_override() {
