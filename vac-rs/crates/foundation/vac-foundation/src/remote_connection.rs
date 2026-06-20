@@ -1,9 +1,12 @@
 use crate::utils::{DirectoryEntry, FileSystemProvider};
 use anyhow::{Result, anyhow};
 use async_trait::async_trait;
+use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64_STANDARD};
+use hmac::{Hmac, Mac};
 use russh::client::{self, Handler};
 use russh_sftp::client::SftpSession;
 use serde::{Deserialize, Serialize};
+use sha1::Sha1;
 use std::{
     collections::HashMap,
     fmt::{self, Display},
@@ -16,6 +19,8 @@ use tokio::io::AsyncWriteExt;
 use tokio::sync::RwLock;
 use tracing::debug;
 use uuid;
+
+type HmacSha1 = Hmac<Sha1>;
 
 #[derive(Debug)]
 struct ParsedConnection {
@@ -101,9 +106,17 @@ pub struct KnownHostsVerifier {
     allow_unknown_l1_degraded: bool,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum KnownHostMarker {
+    Plain,
+    CertAuthority,
+    Revoked,
+}
+
 #[derive(Debug, Clone)]
 pub struct KnownHostEntry {
-    host: String,
+    marker: KnownHostMarker,
+    host_pattern: String,
     key_type: String,
     key: String,
 }
@@ -134,15 +147,33 @@ impl KnownHostsVerifier {
 
     #[must_use]
     fn verify(&self, hostname: &str, port: u16, observed_key: &KnownHostKey) -> bool {
-        let host_variants = [hostname.to_string(), format!("[{hostname}]:{port}")];
+        let revoked = self.entries.iter().any(|entry| {
+            entry.marker == KnownHostMarker::Revoked
+                && entry.matches_host(hostname, port)
+                && entry.matches_key(observed_key)
+        });
+        if revoked {
+            return false;
+        }
+
         let matched = self.entries.iter().any(|entry| {
-            host_variants
-                .iter()
-                .any(|host| entry.host.split(',').any(|item| item == host))
-                && entry.key_type == observed_key.key_type
-                && entry.key == observed_key.key
+            entry.marker == KnownHostMarker::Plain
+                && entry.matches_host(hostname, port)
+                && entry.matches_key(observed_key)
         });
         matched || (self.allow_unknown_l1_degraded && self.entries.is_empty())
+    }
+}
+
+impl KnownHostEntry {
+    fn matches_key(&self, observed_key: &KnownHostKey) -> bool {
+        self.key_type == observed_key.key_type && self.key == observed_key.key
+    }
+
+    fn matches_host(&self, hostname: &str, port: u16) -> bool {
+        self.host_pattern
+            .split(',')
+            .any(|pattern| known_host_pattern_matches(pattern, hostname, port))
     }
 }
 
@@ -179,23 +210,69 @@ pub fn parse_known_hosts_entries(text: &str) -> Vec<KnownHostEntry> {
     text.lines()
         .filter_map(|line| {
             let trimmed = line.trim();
-            if trimmed.is_empty() || trimmed.starts_with('#') || trimmed.starts_with('@') {
+            if trimmed.is_empty() || trimmed.starts_with('#') {
                 return None;
             }
+
             let mut parts = trimmed.split_whitespace();
-            let host = parts.next()?.to_string();
+            let first = parts.next()?;
+            let (marker, host_pattern) = match first {
+                "@cert-authority" => (KnownHostMarker::CertAuthority, parts.next()?),
+                "@revoked" => (KnownHostMarker::Revoked, parts.next()?),
+                marker if marker.starts_with('@') => return None,
+                host_pattern => (KnownHostMarker::Plain, host_pattern),
+            };
+
             let key_type = parts.next()?.to_string();
             let key = parts.next()?.to_string();
-            if key_type.is_empty() || key.is_empty() {
+            if host_pattern.is_empty() || key_type.is_empty() || key.is_empty() {
                 return None;
             }
             Some(KnownHostEntry {
-                host,
+                marker,
+                host_pattern: host_pattern.to_string(),
                 key_type,
                 key,
             })
         })
         .collect()
+}
+
+fn known_host_pattern_matches(pattern: &str, hostname: &str, port: u16) -> bool {
+    if pattern.starts_with("|1|") {
+        return openssh_hashed_host_matches(pattern, hostname)
+            || openssh_hashed_host_matches(pattern, &format!("[{hostname}]:{port}"));
+    }
+
+    pattern == hostname || pattern == format!("[{hostname}]:{port}")
+}
+
+fn openssh_hashed_host_matches(pattern: &str, candidate: &str) -> bool {
+    let mut parts = pattern.split('|');
+    if parts.next() != Some("") || parts.next() != Some("1") {
+        return false;
+    }
+    let Some(encoded_salt) = parts.next() else {
+        return false;
+    };
+    let Some(encoded_hash) = parts.next() else {
+        return false;
+    };
+    if parts.next().is_some() {
+        return false;
+    }
+
+    let Ok(salt) = BASE64_STANDARD.decode(encoded_salt) else {
+        return false;
+    };
+    let Ok(expected_hash) = BASE64_STANDARD.decode(encoded_hash) else {
+        return false;
+    };
+    let Ok(mut mac) = HmacSha1::new_from_slice(&salt) else {
+        return false;
+    };
+    mac.update(candidate.as_bytes());
+    mac.verify_slice(&expected_hash).is_ok()
 }
 
 pub struct RemoteConnection {
@@ -938,14 +1015,41 @@ impl PathLocation {
 
 #[cfg(test)]
 mod tests {
-    use super::{KnownHostEntry, KnownHostKey, KnownHostsVerifier, parse_known_hosts_entries};
+    use super::{
+        HmacSha1, KnownHostEntry, KnownHostKey, KnownHostMarker, KnownHostsVerifier,
+        parse_known_hosts_entries,
+    };
+    use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64_STANDARD};
+    use hmac::Mac;
 
-    fn entry(host: &str, key_type: &str, key: &str) -> KnownHostEntry {
+    fn entry(host_pattern: &str, key_type: &str, key: &str) -> KnownHostEntry {
+        marked_entry(KnownHostMarker::Plain, host_pattern, key_type, key)
+    }
+
+    fn marked_entry(
+        marker: KnownHostMarker,
+        host_pattern: &str,
+        key_type: &str,
+        key: &str,
+    ) -> KnownHostEntry {
         KnownHostEntry {
-            host: host.to_string(),
+            marker,
+            host_pattern: host_pattern.to_string(),
             key_type: key_type.to_string(),
             key: key.to_string(),
         }
+    }
+
+    fn hashed_host_pattern(hostname: &str) -> String {
+        let salt = b"vac-test-salt";
+        let mut mac = HmacSha1::new_from_slice(salt).expect("valid HMAC salt");
+        mac.update(hostname.as_bytes());
+        let digest = mac.finalize().into_bytes();
+        format!(
+            "|1|{}|{}",
+            BASE64_STANDARD.encode(salt),
+            BASE64_STANDARD.encode(digest)
+        )
     }
 
     fn observed(key_type: &str, key: &str) -> KnownHostKey {
@@ -960,7 +1064,8 @@ mod tests {
         let entries = parse_known_hosts_entries("example.com ssh-ed25519 AAAAC3Nz\n");
 
         assert_eq!(entries.len(), 1);
-        assert_eq!(entries[0].host, "example.com");
+        assert_eq!(entries[0].marker, KnownHostMarker::Plain);
+        assert_eq!(entries[0].host_pattern, "example.com");
         assert_eq!(entries[0].key_type, "ssh-ed25519");
         assert_eq!(entries[0].key, "AAAAC3Nz");
     }
@@ -1008,12 +1113,78 @@ mod tests {
     }
 
     #[test]
-    fn hashed_known_hosts_entries_do_not_enable_unknown_host_bypass() {
+    fn known_hosts_verifier_matches_hashed_host_entries() {
         let verifier = KnownHostsVerifier {
-            entries: vec![entry("|1|salt|hash", "ssh-ed25519", "AAAAC3Nz")],
-            allow_unknown_l1_degraded: true,
+            entries: vec![entry(
+                &hashed_host_pattern("example.com"),
+                "ssh-ed25519",
+                "AAAAC3Nz",
+            )],
+            allow_unknown_l1_degraded: false,
+        };
+
+        assert!(verifier.verify("example.com", 22, &observed("ssh-ed25519", "AAAAC3Nz")));
+        assert!(!verifier.verify("other.example", 22, &observed("ssh-ed25519", "AAAAC3Nz")));
+    }
+
+    #[test]
+    fn known_hosts_verifier_matches_hashed_bracketed_port_entries() {
+        let verifier = KnownHostsVerifier {
+            entries: vec![entry(
+                &hashed_host_pattern("[example.com]:2222"),
+                "ssh-ed25519",
+                "AAAAC3Nz",
+            )],
+            allow_unknown_l1_degraded: false,
+        };
+
+        assert!(verifier.verify("example.com", 2222, &observed("ssh-ed25519", "AAAAC3Nz")));
+        assert!(!verifier.verify("example.com", 22, &observed("ssh-ed25519", "AAAAC3Nz")));
+    }
+
+    #[test]
+    fn known_hosts_verifier_revoked_entry_rejects_even_with_allow_entry() {
+        let verifier = KnownHostsVerifier {
+            entries: vec![
+                entry("example.com", "ssh-ed25519", "AAAAC3Nz"),
+                marked_entry(
+                    KnownHostMarker::Revoked,
+                    "example.com",
+                    "ssh-ed25519",
+                    "AAAAC3Nz",
+                ),
+            ],
+            allow_unknown_l1_degraded: false,
         };
 
         assert!(!verifier.verify("example.com", 22, &observed("ssh-ed25519", "AAAAC3Nz")));
+    }
+
+    #[test]
+    fn known_hosts_cert_authority_entry_does_not_allow_raw_host_key() {
+        let verifier = KnownHostsVerifier {
+            entries: vec![marked_entry(
+                KnownHostMarker::CertAuthority,
+                "*.example.com",
+                "ssh-ed25519",
+                "AAAAC3Nz",
+            )],
+            allow_unknown_l1_degraded: true,
+        };
+
+        assert!(!verifier.verify("host.example.com", 22, &observed("ssh-ed25519", "AAAAC3Nz")));
+    }
+
+    #[test]
+    fn parse_known_hosts_entries_preserves_supported_markers() {
+        let entries = parse_known_hosts_entries(
+            "@revoked example.com ssh-ed25519 AAAAC3Nz\n@cert-authority *.example.com ssh-rsa AAAAB3Nz\n",
+        );
+
+        assert_eq!(entries.len(), 2);
+        assert_eq!(entries[0].marker, KnownHostMarker::Revoked);
+        assert_eq!(entries[0].host_pattern, "example.com");
+        assert_eq!(entries[1].marker, KnownHostMarker::CertAuthority);
+        assert_eq!(entries[1].host_pattern, "*.example.com");
     }
 }

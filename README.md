@@ -88,3 +88,8 @@ vac autopilot schedule add --name retrospect --cron "0 3 * * *" --prompt "$(vac 
 ```
 
 This is a local cooperative L1 workflow helper. It does not claim L2 broker/OS enforcement.
+
+
+## Documentation
+
+- [Container credential mounts](docs/container-credential-mounts.md)

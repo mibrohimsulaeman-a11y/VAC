@@ -50,6 +50,8 @@ libsql = { workspace = true, optional = true }
 # OAuth dependencies
 sha2 = { workspace = true }
 base64 = "0.22"
+hmac = "0.12"
+sha1 = "0.10"
 urlencoding = "2.1"
 
 

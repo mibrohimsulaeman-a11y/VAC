@@ -1,4 +1,5 @@
-use globset::Glob;
+use globset::{Glob, GlobMatcher};
+use grep_matcher::Matcher;
 use grep_regex::RegexMatcher;
 use grep_searcher::Searcher;
 use grep_searcher::sinks::UTF8;
@@ -7,6 +8,7 @@ use rmcp::ErrorData as McpError;
 use rmcp::model::{CallToolResult, Content};
 use serde_json::json;
 use similar::TextDiff;
+use std::collections::HashSet;
 use std::fs;
 use std::path::Path;
 use std::sync::Arc;
@@ -574,69 +576,166 @@ pub(crate) async fn view_remote_path(
     }
 }
 
-fn shell_single_quote_arg(value: &str) -> String {
-    if value.is_empty() {
-        return "''".to_string();
+const REMOTE_GREP_MAX_FILE_BYTES: u64 = 8 * 1024 * 1024;
+const REMOTE_WALK_MAX_DEPTH: usize = 32;
+const REMOTE_WALK_MAX_ENTRIES: usize = 10_000;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct RemoteWalkEntry {
+    path: String,
+    relative: String,
+    file_name: String,
+    is_directory: bool,
+}
+
+impl RemoteWalkEntry {
+    fn new(root: &str, path: String, is_directory: bool) -> Self {
+        Self {
+            relative: remote_relative_path(root, &path),
+            file_name: remote_file_name(&path).to_string(),
+            path,
+            is_directory,
+        }
     }
 
-    format!("'{}'", value.replace('\'', "'\\''"))
+    fn matches_glob(&self, glob: &GlobMatcher) -> bool {
+        glob.is_match(&self.relative) || glob.is_match(&self.file_name)
+    }
 }
 
-fn remote_head_limit(max_lines: usize) -> usize {
-    max_lines.saturating_add(1)
+fn remote_relative_path(root: &str, path: &str) -> String {
+    let normalized_root = root.trim_end_matches('/');
+    let relative = if normalized_root.is_empty() {
+        path.trim_start_matches('/')
+    } else {
+        path.strip_prefix(normalized_root)
+            .unwrap_or(path)
+            .trim_start_matches('/')
+    };
+
+    if relative.is_empty() {
+        remote_file_name(path).to_string()
+    } else {
+        relative.to_string()
+    }
 }
 
-fn build_remote_find_glob_command(
+fn remote_file_name(path: &str) -> &str {
+    path.rsplit(['/', '\\'])
+        .next()
+        .filter(|name| !name.is_empty())
+        .unwrap_or(path)
+}
+
+fn remote_walk_budget(max_lines: usize) -> usize {
+    max_lines
+        .saturating_add(1)
+        .saturating_mul(64)
+        .clamp(128, REMOTE_WALK_MAX_ENTRIES)
+}
+
+async fn walk_remote_entries(
+    conn: &Arc<RemoteConnection>,
+    root: &str,
+    max_entries: usize,
+    max_depth: usize,
+) -> anyhow::Result<(Vec<RemoteWalkEntry>, bool)> {
+    let mut stack = vec![(root.to_string(), 0usize)];
+    let mut entries = Vec::new();
+    let mut truncated = false;
+
+    while let Some((directory, depth)) = stack.pop() {
+        let children = match conn.list_directory_with_types(&directory).await {
+            Ok(children) => children,
+            Err(error) if depth == 0 => return Err(error),
+            Err(_) => continue,
+        };
+
+        let mut child_directories = Vec::new();
+        for (child_path, is_directory) in children {
+            if entries.len() >= max_entries {
+                truncated = true;
+                break;
+            }
+
+            if is_directory && depth < max_depth {
+                child_directories.push(child_path.clone());
+            }
+            entries.push(RemoteWalkEntry::new(root, child_path, is_directory));
+        }
+
+        if truncated {
+            break;
+        }
+
+        child_directories.sort();
+        for child_directory in child_directories.into_iter().rev() {
+            stack.push((child_directory, depth + 1));
+        }
+    }
+
+    entries.sort_by(|left, right| left.path.cmp(&right.path));
+    Ok((entries, truncated))
+}
+
+fn compile_regex(pattern: &str) -> Result<RegexMatcher, CallToolResult> {
+    RegexMatcher::new(pattern).map_err(|error| {
+        CallToolResult::error(vec![
+            Content::text("INVALID_REGEX"),
+            Content::text(format!("Invalid regex pattern '{}': {}", pattern, error)),
+        ])
+    })
+}
+
+fn grep_content_lines(
+    content: &str,
+    matcher: &RegexMatcher,
+    path_prefix: Option<&str>,
+    limit: usize,
+) -> Vec<String> {
+    let mut matches = Vec::new();
+    for (index, line) in content.lines().enumerate() {
+        if matches.len() >= limit {
+            break;
+        }
+        if matcher.is_match(line.as_bytes()).unwrap_or(false) {
+            let line_number = index + 1;
+            let line = line.trim_end();
+            if let Some(path_prefix) = path_prefix {
+                matches.push(format!("{}:{}:{}", path_prefix, line_number, line));
+            } else {
+                matches.push(format!("{}:{}", line_number, line));
+            }
+        }
+    }
+    matches
+}
+
+async fn read_remote_file_to_string_limited(
+    conn: &Arc<RemoteConnection>,
     remote_path: &str,
-    glob_pattern: &str,
-    max_lines: usize,
-) -> String {
-    format!(
-        "find {} -name {} 2>/dev/null | head -n {}",
-        shell_single_quote_arg(remote_path),
-        shell_single_quote_arg(glob_pattern),
-        remote_head_limit(max_lines)
-    )
+) -> anyhow::Result<String> {
+    let size = conn.file_size(remote_path).await?;
+    if size > REMOTE_GREP_MAX_FILE_BYTES {
+        return Err(anyhow::anyhow!(
+            "remote file exceeds grep read limit ({} > {} bytes): {}",
+            size,
+            REMOTE_GREP_MAX_FILE_BYTES,
+            remote_path
+        ));
+    }
+
+    let content = conn.read_file(remote_path).await?;
+    Ok(String::from_utf8_lossy(&content).into_owned())
 }
 
-fn build_remote_grep_file_command(remote_path: &str, pattern: &str, max_lines: usize) -> String {
-    format!(
-        "grep -En -- {} {} 2>/dev/null | head -n {}",
-        shell_single_quote_arg(pattern),
-        shell_single_quote_arg(remote_path),
-        remote_head_limit(max_lines)
-    )
+fn display_limited_lines(lines: Vec<String>, max_lines: usize) -> (Vec<String>, bool) {
+    let truncated = lines.len() > max_lines;
+    let display_lines = lines.into_iter().take(max_lines).collect();
+    (display_lines, truncated)
 }
 
-fn build_remote_grep_directory_command(
-    remote_path: &str,
-    pattern: &str,
-    max_lines: usize,
-) -> String {
-    format!(
-        "grep -rEn --include='*' -- {} {} 2>/dev/null | head -n {}",
-        shell_single_quote_arg(pattern),
-        shell_single_quote_arg(remote_path),
-        remote_head_limit(max_lines)
-    )
-}
-
-fn build_remote_grep_directory_with_glob_command(
-    remote_path: &str,
-    pattern: &str,
-    glob_pattern: &str,
-    max_lines: usize,
-) -> String {
-    format!(
-        "find {} -name {} -type f -exec grep -EHn -- {} {{}} \\; 2>/dev/null | head -n {}",
-        shell_single_quote_arg(remote_path),
-        shell_single_quote_arg(glob_pattern),
-        shell_single_quote_arg(pattern),
-        remote_head_limit(max_lines)
-    )
-}
-
-/// View remote directory contents filtered by glob pattern using find command
+/// View remote directory contents filtered by glob pattern using SFTP traversal.
 async fn view_remote_dir_with_glob(
     conn: &Arc<RemoteConnection>,
     remote_path: &str,
@@ -644,20 +743,35 @@ async fn view_remote_dir_with_glob(
     glob_pattern: &str,
     max_lines: usize,
 ) -> Result<CallToolResult, McpError> {
-    let command = build_remote_find_glob_command(remote_path, glob_pattern, max_lines);
+    let glob = match Glob::new(glob_pattern) {
+        Ok(glob) => glob.compile_matcher(),
+        Err(error) => {
+            return Ok(CallToolResult::error(vec![
+                Content::text("INVALID_GLOB"),
+                Content::text(format!(
+                    "Invalid glob pattern '{}': {}",
+                    glob_pattern, error
+                )),
+            ]));
+        }
+    };
 
-    match conn.execute_command(&command, None, None).await {
-        Ok((output, exit_code)) => {
-            if exit_code != 0 && output.trim().is_empty() {
-                return Ok(CallToolResult::success(vec![Content::text(format!(
-                    "No files matching '{}' found in {}",
-                    glob_pattern, original_path
-                ))]));
-            }
-
-            let lines: Vec<&str> = output.lines().collect();
-            let truncated = lines.len() > max_lines;
-            let display_lines: Vec<&str> = lines.into_iter().take(max_lines).collect();
+    match walk_remote_entries(
+        conn,
+        remote_path,
+        remote_walk_budget(max_lines),
+        REMOTE_WALK_MAX_DEPTH,
+    )
+    .await
+    {
+        Ok((entries, walk_truncated)) => {
+            let matches: Vec<String> = entries
+                .into_iter()
+                .filter(|entry| entry.matches_glob(&glob))
+                .map(|entry| entry.path)
+                .collect();
+            let (display_lines, line_truncated) = display_limited_lines(matches, max_lines);
+            let truncated = walk_truncated || line_truncated;
 
             if display_lines.is_empty() {
                 return Ok(CallToolResult::success(vec![Content::text(format!(
@@ -681,14 +795,14 @@ async fn view_remote_dir_with_glob(
                 sanitize_text_output(&result),
             )]))
         }
-        Err(e) => Ok(CallToolResult::error(vec![
+        Err(error) => Ok(CallToolResult::error(vec![
             Content::text("REMOTE_GLOB_ERROR"),
-            Content::text(format!("Failed to search remote directory: {}", e)),
+            Content::text(format!("Failed to search remote directory: {}", error)),
         ])),
     }
 }
 
-/// Grep search in a single remote file
+/// Grep search in a single remote file using SFTP read + local regex matching.
 async fn grep_remote_file(
     conn: &Arc<RemoteConnection>,
     remote_path: &str,
@@ -696,22 +810,22 @@ async fn grep_remote_file(
     pattern: &str,
     max_lines: usize,
 ) -> Result<CallToolResult, McpError> {
-    let command = build_remote_grep_file_command(remote_path, pattern, max_lines);
+    let matcher = match compile_regex(pattern) {
+        Ok(matcher) => matcher,
+        Err(error) => return Ok(error),
+    };
 
-    match conn.execute_command(&command, None, None).await {
-        Ok((output, _exit_code)) => {
-            // grep returns exit code 1 for no matches, which is fine
-            let lines: Vec<&str> = output.lines().collect();
+    match read_remote_file_to_string_limited(conn, remote_path).await {
+        Ok(content) => {
+            let matches = grep_content_lines(&content, &matcher, None, max_lines.saturating_add(1));
+            let (display_lines, truncated) = display_limited_lines(matches, max_lines);
 
-            if lines.is_empty() {
+            if display_lines.is_empty() {
                 return Ok(CallToolResult::success(vec![Content::text(format!(
                     "No matches for '{}' in {}",
                     pattern, original_path
                 ))]));
             }
-
-            let truncated = lines.len() > max_lines;
-            let display_lines: Vec<&str> = lines.into_iter().take(max_lines).collect();
 
             let mut result = format!(
                 "Grep results for '{}' in \"{}\" ({} matches in 1 file):\n\n{}",
@@ -729,14 +843,71 @@ async fn grep_remote_file(
                 sanitize_text_output(&result),
             )]))
         }
-        Err(e) => Ok(CallToolResult::error(vec![
+        Err(error) => Ok(CallToolResult::error(vec![
             Content::text("REMOTE_GREP_ERROR"),
-            Content::text(format!("Failed to grep remote file: {}", e)),
+            Content::text(format!("Failed to grep remote file: {}", error)),
         ])),
     }
 }
 
-/// Grep search across a remote directory using grep -rE
+async fn grep_remote_entries(
+    conn: &Arc<RemoteConnection>,
+    remote_path: &str,
+    matcher: &RegexMatcher,
+    glob: Option<&GlobMatcher>,
+    max_lines: usize,
+) -> anyhow::Result<(Vec<String>, usize, bool)> {
+    let (entries, walk_truncated) = walk_remote_entries(
+        conn,
+        remote_path,
+        remote_walk_budget(max_lines),
+        REMOTE_WALK_MAX_DEPTH,
+    )
+    .await?;
+
+    let mut all_matches = Vec::new();
+    let mut files_with_matches = 0usize;
+    let mut truncated = walk_truncated;
+
+    for entry in entries {
+        if all_matches.len() > max_lines {
+            truncated = true;
+            break;
+        }
+        if entry.is_directory {
+            continue;
+        }
+        if let Some(glob) = glob
+            && !entry.matches_glob(glob)
+        {
+            continue;
+        }
+
+        let Ok(content) = read_remote_file_to_string_limited(conn, &entry.path).await else {
+            continue;
+        };
+        let remaining = max_lines
+            .saturating_add(1)
+            .saturating_sub(all_matches.len());
+        if remaining == 0 {
+            truncated = true;
+            break;
+        }
+        let file_matches = grep_content_lines(&content, matcher, Some(&entry.path), remaining);
+        if !file_matches.is_empty() {
+            files_with_matches += 1;
+            all_matches.extend(file_matches);
+        }
+    }
+
+    if all_matches.len() > max_lines {
+        truncated = true;
+    }
+
+    Ok((all_matches, files_with_matches, truncated))
+}
+
+/// Grep search across a remote directory using SFTP traversal + local regex matching.
 async fn grep_remote_directory(
     conn: &Arc<RemoteConnection>,
     remote_path: &str,
@@ -744,34 +915,32 @@ async fn grep_remote_directory(
     pattern: &str,
     max_lines: usize,
 ) -> Result<CallToolResult, McpError> {
-    let command = build_remote_grep_directory_command(remote_path, pattern, max_lines);
+    let matcher = match compile_regex(pattern) {
+        Ok(matcher) => matcher,
+        Err(error) => return Ok(error),
+    };
 
-    match conn.execute_command(&command, None, None).await {
-        Ok((output, _exit_code)) => {
-            let lines: Vec<&str> = output.lines().collect();
-
-            if lines.is_empty() {
+    match grep_remote_entries(conn, remote_path, &matcher, None, max_lines).await {
+        Ok((matches, files_with_matches, truncated)) => {
+            let display_lines: Vec<String> = matches.into_iter().take(max_lines).collect();
+            if display_lines.is_empty() {
                 return Ok(CallToolResult::success(vec![Content::text(format!(
                     "No matches for '{}' in {}",
                     pattern, original_path
                 ))]));
             }
 
-            let truncated = lines.len() > max_lines;
-            let display_lines: Vec<&str> = lines.into_iter().take(max_lines).collect();
-
-            // Count unique files
-            let files_with_matches: std::collections::HashSet<&str> = display_lines
+            let unique_files: HashSet<&str> = display_lines
                 .iter()
                 .filter_map(|line| line.split(':').next())
                 .collect();
-
+            let files_with_matches = files_with_matches.max(unique_files.len());
             let mut result = format!(
                 "Grep results for '{}' in \"{}\" ({} matches in {} files):\n\n{}",
                 pattern,
                 original_path,
                 display_lines.len(),
-                files_with_matches.len(),
+                files_with_matches,
                 display_lines.join("\n")
             );
 
@@ -783,14 +952,14 @@ async fn grep_remote_directory(
                 sanitize_text_output(&result),
             )]))
         }
-        Err(e) => Ok(CallToolResult::error(vec![
+        Err(error) => Ok(CallToolResult::error(vec![
             Content::text("REMOTE_GREP_ERROR"),
-            Content::text(format!("Failed to grep remote directory: {}", e)),
+            Content::text(format!("Failed to grep remote directory: {}", error)),
         ])),
     }
 }
 
-/// Grep search across a remote directory filtered by glob pattern
+/// Grep search across a remote directory filtered by glob pattern.
 async fn grep_remote_directory_with_glob(
     conn: &Arc<RemoteConnection>,
     remote_path: &str,
@@ -799,40 +968,45 @@ async fn grep_remote_directory_with_glob(
     glob_pattern: &str,
     max_lines: usize,
 ) -> Result<CallToolResult, McpError> {
-    let command = build_remote_grep_directory_with_glob_command(
-        remote_path,
-        pattern,
-        glob_pattern,
-        max_lines,
-    );
+    let matcher = match compile_regex(pattern) {
+        Ok(matcher) => matcher,
+        Err(error) => return Ok(error),
+    };
+    let glob = match Glob::new(glob_pattern) {
+        Ok(glob) => glob.compile_matcher(),
+        Err(error) => {
+            return Ok(CallToolResult::error(vec![
+                Content::text("INVALID_GLOB"),
+                Content::text(format!(
+                    "Invalid glob pattern '{}': {}",
+                    glob_pattern, error
+                )),
+            ]));
+        }
+    };
 
-    match conn.execute_command(&command, None, None).await {
-        Ok((output, _exit_code)) => {
-            let lines: Vec<&str> = output.lines().collect();
-
-            if lines.is_empty() {
+    match grep_remote_entries(conn, remote_path, &matcher, Some(&glob), max_lines).await {
+        Ok((matches, files_with_matches, truncated)) => {
+            let display_lines: Vec<String> = matches.into_iter().take(max_lines).collect();
+            if display_lines.is_empty() {
                 return Ok(CallToolResult::success(vec![Content::text(format!(
                     "No matches for '{}' in {} (filtered by glob '{}')",
                     pattern, original_path, glob_pattern
                 ))]));
             }
 
-            let truncated = lines.len() > max_lines;
-            let display_lines: Vec<&str> = lines.into_iter().take(max_lines).collect();
-
-            // Count unique files
-            let files_with_matches: std::collections::HashSet<&str> = display_lines
+            let unique_files: HashSet<&str> = display_lines
                 .iter()
                 .filter_map(|line| line.split(':').next())
                 .collect();
-
+            let files_with_matches = files_with_matches.max(unique_files.len());
             let mut result = format!(
                 "Grep results for '{}' in \"{}\" (glob: '{}') ({} matches in {} files):\n\n{}",
                 pattern,
                 original_path,
                 glob_pattern,
                 display_lines.len(),
-                files_with_matches.len(),
+                files_with_matches,
                 display_lines.join("\n")
             );
 
@@ -844,9 +1018,9 @@ async fn grep_remote_directory_with_glob(
                 sanitize_text_output(&result),
             )]))
         }
-        Err(e) => Ok(CallToolResult::error(vec![
+        Err(error) => Ok(CallToolResult::error(vec![
             Content::text("REMOTE_GREP_ERROR"),
-            Content::text(format!("Failed to grep remote directory: {}", e)),
+            Content::text(format!("Failed to grep remote directory: {}", error)),
         ])),
     }
 }
@@ -1523,41 +1697,38 @@ mod tests {
     use super::*;
 
     #[test]
-    fn shell_single_quote_arg_quotes_empty_and_plain_values() {
-        assert_eq!(shell_single_quote_arg(""), "''");
-        assert_eq!(
-            shell_single_quote_arg("/tmp/path with spaces"),
-            "'/tmp/path with spaces'"
-        );
+    fn remote_relative_path_handles_metacharacters_as_data() {
+        let relative = remote_relative_path("/tmp/root", "/tmp/root/a b;touch /tmp/pwn$(x)'z.rs");
+        assert_eq!(relative, "a b;touch /tmp/pwn$(x)'z.rs");
     }
 
     #[test]
-    fn shell_single_quote_arg_escapes_embedded_single_quote() {
-        assert_eq!(shell_single_quote_arg("a'b"), "'a'\\''b'");
+    fn remote_glob_matching_uses_local_matcher_not_shell_command() {
+        let glob = Glob::new("*.rs';rm -rf /")
+            .expect("valid glob")
+            .compile_matcher();
+        let entry = RemoteWalkEntry::new(
+            "/tmp/root",
+            "/tmp/root/main.rs';rm -rf /".to_string(),
+            false,
+        );
+
+        assert!(entry.matches_glob(&glob));
     }
 
     #[test]
-    fn remote_read_commands_quote_dynamic_path_and_pattern_args() {
-        let path = "/tmp/a b;touch /tmp/pwn$(x)'z";
-        let pattern = "-needle$(touch nope)'|.*";
-        let glob = "*.rs';rm -rf /";
-
-        let file_command = build_remote_grep_file_command(path, pattern, 5);
-        assert_eq!(
-            file_command,
-            "grep -En -- '-needle$(touch nope)'\\''|.*' '/tmp/a b;touch /tmp/pwn$(x)'\\''z' 2>/dev/null | head -n 6"
+    fn remote_grep_content_accepts_leading_hyphen_pattern_without_shell_options() {
+        let matcher = compile_regex("-needle").expect("valid regex");
+        let matches = grep_content_lines(
+            "safe\n-needle here\n",
+            &matcher,
+            Some("/tmp/a b;touch /tmp/pwn$(x)'z"),
+            5,
         );
 
-        let dir_command = build_remote_grep_directory_command(path, pattern, 5);
         assert_eq!(
-            dir_command,
-            "grep -rEn --include='*' -- '-needle$(touch nope)'\\''|.*' '/tmp/a b;touch /tmp/pwn$(x)'\\''z' 2>/dev/null | head -n 6"
-        );
-
-        let glob_command = build_remote_grep_directory_with_glob_command(path, pattern, glob, 5);
-        assert_eq!(
-            glob_command,
-            "find '/tmp/a b;touch /tmp/pwn$(x)'\\''z' -name '*.rs'\\'';rm -rf /' -type f -exec grep -EHn -- '-needle$(touch nope)'\\''|.*' {} \\; 2>/dev/null | head -n 6"
+            matches,
+            vec!["/tmp/a b;touch /tmp/pwn$(x)'z:2:-needle here".to_string()]
         );
     }
 

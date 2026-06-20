@@ -46,7 +46,7 @@ pub struct StartArgs {
     #[arg(long, default_value_t = false)]
     pub show_token: bool,
 
-    /// Disable auth checks for protected routes (local dev only)
+    /// Disable auth checks for protected routes (loopback-only local dev mode)
     #[arg(long, default_value_t = false)]
     pub no_auth: bool,
 
@@ -2359,6 +2359,26 @@ async fn write_default_autopilot_config(path: &Path, force: bool) -> Result<(), 
     }
 
     Ok(())
+}
+
+fn validate_no_auth_bind(bind: &str, no_auth: bool) -> Result<(), String> {
+    if !no_auth {
+        return Ok(());
+    }
+
+    let addr = bind.parse::<SocketAddr>().map_err(|_| {
+        format!(
+            "no_auth_requires_loopback_bind: disabled route checks require an explicit loopback SocketAddr bind; got {bind}"
+        )
+    })?;
+
+    if addr.ip().is_loopback() {
+        Ok(())
+    } else {
+        Err(format!(
+            "no_auth_requires_loopback_bind: disabled route checks may only be used with loopback bind addresses; got {bind}"
+        ))
+    }
 }
 
 fn loopback_base_url_from_bind(bind: &str) -> String {

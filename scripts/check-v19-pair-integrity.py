@@ -69,9 +69,21 @@ def sha_file(path: pathlib.Path) -> str:
     return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def has_rel_segments(rel: str, *segments: str) -> bool:
+    parts = pathlib.PurePosixPath(rel).parts
+    if len(segments) > len(parts):
+        return False
+    return any(
+        tuple(parts[index : index + len(segments)]) == segments
+        for index in range(len(parts) - len(segments) + 1)
+    )
+
+
 def source_index_scope(rel: str) -> tuple[bool, str]:
     if rel in INDEX_EXCLUDED_NAMES:
         return False, "root_checkpoint_or_validation_log"
+    if has_rel_segments(rel, ".vac", "session"):
+        return False, "generated_or_local_state_session"
     if any(rel.startswith(prefix) for prefix in INDEX_EXCLUDED_PREFIXES):
         return False, "generated_or_local_state_prefix"
     suffix = pathlib.Path(rel).suffix.lower()

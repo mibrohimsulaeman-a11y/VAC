@@ -54,6 +54,7 @@ pub fn vac_agent_default_mounts() -> Vec<String> {
     ];
 
     if env_flag_enabled("VAC_AGENT_MOUNT_AWS") {
+        warn_credential_mount_enabled("VAC_AGENT_MOUNT_AWS", "aws");
         mounts.extend([
             "~/.aws/config:/home/agent/.aws/config:ro".to_string(),
             "~/.aws/credentials:/home/agent/.aws/credentials:ro".to_string(),
@@ -62,6 +63,7 @@ pub fn vac_agent_default_mounts() -> Vec<String> {
         ]);
     }
     if env_flag_enabled("VAC_AGENT_MOUNT_GCP") {
+        warn_credential_mount_enabled("VAC_AGENT_MOUNT_GCP", "gcp");
         mounts.extend([
             "~/.config/gcloud/active_config:/home/agent/.config/gcloud/active_config:ro".to_string(),
             "~/.config/gcloud/configurations:/home/agent/.config/gcloud/configurations:ro".to_string(),
@@ -73,6 +75,7 @@ pub fn vac_agent_default_mounts() -> Vec<String> {
         ]);
     }
     if env_flag_enabled("VAC_AGENT_MOUNT_AZURE") {
+        warn_credential_mount_enabled("VAC_AGENT_MOUNT_AZURE", "azure");
         mounts.extend([
             "~/.azure/config:/home/agent/.azure/config:ro".to_string(),
             "~/.azure/clouds.config:/home/agent/.azure/clouds.config:ro".to_string(),
@@ -83,12 +86,15 @@ pub fn vac_agent_default_mounts() -> Vec<String> {
         ]);
     }
     if env_flag_enabled("VAC_AGENT_MOUNT_DIGITALOCEAN") {
+        warn_credential_mount_enabled("VAC_AGENT_MOUNT_DIGITALOCEAN", "digitalocean");
         mounts.push("~/.digitalocean:/home/agent/.digitalocean:ro".to_string());
     }
     if env_flag_enabled("VAC_AGENT_MOUNT_KUBE") {
+        warn_credential_mount_enabled("VAC_AGENT_MOUNT_KUBE", "kube");
         mounts.push("~/.kube:/home/agent/.kube:ro".to_string());
     }
     if env_flag_enabled("VAC_AGENT_MOUNT_SSH") {
+        warn_credential_mount_enabled("VAC_AGENT_MOUNT_SSH", "ssh");
         mounts.push("~/.ssh:/home/agent/.ssh:ro".to_string());
     }
 
@@ -99,6 +105,14 @@ fn env_flag_enabled(name: &str) -> bool {
     std::env::var(name)
         .map(|value| matches!(value.as_str(), "1") || value.eq_ignore_ascii_case("true"))
         .unwrap_or(false)
+}
+
+fn warn_credential_mount_enabled(flag_name: &str, provider: &str) {
+    tracing::warn!(
+        flag = flag_name,
+        provider,
+        "VAC agent credential mount enabled; L1 cooperative sandbox is not a credential boundary"
+    );
 }
 
 /// Resolve the host-side AK knowledge store directory for a sandboxed subagent.
@@ -494,6 +508,23 @@ mod tests {
         );
         assert_no_mount_contains(&mounts, "/home/agent/.config/gcloud");
         assert_no_mount_contains(&mounts, "/home/agent/.azure");
+
+        clear_opt_in_mount_env();
+    }
+
+    #[test]
+    fn invalid_credential_mount_flag_value_does_not_enable_mount() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        clear_opt_in_mount_env();
+        unsafe {
+            std::env::set_var("VAC_AGENT_MOUNT_AWS", "yes");
+            std::env::set_var("VAC_AGENT_MOUNT_GCP", "enabled");
+        }
+
+        let mounts = vac_agent_default_mounts();
+
+        assert_no_mount_contains(&mounts, "/home/agent/.aws");
+        assert_no_mount_contains(&mounts, "/home/agent/.config/gcloud");
 
         clear_opt_in_mount_env();
     }

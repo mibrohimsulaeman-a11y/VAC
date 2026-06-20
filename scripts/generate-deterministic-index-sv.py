@@ -89,8 +89,18 @@ def role(path: str) -> str:
     return "repo"
 
 
+def has_path_segment(path: Path, *segments: str) -> bool:
+    parts = path.relative_to(ROOT).parts
+    if len(segments) > len(parts):
+        return False
+    return any(
+        tuple(parts[index : index + len(segments)]) == segments
+        for index in range(len(parts) - len(segments) + 1)
+    )
+
+
 def is_generated(path: str) -> bool:
-    return path.startswith((".vac/registry/", ".vac/assessment/", ".vac/evidence/", ".vac/index/", ".vac/cache/", ".vac/plans/", ".vac/ledger/", ".vac/memories/", ".vac/exports/"))
+    return path.startswith((".vac/registry/", ".vac/assessment/", ".vac/evidence/", ".vac/index/", ".vac/cache/", ".vac/plans/", ".vac/ledger/", ".vac/memories/", ".vac/exports/", ".vac/session/")) or "/.vac/session/" in path
 
 
 def include(p: Path) -> bool:
@@ -98,6 +108,8 @@ def include(p: Path) -> bool:
     if p.is_dir():
         return False
     if any(part in EXCLUDE_PARTS for part in p.parts):
+        return False
+    if has_path_segment(p, ".vac", "session"):
         return False
     if any(rel.startswith(pref) for pref in EXCLUDE_PREFIXES):
         return False

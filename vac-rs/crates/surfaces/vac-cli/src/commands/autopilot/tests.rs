@@ -85,6 +85,34 @@ fn loopback_base_url_resolves_unspecified_bind() {
     assert_eq!(v6, "http://[::1]:4096");
 }
 
+#[test]
+fn no_auth_loopback_bind_is_allowed() {
+    assert!(validate_no_auth_bind("127.0.0.1:4096", true).is_ok());
+    assert!(validate_no_auth_bind("127.9.8.7:4096", true).is_ok());
+    assert!(validate_no_auth_bind("[::1]:4096", true).is_ok());
+}
+
+#[test]
+fn no_auth_public_or_unspecified_bind_is_rejected() {
+    for bind in [
+        "0.0.0.0:4096",
+        "[::]:4096",
+        "192.168.1.10:4096",
+        "10.0.0.2:4096",
+        "8.8.8.8:4096",
+    ] {
+        let error = validate_no_auth_bind(bind, true)
+            .expect_err("public disabled-route bind should fail closed");
+        assert!(error.contains("no_auth_requires_loopback_bind"));
+    }
+}
+
+#[test]
+fn guarded_public_bind_is_allowed() {
+    assert!(validate_no_auth_bind("0.0.0.0:4096", false).is_ok());
+    assert!(validate_no_auth_bind("[::]:4096", false).is_ok());
+}
+
 fn sample_schedule(name: &str) -> AutopilotScheduleConfig {
     AutopilotScheduleConfig {
         name: name.to_string(),

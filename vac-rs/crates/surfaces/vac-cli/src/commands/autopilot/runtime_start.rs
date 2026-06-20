@@ -145,6 +145,7 @@ pub(super) async fn start_autopilot(
     let has_runtime_overrides = options.has_runtime_overrides();
     let effective_server = if has_runtime_overrides || needs_setup {
         let server_config = AutopilotServerConfig::from_start_options(&options);
+        validate_no_auth_bind(&server_config.listen, server_config.no_auth)?;
         let mut config_file = saved_config.clone();
         config_file.server = server_config.clone();
         config_file.save()?;
@@ -155,6 +156,8 @@ pub(super) async fn start_autopilot(
     } else {
         saved_config.server.clone()
     };
+
+    validate_no_auth_bind(&effective_server.listen, effective_server.no_auth)?;
 
     let effective_options = options.clone().with_server_config(&effective_server);
 
@@ -384,6 +387,7 @@ pub(super) async fn start_foreground_runtime(
     // --- 1. Server runtime (initialize before scheduler to avoid sqlite3Close/sqlite3_open
     //     race on libsql's global state when run_scheduler exits early) ---
     let bind = options.bind.clone();
+    validate_no_auth_bind(&bind, options.no_auth)?;
     let (auth_config, generated_auth_token) = if options.no_auth {
         (vac_broker::AuthConfig::disabled(), None)
     } else {
