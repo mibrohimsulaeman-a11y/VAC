@@ -9,8 +9,6 @@ PR_Description.md
 experiments/
 
 # VAC local/regenerable state
-.vac/cache/**
-!.vac/cache/.gitkeep
 .vac/memories/*.db
 .vac/session*
 .vac/registry/sessions/*/working/**

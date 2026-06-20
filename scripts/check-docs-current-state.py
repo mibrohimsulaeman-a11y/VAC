@@ -2,7 +2,7 @@
 """Current-state docs/link hygiene gate for VAC v1.9.
 
 This SV gate rejects obsolete upstream package/install links while allowing the
-current mibrohimsulaeman-a11y repository coordinate and the future Vastar GHCR namespace.
+current mibrohimsulaeman-a11y repository coordinate and canonical GHCR namespace.
 It does not call the network and does not run Cargo.
 """
 from __future__ import annotations
