@@ -25,15 +25,15 @@
     "execution": "observed_l1",
     "proof_hash": null,
     "proof_ref": null,
-    "source_scope_hash": "sha256:c1ea58d5c4f32eaac8e0ad00c83b2c1d51e139a1ce033f68e6ff1199377f438f",
+    "source_scope_hash": "sha256:62d5c983c3de08ae824e7d29a3c199d83f0aa1c742ef367d20e5ea1aa729fe83",
     "status": "TV-Pending"
   },
-  "compiled_snapshot_hash": "sha256:3ce7cc14f7fd745870f26e728a27b786ef16c5423be6194d93b6b34cca98fdaa",
+  "compiled_snapshot_hash": "sha256:9ff827148d6264094ff4b4edcde7b7d3939f1ba57340eb3f4e2cb17a98b756b3",
   "control_plane": {
     "audit": "jcs_json",
     "authoring": "yaml",
     "capabilities_snapshot_hash": "sha256:0a31ce274f5f454195eee4813bac4c9fb75337a9a5a4be3aab6ea11b6ab143c7",
-    "compiled_snapshot_hash": "sha256:3ce7cc14f7fd745870f26e728a27b786ef16c5423be6194d93b6b34cca98fdaa",
+    "compiled_snapshot_hash": "sha256:9ff827148d6264094ff4b4edcde7b7d3939f1ba57340eb3f4e2cb17a98b756b3",
     "compiled_snapshot_location": ".vac/cache/compiled",
     "compiled_snapshots_current": true,
     "generated_mirror_location": ".vac/registry/compiled",
@@ -54,7 +54,7 @@
     "reasons": [
       "missing_l2_broker_mediated_execution_proof"
     ],
-    "source_scope_hash": "sha256:8f5463bed7eeb259708978f42f0fa9d65abcf101e01046715a255df49af15acf",
+    "source_scope_hash": "sha256:14a3fe3e63d33ca2e153a2b472ed1e92e3e4153c9b3df8bcee63844f18b0a0ee",
     "status": "NotImplemented"
   },
   "model": null,
@@ -113,7 +113,7 @@
   "workspace": {
     "conformance_level": "L1",
     "enforcement_level": "L1",
-    "file_count": 762,
+    "file_count": 758,
     "rust_crate_count": 38
   }
 }

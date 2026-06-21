@@ -501,6 +501,8 @@ def source_file_count() -> int:
             continue
         if any(rel_path.startswith(prefix) for prefix in generated_prefixes):
             continue
+        if rel_path.startswith(".vac/session/") or "/.vac/session/" in rel_path:
+            continue
         count += 1
     return count
 
