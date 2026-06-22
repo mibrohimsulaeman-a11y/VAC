@@ -391,12 +391,13 @@ def main() -> int:
     check_json_fixtures(errors)
     check_runtime_event_duplicate_rejected(errors)
     if errors:
-        print("VAC v1.9 fixture coverage: FAIL")
+        print("VAC v1.9 traceability/static fixture coverage: FAIL")
         for error in errors:
             print(f"- {error}")
         return 1
-    print("VAC v1.9 fixture coverage: PASS")
-    print(f"fixture_groups={len(REQUIRED_FIXTURE_GROUPS)}")
+    print("VAC v1.9 traceability/static fixture coverage: PASS")
+    print("coverage_model=traceability_static_coverage_plus_executable_sqlite_duplicate_sequence")
+    print(f"required_traceability_groups={len(REQUIRED_FIXTURE_GROUPS)}")
     print(f"critical_acceptance_checks={len(CRITICAL_ACCEPTANCE_IDS)}")
     print(f"v19_fixture_files={len(JSON_FIXTURE_FILES)}")
     for flag in PASS_OUTPUT_FLAGS:

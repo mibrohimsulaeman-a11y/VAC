@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import hashlib
 import json
-import subprocess
 from pathlib import Path
 from typing import Any
+
+from vac_script_common import git_output, proof_payload_hash, read_json_object
+from vac_script_common import proof_path as common_proof_path
+from vac_script_common import source_scope_hash as common_source_scope_hash
 
 CLAIM_ID = "l2_broker"
 PROOF_REL = ".vac/evidence/l2-broker-mediated-execution-current.json"
@@ -76,50 +78,13 @@ TEXT_SUFFIXES = {
 }
 
 
-def canonical_hash(value: Any) -> str:
-    raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
-    return "sha256:" + hashlib.sha256(raw).hexdigest()
-
-
-def file_hash(path: Path) -> str:
-    return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
-
 
 def proof_path(root: Path) -> Path:
-    return root / PROOF_REL
-
-
-def git_output(root: Path, *args: str) -> str:
-    try:
-        proc = subprocess.run(
-            ["git", *args],
-            cwd=root,
-            check=False,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            text=True,
-            timeout=30,
-        )
-    except Exception:
-        return ""
-    return proc.stdout.strip() if proc.returncode == 0 else ""
+    return common_proof_path(root, PROOF_REL)
 
 
 def source_scope_hash(root: Path) -> str:
-    files: list[dict[str, Any]] = []
-    for rel in SOURCE_SCOPE_PATHS:
-        path = root / rel
-        if path.is_file():
-            files.append({"path": rel, "sha256": file_hash(path)})
-        else:
-            files.append({"path": rel, "missing": True})
-    return canonical_hash({"claim": CLAIM_ID, "files": files})
-
-
-def proof_payload_hash(proof: dict[str, Any]) -> str:
-    payload = dict(proof)
-    payload.pop("proof_hash", None)
-    return canonical_hash(payload)
+    return common_source_scope_hash(root, CLAIM_ID, SOURCE_SCOPE_PATHS)
 
 
 def forbidden_l2_overclaim_patterns() -> list[str]:
@@ -170,17 +135,14 @@ def scan_overclaims(root: Path) -> list[str]:
     return findings
 
 
+
 def read_proof(root: Path) -> tuple[dict[str, Any] | None, list[str]]:
-    path = proof_path(root)
-    if not path.is_file():
-        return None, ["missing_l2_broker_mediated_execution_proof"]
-    try:
-        value = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        return None, [f"invalid_l2_broker_proof_json:{exc}"]
-    if not isinstance(value, dict):
-        return None, ["l2_broker_proof_root_not_object"]
-    return value, []
+    return read_json_object(
+        proof_path(root),
+        missing_reason="missing_l2_broker_mediated_execution_proof",
+        invalid_json_prefix="invalid_l2_broker_proof_json",
+        not_object_reason="l2_broker_proof_root_not_object",
+    )
 
 
 def validate_proof(root: Path, proof: dict[str, Any]) -> list[str]:

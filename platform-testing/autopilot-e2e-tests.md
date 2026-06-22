@@ -1,4 +1,4 @@
-> **VAC v1.5 status note:** This report is historical platform evidence. Current installation and runtime instructions are in `GETTING-STARTED.md`; current source authority is `.vac/registry/compiled` JSON. URLs inside this report that point to example endpoints are fixture data, not current hosted documentation.
+> **VAC v1.9 status note:** This report is historical platform evidence. Current installation and runtime instructions are in `GETTING-STARTED.md`; current source authority is `.vac/registry/compiled` JSON. URLs inside this report that point to example endpoints are fixture data, not current hosted documentation.
 
 # VAC autopilot E2E testing state
 

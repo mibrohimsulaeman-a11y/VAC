@@ -76,7 +76,7 @@ def main() -> int:
         "id": f"artifact.{SLUG}",
         "created_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "source_zip": f"{SLUG}.zip",
-        "baseline": "vac-runtime-v15-state7-merged-audit-closure-checkpoint-20260611T0132Z.zip",
+        "baseline": "VAC v1.9 current source tree",
         "runtime_label": "VAC Runtime v1.9 L1 Static Closure Candidate — storage split and runtime-journal scaffold",
         "sv_done": True,
         "tv_pending": cargo_pending + ["tui_pty_visual_qa", "l2_broker_os_sandbox"],
@@ -101,22 +101,6 @@ def main() -> int:
         "assessment_summary": assessment.get("summary"),
         "assessment_snapshot_hash": assessment.get("snapshot_hash"),
         "gap_summary": gap.get("summary"),
-        "state6-semantics-closure": {
-            "policy_precedence": "explicit allow/approval rules are evaluated before default_decision; default applies only on zero matches",
-            "approval_required_flow": "ApprovalRequired persists approval_request v2, pauses agent loop, resumes with single-retry scoped grant",
-            "bootstrap_artifact_truth": "missing task/spec/todo become needs_discussion and closeout evidence is invalid/blocking",
-            "sv_gate": "scripts/vac-runtime-state6-semantics-sv.py",
-            "cargo_tv": cargo_tv_status,
-            "l2_broker": "NotImplemented"
-        },
-        "state5-operational-closure": {
-            "final_gate_idempotence": "two-pass compile -> index -> assessment -> freshness; aggregate deep validation runs after assessment",
-            "broker_bootstrap": "VacRuntimeMetadataBootstrap wired into session_actor",
-            "policy_authority": "vac-policy::PolicySnapshot",
-            "mcp_proof": "broker recomputes action/target/capability/session binding hash at L1",
-            "cargo_tv": cargo_tv_status,
-            "l2_broker": "NotImplemented"
-        },
         "compiled_outputs": workspace.get("compiled_outputs", []),
         "source_tree": source_tree_inventory(),
         "storage_class": {

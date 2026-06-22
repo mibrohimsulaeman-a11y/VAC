@@ -15,6 +15,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from vac_script_common import canonical_hash, now
+from vac_script_common import sha256_bytes as sha_bytes
+
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / ".vac/index"
 EXCLUDE_PARTS = {".git", "target", "node_modules", ".venv", "__pycache__"}
@@ -60,17 +63,6 @@ RUST_SYMBOL_RE = re.compile(
 )
 CALL_RE = re.compile(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(")
 
-
-def now() -> str:
-    return os.environ.get("VAC_SV_GENERATED_AT", "1970-01-01T00:00:00Z")
-
-
-def sha_bytes(data: bytes) -> str:
-    return "sha256:" + hashlib.sha256(data).hexdigest()
-
-
-def canonical_hash(value: Any) -> str:
-    return sha_bytes(json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode())
 
 
 def role(path: str) -> str:

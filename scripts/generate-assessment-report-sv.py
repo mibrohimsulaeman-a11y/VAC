@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate current VAC assessment baseline + span-grounded gap report.
 
-State5 expands the assessment from a six-finding scaffold into deterministic
+VAC v1.9 expands the assessment from a six-finding scaffold into deterministic
 joins across intent manifests, code index facts, risk findings, and baseline
 counts. This is still SV/no-Cargo and honest about TV/L2 pending work, but every
 finding is current-span grounded or explicitly marked as intent-without-code.
@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import fnmatch
 import hashlib
-import os
 import json
 import pathlib
 import sys
@@ -19,45 +18,11 @@ from typing import Any
 
 import yaml
 
+from vac_script_common import canonical_hash, now, read_json, read_jsonl, recorded_at, write_json
+
 ROOT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 OUT = ROOT / ".vac/assessment"
 
-
-def now() -> str:
-    return os.environ.get("VAC_SV_GENERATED_AT", "1970-01-01T00:00:00Z")
-
-
-def recorded_at() -> str:
-    return os.environ.get("VAC_EVIDENCE_RECORDED_AT", now())
-
-
-def read_json(path: pathlib.Path, default: Any) -> Any:
-    try:
-        return json.loads(path.read_text())
-    except Exception:
-        return default
-
-
-def read_jsonl(path: pathlib.Path) -> list[dict[str, Any]]:
-    rows: list[dict[str, Any]] = []
-    if not path.exists():
-        return rows
-    for line in path.read_text().splitlines():
-        if line.strip():
-            row = json.loads(line)
-            if isinstance(row, dict):
-                rows.append(row)
-    return rows
-
-
-def canonical_hash(value: Any) -> str:
-    payload = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
-    return "sha256:" + hashlib.sha256(payload).hexdigest()
-
-
-def write_json(path: pathlib.Path, data: Any) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
 
 
 def load_yaml(path: pathlib.Path) -> dict[str, Any]:

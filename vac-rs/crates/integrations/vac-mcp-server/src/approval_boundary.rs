@@ -58,7 +58,7 @@ pub(crate) fn require_vac_bound_approval(
         return Err(CallToolResult::error(vec![
             Content::text("VAC_BOUND_APPROVAL_REQUIRED"),
             Content::text(format!(
-                "VAC v1.5 blocked {action} on {target}: mutating/process/network MCP tools require a vac_bound_approval stamped by BoundRuntimeToolBoundary after Semantic Plan, artifact, patch/command/network, and policy gates pass."
+                "VAC v1.9 blocked {action} on {target}: mutating/process/network MCP tools require a vac_bound_approval stamped by BoundRuntimeToolBoundary after Semantic Plan, artifact, patch/command/network, and policy gates pass."
             )),
         ]));
     };
@@ -80,7 +80,7 @@ fn verify_vac_bound_approval(
         return Err(CallToolResult::error(vec![
             Content::text("VAC_BOUND_APPROVAL_INVALID"),
             Content::text(format!(
-                "VAC v1.5 rejected {action} on {target}: approval proof is missing a valid v2 schema/kind/decision/hash/mode binding."
+                "VAC v1.9 rejected {action} on {target}: approval proof is missing a valid v2 schema/kind/decision/hash/mode binding."
             )),
         ]));
     }
@@ -144,7 +144,7 @@ fn vac_diff_hash_matches(
     let compact_payload = strip_nulls(payload.clone());
     let candidates = [payload, compact_payload];
     candidates.iter().any(|arguments| {
-        let candidate = canonical_json_sha256(&json!({
+        let candidate = vac_jcs::canonical_json_sha256(&json!({
             "tool_call_id": approval.tool_call_id,
             "tool_name": approval.tool_name,
             "action": action,
@@ -157,16 +157,12 @@ fn vac_diff_hash_matches(
 }
 
 fn recompute_vac_bound_binding_hash(approval: &VacBoundApproval) -> String {
-    canonical_json_sha256(&json!({
+    vac_jcs::canonical_json_sha256(&json!({
         "plan_hash": approval.plan_hash,
         "diff_hash": approval.diff_hash,
         "policy_snapshot_hash": approval.policy_snapshot_hash,
         "nonce": approval.nonce,
     }))
-}
-
-fn canonical_json_sha256(value: &serde_json::Value) -> String {
-    vac_jcs::canonical_json_sha256(value)
 }
 
 fn arguments_without_vac_bound_approval(arguments: &Value) -> Value {
@@ -198,7 +194,7 @@ fn vac_bound_binding_error(action: &str, target: &str, detail: &str) -> CallTool
     CallToolResult::error(vec![
         Content::text("VAC_BOUND_APPROVAL_BINDING_MISMATCH"),
         Content::text(format!(
-            "VAC v1.5 rejected {action} on {target}: approval v2 binding failed broker-side recomputation against the actual MCP payload: {detail}."
+            "VAC v1.9 rejected {action} on {target}: approval v2 binding failed broker-side recomputation against the actual MCP payload: {detail}."
         )),
     ])
 }
@@ -211,7 +207,7 @@ mod tests {
         let tool_call_id = Some("tool-call-1".to_string());
         let tool_name = Some("run_command".to_string());
         let gate = "policy.command.execute_process".to_string();
-        let diff_hash = canonical_json_sha256(&json!({
+        let diff_hash = vac_jcs::canonical_json_sha256(&json!({
             "tool_call_id": tool_call_id,
             "tool_name": tool_name,
             "action": action,

@@ -1,3 +1,7 @@
+// Fixture source for deterministic Rust AST indexing.
+// This file intentionally lives outside Cargo test targets; `#[test]` tokens
+// below are parser inputs, not executable unit tests.
+
 #[test]
 fn unit_works() {
     assert_eq!(2 + 2, 4);

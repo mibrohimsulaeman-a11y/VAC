@@ -135,7 +135,7 @@ fn vac_command_error(detail: &str) -> CallToolResult {
     CallToolResult::error(vec![
         Content::text("VAC_STRUCTURED_COMMAND_REQUIRED"),
         Content::text(format!(
-            "VAC v1.5 requires structured runner+args; free-form shell is blocked: {detail}"
+            "VAC v1.9 requires structured runner+args; free-form shell is blocked: {detail}"
         )),
     ])
 }

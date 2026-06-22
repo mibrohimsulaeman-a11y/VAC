@@ -1,6 +1,6 @@
 # vac-agent-loop
 
-`vac-agent-loop` owns the VAC v1.5 bounded agent runtime contract. Provider streaming and tool I/O stay outside this boundary; this crate models how an agent request is admitted, bounded, validated, and closed.
+`vac-agent-loop` owns the VAC v1.9 bounded agent runtime contract. Provider streaming and tool I/O stay outside this boundary; this crate models how an agent request is admitted, bounded, validated, and closed.
 
 ## Runtime source
 
@@ -20,7 +20,7 @@ The runtime must enforce:
 5. Bounded patches by file, line range, semantic anchor, ownership, and budget.
 6. Pre-command gate and structured command gate; no free-form shell or shell metacharacter execution.
 7. Evidence, SpecSync, readiness, ownership, and assessment closeout.
-8. Completion lock: no silent done when artifacts, evidence, or v1.5 conditions are unresolved.
+8. Completion lock: no silent done when artifacts, evidence, or v1.9 conditions are unresolved.
 
 ## Sandbox validation
 

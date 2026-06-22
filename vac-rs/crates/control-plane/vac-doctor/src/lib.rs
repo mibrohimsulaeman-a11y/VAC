@@ -274,7 +274,7 @@ pub fn doctor_assessment_freshness(input: &AssessmentFreshnessDoctorInput) -> Do
 }
 
 #[must_use]
-pub fn doctor_release_with_v1_5_gates(mut checks: Vec<DoctorResult>) -> ReleaseDoctorReport {
+pub fn doctor_release_with_v19_gates(mut checks: Vec<DoctorResult>) -> ReleaseDoctorReport {
     let required = [
         "compiled_source_hashes",
         "index_counts",
@@ -287,7 +287,7 @@ pub fn doctor_release_with_v1_5_gates(mut checks: Vec<DoctorResult>) -> ReleaseD
         if !checks.iter().any(|check| check.gate == gate) {
             checks.push(DoctorResult::fail(
                 gate,
-                "required v1.5 release doctor gate did not run",
+                "required v1.9 release doctor gate did not run",
             ));
         }
     }
@@ -765,7 +765,7 @@ mod tests {
 
     #[test]
     fn release_aggregation_fails_when_required_gate_missing() {
-        let report = doctor_release_with_v1_5_gates(vec![DoctorResult::pass("spec_sync")]);
+        let report = doctor_release_with_v19_gates(vec![DoctorResult::pass("spec_sync")]);
         assert_eq!(report.status(), DoctorStatus::Fail);
         assert!(
             report

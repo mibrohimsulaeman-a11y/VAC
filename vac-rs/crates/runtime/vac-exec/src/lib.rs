@@ -3,7 +3,7 @@
 //! This crate is intentionally shell-free. It describes process execution as
 //! `runner + args`, validates the runner against an explicit registry, and
 //! reports why a request cannot be treated as a VAC structured command. It is
-//! the shared contract used by the v1.5 agent boundary, MCP command tools, and
+//! the shared contract used by the v1.9 agent boundary, MCP command tools, and
 //! doctor fixtures.
 
 use serde::{Deserialize, Serialize};

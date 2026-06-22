@@ -1,6 +1,6 @@
 //! VAC policy evaluator.
 //!
-//! This crate implements the v1.5 fail-closed policy semantics used by patch,
+//! This crate implements the v1.9 fail-closed policy semantics used by patch,
 //! command, network, memory, approval, and registry transaction gates. It is a
 //! deterministic source-level engine: no matching policy means `Deny`, and all
 //! merges are most-restrictive-wins. Equivalent external contract spelling: PolicyDecision::Deny.
@@ -143,7 +143,7 @@ impl PolicySnapshot {
             };
         }
 
-        // VAC v1.5 decision precedence is match-first:
+        // VAC v1.9 decision precedence is match-first:
         //   explicit deny > approval_required > explicit allow > default_decision.
         // The default decision applies only when no rule matches.  The previous
         // implementation started at default=deny and then merged explicit allow
@@ -185,7 +185,7 @@ impl PolicySnapshot {
                 }
                 // A scoped grant may lower approval_required to allow, but only
                 // when a stronger hard deny has not already won. This is the
-                // v1.5 C-05 exception to pure most-restrictive deadlock and is
+                // v1.9 C-05 exception to pure most-restrictive deadlock and is
                 // always evidence-bound plus time/scope bounded.
                 if !matches!(decision, Decision::Deny) {
                     decision = match (decision, grant.decision) {

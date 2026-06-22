@@ -32,10 +32,7 @@ experiments/
 .vac/evidence/**
 .vac/registry/evidence/**
 .vac/plans/**
-!.vac/plans/runtime-v15-audit-closure.yaml
-!.vac/plans/runtime-v15-reaudit-closure.yaml
 .vac/ledger/**
-!.vac/ledger/runtime-v15-reaudit-closure.yaml
 .vac/registry/spec-sync/**
 .vac/registry/sessions/**
 .vac/registry/approvals/**

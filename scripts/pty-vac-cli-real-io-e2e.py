@@ -2,27 +2,25 @@
 from __future__ import annotations
 
 import argparse
-import fcntl
 import hashlib
 import http.server
 import json
 import os
 import pty
-import re
 import selectors
 import shlex
 import signal
 import socket
 import socketserver
-import struct
 import subprocess
 import sys
 import tempfile
-import termios
 import threading
 import time
 from pathlib import Path
 from typing import Any
+
+from vac_pty_common import decode, read_available, set_pty_size, strip_ansi
 
 ENTER_ALT = b"\x1b[?1049h"
 EXIT_ALT = b"\x1b[?1049l"
@@ -34,13 +32,6 @@ PLAN_HASH = "sha256:real-io-plan"
 POLICY_HASH = "sha256:real-io-policy"
 GATE = "real_io_e2e_gate"
 
-
-def strip_ansi(text: str) -> str:
-    return re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", text)
-
-
-def decode(buf: bytes) -> str:
-    return buf.decode("utf-8", errors="replace")
 
 
 def jcs_sha(value: Any) -> str:
@@ -475,28 +466,6 @@ def start_loopback_content_server(port: int) -> socketserver.ThreadingTCPServer:
     return server
 
 
-def set_pty_size(fd: int, rows: int = 48, cols: int = 140) -> None:
-    winsize = struct.pack("HHHH", rows, cols, 0, 0)
-    fcntl.ioctl(fd, termios.TIOCSWINSZ, winsize)
-
-
-def read_available(master_fd: int, selector: selectors.BaseSelector, deadline: float) -> bytes:
-    chunks: list[bytes] = []
-    while time.monotonic() < deadline:
-        timeout = max(0.0, min(0.05, deadline - time.monotonic()))
-        events = selector.select(timeout)
-        if not events:
-            break
-        for _key, _mask in events:
-            try:
-                chunk = os.read(master_fd, 65536)
-            except OSError:
-                return b"".join(chunks)
-            if not chunk:
-                return b"".join(chunks)
-            chunks.append(chunk)
-    return b"".join(chunks)
-
 
 def find_vac_binary(root: Path) -> list[str]:
     env_cmd = os.environ.get("VAC_REAL_IO_E2E_CMD")
@@ -550,7 +519,7 @@ api_key = "deterministic-local-key"
 
 def run_vac(root: Path, sandbox: Path, config_path: Path, timeout: float) -> tuple[int, bytes]:
     master_fd, slave_fd = pty.openpty()
-    set_pty_size(slave_fd)
+    set_pty_size(slave_fd, 48, 140)
     env = os.environ.copy()
     env.update(
         {

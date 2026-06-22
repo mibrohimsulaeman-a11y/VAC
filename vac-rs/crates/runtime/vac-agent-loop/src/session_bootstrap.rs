@@ -1,7 +1,7 @@
-//! VAC v1.5 runtime metadata bootstrap.
+//! VAC v1.9 runtime metadata bootstrap.
 //!
 //! This module is intentionally small and dependency-light: the real provider
-//! loop only receives `AgentRunContext.metadata`, but VAC v1.5 requires that
+//! loop only receives `AgentRunContext.metadata`, but VAC v1.9 requires that
 //! metadata to carry compiled registry authority from `.vac/cache/compiled` or DB,
 //! an approved Semantic Plan, mandatory task/spec/todo artifacts, read-plan tickets, and closeout state
 //! before any mutating/process/read/network tool can execute. v1.9 keeps durable

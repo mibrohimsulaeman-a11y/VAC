@@ -1,4 +1,4 @@
-//! VAC v1.5 mediation for the real async agent/tool path.
+//! VAC v1.9 mediation for the real async agent/tool path.
 //!
 //! `bound_runtime.rs` contains the contract state machine. This module binds
 //! that state machine to real `ProposedToolCall` values so the provider loop

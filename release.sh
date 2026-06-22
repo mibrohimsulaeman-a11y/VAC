@@ -1,6 +1,10 @@
 #!/bin/bash
 
-set -e  # Exit on any error
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CARGO_MANIFEST="$ROOT/vac-rs/Cargo.toml"
+CARGO_LOCK="$ROOT/vac-rs/Cargo.lock"
 
 # Colors for output
 RED='\033[0;31m'
@@ -31,31 +35,32 @@ show_usage() {
     echo "Usage: $0 [patch|minor|major|<specific_version>] [--beta]"
     echo ""
     echo "Examples:"
-    echo "  $0 patch          # Bump patch version (0.1.100 -> 0.1.101)"
-    echo "  $0 minor          # Bump minor version (0.1.100 -> 0.2.0)"
-    echo "  $0 major          # Bump major version (0.1.100 -> 1.0.0)"
+    echo "  $0 patch          # Bump patch version (0.3.86-vac.1 -> 0.3.87)"
+    echo "  $0 minor          # Bump minor version (0.3.86-vac.1 -> 0.4.0)"
+    echo "  $0 major          # Bump major version (0.3.86-vac.1 -> 1.0.0)"
     echo "  $0 1.2.3          # Set specific version to 1.2.3"
     echo "  $0                # Interactive mode - will prompt for version type"
     echo ""
     echo "Beta releases:"
-    echo "  $0 patch --beta   # Create beta release (0.1.100 -> 0.1.101-beta.1)"
+    echo "  $0 patch --beta   # Create beta release (0.3.86-vac.1 -> 0.3.87-beta.1)"
     echo "  $0 --beta         # Interactive mode with beta suffix"
     echo ""
-    echo "Note: Beta releases create tags like v0.1.101-beta.1 and push to"
+    echo "Note: Beta releases create tags like v0.3.87-beta.1 and push to"
     echo "      a separate branch in homebrew-vac for testing."
 }
 
 # Function to get current version from Cargo.toml
 get_current_version() {
-    grep '^version = ' Cargo.toml | sed -E 's/version = "([^"]+)"/\1/'
+    grep -m1 '^version = ' "$CARGO_MANIFEST" | sed -E 's/version = "([^"]+)"/\1/'
 }
 
 # Function to validate semantic version format
-# Accepts: X.Y.Z or X.Y.Z-beta.N
+# Accepts: X.Y.Z or X.Y.Z-<semver-prerelease>, for example X.Y.Z-beta.N
+# or the repository's current X.Y.Z-vac.N prerelease channel.
 validate_version() {
     local version=$1
-    if [[ ! $version =~ ^[0-9]+\.[0-9]+\.[0-9]+(-beta\.[0-9]+)?$ ]]; then
-        print_error "Invalid version format: $version. Expected format: X.Y.Z or X.Y.Z-beta.N"
+    if [[ ! $version =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z][0-9A-Za-z.-]*)?$ ]]; then
+        print_error "Invalid version format: $version. Expected semver format: X.Y.Z or X.Y.Z-<prerelease>"
         return 1
     fi
     return 0
@@ -65,11 +70,16 @@ validate_version() {
 bump_version() {
     local current_version=$1
     local bump_type=$2
+    local base_version=${current_version%%-*}
 
-    IFS='.' read -ra VERSION_PARTS <<< "$current_version"
-    local major=${VERSION_PARTS[0]}
-    local minor=${VERSION_PARTS[1]}
-    local patch=${VERSION_PARTS[2]}
+    if [[ ! $base_version =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+        print_error "Cannot bump non-semver base version: $current_version"
+        return 1
+    fi
+
+    local major=${BASH_REMATCH[1]}
+    local minor=${BASH_REMATCH[2]}
+    local patch=${BASH_REMATCH[3]}
 
     case $bump_type in
         "patch")
@@ -96,25 +106,43 @@ bump_version() {
 # Function to update version in Cargo.toml and Cargo.lock
 update_cargo_version() {
     local new_version=$1
-    local temp_file=$(mktemp)
 
-    # 1. Update [workspace.package] version
-    # This updates the first occurrence of version = "..." which is workspace.package
-    # Pattern handles both regular versions (X.Y.Z) and beta versions (X.Y.Z-beta.N)
-    sed -E "s/^version = \"[0-9]+\.[0-9]+\.[0-9]+(-beta\.[0-9]+)?\"/version = \"$new_version\"/" Cargo.toml > "$temp_file"
-    mv "$temp_file" Cargo.toml
+    VERSION="$new_version" MANIFEST="$CARGO_MANIFEST" python3 - <<'PY_UPDATE_CARGO_VERSION'
+import os
+import re
+from pathlib import Path
 
-    # 2. Update internal dependencies versions in [workspace.dependencies]
-    # We look for lines starting with 'vac-provider-core' or 'vac-' and update their version field
-    local temp_file2=$(mktemp)
-    sed -E "/^(vac-provider-core|vac-)/s/version = \"[^\"]+\"/version = \"$new_version\"/" Cargo.toml > "$temp_file2"
-    mv "$temp_file2" Cargo.toml
+version = os.environ["VERSION"]
+manifest = Path(os.environ["MANIFEST"])
+text = manifest.read_text(encoding="utf-8")
+
+text, workspace_version_count = re.subn(
+    r'(^version\s*=\s*")[^"]+(")',
+    rf'\g<1>{version}\2',
+    text,
+    count=1,
+    flags=re.MULTILINE,
+)
+if workspace_version_count != 1:
+    raise SystemExit("failed to update [workspace.package] version")
+
+workspace_dependency_version = re.compile(
+    r'^(?P<prefix>vac[A-Za-z0-9_-]*\s*=\s*\{[^}\n]*\bversion\s*=\s*")[^"]+(?P<suffix>"[^}\n]*\})',
+    re.MULTILINE,
+)
+text = workspace_dependency_version.sub(
+    lambda match: f"{match.group('prefix')}{version}{match.group('suffix')}",
+    text,
+)
+
+manifest.write_text(text, encoding="utf-8")
+PY_UPDATE_CARGO_VERSION
 
     print_success "Updated workspace version and internal dependency versions to $new_version"
 
     # Update Cargo.lock to reflect the new version
     print_info "Updating Cargo.lock..."
-    if cargo update --workspace; then
+    if cargo update --manifest-path "$CARGO_MANIFEST" --workspace; then
         print_success "Updated Cargo.lock"
     else
         print_error "Failed to update Cargo.lock"
@@ -143,7 +171,7 @@ commit_and_push() {
     local version=$1
 
     print_info "Adding changes to git..."
-    git add Cargo.toml Cargo.lock
+    git add "$CARGO_MANIFEST" "$CARGO_LOCK"
 
     # Add any other uncommitted changes if they exist
     if [[ -n $(git status --porcelain) ]]; then
@@ -188,6 +216,8 @@ get_next_beta_number() {
 
 # Main script logic
 main() {
+    cd "$ROOT"
+
     print_info "Starting release process..."
 
     # Parse arguments for --beta flag
@@ -208,15 +238,15 @@ main() {
         exit 1
     fi
 
-    # Check if Cargo.toml exists
-    if [[ ! -f "Cargo.toml" ]]; then
-        print_error "Cargo.toml not found in current directory"
+    # Check if the Cargo workspace manifest exists
+    if [[ ! -f "$CARGO_MANIFEST" ]]; then
+        print_error "Cargo workspace manifest not found: $CARGO_MANIFEST"
         exit 1
     fi
 
     # Get current version (strip any existing beta suffix for base version)
     current_version=$(get_current_version)
-    base_version=$(echo "$current_version" | sed -E 's/-beta\.[0-9]+$//')
+    base_version=${current_version%%-*}
 
     if [[ -z "$current_version" ]]; then
         print_error "Could not find version in Cargo.toml"
@@ -248,7 +278,7 @@ main() {
             2) new_version=$(bump_version "$base_version" "minor") ;;
             3) new_version=$(bump_version "$base_version" "major") ;;
             4)
-                read -p "Enter custom version (X.Y.Z format): " custom_version
+                read -p "Enter custom semver version (X.Y.Z or X.Y.Z-<prerelease>): " custom_version
                 if validate_version "$custom_version"; then
                     new_version="$custom_version"
                 else
@@ -273,6 +303,10 @@ main() {
 
     # Add beta suffix if --beta flag is set
     if [[ "$is_beta" == true ]]; then
+        if [[ "$new_version" == *-* ]]; then
+            print_error "--beta cannot be combined with an explicit prerelease version: $new_version"
+            exit 1
+        fi
         beta_num=$(get_next_beta_number "$new_version")
         new_version="${new_version}-beta.${beta_num}"
         print_info "Beta version: $new_version"
@@ -317,7 +351,7 @@ main() {
 }
 
 # Handle help flag
-if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
     show_usage
     exit 0
 fi

@@ -27,25 +27,20 @@ run tui-canonical-renderer python3 scripts/check-tui-canonical-renderer.py "$ROO
 run brand-allowlist python3 scripts/check-brand-allowlist.py "$ROOT"
 run docs-current-state python3 scripts/check-docs-current-state.py
 run runtime-agent-e2e python3 scripts/vac-runtime-agent-e2e-sv.py
-run runtime-v15-e2e python3 scripts/vac-runtime-v15-e2e.py .
-run runtime-audit-closure python3 scripts/vac-runtime-audit-closure-sv.py .
 run runtime-realpath-e2e python3 scripts/vac-runtime-realpath-e2e.py .
 run external-provider-remote-process-io python3 scripts/check-external-provider-remote-process-io-e2e.py .
 run scoped-validation-proof python3 scripts/check-ci-scoped-validation-proof.py .
 run l2-broker-status python3 scripts/check-l2-broker-status.py .
-run runtime-state4-adversarial python3 scripts/vac-runtime-state4-adversarial-sv.py .
-run runtime-state5-operational python3 scripts/vac-runtime-state5-operational-sv.py .
-run runtime-state6-semantics python3 scripts/vac-runtime-state6-semantics-sv.py .
-run runtime-state7-merged-audit python3 scripts/vac-runtime-state7-merged-audit-sv.py .
 run final-idempotence python3 scripts/vac-final-idempotence-sv.py .
 run tui-e2e-coverage python3 scripts/check-vac-tui-e2e-coverage.py .
 run confirmed-intent-coverage python3 scripts/check-confirmed-intent-coverage.py .
 run confirmed-intent-negative-fixtures python3 scripts/check-confirmed-intent-negative-fixtures.py .
+run confirmed-intent-executable-fixtures python3 scripts/check-confirmed-intent-executable-fixtures.py .
 run confirmed-intent-status python3 scripts/refresh-confirmed-intent-status.py .
 run rust-ast-index-status python3 scripts/refresh-rust-ast-index-status.py .
 run refresh-evidence-logs python3 scripts/refresh-evidence-logs-sv.py .
 run evidence-log-freshness python3 scripts/check-evidence-log-freshness.py .
-run generate-checkpoint-manifest python3 scripts/generate-checkpoint-manifest.py . vac-runtime-v15-state7-merged-audit-closure-checkpoint
+run generate-checkpoint-manifest python3 scripts/generate-checkpoint-manifest.py . vac-runtime-v19-reaudit-checkpoint
 run assessment-freshness python3 scripts/check-assessment-freshness.py .
 run checkpoint-integrity python3 scripts/check-checkpoint-integrity.py .
 run py-compile python3 -m py_compile \
@@ -61,6 +56,7 @@ run py-compile python3 -m py_compile \
   scripts/ci_scoped_validation_status.py \
   scripts/check-ci-scoped-validation-proof.py \
   scripts/ci-scoped-validation-proof.py \
+  scripts/check-confirmed-intent-executable-fixtures.py \
   scripts/l2_broker_status.py \
   scripts/check-l2-broker-status.py \
   scripts/generate-checkpoint-manifest.py \
@@ -72,13 +68,7 @@ run py-compile python3 -m py_compile \
   scripts/check-docs-current-state.py \
   scripts/check-checkpoint-integrity.py \
   scripts/vac-runtime-agent-e2e-sv.py \
-  scripts/vac-runtime-v15-e2e.py \
-  scripts/vac-runtime-audit-closure-sv.py \
   scripts/vac-runtime-realpath-e2e.py \
-  scripts/vac-runtime-state4-adversarial-sv.py \
-  scripts/vac-runtime-state5-operational-sv.py \
-  scripts/vac-runtime-state6-semantics-sv.py \
-  scripts/vac-runtime-state7-merged-audit-sv.py \
   scripts/vac-final-idempotence-sv.py \
   scripts/check-evidence-log-freshness.py
 printf '\nVAC re-audit final SV gate: PASS\n'

@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import hashlib
-import json
-import subprocess
 from pathlib import Path
 from typing import Any
+
+from vac_script_common import file_hash as common_file_hash
+from vac_script_common import git_output
+from vac_script_common import proof_payload_hash as common_proof_payload_hash
+from vac_script_common import proof_path as common_proof_path
+from vac_script_common import read_json_object
+from vac_script_common import source_scope_hash as common_source_scope_hash
 
 CLAIM_ID = "external_provider_remote_process_io_e2e"
 REMOTE_PROCESS_CLAIM_ID = "remote_process_io_e2e"
@@ -52,67 +56,37 @@ SOURCE_SCOPE_PATHS = [
 ]
 
 
-def canonical_json_bytes(value: Any) -> bytes:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
-
-
-def canonical_hash(value: Any) -> str:
-    return "sha256:" + hashlib.sha256(canonical_json_bytes(value)).hexdigest()
-
 
 def file_sha256(path: Path) -> str:
-    return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-def git_output(root: Path, *args: str) -> str | None:
-    try:
-        proc = subprocess.run(
-            ["git", *args],
-            cwd=root,
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            text=True,
-        )
-    except (OSError, subprocess.CalledProcessError):
-        return None
-    return proc.stdout.strip()
+    return common_file_hash(path)
 
 
 def source_scope_hash(root: Path) -> str:
-    files: list[dict[str, Any]] = []
-    for rel in SOURCE_SCOPE_PATHS:
-        path = root / rel
-        if path.is_file():
-            files.append({"path": rel, "sha256": file_sha256(path)})
-        else:
-            files.append({"missing": True, "path": rel})
-    return canonical_hash({"claim": CLAIM_ID, "files": files})
+    return common_source_scope_hash(root, CLAIM_ID, SOURCE_SCOPE_PATHS)
 
 
 def proof_path(root: Path) -> Path:
-    return root / PROOF_REL
+    return common_proof_path(root, PROOF_REL)
 
 
 def proof_hash_payload(proof: dict[str, Any]) -> dict[str, Any]:
-    return {key: value for key, value in proof.items() if key != "proof_hash"}
+    payload = dict(proof)
+    payload.pop("proof_hash", None)
+    return payload
 
 
 def proof_hash(proof: dict[str, Any]) -> str:
-    return canonical_hash(proof_hash_payload(proof))
+    return common_proof_payload_hash(proof)
+
 
 
 def load_proof(root: Path) -> tuple[dict[str, Any] | None, list[str]]:
-    path = proof_path(root)
-    if not path.is_file():
-        return None, ["missing_external_provider_remote_process_io_proof"]
-    try:
-        value = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        return None, [f"invalid_external_provider_remote_process_io_proof_json:{exc}"]
-    if not isinstance(value, dict):
-        return None, ["external_provider_remote_process_io_proof_root_not_object"]
-    return value, []
+    return read_json_object(
+        proof_path(root),
+        missing_reason="missing_external_provider_remote_process_io_proof",
+        invalid_json_prefix="invalid_external_provider_remote_process_io_proof_json",
+        not_object_reason="external_provider_remote_process_io_proof_root_not_object",
+    )
 
 
 def _require_bool_true(proof: dict[str, Any], path: tuple[str, ...], errors: list[str]) -> None:

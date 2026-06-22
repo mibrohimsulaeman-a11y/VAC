@@ -1,9 +1,0 @@
-{
-  "kind": "vac_state3_assessment_freshness_fixture",
-  "cases": [
-    {"id": "finding_span_hash_matches_current_index", "expected": "pass"},
-    {"id": "stale_span_id_blocks_release", "expected": "fail"},
-    {"id": "baseline_counts_must_match_index", "expected": "fail"},
-    {"id": "missing_code_requires_intent_proof", "expected": "pass_with_empty_matched_spans"}
-  ]
-}

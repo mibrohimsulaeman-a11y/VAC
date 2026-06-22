@@ -1,7 +1,7 @@
 schema_version: 2
 kind: capability
 id: vac.control_plane.registry
-title: VAC v1.5 Control Plane Registry
+title: VAC v1.9 Control Plane Registry
 readiness:
   declared: ready
   computed: partial

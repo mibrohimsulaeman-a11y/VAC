@@ -1,6 +1,6 @@
 //! Legacy shell risk classifier retained only for fixture/back-compat callers. Use structured command + vac-policy + BoundRuntimeController.
 //!
-//! VAC Runtime v1.5 command authority lives in the structured command parser,
+//! VAC Runtime v1.9 command authority lives in the structured command parser,
 //! compiled policy snapshot, and bound runtime pre-command gate.  This module is
 //! intentionally labelled as heuristic so it cannot be mistaken for the product
 //! command gate or L2 enforcement boundary.

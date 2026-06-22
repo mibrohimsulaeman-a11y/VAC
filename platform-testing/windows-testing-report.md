@@ -1,8 +1,8 @@
-> **VAC v1.5 status note:** This report is historical platform evidence. Current installation and runtime instructions are in `GETTING-STARTED.md`; current source authority is `.vac/registry/compiled` JSON. URLs inside this report that point to example endpoints are fixture data, not current hosted documentation.
+> **VAC v1.9 status note:** This report is historical platform evidence. Current installation and runtime instructions are in `GETTING-STARTED.md`; current source authority is `.vac/registry/compiled` JSON. URLs inside this report that point to example endpoints are fixture data, not current hosted documentation.
 
 # VAC Windows testing report
 
-This file supersedes an older pre-v1.5 report. No Windows binary or release download is claimed by this sandbox checkpoint.
+This file supersedes an older pre-v1.9 report. No Windows binary or release download is claimed by this sandbox checkpoint.
 
 ## Current status
 

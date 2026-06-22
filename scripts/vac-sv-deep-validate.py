@@ -147,7 +147,7 @@ def validate_control_plane_files() -> None:
         fail("compiled workspace missing source_hashes")
 
 
-def validate_v15_reports() -> None:
+def validate_runtime_reports() -> None:
     status = load_json(".vac/registry/status.json") or {}
     if status.get("product") != "VAC":
         fail("registry status product is not VAC")
@@ -354,7 +354,7 @@ def main() -> int:
     ensure_dirs()
     validate_workspace_manifest()
     validate_control_plane_files()
-    validate_v15_reports()
+    validate_runtime_reports()
     validate_assessment_freshness_inline()
     validate_runtime_jobs()
     validate_tui_operator()

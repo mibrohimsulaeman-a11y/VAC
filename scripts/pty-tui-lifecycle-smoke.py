@@ -2,12 +2,8 @@
 from __future__ import annotations
 
 import argparse
-import fcntl
 import os
 import pty
-import re
-import struct
-import termios
 import selectors
 import shlex
 import signal
@@ -16,33 +12,13 @@ import sys
 import time
 from pathlib import Path
 
+from vac_pty_common import contains_ordered_text, decode, read_available, set_pty_size, strip_ansi
+
 ENTER_ALT = b"\x1b[?1049h"
 EXIT_ALT = b"\x1b[?1049l"
 SHIFT_TAB = b"\x1b[Z"
 CTRL_C = b"\x03"
 
-
-def strip_ansi(text: str) -> str:
-    return re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", text)
-
-
-def contains_ordered_text(text: str, needle: str) -> bool:
-    pos = 0
-    for ch in needle:
-        found = text.find(ch, pos)
-        if found < 0:
-            return False
-        pos = found + 1
-    return True
-
-
-def decode(buf: bytes) -> str:
-    return buf.decode("utf-8", errors="replace")
-
-
-def set_pty_size(fd: int, rows: int = 40, cols: int = 120) -> None:
-    winsize = struct.pack("HHHH", rows, cols, 0, 0)
-    fcntl.ioctl(fd, termios.TIOCSWINSZ, winsize)
 
 
 def default_command(root: Path) -> list[str]:
@@ -67,28 +43,11 @@ def default_command(root: Path) -> list[str]:
     ]
 
 
-def read_available(master_fd: int, selector: selectors.BaseSelector, deadline: float) -> bytes:
-    chunks: list[bytes] = []
-    while time.monotonic() < deadline:
-        timeout = max(0.0, min(0.05, deadline - time.monotonic()))
-        events = selector.select(timeout)
-        if not events:
-            break
-        for _key, _mask in events:
-            try:
-                chunk = os.read(master_fd, 65536)
-            except OSError:
-                return b"".join(chunks)
-            if not chunk:
-                return b"".join(chunks)
-            chunks.append(chunk)
-    return b"".join(chunks)
-
 
 def run_smoke(root: Path, timeout: float) -> tuple[int, bytes]:
     try:
         master_fd, slave_fd = pty.openpty()
-        set_pty_size(slave_fd)
+        set_pty_size(slave_fd, 40, 120)
     except OSError as error:
         print(f"VAC TUI PTY lifecycle smoke: SKIP pty unavailable: {error}")
         return 0, b""

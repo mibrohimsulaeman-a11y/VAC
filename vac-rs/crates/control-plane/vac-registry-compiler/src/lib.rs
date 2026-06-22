@@ -1,7 +1,7 @@
 //! Deterministic VAC registry compiler.
 //!
 //! YAML under `.vac/` is authoring-plane input. This crate models the compiled
-//! JSON runtime truth used by VAC v1.5: sorted inputs, stable source hashes,
+//! JSON runtime truth used by VAC v1.9: sorted inputs, stable source hashes,
 //! readiness triplets, policy/surface/workflow/spec projection, and a JCS-style
 //! canonical hash. Nondeterministic timestamps are intentionally kept out of the
 //! hashed runtime authority projection.
@@ -114,10 +114,7 @@ pub fn deterministic_json<T: Serialize>(value: &T) -> Result<String, serde_json:
     vac_jcs::to_canonical_pretty_string(&value)
 }
 
-#[must_use]
-pub fn canonical_json_sha256(value: &Value) -> String {
-    vac_jcs::canonical_json_sha256(value)
-}
+pub use vac_jcs::canonical_json_sha256;
 
 #[must_use]
 pub fn sha256_bytes(bytes: &[u8]) -> String {

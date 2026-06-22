@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """VAC assessment freshness doctor (SV-safe, no cargo required).
 
-Validates the v1.5 requirement that assessment findings are grounded in the
+Validates the v1.9 requirement that assessment findings are grounded in the
 current deterministic index. This closes the gap where gap_report.json could
 cite historical span ids/hash values while the index had already changed.
 """

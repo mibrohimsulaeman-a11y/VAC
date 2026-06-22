@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static real-path E2E scenarios for VAC v1.5 runtime closure.
+"""Static real-path E2E scenarios for VAC v1.9 runtime closure.
 
 This is not a Rust runtime test. It proves that source-level real execution
 paths now contain the expected fail-closed mediation points and no longer rely

@@ -2,20 +2,18 @@
 from __future__ import annotations
 
 import argparse
-import fcntl
 import json
 import os
 import pty
-import re
 import selectors
 import shlex
 import signal
-import struct
 import subprocess
 import sys
-import termios
 import time
 from pathlib import Path
+
+from vac_pty_common import contains_ordered_text, decode, read_available, set_pty_size, strip_ansi
 
 ENTER_ALT = b"\x1b[?1049h"
 EXIT_ALT = b"\x1b[?1049l"
@@ -23,40 +21,6 @@ CTRL_C = b"\x03"
 ENTER_KEY = b"\r\n"
 SPACE_KEY = b" "
 
-
-def strip_ansi(text: str) -> str:
-    return re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", text)
-
-
-def decode(buf: bytes) -> str:
-    return buf.decode("utf-8", errors="replace")
-
-
-def contains_ordered_text(text: str, needle: str) -> bool:
-    pos = 0
-    for ch in needle:
-        found = text.find(ch, pos)
-        if found < 0:
-            return False
-        pos = found + 1
-    return True
-
-
-def marker_present(text: str, marker: str) -> bool:
-    lower = text.lower()
-    marker_lower = marker.lower()
-    return marker_lower in lower or contains_ordered_text(lower, marker_lower)
-
-
-def tool_name_present(text: str, tool: str) -> bool:
-    lower = text.lower()
-    spaced = tool.replace("_", " ").lower()
-    return tool.lower() in lower or spaced in lower or contains_ordered_text(lower, tool.lower())
-
-
-def set_pty_size(fd: int, rows: int = 48, cols: int = 140) -> None:
-    winsize = struct.pack("HHHH", rows, cols, 0, 0)
-    fcntl.ioctl(fd, termios.TIOCSWINSZ, winsize)
 
 
 def default_command(root: Path) -> list[str]:
@@ -81,23 +45,6 @@ def default_command(root: Path) -> list[str]:
     ]
 
 
-def read_available(master_fd: int, selector: selectors.BaseSelector, deadline: float) -> bytes:
-    chunks: list[bytes] = []
-    while time.monotonic() < deadline:
-        timeout = max(0.0, min(0.05, deadline - time.monotonic()))
-        events = selector.select(timeout)
-        if not events:
-            break
-        for _key, _mask in events:
-            try:
-                chunk = os.read(master_fd, 65536)
-            except OSError:
-                return b"".join(chunks)
-            if not chunk:
-                return b"".join(chunks)
-            chunks.append(chunk)
-    return b"".join(chunks)
-
 
 def load_matrix(root: Path) -> dict:
     path = root / "tests" / "fixtures" / "tui-agent-tool-lifecycle" / "tool-matrix.json"
@@ -107,7 +54,7 @@ def load_matrix(root: Path) -> dict:
 def run_smoke(root: Path, timeout: float) -> tuple[int, bytes]:
     try:
         master_fd, slave_fd = pty.openpty()
-        set_pty_size(slave_fd)
+        set_pty_size(slave_fd, 48, 140)
     except OSError as error:
         print(f"VAC TUI agent tool lifecycle smoke: SKIP pty unavailable: {error}")
         return 0, b""

@@ -1,4 +1,4 @@
-//! VAC v1.5 control-plane support crate.
+//! VAC v1.9 control-plane support crate.
 //!
 //! This crate is intentionally small in the sandbox checkpoint. It provides
 //! typed contracts used by static validation and later TV cargo fix loops.

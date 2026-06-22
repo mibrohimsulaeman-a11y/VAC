@@ -61,7 +61,7 @@ pub(crate) fn require_vac_view_governance(
         return Err(CallToolResult::error(vec![
             Content::text("VAC_READ_GOVERNANCE_REQUIRED"),
             Content::text(format!(
-                "VAC v1.5 blocked view on {path}: local file/grep/glob reads require a deterministic read_plan_ticket or vac_bound_approval stamped by the bound runtime."
+                "VAC v1.9 blocked view on {path}: local file/grep/glob reads require a deterministic read_plan_ticket or vac_bound_approval stamped by the bound runtime."
             )),
         ]));
     };

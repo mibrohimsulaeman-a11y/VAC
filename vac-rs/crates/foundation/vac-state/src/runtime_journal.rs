@@ -520,7 +520,8 @@ const TRUST_DERIVATION_VERIFIED: &str = "verified";
 const TRUST_DERIVATION_VERIFIED_DOWNGRADE: &str = "verified_downgrade";
 const TRUST_DOWNGRADE_REASON_MISSING_OR_INVALID_PROOF: &str = "missing_or_invalid_proof";
 
-const TRUST_WORDING_LOCAL_SELF_REPORTED: &str = "local self-reported trace; integrity hint only";
+pub const TRUST_WORDING_LOCAL_SELF_REPORTED: &str =
+    "local self-reported trace; integrity hint only";
 const TRUST_WORDING_SHARED_COOPERATIVE: &str = "shared cooperative record; not tamper-evident";
 const TRUST_WORDING_CI_SELF_REPORT: &str = "CI-attested self-report; execution not mediated";
 const TRUST_WORDING_EXTERNAL_SELF_REPORT: &str =

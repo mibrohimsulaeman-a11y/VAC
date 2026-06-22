@@ -7,12 +7,15 @@ the Cargo TV surface at NotEvaluated.
 """
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import pathlib
-import subprocess
 from typing import Any
+
+from vac_script_common import canonical_hash, read_json, sha256_bytes
+from vac_script_common import git_output_args as git_output
+from vac_script_common import proof_payload_hash
+from vac_script_common import proof_path as common_proof_path
 
 TV_PASS = "TV-Pass"
 TV_FAIL = "TV-Fail"
@@ -30,22 +33,9 @@ REQUIRED_CHECKS = [
 WORKSPACE_EXCLUDED_DIRS = {".git", ".vac", "target", "node_modules", "__pycache__"}
 
 
-def sha256_bytes(data: bytes) -> str:
-    return "sha256:" + hashlib.sha256(data).hexdigest()
-
-
-def canonical_hash(value: Any) -> str:
-    payload = json.dumps(
-        value,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=False,
-    ).encode("utf-8")
-    return sha256_bytes(payload)
-
 
 def proof_path(root: pathlib.Path) -> pathlib.Path:
-    return root / PROOF_REL
+    return common_proof_path(root, PROOF_REL)
 
 
 def cargo_workspace_hash(root: pathlib.Path) -> str:
@@ -83,40 +73,30 @@ def cargo_workspace_hash(root: pathlib.Path) -> str:
     return canonical_hash({"cargo_workspace_files": entries})
 
 
-def git_output(root: pathlib.Path, args: list[str]) -> str:
-    try:
-        completed = subprocess.run(
-            ["git", *args],
-            cwd=root,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            timeout=30,
-            check=False,
-        )
-    except Exception:
-        return ""
-    if completed.returncode != 0:
-        return ""
-    return completed.stdout.strip()
-
-
-def read_json(path: pathlib.Path, default: Any) -> Any:
-    try:
-        return json.loads(path.read_text())
-    except Exception:
-        return default
-
 
 def read_proof(root: pathlib.Path) -> dict[str, Any]:
     proof = read_json(proof_path(root), {})
     return proof if isinstance(proof, dict) else {}
 
 
-def proof_payload_hash(proof: dict[str, Any]) -> str:
-    payload = dict(proof)
-    payload.pop("proof_hash", None)
-    return canonical_hash(payload)
+def cargo_tv_proof_consumption_enabled() -> bool:
+    value = os.environ.get("VAC_CARGO_TV_CONSUME_PROOF", "")
+    return value == "1" or value.lower() == "true"
+
+
+def not_evaluated_summary() -> dict[str, Any]:
+    return {
+        "status": NOT_EVALUATED,
+        "checks": {check_id: NOT_EVALUATED for check_id in REQUIRED_CHECKS},
+        "proof_ref": None,
+        "proof_hash": None,
+        "cargo_workspace_hash": None,
+        "git_head": None,
+        "generated_at": None,
+        "tv_pending": list(REQUIRED_CHECKS),
+        "errors": ["missing_cargo_tv_proof"],
+    }
+
 
 
 def validate_proof(root: pathlib.Path, proof: dict[str, Any] | None = None) -> list[str]:
@@ -149,17 +129,19 @@ def validate_proof(root: pathlib.Path, proof: dict[str, Any] | None = None) -> l
     return errors
 
 
-def cargo_tv_summary(root: pathlib.Path) -> dict[str, Any]:
+def cargo_tv_summary(
+    root: pathlib.Path,
+    *,
+    consume_proof: bool | None = None,
+) -> dict[str, Any]:
+    if consume_proof is None:
+        consume_proof = cargo_tv_proof_consumption_enabled()
+    if not consume_proof:
+        return not_evaluated_summary()
+
     proof = read_proof(root)
     if not proof:
-        return {
-            "status": NOT_EVALUATED,
-            "checks": {check_id: NOT_EVALUATED for check_id in REQUIRED_CHECKS},
-            "proof_ref": None,
-            "proof_hash": None,
-            "tv_pending": list(REQUIRED_CHECKS),
-            "errors": ["missing_cargo_tv_proof"],
-        }
+        return not_evaluated_summary()
 
     errors = validate_proof(root, proof)
     raw_checks = proof.get("checks") if isinstance(proof.get("checks"), dict) else {}

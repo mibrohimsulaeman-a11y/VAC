@@ -1,6 +1,6 @@
 //! VAC operator console renderer.
 //!
-//! This module renders the v1.5 VAC-native TUI surfaces from runtime state and
+//! This module renders the v1.9 VAC-native TUI surfaces from runtime state and
 //! `.vac/registry` snapshots. It intentionally does not hardcode provider/model
 //! names, legacy product labels, or sample runtime jobs from design mockups.
 

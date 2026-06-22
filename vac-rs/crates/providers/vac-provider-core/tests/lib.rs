@@ -1,4 +1,4 @@
-//! Test suite for ai-sdk
+//! Test suite for vac-provider-core
 
 mod integration;
 mod unit;

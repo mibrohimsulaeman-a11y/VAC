@@ -37,7 +37,7 @@ pub use runtime_journal::{
     ManifestSyncClassification, ManifestSyncRecordProbe, RUNTIME_DB_REQUIRED_PRAGMAS,
     RUNTIME_DB_REQUIRED_TABLES, RuntimeJournalAppendDecision, RuntimeJournalEventDraft,
     RuntimeJournalOpenRequest, RuntimeJournalRecordEnvelope, RuntimeJournalWritePlan,
-    RuntimeManifestBinding, RuntimeTrustClaim, classify_manifest_sync_record,
-    evaluate_runtime_event_append, runtime_db_migration_has_required_pragmas,
-    runtime_journal_write_plan,
+    RuntimeManifestBinding, RuntimeTrustClaim, TRUST_WORDING_LOCAL_SELF_REPORTED,
+    classify_manifest_sync_record, evaluate_runtime_event_append,
+    runtime_db_migration_has_required_pragmas, runtime_journal_write_plan,
 };

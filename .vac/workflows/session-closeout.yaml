@@ -1,7 +1,7 @@
 schema_version: 1
 kind: workflow
 id: maintenance.session_closeout
-title: VAC v1.5 session closeout and completion lock
+title: VAC v1.9 session closeout and completion lock
 status: partial
 steps:
   - id: compile_registry

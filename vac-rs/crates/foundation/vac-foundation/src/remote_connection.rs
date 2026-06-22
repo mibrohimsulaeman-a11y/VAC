@@ -531,7 +531,7 @@ impl RemoteConnection {
             .await
             .map_err(|e| Self::map_ssh_error(e, "failed to open channel"))?;
 
-        // VAC v1.5: remote execution is an L1-degraded SSH exec-channel path.
+        // VAC v1.9: remote execution is an L1-degraded SSH exec-channel path.
         // The command string arrives from a structured runner+args authority and
         // is never wrapped in a shell trampoline by VAC. Full argv custody is
         // reserved for the L2 broker substrate.

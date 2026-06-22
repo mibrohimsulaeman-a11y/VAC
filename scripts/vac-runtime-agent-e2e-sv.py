@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SV E2E validation for the VAC v1.5 bounded agent runtime.
+"""SV E2E validation for the VAC v1.9 bounded agent runtime.
 
 No cargo is executed. The script verifies source-level runtime contracts and a
 fixture matrix that models happy-path, block, approval-pause, and discussion

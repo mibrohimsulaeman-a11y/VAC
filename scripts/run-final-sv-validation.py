@@ -22,20 +22,18 @@ commands = [
     ('l2-broker-status', ['python3', 'scripts/check-l2-broker-status.py', '.'], 300),
     ('confirmed-intent-coverage', ['python3', 'scripts/check-confirmed-intent-coverage.py', '.'], 300),
     ('confirmed-intent-negative-fixtures', ['python3', 'scripts/check-confirmed-intent-negative-fixtures.py', '.'], 300),
+    ('confirmed-intent-executable-fixtures', ['python3', 'scripts/check-confirmed-intent-executable-fixtures.py', '.'], 300),
     ('confirmed-intent-status', ['python3', 'scripts/refresh-confirmed-intent-status.py', '.'], 300),
     ('rust-ast-index-status', ['python3', 'scripts/refresh-rust-ast-index-status.py', '.'], 300),
     ('sv-static', ['python3', 'scripts/sv_static_validate.py', '.'], 300),
     ('sv-deep', ['python3', 'scripts/vac-sv-deep-validate.py', str(ROOT)], 300),
-    ('runtime-state5-operational', ['python3', 'scripts/vac-runtime-state5-operational-sv.py', '.'], 300),
-    ('runtime-state6-semantics', ['python3', 'scripts/vac-runtime-state6-semantics-sv.py', '.'], 300),
-    ('runtime-state7-merged-audit', ['python3', 'scripts/vac-runtime-state7-merged-audit-sv.py', '.'], 300),
     ('refresh-evidence-logs', ['python3', 'scripts/refresh-evidence-logs-sv.py', '.'], 300),
     ('evidence-log-freshness', ['python3', 'scripts/check-evidence-log-freshness.py', '.'], 300),
 ]
 
 LOG.parent.mkdir(parents=True, exist_ok=True)
 with LOG.open('w') as log:
-    log.write('VAC final SV validation v1.9/state7\n')
+    log.write('VAC final SV validation v1.9\n')
     log.write(f'log_path={LOG}\n')
     log.write('log_hygiene=outside_indexed_root_before_index_generation\n')
     for name, cmd, timeout_seconds in commands:

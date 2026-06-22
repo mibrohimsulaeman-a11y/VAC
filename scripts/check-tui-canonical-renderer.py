@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static guard: one canonical VAC v1.5 operator renderer path."""
+"""Static guard: one canonical VAC v1.9 operator renderer path."""
 from __future__ import annotations
 import sys
 from pathlib import Path

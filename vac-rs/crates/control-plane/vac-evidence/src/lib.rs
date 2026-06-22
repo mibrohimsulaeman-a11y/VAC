@@ -267,10 +267,7 @@ fn strip_hash_and_sig(value: &mut Value) {
     }
 }
 
-#[must_use]
-pub fn canonical_json_sha256(value: &Value) -> String {
-    vac_jcs::canonical_json_sha256(value)
-}
+pub use vac_jcs::canonical_json_sha256;
 
 #[must_use]
 pub fn normalize_json(value: &Value) -> Value {

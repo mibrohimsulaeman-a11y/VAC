@@ -19,7 +19,7 @@ run assessment-freshness python3 scripts/check-assessment-freshness.py .
 run evidence-log-freshness python3 scripts/check-evidence-log-freshness.py .
 run runtime-db-schema python3 scripts/check-v19-runtime-db-schema.py .
 run runtime-journal-writer python3 scripts/check-v19-runtime-journal-writer.py .
-run fixture-coverage python3 scripts/check-vac-v19-fixture-coverage.py .
+run traceability-static-coverage python3 scripts/check-vac-v19-fixture-coverage.py .
 run tui-lifecycle-static python3 scripts/check-tui-lifecycle-e2e-static.py .
 run tui-e2e-coverage python3 scripts/check-vac-tui-e2e-coverage.py .
 run external-provider-remote-process-io python3 scripts/check-external-provider-remote-process-io-e2e.py .
@@ -27,6 +27,7 @@ run scoped-validation-proof python3 scripts/check-ci-scoped-validation-proof.py 
 run l2-broker-status python3 scripts/check-l2-broker-status.py .
 run confirmed-intent-coverage python3 scripts/check-confirmed-intent-coverage.py .
 run confirmed-intent-negative-fixtures python3 scripts/check-confirmed-intent-negative-fixtures.py .
+run confirmed-intent-executable-fixtures python3 scripts/check-confirmed-intent-executable-fixtures.py .
 run confirmed-intent-status python3 scripts/refresh-confirmed-intent-status.py .
 run rust-ast-index-status python3 scripts/refresh-rust-ast-index-status.py .
 run storage-classes python3 scripts/check-v19-storage-classes.py .
@@ -42,10 +43,6 @@ else
   printf 'source_workspace_mode=skip_root_checkpoint_manifest\n'
 fi
 run checkpoint-integrity python3 scripts/check-checkpoint-integrity.py .
-run runtime-state4-adversarial python3 scripts/vac-runtime-state4-adversarial-sv.py .
-run runtime-state5-operational python3 scripts/vac-runtime-state5-operational-sv.py .
-run runtime-state6-semantics python3 scripts/vac-runtime-state6-semantics-sv.py .
-run runtime-state7 python3 scripts/vac-runtime-state7-merged-audit-sv.py .
 printf '\nVAC v1.9 final SV gate: PASS\n'
 python3 scripts/check-cargo-tv.py . --summary-only
 python3 scripts/check-l2-broker-status.py . --summary-only

@@ -35,6 +35,7 @@ use vac_provider_core::{ContentPart, Message, MessageContent, Role};
 use vac_remote_service::CreateCheckpointRequest;
 use vac_state::{
     RuntimeJournalEventDraft, RuntimeJournalOpenRequest, RuntimeManifestBinding, RuntimeTrustClaim,
+    TRUST_WORDING_LOCAL_SELF_REPORTED,
 };
 
 const CHECKPOINT_FLUSH_INTERVAL: std::time::Duration = std::time::Duration::from_secs(5);
@@ -53,7 +54,6 @@ pub fn build_checkpoint_envelope(
 }
 
 const VAC_RUNTIME_METADATA_KEY: &str = "vac_runtime";
-const LOCAL_RUNTIME_TRUST_WORDING: &str = "local self-reported trace; integrity hint only";
 
 async fn bootstrap_runtime_journal_product_path(
     workspace_root: &Path,
@@ -187,7 +187,7 @@ async fn bootstrap_runtime_journal_product_path(
         manifest_sync: vac_agent_loop::ManifestSyncCloseoutState::current(),
         evidence_summary_present: evidence_summary_present && counts.evidence_hints > 0,
         evidence_summary_trust_wording: evidence_summary_present
-            .then(|| LOCAL_RUNTIME_TRUST_WORDING.to_string()),
+            .then(|| TRUST_WORDING_LOCAL_SELF_REPORTED.to_string()),
     };
     set_runtime_journal_projection(metadata, &projection)?;
     Ok(projection)
@@ -513,7 +513,7 @@ async fn run_session_actor(
     let session_cwd = resolve_session_cwd(&state, session_id).await;
     let session_id_text = session_id.to_string();
 
-    // State5 VAC v1.5 operational closure: broker/session startup must attach
+    // VAC v1.9 operational closure: broker/session startup must attach
     // compiled-registry runtime authority, approved Semantic Plan JSON, mandatory
     // task/spec/todo artifacts, and closeout metadata before `run_agent`. Without
     // this bridge ordinary sessions would fail closed or drift into legacy MCP

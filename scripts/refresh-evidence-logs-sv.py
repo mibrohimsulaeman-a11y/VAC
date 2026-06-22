@@ -23,7 +23,7 @@ gap_summary=gap.get('summary') or {}
 cargo_tv=cargo_tv_summary(ROOT)
 cargo_checks=cargo_tv.get('checks') or {}
 text='\n'.join([
-    'VAC State6 evidence mirror: current snapshot only',
+    'VAC v1.9 evidence mirror: current snapshot only',
     'status: SV-PASS final source freeze',
     'workspace_root: packaged-source-relative',
     f'compiled_snapshot_hash: {compiled}',

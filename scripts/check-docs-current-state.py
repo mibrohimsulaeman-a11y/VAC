@@ -126,13 +126,13 @@ def check_historical_banners() -> None:
             if path.name == "README.md":
                 continue
             text = path.read_text(errors="ignore")
-            if "VAC v1.9 status note" not in text and "VAC v1.5 status note" not in text:
+            if "VAC v1.9 status note" not in text:
                 fail(f"historical architecture doc missing current status note: {path.relative_to(ROOT)}")
     for rel in ["platform-testing/windows-testing-report.md", "platform-testing/autopilot-e2e-tests.md"]:
         path = ROOT / rel
         if path.is_file():
             text = path.read_text(errors="ignore")
-            if "VAC v1.9 status note" not in text and "VAC v1.5 status note" not in text:
+            if "VAC v1.9 status note" not in text:
                 fail(f"historical platform doc missing current status note: {rel}")
 
 

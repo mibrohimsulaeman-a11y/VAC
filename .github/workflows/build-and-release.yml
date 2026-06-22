@@ -219,15 +219,42 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "Tag version: $VERSION"
 
-          # Verify version matches Cargo.toml
+          # Verify and, for tag builds only, align the workspace manifest to the tag.
           CARGO_VERSION=$(grep -m1 '^version = ' vac-rs/Cargo.toml | sed 's/version = "\(.*\)"/\1/')
           echo "Cargo.toml version: $CARGO_VERSION"
 
           if [ "$VERSION" != "$CARGO_VERSION" ]; then
-            echo "Warning: Tag version ($VERSION) does not match Cargo.toml version ($CARGO_VERSION)"
-            echo "Updating Cargo.toml to match tag version"
-            sed -i "s/^version = \".*\"/version = \"$VERSION\"/" vac-rs/Cargo.toml
+            echo "Warning: tag version ($VERSION) does not match Cargo.toml version ($CARGO_VERSION)"
           fi
+
+          VERSION="$VERSION" python3 - <<'PY_SYNC_CARGO_VERSION'
+          import os
+          import re
+          from pathlib import Path
+
+          version = os.environ["VERSION"]
+          manifest = Path("vac-rs/Cargo.toml")
+          text = manifest.read_text(encoding="utf-8")
+          text, workspace_version_count = re.subn(
+              r'(^version\s*=\s*")[^"]+(")',
+              rf'\g<1>{version}\2',
+              text,
+              count=1,
+              flags=re.MULTILINE,
+          )
+          if workspace_version_count != 1:
+              raise SystemExit("failed to update [workspace.package] version")
+          workspace_dependency_version = re.compile(
+              r'^(?P<prefix>vac[A-Za-z0-9_-]*\s*=\s*\{[^}\n]*\bversion\s*=\s*")[^"]+(?P<suffix>"[^}\n]*\})',
+              re.MULTILINE,
+          )
+          text = workspace_dependency_version.sub(
+              lambda match: f"{match.group('prefix')}{version}{match.group('suffix')}",
+              text,
+          )
+          manifest.write_text(text, encoding="utf-8")
+          PY_SYNC_CARGO_VERSION
+          cargo update --manifest-path vac-rs/Cargo.toml --workspace
 
       - name: Login to crates.io
         run: echo "$CRATES_IO_TOKEN" | cargo login
@@ -236,7 +263,7 @@ jobs:
 
       - name: Publish workspace members to crates.io
         run: |
-          set -e
+          set -euo pipefail
           VERSION=${{ steps.get_version.outputs.VERSION }}
 
           echo "Publishing workspace members to crates.io version $VERSION"
@@ -247,7 +274,7 @@ jobs:
             echo "Publishing $pkg..."
             # Capture output and exit code
             set +e
-            OUTPUT=$(cargo publish --manifest-path vac-rs/Cargo.toml -p "$pkg" --no-verify 2>&1)
+            OUTPUT=$(cargo publish --manifest-path vac-rs/Cargo.toml -p "$pkg" --no-verify --allow-dirty 2>&1)
             EXIT_CODE=$?
             set -e
 
@@ -264,25 +291,71 @@ jobs:
             fi
           }
 
-          # Publish dependencies first, then the main crate
-          # Order matters: publish dependencies before dependents
-          publish_package vac-provider-core
-          publish_package vac-foundation
-          publish_package vac-remote-service
-          publish_package vac-mcp-config
-          publish_package vac-mcp-client
-          publish_package vac-mcp-server
-          publish_package vac-mcp-proxy
-          publish_package vac-shell-approval
-          publish_package vac-ak
-          publish_package vac-agent-loop
-          publish_package vac-messaging-gateway
-          publish_package vac-broker
-          publish_package vac-tui
-          # Finally publish the main CLI crate
-          publish_package vac
+          cargo metadata --manifest-path vac-rs/Cargo.toml --no-deps --format-version 1 > /tmp/vac-cargo-metadata.json
+          python3 - <<'PY_PUBLISH_PLAN' > /tmp/vac-publish-plan.txt
+          import json
+          from pathlib import Path
 
-          echo "All packages published successfully!"
+          metadata = json.loads(Path("/tmp/vac-cargo-metadata.json").read_text(encoding="utf-8"))
+          workspace_ids = set(metadata["workspace_members"])
+          packages_by_id = {
+              package["id"]: package
+              for package in metadata["packages"]
+              if package["id"] in workspace_ids and package.get("publish") != []
+          }
+          ids_by_name = {package["name"]: package_id for package_id, package in packages_by_id.items()}
+
+          dependencies_by_id = {}
+          for package_id, package in packages_by_id.items():
+              dependencies = set()
+              for dependency in package.get("dependencies", []):
+                  dependency_id = ids_by_name.get(dependency.get("name", ""))
+                  if dependency_id is not None:
+                      dependencies.add(dependency_id)
+              dependencies_by_id[package_id] = dependencies
+
+          visited = set()
+          visiting = set()
+          ordered = []
+
+          def visit(package_id):
+              if package_id in visited:
+                  return
+              if package_id in visiting:
+                  raise SystemExit(f"cycle in workspace publish graph at {packages_by_id[package_id]['name']}")
+              visiting.add(package_id)
+              for dependency_id in sorted(
+                  dependencies_by_id[package_id],
+                  key=lambda item: packages_by_id[item]["name"],
+              ):
+                  visit(dependency_id)
+              visiting.remove(package_id)
+              visited.add(package_id)
+              ordered.append(package_id)
+
+          for package_id in sorted(
+              packages_by_id,
+              key=lambda item: packages_by_id[item]["manifest_path"],
+          ):
+              visit(package_id)
+
+          for package_id in ordered:
+              print(packages_by_id[package_id]["name"])
+          PY_PUBLISH_PLAN
+
+          mapfile -t VAC_PUBLISH_PACKAGES < /tmp/vac-publish-plan.txt
+          if [ "${#VAC_PUBLISH_PACKAGES[@]}" -eq 0 ]; then
+            echo "No publishable workspace packages found"
+            exit 1
+          fi
+
+          echo "Publish plan derived from cargo metadata:"
+          printf '  %s\n' "${VAC_PUBLISH_PACKAGES[@]}"
+          for pkg in "${VAC_PUBLISH_PACKAGES[@]}"; do
+            publish_package "$pkg"
+          done
+
+          echo "All metadata-derived packages published successfully!"
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
 
@@ -376,7 +449,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          repository: vac/homebrew-vac
+          repository: ${{ github.repository_owner }}/homebrew-vac
           token: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
 
       - name: Update Homebrew formula
@@ -398,7 +471,7 @@ jobs:
           cat > vac.rb << EOF
           class VAC < Formula
             desc "VAC CLI tool"
-            homepage "local-vac-v1-5-checkpoint"
+            homepage "https://github.com/${{ github.repository }}"
             version "${VERSION}"
 
             on_macos do

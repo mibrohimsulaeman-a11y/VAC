@@ -1,19 +1,21 @@
 {
   "cargo_tv": {
-    "cargo_workspace_hash": "sha256:6ddfcc177e2e26a88a7f8e593020a3c61482d558589920565b6ef214354e3cd5",
+    "cargo_workspace_hash": null,
     "checks": {
-      "cargo_check": "TV-Pass",
-      "cargo_clippy": "TV-Pass",
-      "cargo_fmt": "TV-Pass",
-      "cargo_metadata": "TV-Pass",
-      "cargo_test": "TV-Pass"
+      "cargo_check": "NotEvaluated",
+      "cargo_clippy": "NotEvaluated",
+      "cargo_fmt": "NotEvaluated",
+      "cargo_metadata": "NotEvaluated",
+      "cargo_test": "NotEvaluated"
     },
-    "errors": [],
-    "generated_at": "2026-06-17T11:49:59Z",
-    "git_head": "d212691c040eab2d5fc689eec8f511cfc4c9b2a9",
-    "proof_hash": "sha256:f9b04497f3dcb196ab6161c4057d66f8f6bb23c6cad9783d3512d1d7338ea724",
-    "proof_ref": ".vac/evidence/cargo-tv-current.json",
-    "status": "TV-Pass"
+    "errors": [
+      "missing_cargo_tv_proof"
+    ],
+    "generated_at": null,
+    "git_head": null,
+    "proof_hash": null,
+    "proof_ref": null,
+    "status": "NotEvaluated"
   },
   "ci_scoped_validation": {
     "custody": "local_only",
@@ -23,49 +25,21 @@
     "execution": "observed_l1",
     "proof_hash": null,
     "proof_ref": null,
-    "source_scope_hash": "sha256:fe4435093ed771aa8004a5dbef51827ec746911513cca290a355748638691cbf",
+    "source_scope_hash": "sha256:c1ea58d5c4f32eaac8e0ad00c83b2c1d51e139a1ce033f68e6ff1199377f438f",
     "status": "TV-Pending"
   },
-  "compiled_snapshot_hash": "sha256:7f4c6c6b79ff43692e11f931438b5f7635c7b7ca29de722351b6be1de57db9c5",
+  "compiled_snapshot_hash": "sha256:3ce7cc14f7fd745870f26e728a27b786ef16c5423be6194d93b6b34cca98fdaa",
   "control_plane": {
     "audit": "jcs_json",
     "authoring": "yaml",
-    "capabilities_snapshot_hash": "sha256:d2b8bf2cdae622bbf711bb32e89c35a5863bb206ac048dbdfc681e693aaafd33",
-    "compiled_snapshot_hash": "sha256:7f4c6c6b79ff43692e11f931438b5f7635c7b7ca29de722351b6be1de57db9c5",
+    "capabilities_snapshot_hash": "sha256:0a31ce274f5f454195eee4813bac4c9fb75337a9a5a4be3aab6ea11b6ab143c7",
+    "compiled_snapshot_hash": "sha256:3ce7cc14f7fd745870f26e728a27b786ef16c5423be6194d93b6b34cca98fdaa",
     "compiled_snapshot_location": ".vac/cache/compiled",
     "compiled_snapshots_current": true,
     "generated_mirror_location": ".vac/registry/compiled",
     "runtime": "compiled_json"
   },
   "control_plane_version": "1.9",
-  "confirmed_intent": {
-    "confirmed_intent_domain_coverage": "SV-Pass",
-    "confirmed_intent_traceability_gate": "SV-Pass",
-    "confirmed_intent_traceability": "SV-Pass",
-    "confirmed_intent_negative_fixtures": "SV-Pass",
-    "confirmed_intent_executable_fixtures": "SV-Pass",
-    "all_negative_cases_rejected": true,
-    "crate_without_intent_or_rationale": 0,
-    "external_provider_remote_process_io_e2e": "TV-Pending",
-    "remote_process_io_e2e": "TV-Pending",
-    "external_provider_remote_process_io_e2e_execution": "observed_l1",
-    "external_provider_remote_process_io_e2e_custody": "local_only",
-    "external_provider_remote_process_io_e2e_proof_ref": null,
-    "external_provider_remote_process_io_e2e_proof_hash": null,
-    "domain_count": 7,
-    "domain_map": "tests/fixtures/confirmed-intent/domain-map.json",
-    "coverage_audit": "docs/audit/VAC_CONFIRMED_INTENT_COVERAGE_AUDIT.md",
-    "traceability_audit": "docs/audit/VAC_CONFIRMED_INTENT_TRACEABILITY.md",
-    "domains": [
-      "vac-broker",
-      "vac-provider-core",
-      "vac-mcp-server",
-      "vac-messaging-gateway",
-      "vac-remote-service",
-      "vac-autopilot",
-      "vac-tui-bridge"
-    ]
-  },
   "enforcement_level": "L1",
   "generated_at": "1970-01-01T00:00:00Z",
   "id": "status.workspace.current",
@@ -80,7 +54,7 @@
     "reasons": [
       "missing_l2_broker_mediated_execution_proof"
     ],
-    "source_scope_hash": "sha256:67066e8c6762530cf2994d345a556a796c48cecd6a59e2d1aeb97ddd79907708",
+    "source_scope_hash": "sha256:8f5463bed7eeb259708978f42f0fa9d65abcf101e01046715a255df49af15acf",
     "status": "NotImplemented"
   },
   "model": null,
@@ -93,7 +67,7 @@
     "partial": 24,
     "planned": 1,
     "ready": 0,
-    "source": "canonical compiled capabilities/current.json; cargo TV current-run proof",
+    "source": "canonical compiled capabilities/current.json; cargo gates not evaluated",
     "valid_percent": 0
   },
   "readiness_summary": {
@@ -128,28 +102,18 @@
     "generated_artifacts": "export_only_by_default",
     "runtime_journal": "local_sqlite_ignored"
   },
-  "tv_pending": [],
+  "tv_pending": [
+    "cargo_metadata",
+    "cargo_fmt",
+    "cargo_check",
+    "cargo_clippy",
+    "cargo_test"
+  ],
   "updated_at": "1970-01-01T00:00:00Z",
   "workspace": {
     "conformance_level": "L1",
     "enforcement_level": "L1",
-    "file_count": 788,
+    "file_count": 762,
     "rust_crate_count": 38
-  },
-  "rust_ast_index": {
-    "rust_ast_index": "SV-Pass",
-    "parser_mode": "rust_ast",
-    "ast_symbols_detected": true,
-    "rust_ast_default_index": "SV-Pass",
-    "fail_closed_fallback": true,
-    "heuristic_ast_delta_reported": true,
-    "ast_index_does_not_overclaim_calls": true,
-    "calls_lightweight": "SV-Partial",
-    "complete_call_graph": "Not claimed",
-    "default_index_parser": "rust_ast_default",
-    "fallback_mode": "fail_closed_static_heuristic",
-    "ast_lane": "default_syn",
-    "fixture_dir": "tests/fixtures/index/rust-ast",
-    "delta_audit": "docs/audit/VAC_RUST_AST_INDEX_DELTA.md"
   }
 }

@@ -1,7 +1,7 @@
 schema_version: 1
 kind: workflow
 id: release.vac_v1_5_static
-title: VAC v1.5 static release gate
+title: VAC v1.9 static release gate
 status: partial
 steps:
 - id: static_structure

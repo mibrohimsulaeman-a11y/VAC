@@ -50,7 +50,7 @@ pub struct RunCommandRequest {
     pub command: String,
     #[serde(default)]
     #[schemars(
-        description = "VAC v1.5 structured command authority: {id, runner, args, risk, approval}"
+        description = "VAC v1.9 structured command authority: {id, runner, args, risk, approval}"
     )]
     pub structured_command: Option<VacStructuredCommandRequest>,
     #[schemars(description = "Optional description of the command to execute")]
@@ -59,7 +59,7 @@ pub struct RunCommandRequest {
     pub timeout: Option<u64>,
     #[serde(default)]
     #[schemars(
-        description = "VAC v1.5 bound-runtime proof stamped by BoundRuntimeToolBoundary; mutating/process tools fail closed without it"
+        description = "VAC v1.9 bound-runtime proof stamped by BoundRuntimeToolBoundary; mutating/process tools fail closed without it"
     )]
     pub vac_bound_approval: Option<VacBoundApproval>,
 }
@@ -73,7 +73,7 @@ pub struct RunRemoteCommandRequest {
     pub command: String,
     #[serde(default)]
     #[schemars(
-        description = "VAC v1.5 structured command authority: {id, runner, args, risk, approval}"
+        description = "VAC v1.9 structured command authority: {id, runner, args, risk, approval}"
     )]
     pub structured_command: Option<VacStructuredCommandRequest>,
     #[schemars(description = "Optional description of the command to execute")]
@@ -96,7 +96,7 @@ pub struct RunRemoteCommandRequest {
     pub private_key_path: Option<String>,
     #[serde(default)]
     #[schemars(
-        description = "VAC v1.5 bound-runtime proof stamped by BoundRuntimeToolBoundary; mutating/process tools fail closed without it"
+        description = "VAC v1.9 bound-runtime proof stamped by BoundRuntimeToolBoundary; mutating/process tools fail closed without it"
     )]
     pub vac_bound_approval: Option<VacBoundApproval>,
 }
@@ -214,7 +214,7 @@ pub struct ViewRequest {
     pub read_plan_ticket: Option<VacReadPlanTicket>,
     #[serde(default)]
     #[schemars(
-        description = "VAC v1.5 bound-runtime proof stamped by BoundRuntimeToolBoundary; remote/credential reads require it"
+        description = "VAC v1.9 bound-runtime proof stamped by BoundRuntimeToolBoundary; remote/credential reads require it"
     )]
     pub vac_bound_approval: Option<VacBoundApproval>,
     #[schemars(description = "Display directory as a nested tree structure (default: false)")]
@@ -248,7 +248,7 @@ pub struct StrReplaceRequest {
     pub private_key_path: Option<String>,
     #[serde(default)]
     #[schemars(
-        description = "VAC v1.5 bound-runtime proof stamped by BoundRuntimeToolBoundary; file mutations fail closed without it"
+        description = "VAC v1.9 bound-runtime proof stamped by BoundRuntimeToolBoundary; file mutations fail closed without it"
     )]
     pub vac_bound_approval: Option<VacBoundApproval>,
 }
@@ -272,7 +272,7 @@ pub struct CreateRequest {
     pub private_key_path: Option<String>,
     #[serde(default)]
     #[schemars(
-        description = "VAC v1.5 bound-runtime proof stamped by BoundRuntimeToolBoundary; file creation fails closed without it"
+        description = "VAC v1.9 bound-runtime proof stamped by BoundRuntimeToolBoundary; file creation fails closed without it"
     )]
     pub vac_bound_approval: Option<VacBoundApproval>,
 }
@@ -304,7 +304,7 @@ pub struct RemoveRequest {
     pub private_key_path: Option<String>,
     #[serde(default)]
     #[schemars(
-        description = "VAC v1.5 bound-runtime proof stamped by BoundRuntimeToolBoundary; remove operations fail closed without it"
+        description = "VAC v1.9 bound-runtime proof stamped by BoundRuntimeToolBoundary; remove operations fail closed without it"
     )]
     pub vac_bound_approval: Option<VacBoundApproval>,
 }
@@ -316,7 +316,7 @@ pub struct ViewWebPageRequest {
     pub url: String,
     #[serde(default)]
     #[schemars(
-        description = "VAC v1.5 bound-runtime proof stamped after network_access policy evaluation; network reads fail closed without it"
+        description = "VAC v1.9 bound-runtime proof stamped after network_access policy evaluation; network reads fail closed without it"
     )]
     pub vac_bound_approval: Option<VacBoundApproval>,
 }

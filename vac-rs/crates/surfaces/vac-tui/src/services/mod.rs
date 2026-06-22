@@ -45,7 +45,7 @@ pub mod update;
 pub mod widget_selection;
 pub mod wrapping;
 
-// VAC v1.5 canonical operator renderer. New runtime/status/capability/assessment/spec-sync UI work must land here.
+// VAC v1.9 canonical operator renderer. New runtime/status/capability/assessment/spec-sync UI work must land here.
 pub mod vac_operator;
 
 // legacy non-default renderer kept temporarily for TV repair/visual diff only; use services::vac_operator for the canonical operator console path.

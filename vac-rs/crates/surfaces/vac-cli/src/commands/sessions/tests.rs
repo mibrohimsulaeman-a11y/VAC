@@ -22,6 +22,10 @@ async fn in_memory_storage() -> LocalStorage {
         .expect("in-memory storage")
 }
 
+// This is the vac-remote-service local session cache path surfaced by
+// `vac sessions`, not the v1.9 runtime journal authority at `.vac/db/runtime.db`.
+const LOCAL_SESSION_CACHE_PATH: &str = "/tmp/.vac/data/local-session-cache.db";
+
 fn msg(role: Role, text: &str) -> ChatMessage {
     ChatMessage {
         role,
@@ -72,7 +76,7 @@ fn alternating_assistant_user_messages(assistant_count: u32) -> Vec<ChatMessage>
 }
 
 fn local_backend() -> BackendInfo {
-    BackendInfo::local("/tmp/.vac/data/local.db")
+    BackendInfo::local(LOCAL_SESSION_CACHE_PATH)
 }
 
 fn remote_backend() -> BackendInfo {
@@ -150,7 +154,7 @@ async fn sessions_list_json_emits_array_of_session_summaries() {
         backend
             .get("store_path")
             .and_then(serde_json::Value::as_str),
-        Some("/tmp/.vac/data/local.db")
+        Some(LOCAL_SESSION_CACHE_PATH)
     );
 
     let arr = obj
@@ -252,7 +256,7 @@ async fn sessions_list_human_shows_header_when_non_empty() {
         .await
         .unwrap();
     let rendered = render_list(&result.sessions, OutputMode::Human);
-    assert!(rendered.starts_with("Backend: local (/tmp/.vac/data/local.db)\n"));
+    assert!(rendered.starts_with(&format!("Backend: local ({LOCAL_SESSION_CACHE_PATH})\n")));
     assert!(rendered.contains("ID"));
     assert!(rendered.contains("TITLE"));
     assert!(rendered.contains("MSGS"));
@@ -262,14 +266,14 @@ async fn sessions_list_human_shows_header_when_non_empty() {
 #[tokio::test]
 async fn sessions_list_human_empty_storage_is_friendly_message() {
     let rendered = render_list(&[], OutputMode::Human);
-    assert!(rendered.starts_with("Backend: local (/tmp/.vac/data/local.db)\n"));
+    assert!(rendered.starts_with(&format!("Backend: local ({LOCAL_SESSION_CACHE_PATH})\n")));
     assert!(rendered.contains("No sessions found"));
 }
 
 #[test]
 fn render_list_human_includes_local_backend_header() {
     let rendered = output::render_list(&[], &local_backend(), OutputMode::Human);
-    assert!(rendered.starts_with("Backend: local (/tmp/.vac/data/local.db)\n"));
+    assert!(rendered.starts_with(&format!("Backend: local ({LOCAL_SESSION_CACHE_PATH})\n")));
 }
 
 #[test]
@@ -400,7 +404,7 @@ async fn sessions_show_human_includes_resume_hint_and_metadata() {
         None,
         OutputMode::Human,
     );
-    assert!(rendered.starts_with("Backend: local (/tmp/.vac/data/local.db)\n"));
+    assert!(rendered.starts_with(&format!("Backend: local ({LOCAL_SESSION_CACHE_PATH})\n")));
     assert!(rendered.contains(&format!("Resume: vac --session {}", session_id)));
     assert!(rendered.contains("demo"));
     assert!(rendered.contains("/tmp/proj"));

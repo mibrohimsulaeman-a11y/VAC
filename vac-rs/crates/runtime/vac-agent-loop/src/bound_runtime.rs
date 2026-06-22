@@ -1964,10 +1964,7 @@ pub fn evaluate_completion_lock_v1_5(closeout: &CloseoutState) -> CompletionLock
     }
 }
 
-#[must_use]
-pub fn canonical_json_sha256(value: &Value) -> String {
-    vac_jcs::canonical_json_sha256(value)
-}
+pub use vac_jcs::canonical_json_sha256;
 
 #[must_use]
 pub fn approval_binding_hash(

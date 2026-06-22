@@ -149,7 +149,7 @@ pub enum Commands {
 
     /// Analyze your infrastructure setup or run assessment-grounded init checkpoint
     Init {
-        /// Run the VAC v1.5 assessment-grounded init flow instead of plain interactive init.
+        /// Run the VAC v1.9 assessment-grounded init flow instead of plain interactive init.
         #[arg(long = "assess", default_value_t = false)]
         assess: bool,
     },

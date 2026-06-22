@@ -6,19 +6,13 @@ included in the v1.9 clean source ZIP, but can be regenerated from authority
 manifests and compiled snapshot cache before doctor/deep validation.
 """
 from __future__ import annotations
-import hashlib, json, os, pathlib, sys
+import json, pathlib, sys
+from vac_script_common import canonical_hash, now, read_json
 
 ROOT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
-NOW = os.environ.get("VAC_SV_GENERATED_AT", "1970-01-01T00:00:00Z")
+NOW = now()
 OUT = ROOT / ".vac/registry/spec-sync"
 OUT.mkdir(parents=True, exist_ok=True)
-
-def read_json(path: pathlib.Path, default):
-    try: return json.loads(path.read_text())
-    except Exception: return default
-
-def canonical_hash(value) -> str:
-    return "sha256:" + hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()).hexdigest()
 
 workspace = read_json(ROOT / ".vac/cache/compiled/workspace.json", {}) or read_json(ROOT / ".vac/registry/compiled/workspace.json", {})
 status = read_json(ROOT / ".vac/registry/status.json", {})

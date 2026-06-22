@@ -12,7 +12,6 @@ SV contract for sandbox checkpoints:
 """
 from __future__ import annotations
 
-import hashlib
 import os
 import json
 import pathlib
@@ -29,6 +28,8 @@ import yaml
 from cargo_tv_status import REQUIRED_CHECKS, TV_PASS, cargo_tv_summary
 from ci_scoped_validation_status import ci_scoped_validation_summary
 from l2_broker_status import l2_broker_summary
+from vac_script_common import canonical_hash, read_json, sha256_bytes, write_json
+from vac_script_common import file_hash as sha256_file
 
 ROOT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 NOW = os.environ.get("VAC_SV_GENERATED_AT", "1970-01-01T00:00:00Z")
@@ -51,22 +52,6 @@ def rel(path: pathlib.Path) -> str:
     return path.relative_to(ROOT).as_posix()
 
 
-def sha256_bytes(data: bytes) -> str:
-    return "sha256:" + hashlib.sha256(data).hexdigest()
-
-
-def sha256_file(path: pathlib.Path) -> str:
-    return sha256_bytes(path.read_bytes())
-
-
-def canonical_hash(value: Any) -> str:
-    payload = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
-    return sha256_bytes(payload)
-
-
-def write_json(path: pathlib.Path, data: Any) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
 
 
 def write_compiled(rel_path: str, data: Any) -> None:
@@ -80,12 +65,6 @@ def authoring_paths(name: str) -> list[pathlib.Path]:
         paths.extend(ROOT.glob(pattern))
     return sorted({path.resolve(): path for path in paths}.values())
 
-
-def read_json(path: pathlib.Path, default: Any) -> Any:
-    try:
-        return json.loads(path.read_text())
-    except Exception:
-        return default
 
 
 def yaml_load(path: pathlib.Path) -> dict[str, Any]:
@@ -334,7 +313,7 @@ def compile_policy_rules() -> list[dict[str, Any]]:
 def compile_policy_snapshot() -> dict[str, Any]:
     """Compile YAML policy manifests into the single vac-policy::PolicySnapshot authority.
 
-    State5 closure: BoundRuntimeController must not duplicate policy semantics.
+    Runtime closure: BoundRuntimeController must not duplicate policy semantics.
     This projection mirrors vac_policy::PolicySnapshot field names so Rust can
     deserialize and evaluate the same snapshot used by scripts/TUI/doctor.
     """
@@ -404,7 +383,6 @@ def script_runner_binding_for_command(command: dict[str, Any]) -> dict[str, Any]
         "vac.static.gate": "scripts/vac-static-gate.sh",
         "vac.reaudit.final": "scripts/vac-reaudit-final-sv-gate.sh",
         "vac.final.sv": "scripts/run-final-sv-validation.py",
-        "vac.state5.operational": "scripts/vac-runtime-state5-operational-sv.py",
     }
     script_path = script_registry.get(script_id)
     if not script_path:

@@ -1,7 +1,7 @@
 schema_version: 2
 kind: capability
 id: vac.runtime.agent_loop
-title: VAC v1.5 Bounded Agent Loop
+title: VAC v1.9 Bounded Agent Loop
 readiness:
   declared: partial
   computed: partial

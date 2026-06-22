@@ -396,7 +396,7 @@ pub fn welcome_messages(
     _latest_version: Option<String>,
     _state: &crate::app::AppState,
 ) -> Vec<Message> {
-    // VAC v1.5 renders first-launch/idle state through the operator console
+    // VAC v1.9 renders first-launch/idle state through the operator console
     // (`vac_operator_console`) so the screen can be backed by live model,
     // workspace, capability, and compiled registry data instead of a static
     // ASCII welcome banner.
@@ -428,64 +428,42 @@ pub fn handle_errors(error: String) -> String {
     }
 }
 
-pub fn push_issue_message(state: &mut AppState) {
-    let url = "https://github.com/Vastar-AI/vac/issues/new";
-
-    // Try to open the URL in the default browser
-    match open::that(url) {
-        Ok(_) => {
-            let message = Message::styled(Line::from(vec![
-                Span::styled(
-                    "🔗 Opening GitHub Issues... ",
-                    Style::default().fg(ThemeColors::green()),
-                ),
-                Span::raw(url),
-            ]));
-            state.messages_scrolling_state.messages.push(message);
-        }
-        Err(e) => {
-            let message = Message::styled(Line::from(vec![
-                Span::styled(
-                    "❌ Failed to open GitHub Issues: ",
-                    Style::default().fg(ThemeColors::red()),
-                ),
-                Span::raw(e.to_string()),
-                Span::raw(" - "),
-                Span::raw(url),
-            ]));
-            state.messages_scrolling_state.messages.push(message);
-        }
-    }
+fn push_external_link_message(
+    state: &mut AppState,
+    url: &'static str,
+    opening_label: &'static str,
+    failed_label: &'static str,
+) {
+    let message = match open::that(url) {
+        Ok(_) => Message::styled(Line::from(vec![
+            Span::styled(opening_label, Style::default().fg(ThemeColors::green())),
+            Span::raw(url),
+        ])),
+        Err(e) => Message::styled(Line::from(vec![
+            Span::styled(failed_label, Style::default().fg(ThemeColors::red())),
+            Span::raw(e.to_string()),
+            Span::raw(" - "),
+            Span::raw(url),
+        ])),
+    };
+    state.messages_scrolling_state.messages.push(message);
     invalidate_message_lines_cache(state);
 }
 
-pub fn push_support_message(state: &mut AppState) {
-    let url = "https://discord.gg/c4HUkDD45d";
+pub fn push_issue_message(state: &mut AppState) {
+    push_external_link_message(
+        state,
+        "https://github.com/mibrohimsulaeman-a11y/VAC/issues/new",
+        "🔗 Opening GitHub Issues... ",
+        "❌ Failed to open GitHub Issues: ",
+    );
+}
 
-    // Try to open the URL in the default browser
-    match open::that(url) {
-        Ok(_) => {
-            let message = Message::styled(Line::from(vec![
-                Span::styled(
-                    "💬 Opening Discord Support... ",
-                    Style::default().fg(ThemeColors::green()),
-                ),
-                Span::raw(url),
-            ]));
-            state.messages_scrolling_state.messages.push(message);
-        }
-        Err(e) => {
-            let message = Message::styled(Line::from(vec![
-                Span::styled(
-                    "❌ Failed to open Discord Support: ",
-                    Style::default().fg(ThemeColors::red()),
-                ),
-                Span::raw(e.to_string()),
-                Span::raw(" - "),
-                Span::raw(url),
-            ]));
-            state.messages_scrolling_state.messages.push(message);
-        }
-    }
-    invalidate_message_lines_cache(state);
+pub fn push_support_message(state: &mut AppState) {
+    push_external_link_message(
+        state,
+        "https://discord.gg/c4HUkDD45d",
+        "💬 Opening Discord Support... ",
+        "❌ Failed to open Discord Support: ",
+    );
 }

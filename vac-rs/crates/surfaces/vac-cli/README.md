@@ -1,6 +1,6 @@
 # vac-cli surface crate
 
-`vac-cli` is the native CLI surface for VAC. It should route operator actions into the VAC v1.5 control plane and runtime crates; it should not be treated as the owner of runtime authority.
+`vac-cli` is the native CLI surface for VAC. It should route operator actions into the VAC v1.9 control plane and runtime crates; it should not be treated as the owner of runtime authority.
 
 ## Current authority model
 
